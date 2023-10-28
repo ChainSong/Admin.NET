@@ -1,0 +1,400 @@
+﻿using Admin.NET.Application.CommonCore.ExcelCommon;
+using Admin.NET.Application.Const;
+using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Factory;
+using Admin.NET.Application.Interface;
+using Admin.NET.Core;
+using Admin.NET.Core.Entity;
+using AngleSharp.Dom;
+using COSXML.Network;
+using Furion.DatabaseAccessor;
+using Furion.DependencyInjection;
+using Furion.FriendlyException;
+using Microsoft.AspNetCore.Http;
+using NewLife.Net;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+
+namespace Admin.NET.Application;
+/// <summary>
+/// WMS_PreOrder服务
+/// </summary>
+[ApiDescriptionSettings(ApplicationConst.GroupName, Order = 100)]
+public class WMSPreOrderService : IDynamicApiController, ITransient
+{
+    private readonly SqlSugarRepository<WMSPreOrder> _rep;
+
+    private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
+    private readonly ISqlSugarClient _db;
+    private readonly UserManager _userManager;
+
+    private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+    private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
+    private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+    private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
+
+
+    private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
+    private readonly SqlSugarRepository<WMSOrder> _repOrder;
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder)
+    {
+        _rep = rep;
+        _reppreOrderDetail = reppreOrderDetail;
+        _userManager = userManager;
+        _db = db;
+        _repCustomerUser = repCustomerUser;
+        _repWarehouseUser = repWarehouseUser;
+        _repTableColumns = repTableColumns;
+        _repTableColumnsDetail = repTableColumnsDetail;
+        _repOrderDetail = repOrderDetail;
+        _repOrder = repOrder;
+
+    }
+
+    /// <summary>
+    /// 分页查询WMS_PreOrder
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "Page")]
+    public async Task<SqlSugarPagedList<WMSPreOrderOutput>> Page(WMSPreOrderInput input)
+    {
+        var query = _rep.AsQueryable()
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
+                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
+                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
+                    .WhereIF(input.PreOrderStatus > 0, u => u.PreOrderStatus == input.PreOrderStatus)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str1), u => u.Str1.Contains(input.Str1.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str2), u => u.Str2.Contains(input.Str2.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str3), u => u.Str3.Contains(input.Str3.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str4), u => u.Str4.Contains(input.Str4.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str5), u => u.Str5.Contains(input.Str5.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str6), u => u.Str6.Contains(input.Str6.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str7), u => u.Str7.Contains(input.Str7.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str8), u => u.Str8.Contains(input.Str8.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str9), u => u.Str9.Contains(input.Str9.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str10), u => u.Str10.Contains(input.Str10.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str11), u => u.Str11.Contains(input.Str11.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str12), u => u.Str12.Contains(input.Str12.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str13), u => u.Str13.Contains(input.Str13.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str14), u => u.Str14.Contains(input.Str14.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str15), u => u.Str15.Contains(input.Str15.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str16), u => u.Str16.Contains(input.Str16.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str17), u => u.Str17.Contains(input.Str17.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str18), u => u.Str18.Contains(input.Str18.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str19), u => u.Str19.Contains(input.Str19.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Str20), u => u.Str20.Contains(input.Str20.Trim()))
+                    .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
+                    .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
+                    .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
+                    .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
+                    .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
+
+                    .Select<WMSPreOrderOutput>()
+;
+        if (input.OrderTimeRange != null && input.OrderTimeRange.Count > 0)
+        {
+            DateTime? start = input.OrderTimeRange[0];
+            query = query.WhereIF(start.HasValue, u => u.OrderTime > start);
+            if (input.OrderTimeRange.Count > 1 && input.OrderTimeRange[1].HasValue)
+            {
+                var end = input.OrderTimeRange[1].Value.AddDays(1);
+                query = query.Where(u => u.OrderTime < end);
+            }
+        }
+        if (input.CompleteTimeRange != null && input.CompleteTimeRange.Count > 0)
+        {
+            DateTime? start = input.CompleteTimeRange[0];
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            if (input.CompleteTimeRange.Count > 1 && input.CompleteTimeRange[1].HasValue)
+            {
+                var end = input.CompleteTimeRange[1].Value.AddDays(1);
+                query = query.Where(u => u.CompleteTime < end);
+            }
+        }
+        if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
+        {
+            DateTime? start = input.CreationTimeRange[0];
+            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
+            {
+                var end = input.CreationTimeRange[1].Value.AddDays(1);
+                query = query.Where(u => u.CreationTime < end);
+            }
+        }
+        if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
+        {
+            DateTime? start = input.DateTime1Range[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
+            {
+                var end = input.DateTime1Range[1].Value.AddDays(1);
+                query = query.Where(u => u.DateTime1 < end);
+            }
+        }
+        if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
+        {
+            DateTime? start = input.DateTime2Range[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
+            {
+                var end = input.DateTime2Range[1].Value.AddDays(1);
+                query = query.Where(u => u.DateTime2 < end);
+            }
+        }
+        if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
+        {
+            DateTime? start = input.DateTime3Range[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
+            {
+                var end = input.DateTime3Range[1].Value.AddDays(1);
+                query = query.Where(u => u.DateTime3 < end);
+            }
+        }
+        if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
+        {
+            DateTime? start = input.DateTime4Range[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
+            {
+                var end = input.DateTime4Range[1].Value.AddDays(1);
+                query = query.Where(u => u.DateTime4 < end);
+            }
+        }
+        if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
+        {
+            DateTime? start = input.DateTime5Range[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
+            {
+                var end = input.DateTime5Range[1].Value.AddDays(1);
+                query = query.Where(u => u.DateTime5 < end);
+            }
+        }
+        query = query.OrderBuilder(input);
+        return await query.ToPagedListAsync(input.Page, input.PageSize);
+    }
+
+    /// <summary>
+    /// 增加WMS_PreOrder
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "Add")]
+    public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateWMSPreOrderInput input)
+    {
+        //TODO:新增前的逻辑判断，是否允许新增
+
+        //构造传入集合
+        List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
+        entityListDtos.Add(input);
+        //使用简单工厂定制化修改和新增的方法
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
+        factory._repPreOrder = _rep;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        var response = await factory.AddStrategy(entityListDtos);
+        return response;
+        //var entity = ObjectMapper.Map<WMS_PreOrder>(input);
+        ////调用领域服务
+        //entity = await _wms_preorderManager.CreateAsync(entity);
+
+        //var dto = ObjectMapper.Map<WMS_PreOrderEditDto>(entity);
+        //response.Data.
+        //var entity = input.Adapt<WMSPreOrder>();
+        //await _rep.InsertAsync(entity);
+    }
+
+    /// <summary>
+    /// 删除WMS_PreOrder
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "Delete")]
+    public async Task Delete(DeleteWMSPreOrderInput input)
+    {
+        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        await _rep.DeleteAsync(entity);   //假删除
+    }
+
+    /// <summary>
+    /// 更新WMS_PreOrder
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "Update")]
+    public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSPreOrderInput input)
+    {
+
+
+        List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
+        entityListDtos.Add(input);
+        //使用简单工厂定制化修改和新增的方法
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
+        factory._repPreOrder = _rep;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        var response = await factory.UpdateStrategy(entityListDtos);
+        return response;
+        //var entity = input.Adapt<WMSPreOrder>();
+        //await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+    }
+
+
+
+
+    /// <summary>
+    /// 获取WMS_PreOrder 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "Query")]
+    public async Task<WMSPreOrder> Get(long id)
+    {
+        var entity = await _rep.AsQueryable().Includes(a => a.Details).Includes(a => a.OrderAddress).Where(u => u.Id == id).FirstAsync();
+        //var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
+        return entity;
+    }
+
+    /// <summary>
+    /// 获取WMS_PreOrder列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<List<WMSPreOrderOutput>> List([FromQuery] WMSPreOrderInput input)
+    {
+        return await _rep.AsQueryable().Select<WMSPreOrderOutput>().ToListAsync();
+    }
+
+
+
+    /// <summary>
+    /// 接收上传文件方法
+    /// </summary>
+    /// <param name="file">文件内容</param>
+    /// <param name="Status">提交状态，第一次提交，可能存在校验提示， 用户选择忽略提示可以使用</param>
+    /// <returns>文件名称</returns>
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "UploadExcelFile")]
+    public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
+    {
+
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        string url = await ImprotExcel.WriteFile(file);
+        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
+
+        factoryExcel._repPreOrder = _rep;
+        factoryExcel._repWarehouseUser = _repWarehouseUser;
+        factoryExcel._db = _db;
+        factoryExcel._userManager = _userManager;
+
+        factoryExcel._repCustomerUser = _repCustomerUser;
+        factoryExcel._repWarehouseUser = _repWarehouseUser;
+        factoryExcel._repTableColumns = _repTableColumns;
+        factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
+
+
+        var data = factoryExcel.Strategy(dataExcel);
+        var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
+        var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
+
+        //将散装的主表和明细表 组合到一起 
+        List<AddOrUpdateWMSPreOrderInput> PreOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
+        PreOrders.ForEach(item =>
+        {
+            item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
+        });
+
+        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+        var CustomerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+        long CustomerId = 0;
+        if (CustomerData != null)
+        {
+            CustomerId = CustomerData.CustomerId;
+        }
+        //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
+        //使用简单工厂定制化修改和新增的方法
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(CustomerId);
+        factory._repPreOrder = _rep;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        var response = await factory.AddStrategy(entityListDtos);
+        return response;
+
+    }
+
+
+    //[Route("~/adonet/transaction")]
+    /// <summary>
+    /// 预出库单转出库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [ApiDescriptionSettings(Name = "PreOrderForOrder")]
+    public async Task<Response<List<OrderStatusDto>>> PreOrderForOrder(List<long> input)
+    {
+
+
+        //获取勾选的订单的客户
+        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+        var customerData = _repCustomerUser.AsQueryable().Where(a => a.Id == input.First()).First();
+        long customerId = 0;
+        if (customerData != null)
+        {
+            customerId = customerData.CustomerId;
+        }
+        IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(customerId);
+        factory._repPreOrder = _rep;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.Strategy(input);
+
+        return response;
+    }
+
+   
+}
+
