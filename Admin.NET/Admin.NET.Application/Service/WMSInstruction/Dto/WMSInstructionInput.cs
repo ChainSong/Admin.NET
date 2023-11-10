@@ -164,12 +164,12 @@ namespace Admin.NET.Application;
         /// <summary>
         /// CreationTime
         /// </summary>
-        public DateTime? CreationTime { get; set; }
+        //public DateTime? CreationTime { get; set; }
         
         /// <summary>
          /// CreationTime范围
          /// </summary>
-         public List<DateTime?> CreationTimeRange { get; set; } 
+         public List<DateTime?> CreationTime { get; set; } 
     }
 
     /// <summary>

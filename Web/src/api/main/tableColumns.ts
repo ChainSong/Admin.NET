@@ -47,10 +47,8 @@ export const updateTableColumnsDetail = (params?: any) =>
 
 // 编辑表管理
 export const getByTableNameList = async (params?: any) => {
-
 	let data = { data: { result: [] } };
 	// localStorage.setItem(params, null);
-
 	let tableColumnsStorage = localStorage.getItem(params);
 	if (tableColumnsStorage != null && tableColumnsStorage.length > 30) {
 		return JSON.parse(tableColumnsStorage) as Array<data>;
@@ -69,7 +67,6 @@ const tableNameList = (params?: any) => {
 		url: `${Api.GetByTableNameList}/${params}`,
 		method: 'get'
 	});
-
 }
 // request({
 // 	url: Api.GetByTableNameList,
@@ -110,7 +107,6 @@ export const pageAllTableColumns = (params?: any) =>
 
 // 清理表结构缓存
 export const cleanTableColumnsCache = (params?: any) => {
-
 	localStorage.setItem(params, null);
 	request({
 		url: Api.CleanTableColumnsCache,
@@ -120,7 +116,6 @@ export const cleanTableColumnsCache = (params?: any) => {
 }
 // 直接查询所有的表名称
 export const getImportExcelTemplate = (params?: any) =>
-
 	request({
 		url: Api.GetImportExcelTemplate,
 		method: 'post',

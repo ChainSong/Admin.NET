@@ -228,9 +228,10 @@ const submit = async () => {
 					 
 					let result = await updateWMSASN(state.value.header);
 					if (result.data.result.code == "1") {
+						ElMessage.success("修改成功");
 						closeDialog();
 					} else {
-						ElMessage.error("添加失败");
+						ElMessage.error("修改失败");
 					}
 
 					closeDialog();

@@ -183,8 +183,6 @@ const submit = async () => {
 
 const gettableColumn = async () => {
 	let res = await getByTableNameList("WMS_Product");
-	console.log("res");
-	console.log(res);
 	state.value.tableColumnHeaders = res.data.result;
 	headerRule.value = {};
 	//验证

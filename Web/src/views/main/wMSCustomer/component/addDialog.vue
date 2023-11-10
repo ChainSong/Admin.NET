@@ -196,12 +196,8 @@ const cancel = () => {
 };
 
 // 提交
-const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
+const submit = async () => { 
 	state.value.header.details = state.value.details
-	console.log(state.value.header);
-
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
@@ -266,8 +262,7 @@ const gettableColumn = async () => {
 			];
 		}
 	});
-	console.log(" state.value.tableColumnDetails")
-	console.log(state.value.tableColumnDetails)
+	 
 	// console.log(state.value.header)
 	// let resDetail = await getByTableNameList("CustomerDetail");
 	// state.value.tableColumnHeaders = res.data.result;

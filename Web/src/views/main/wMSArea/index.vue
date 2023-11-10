@@ -214,7 +214,7 @@ const gettableColumn = async () => {
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
-  console.log(state.value.header);
+  // console.log(state.value.header);
   var res = await pageWMSArea(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
   tableParams.value.total = res.data.result?.total;

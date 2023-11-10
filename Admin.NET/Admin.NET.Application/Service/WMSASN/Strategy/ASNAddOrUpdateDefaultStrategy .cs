@@ -193,9 +193,12 @@ namespace Admin.NET.Application.Strategy
                         });
 
                 });
-                response.Code = StatusCode.Error;
-                response.Msg = "订单异常";
-                return response;
+                if (response.Data.Count > 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "订单异常";
+                    return response;
+                }
             }
 
             var asnData = request.Adapt<List<WMSASN>>();

@@ -99,63 +99,63 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
 
                     .Select<WMSAdjustmentOutput>()
 ;
-        if (input.AdjustmentTimeRange != null && input.AdjustmentTimeRange.Count > 0)
+        if (input.AdjustmentTime != null && input.AdjustmentTime.Count > 0)
         {
-            DateTime? start = input.AdjustmentTimeRange[0];
+            DateTime? start = input.AdjustmentTime[0];
             query = query.WhereIF(start.HasValue, u => u.AdjustmentTime > start);
-            if (input.AdjustmentTimeRange.Count > 1 && input.AdjustmentTimeRange[1].HasValue)
+            if (input.AdjustmentTime.Count > 1 && input.AdjustmentTime[1].HasValue)
             {
-                var end = input.AdjustmentTimeRange[1].Value.AddDays(1);
+                var end = input.AdjustmentTime[1].Value.AddDays(1);
                 query = query.Where(u => u.AdjustmentTime < end);
             }
         }
-        if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
+        if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
-            DateTime? start = input.DateTime1Range[0];
+            DateTime? start = input.DateTime1[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
-            if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
+            if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
-                var end = input.DateTime1Range[1].Value.AddDays(1);
+                var end = input.DateTime1[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime1 < end);
             }
         }
-        if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
+        if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
-            DateTime? start = input.DateTime2Range[0];
+            DateTime? start = input.DateTime2[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
-            if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
+            if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
-                var end = input.DateTime2Range[1].Value.AddDays(1);
+                var end = input.DateTime2[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime2 < end);
             }
         }
-        if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
+        if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
-            DateTime? start = input.DateTime3Range[0];
+            DateTime? start = input.DateTime3[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
-            if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
+            if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
-                var end = input.DateTime3Range[1].Value.AddDays(1);
+                var end = input.DateTime3[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime3 < end);
             }
         }
-        if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
+        if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
-            DateTime? start = input.DateTime4Range[0];
+            DateTime? start = input.DateTime4[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
-            if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
+            if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
-                var end = input.DateTime4Range[1].Value.AddDays(1);
+                var end = input.DateTime4[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime4 < end);
             }
         }
-        if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
+        if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
-            DateTime? start = input.DateTime5Range[0];
+            DateTime? start = input.DateTime5[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
-            if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
+            if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
-                var end = input.DateTime5Range[1].Value.AddDays(1);
+                var end = input.DateTime5[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime5 < end);
             }
         }

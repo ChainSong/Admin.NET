@@ -223,10 +223,10 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
+	// console.log("state.value.details");
+	// console.log(state.value.details);
 	state.value.header.details = state.value.details
-	console.log(state.value.header);
+	// console.log(state.value.header);
 
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
@@ -235,10 +235,10 @@ const submit = async () => {
 					// console.log("state.value.header")
 					// console.log(state.value.vm.header)
 				 let result=	await updateWMSAdjustment(state.value.header);
-                   console.log(result.data)
+                //    console.log(result.data)
 					closeDialog();
 				} else {
-					console.log(Object.keys(fieldsDetail))
+					// console.log(Object.keys(fieldsDetail))
 					ElMessage({
 						message: `表单明细有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
 						type: "error",

@@ -8,10 +8,11 @@
 			<sub-item :chil="val.children" />
 		</el-sub-menu>
 		<template v-else>
-			<el-menu-item :index="val.path" :key="val.path">
+			
+			<el-menu-item :index="val.path" :key="val.path" :route="val.path">
 				<template v-if="!val.meta.isLink || (val.meta.isLink && val.meta.isIframe)">
 					<SvgIcon :name="val.meta.icon" />
-					<span>{{ $t(val.meta.title) }}</span>
+					<span>{{ $t(val.meta.title)}}{{val.path}}</span>
 				</template>
 				<template v-else>
 					<a class="w100" @click.prevent="onALinkClick(val)">

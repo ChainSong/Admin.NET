@@ -45,13 +45,13 @@ public class WMSAreaService : IDynamicApiController, ITransient
 
                     .Select<WMSAreaOutput>()
 ;
-        if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
+        if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
-            DateTime? start = input.CreationTimeRange[0];
+            DateTime? start = input.CreationTime[0];
             query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-            if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
+            if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
-                var end = input.CreationTimeRange[1].Value.AddDays(1);
+                var end = input.CreationTime[1].Value.AddDays(1);
                 query = query.Where(u => u.CreationTime < end);
             }
         }

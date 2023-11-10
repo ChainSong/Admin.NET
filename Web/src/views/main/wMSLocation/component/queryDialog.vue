@@ -106,7 +106,6 @@ const openDialog = (row: any) => {
 	state.value.header = JSON.parse(JSON.stringify(row));
 
 	isShowDialog.value = true;
-	console.log("dasdsdasd");
 	gettableColumn();
 	get()
 };

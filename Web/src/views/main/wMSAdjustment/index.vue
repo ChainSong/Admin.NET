@@ -213,7 +213,6 @@ const queryTitle = ref("");
 
 // 页面加载时
 onMounted(async () => {
-  console.log("页面加载时");
   gettableColumn();
 });
 
@@ -266,7 +265,6 @@ const cxecute = (row: any) => {
   })
     .then(async () => {
      var result= await confirmWMSAdjustment([row.id]);
-     console.log(result)
       if (result.data.result.data.length > 0) {
         state.value.orderStatus = result.data.result.data;
         // console.log(state.value.orderStatus);

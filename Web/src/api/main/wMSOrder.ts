@@ -6,6 +6,8 @@ enum Api {
   PageWMSOrder = '/api/wMSOrder/page',
   GetWMSOrder = '/api/wMSOrder/Query',
   AutomatedAllocation = '/api/wMSOrder/AutomatedAllocation',
+  CreatePickTask = '/api/wMSOrder/CreatePickTask',
+  
 }
 
 // 增加WMSOrder
@@ -55,4 +57,13 @@ request({
 		 data: params,
 	 });
  
+ //转入库单
+ export const createPickTask = (params?: any) => 
+ request({
+		 url: Api.CreatePickTask,
+		 method: 'post',
+		 data: params,
+	 });
  
+ 
+	 

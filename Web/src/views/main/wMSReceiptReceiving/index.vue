@@ -13,8 +13,8 @@
               </template>
               <template v-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
@@ -34,8 +34,8 @@
 
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -61,19 +61,16 @@
             </el-col>
           </template>
         </el-row>
-
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSReceipt:page'"> 查询 </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSReceipt:add'"> 导入上架信息
           </el-button>
         </el-form-item>
-
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
@@ -115,7 +112,7 @@
             </el-button>
             <el-button @click="addInventoryFun(scope.row)" class="el-icon-s-comment" type="text" size="small">加入库存
             </el-button>
-            <el-button type="text" class="el-icon-delete" @click="del(scope.row)"  style="color:#F56C6C;margin-left: 10px;"
+            <el-button type="text" class="el-icon-delete" @click="del(scope.row)" style="color:#F56C6C;margin-left: 10px;"
               size="small">删除</el-button>
             <!-- <el-popconfirm confirm-button-text="确定"   cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="del(scope.row)" title="确定删除吗？"> -->
@@ -142,6 +139,7 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
+
   </div>
 </template>
 
@@ -157,8 +155,8 @@ import queryDialog from '/@/views/main/wMSReceiptReceiving/component/queryDialog
 import { pageWMSReceipt, deleteWMSReceipt, returnReceiptReceiving, addInventory } from '/@/api/main/wMSReceiptReceiving';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
-import Header from "/@/entities/customer";
-import Details from "/@/entities/customerDetail";
+import Header from "/@/entities/receipt";
+import Details from "/@/entities/receiptReceiving";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 

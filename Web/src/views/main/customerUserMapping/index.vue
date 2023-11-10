@@ -9,7 +9,7 @@
        
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="cancel" size="default">取 消</el-button>
+          <el-button @click="cancel" size="default"  >取 消</el-button>
           <el-button type="primary" @click="submit" size="default">确 定</el-button>
         </span>
       </template>
@@ -61,8 +61,7 @@ const ruleForm = ref<any>({});
 // 打开弹窗
 const openDialog = async (row: any) => {
   state.user=row;
-  console.log(state.user);
-  // console.log("dasdsadasdas");
+  
   // state.selectedTabName = '0'; // 重置为第一个 tab 页
   // state.ruleForm = JSON.parse(JSON.stringify(row));
   // if (row.id != undefined) {
@@ -113,9 +112,7 @@ const handleQuery = async (row: any) => {
     })
   })
 
-  // console.log("customerUser.data.result");
-  // console.log(customers.data.result);
-  // console.log(customerUserCheck.data.result);
+  
   // customers.data.result.forEach(element => {
   //   state.customers.push(element.customerName);
   // });

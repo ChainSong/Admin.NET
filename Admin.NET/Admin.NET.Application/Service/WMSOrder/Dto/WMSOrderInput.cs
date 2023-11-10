@@ -299,26 +299,26 @@ namespace Admin.NET.Application;
         /// <summary>
         /// OrderStatus
         /// </summary>
-        public int OrderStatus { get; set; }
+        public int? OrderStatus { get; set; }
         
         /// <summary>
         /// OrderTime
         /// </summary>
-        public DateTime OrderTime { get; set; }
+        //public DateTime OrderTime { get; set; }
         
         /// <summary>
          /// OrderTime范围
          /// </summary>
-         public List<DateTime?> OrderTimeRange { get; set; } 
+         public List<DateTime?> OrderTime { get; set; } 
         /// <summary>
         /// CompleteTime
         /// </summary>
-        public DateTime? CompleteTime { get; set; }
+        //public DateTime? CompleteTime { get; set; }
         
         /// <summary>
          /// CompleteTime范围
          /// </summary>
-         public List<DateTime?> CompleteTimeRange { get; set; } 
+         public List<DateTime?> CompleteTime { get; set; } 
         /// <summary>
         /// DetailCount
         /// </summary>
@@ -332,12 +332,12 @@ namespace Admin.NET.Application;
         /// <summary>
         /// CreationTime
         /// </summary>
-        public DateTime? CreationTime { get; set; }
+        //public DateTime? CreationTime { get; set; }
         
         /// <summary>
          /// CreationTime范围
          /// </summary>
-         public List<DateTime?> CreationTimeRange { get; set; } 
+         public List<DateTime?> CreationTime { get; set; } 
         /// <summary>
         /// Updator
         /// </summary>
@@ -451,48 +451,48 @@ namespace Admin.NET.Application;
         /// <summary>
         /// DateTime1
         /// </summary>
-        public DateTime? DateTime1 { get; set; }
+        //public DateTime? DateTime1 { get; set; }
         
         /// <summary>
          /// DateTime1范围
          /// </summary>
-         public List<DateTime?> DateTime1Range { get; set; } 
+         public List<DateTime?> DateTime1 { get; set; } 
         /// <summary>
         /// DateTime2
         /// </summary>
-        public DateTime? DateTime2 { get; set; }
+        //public DateTime? DateTime2 { get; set; }
         
         /// <summary>
          /// DateTime2范围
          /// </summary>
-         public List<DateTime?> DateTime2Range { get; set; } 
+         public List<DateTime?> DateTime2 { get; set; } 
         /// <summary>
         /// DateTime3
         /// </summary>
-        public DateTime? DateTime3 { get; set; }
+        //public DateTime? DateTime3 { get; set; }
         
         /// <summary>
          /// DateTime3范围
          /// </summary>
-         public List<DateTime?> DateTime3Range { get; set; } 
+         public List<DateTime?> DateTime3 { get; set; } 
         /// <summary>
         /// DateTime4
         /// </summary>
-        public DateTime? DateTime4 { get; set; }
+        //public DateTime? DateTime4 { get; set; }
         
         /// <summary>
          /// DateTime4范围
          /// </summary>
-         public List<DateTime?> DateTime4Range { get; set; } 
+         public List<DateTime?> DateTime4 { get; set; } 
         /// <summary>
         /// DateTime5
         /// </summary>
-        public DateTime? DateTime5 { get; set; }
+        //public DateTime? DateTime5 { get; set; }
         
         /// <summary>
          /// DateTime5范围
          /// </summary>
-         public List<DateTime?> DateTime5Range { get; set; } 
+         public List<DateTime?> DateTime5 { get; set; } 
         /// <summary>
         /// Int1
         /// </summary>

@@ -6,25 +6,30 @@
 					<el-tabs v-model="activeMainName">
 						<el-tab-pane label="订单信息" name="OrderInfo">
 							<el-descriptions class="margin-top" :column="2" size="small" border>
-								<template v-for="i in state.tableColumnHeaders">
-									<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
-										v-if="i.isCreate || i.isKey">
+								<template v-for="i in state.tableColumnHeaders.filter(a=>a.isCreate==1 || a.isKey==1)">
+									<el-descriptions-item  :prop="i.displayName" :label="i.displayName">
 										<template>
 											<!-- <i></i>
 									{{ i.displayName }} -->
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
 											<template v-for="item in i.tableColumnsDetails">
-												<label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
-													show-icon :type="item.color" :key="item.codeStr"></label>
+												<el-tag   v-if="item.codeStr == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+												<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
+													show-icon :type="item.color" :key="item.codeStr"></label> -->
 											</template>
 										</template>
 										<template v-else-if="i.type == 'DropDownListInt'">
 											<template v-for="item in i.tableColumnsDetails">
-												<template v-if="item.codeStr == state.header[i.columnName]">
-													<label show-icon :type="item.color" v-text="item.name"
-														:key="item.codeInt"></label>
-												</template>
+												<!-- <template v-if="item.codeStr == state.header[i.columnName]"> -->
+													<el-tag   v-if="item.codeInt == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+													<!-- <label show-icon :type="item.color" v-text="item.name"
+														:key="item.codeInt"></label> -->
+												<!-- </template> -->
 											</template>
 										</template>
 										<template v-else>
@@ -206,22 +211,17 @@ const gettableColumn = async () => {
 	
 	let resorderAddress = await getByTableNameList("WMS_OrderAddress");
 	state.value.tableColumnOrderAddresss = resorderAddress.data.result;
-
-	console.log("state.value.tableColumnAllocations")
-	console.log(state.value.tableColumnAllocations)
+ 
 };
 //获取订单信息
 const get = async () => {
 	let result = await getWMSOrder(state.value.header.id);
-	console.log("result");
-	console.log(result);
+	 
 	if (result.data.result != null) {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
 		state.value.allocations = result.data.result.allocation;
-	}
-	console.log("state.value.allocations");
-	console.log(state.value.allocations);
+	} 
 }
 
 

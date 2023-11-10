@@ -1,9 +1,13 @@
 <template>
 	<div class="layout-padding layout-padding-unset layout-iframe">
 		<div class="layout-padding-auto layout-padding-view">
-			<div class="w100" v-for="v in setIframeList" :key="v.path" v-loading="v.meta.loading" element-loading-background="white">
+			<div class="w100" v-for="v in setIframeList" :key="v.path" v-loading="v.meta.loading"
+				element-loading-background="white">
 				<transition-group :name="name">
-					<iframe :src="v.meta.isLink" :key="v.path" frameborder="0" height="100%" width="100%" style="position: absolute" :data-url="v.path" v-show="getRoutePath === v.path" ref="iframeRef" />
+					<!-- {{console.log("getRoutePath")}}
+					{{console.log(getRoutePath)}} -->
+					<iframe :src="v.meta.isLink" :key="v.path" frameborder="0" height="100%" width="100%"
+						style="position: absolute" :data-url="v.path" v-show="getRoutePath === v.path"  ref="iframeRef" />
 				</transition-group>
 			</div>
 		</div>
@@ -63,7 +67,11 @@ watch(
 	() => route.fullPath,
 	(val) => {
 		const item: any = props.list.find((v: any) => v.path === val);
-		if (!item) return false;
+		if (!item) {
+			return false;
+		}
+
+
 		if (!item.meta.isIframeOpen) item.meta.isIframeOpen = true;
 		closeIframeLoading(val, item);
 	},
@@ -75,6 +83,7 @@ watch(
 watch(
 	() => props.refreshKey,
 	() => {
+
 		const item: any = props.list.find((v: any) => v.path === route.path);
 		if (!item) return false;
 		if (item.meta.isIframeOpen) item.meta.isIframeOpen = false;

@@ -22,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Plugin.GoView", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Plugin.Elsa", "Plugins\Admin.NET.Plugin.Elsa\Admin.NET.Plugin.Elsa.csproj", "{48EFC3A6-BDC0-4D05-819A-B1FB927FA4C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin.NET.Common", "Admin.NET.Common\Admin.NET.Common.csproj", "{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Common", "Admin.NET.Common\Admin.NET.Common.csproj", "{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

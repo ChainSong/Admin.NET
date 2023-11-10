@@ -217,10 +217,7 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
 	state.value.header.details = state.value.details
-	console.log(state.value.header);
 
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {

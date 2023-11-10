@@ -70,6 +70,7 @@ const filterRoutesFun = <T extends RouteItem>(arr: T[]): T[] => {
 		.map((item: T) => {
 			item = Object.assign({}, item);
 			if (item.children) item.children = filterRoutesFun(item.children);
+		
 			return item;
 		});
 };

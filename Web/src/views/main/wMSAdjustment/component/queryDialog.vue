@@ -134,8 +134,8 @@ const gettableColumn = async () => {
 
 const get = async () => {
 	let result = await getWMSAdjustment(state.value.header.id);
-	console.log("result");
-	console.log(result);
+	// console.log("result");
+	// console.log(result);
 	if (result.data.result != null) {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;

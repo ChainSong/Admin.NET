@@ -27,6 +27,7 @@ const state = reactive<LinkViewState>({
 
 // 立即前往
 const onGotoFullPage = () => {
+	
 	const { origin, pathname } = window.location;
 	if (verifyUrl(<string>state.isLink)) window.open(state.isLink);
 	else window.open(`${origin}${pathname}#${state.isLink}`);

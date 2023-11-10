@@ -13,8 +13,8 @@
               </template>
               <template v-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
@@ -34,8 +34,8 @@
 
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -120,7 +120,7 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button @click="openEdit(scope.row)"  class="el-icon-edit" type="text" size="small">编辑</el-button>
+            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -132,12 +132,11 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
+    <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
+      <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+      </el-alert>
+    </el-dialog>
   </div>
-
-  <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
-    <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
-    </el-alert>
-  </el-dialog>
 </template>
 
 <script lang="ts" setup="" name="wMSASN">
@@ -152,8 +151,8 @@ import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
 import { pageWMSASN, deleteWMSASN, asnForReceipt } from '/@/api/main/wMSASN';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
-import Header from "/@/entities/customer";
-import Details from "/@/entities/customerDetail";
+import Header from "/@/entities/asn";
+import Details from "/@/entities/asnDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
@@ -237,7 +236,7 @@ const openAdd = () => {
 
 // 打开编辑页面
 const openEdit = (row: any) => {
-  if(row.asnStatus!=1){
+  if (row.asnStatus != 1) {
     ElMessage.warning("订单状态不允许编辑");
     return;
   }
@@ -281,13 +280,13 @@ const asnForReceiptFun = () => {
   })
     .then(async () => {
       let result = await asnForReceipt(ids);
-       console.log("result");
-       console.log(result);
+      // console.log("result");
+      // console.log(result);
       if (result.data.result.code == 1) {
         handleQuery();
         ElMessage.success("转入库单成功");
       } else {
-        resultPopupShow.value=true;
+        resultPopupShow.value = true;
         state.value.orderStatus = result.data.result.data;
       }
     })

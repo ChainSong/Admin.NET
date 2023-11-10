@@ -63,6 +63,7 @@ const getIframeListRoutes = async () => {
 };
 // 页面加载前，处理缓存，页面刷新时路由缓存处理
 onBeforeMount(() => {
+	
 	state.keepAliveNameList = keepAliveNames.value;
 	mittBus.on('onTagsViewRefreshRouterView', (fullPath: string) => {
 		state.keepAliveNameList = keepAliveNames.value.filter((name: string) => route.name !== name);
@@ -83,6 +84,7 @@ onMounted(() => {
 	// https://gitee.com/lyt-top/vue-next-admin/pulls/40
 	nextTick(() => {
 		setTimeout(() => {
+			
 			if (themeConfig.value.isCacheTagsView) {
 				let tagsViewArr: RouteItem[] = Session.get('tagsViewList') || [];
 				cachedViews.value = tagsViewArr.filter((item) => item.meta?.isKeepAlive).map((item) => item.name as string);

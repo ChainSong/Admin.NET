@@ -13,8 +13,8 @@
               </template>
               <template v-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
@@ -34,8 +34,8 @@
 
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -78,6 +78,11 @@
           <el-button type="primary" icon="ele-Plus" @click="automatedAllocationFun" v-auth="'wMSOrder:add'"> 分配库存
           </el-button>
         </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="ele-Plus" @click="createPickTaskFun" v-auth="'wMSOrder:add'"> 拣货任务
+          </el-button>
+        </el-form-item>
+
 
       </el-form>
     </el-card>
@@ -139,12 +144,13 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
-  </div>
 
-  <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
-    <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
-    </el-alert>
-  </el-dialog>
+
+    <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
+      <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+      </el-alert>
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts" setup="" name="wMSOrder">
@@ -156,11 +162,11 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation } from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask} from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
-import Header from "/@/entities/customer";
-import Details from "/@/entities/customerDetail";
+import Header from "/@/entities/order";
+import Details from "/@/entities/orderDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
@@ -270,7 +276,7 @@ const del = (row: any) => {
 
 
 
-// 生成拣货单
+// 分配库存
 const automatedAllocationFun = () => {
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {
@@ -310,7 +316,46 @@ const automatedAllocationFun = () => {
 };
 
 
+//生成拣货任务
+const createPickTaskFun = () => {
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    if (a.orderStatus == 20) {
+      ids.push(a.id);
+    }
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选已分配订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要生成拣货任务吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
 
+      let result = await createPickTask(ids);
+      handleQuery();
+      if (result.data.result.data.length > 0) {
+        state.value.orderStatus = result.data.result.data;
+        // console.log(state.value.orderStatus);
+        //导入弹框提醒
+        resultPopupShow.value = true;
+      } else {
+        ElMessage.info(result.data.result.msg);
+      }
+      // console.log(data.data.result);
+      // if (data.data.result[0].statusCode == 1) {
+      //   handleQuery();
+      //   ElMessage.success("转入库单成功");
+      // } else {
+      //   resultPopupShow.value=true;
+      //   state.value.orderStatus = data.data.result;
+      // }
+    })
+    .catch(() => { });
+};
 // 改变页面容量
 const handleSizeChange = (val: number) => {
   tableParams.value.pageSize = val;

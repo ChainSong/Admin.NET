@@ -151,7 +151,6 @@ export default {
 			return this.isPassing ? this.successText : "";
 		},
 		dragVerifyStyle: function () {
-			console.log(this.width, "width");
 			return {
 				width: this.width + "px",
 				height: this.height + "px",

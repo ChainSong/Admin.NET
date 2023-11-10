@@ -4,6 +4,7 @@ using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
@@ -38,7 +39,11 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
     private readonly SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation;
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation)
+    private readonly SqlSugarRepository<WMSPickTask> _repPickTask;
+    private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail; 
+
+
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -55,6 +60,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repTableInventoryUsed = repTableInventoryUsed;
         _repInstruction = repInstruction;
         _repOrderAllocation = repOrderAllocation;
+        _repPickTask= repPickTask;
+        _repPickTaskDetail= repPickTaskDetail;
     }
 
     /// <summary>
@@ -108,83 +115,83 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
                     .Select<WMSOrderOutput>()
 ;
-        if (input.OrderTimeRange != null && input.OrderTimeRange.Count > 0)
+        if (input.OrderTime != null && input.OrderTime.Count > 0)
         {
-            DateTime? start = input.OrderTimeRange[0];
+            DateTime? start = input.OrderTime[0];
             query = query.WhereIF(start.HasValue, u => u.OrderTime > start);
-            if (input.OrderTimeRange.Count > 1 && input.OrderTimeRange[1].HasValue)
+            if (input.OrderTime.Count > 1 && input.OrderTime[1].HasValue)
             {
-                var end = input.OrderTimeRange[1].Value.AddDays(1);
+                var end = input.OrderTime[1].Value.AddDays(1);
                 query = query.Where(u => u.OrderTime < end);
             }
         }
-        if (input.CompleteTimeRange != null && input.CompleteTimeRange.Count > 0)
+        if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
-            DateTime? start = input.CompleteTimeRange[0];
+            DateTime? start = input.CompleteTime[0];
             query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
-            if (input.CompleteTimeRange.Count > 1 && input.CompleteTimeRange[1].HasValue)
+            if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
-                var end = input.CompleteTimeRange[1].Value.AddDays(1);
+                var end = input.CompleteTime[1].Value.AddDays(1);
                 query = query.Where(u => u.CompleteTime < end);
             }
         }
-        if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
+        if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
-            DateTime? start = input.CreationTimeRange[0];
+            DateTime? start = input.CreationTime[0];
             query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-            if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
+            if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
-                var end = input.CreationTimeRange[1].Value.AddDays(1);
+                var end = input.CreationTime[1].Value.AddDays(1);
                 query = query.Where(u => u.CreationTime < end);
             }
         }
-        if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
+        if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
-            DateTime? start = input.DateTime1Range[0];
+            DateTime? start = input.DateTime1[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
-            if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
+            if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
-                var end = input.DateTime1Range[1].Value.AddDays(1);
+                var end = input.DateTime1[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime1 < end);
             }
         }
-        if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
+        if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
-            DateTime? start = input.DateTime2Range[0];
+            DateTime? start = input.DateTime2[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
-            if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
+            if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
-                var end = input.DateTime2Range[1].Value.AddDays(1);
+                var end = input.DateTime2[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime2 < end);
             }
         }
-        if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
+        if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
-            DateTime? start = input.DateTime3Range[0];
+            DateTime? start = input.DateTime3[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
-            if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
+            if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
-                var end = input.DateTime3Range[1].Value.AddDays(1);
+                var end = input.DateTime3[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime3 < end);
             }
         }
-        if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
+        if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
-            DateTime? start = input.DateTime4Range[0];
+            DateTime? start = input.DateTime4[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
-            if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
+            if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
-                var end = input.DateTime4Range[1].Value.AddDays(1);
+                var end = input.DateTime4[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime4 < end);
             }
         }
-        if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
+        if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
-            DateTime? start = input.DateTime5Range[0];
+            DateTime? start = input.DateTime5[0];
             query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
-            if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
+            if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
-                var end = input.DateTime5Range[1].Value.AddDays(1);
+                var end = input.DateTime5[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime5 < end);
             }
         }
@@ -278,7 +285,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         IAutomatedAllocationInterface factory = AutomatedAllocationFactory.AutomatedAllocation();
 
-
+        factory._db = _db;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
@@ -290,6 +297,31 @@ public class WMSOrderService : IDynamicApiController, ITransient
         return response;
 
     }
-     
+
+
+
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "CreatePickTask")]
+    public async Task<Response<List<OrderStatusDto>>> CreatePickTask(List<long> input)
+    {
+        //使用简单工厂定制化  / 
+
+        IPickTaskInterface factory = PickTaskFactory.PickTask();
+
+
+        factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        var response = await factory.Strategy(input);
+
+        return response;
+
+    }
+
 }
 

@@ -253,12 +253,12 @@ public class WMSCustomerInput : BasePageInput
     /// <summary>
     /// CreationTime
     /// </summary>
-    public List<DateTime?> CreationTime { get; set; }
+    //public List<DateTime?> CreationTime { get; set; }
 
     /// <summary>
     /// CreationTime范围
     /// </summary>
-    public List<DateTime?> CreationTimeRange { get; set; }
+    public List<DateTime?> CreationTime { get; set; }
     /// <summary>
     /// Updator
     /// </summary>

@@ -61,63 +61,63 @@ public class WMSInventoryUsableService : IDynamicApiController, ITransient
 
                     .Select<WMSInventoryUsableOutput>()
 ;
-        if(input.ProductionDateRange != null && input.ProductionDateRange.Count >0)
+        if(input.ProductionDate != null && input.ProductionDate.Count >0)
         {
-                DateTime? start= input.ProductionDateRange[0]; 
+                DateTime? start= input.ProductionDate[0]; 
                 query = query.WhereIF(start.HasValue, u => u.ProductionDate > start);
-                if (input.ProductionDateRange.Count >1 && input.ProductionDateRange[1].HasValue)
+                if (input.ProductionDate.Count >1 && input.ProductionDate[1].HasValue)
                 {
-                    var end = input.ProductionDateRange[1].Value.AddDays(1);
+                    var end = input.ProductionDate[1].Value.AddDays(1);
                     query = query.Where(u => u.ProductionDate < end);
                 }
         } 
-        if(input.ExpirationDateRange != null && input.ExpirationDateRange.Count >0)
+        if(input.ExpirationDate != null && input.ExpirationDate.Count >0)
         {
-                DateTime? start= input.ExpirationDateRange[0]; 
+                DateTime? start= input.ExpirationDate[0]; 
                 query = query.WhereIF(start.HasValue, u => u.ExpirationDate > start);
-                if (input.ExpirationDateRange.Count >1 && input.ExpirationDateRange[1].HasValue)
+                if (input.ExpirationDate.Count >1 && input.ExpirationDate[1].HasValue)
                 {
-                    var end = input.ExpirationDateRange[1].Value.AddDays(1);
+                    var end = input.ExpirationDate[1].Value.AddDays(1);
                     query = query.Where(u => u.ExpirationDate < end);
                 }
         } 
-        if(input.InventoryTimeRange != null && input.InventoryTimeRange.Count >0)
+        if(input.InventoryTime != null && input.InventoryTime.Count >0)
         {
-                DateTime? start= input.InventoryTimeRange[0]; 
+                DateTime? start= input.InventoryTime[0]; 
                 query = query.WhereIF(start.HasValue, u => u.InventoryTime > start);
-                if (input.InventoryTimeRange.Count >1 && input.InventoryTimeRange[1].HasValue)
+                if (input.InventoryTime.Count >1 && input.InventoryTime[1].HasValue)
                 {
-                    var end = input.InventoryTimeRange[1].Value.AddDays(1);
+                    var end = input.InventoryTime[1].Value.AddDays(1);
                     query = query.Where(u => u.InventoryTime < end);
                 }
         } 
-        if(input.CreationTimeRange != null && input.CreationTimeRange.Count >0)
+        if(input.CreationTime != null && input.CreationTime.Count >0)
         {
-                DateTime? start= input.CreationTimeRange[0]; 
+                DateTime? start= input.CreationTime[0]; 
                 query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-                if (input.CreationTimeRange.Count >1 && input.CreationTimeRange[1].HasValue)
+                if (input.CreationTime.Count >1 && input.CreationTime[1].HasValue)
                 {
-                    var end = input.CreationTimeRange[1].Value.AddDays(1);
+                    var end = input.CreationTime[1].Value.AddDays(1);
                     query = query.Where(u => u.CreationTime < end);
                 }
         } 
-        if(input.DateTime1Range != null && input.DateTime1Range.Count >0)
+        if(input.DateTime1 != null && input.DateTime1.Count >0)
         {
-                DateTime? start= input.DateTime1Range[0]; 
+                DateTime? start= input.DateTime1[0]; 
                 query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
-                if (input.DateTime1Range.Count >1 && input.DateTime1Range[1].HasValue)
+                if (input.DateTime1.Count >1 && input.DateTime1[1].HasValue)
                 {
-                    var end = input.DateTime1Range[1].Value.AddDays(1);
+                    var end = input.DateTime1[1].Value.AddDays(1);
                     query = query.Where(u => u.DateTime1 < end);
                 }
         } 
-        if(input.DateTime2Range != null && input.DateTime2Range.Count >0)
+        if(input.DateTime2 != null && input.DateTime2.Count >0)
         {
-                DateTime? start= input.DateTime2Range[0]; 
+                DateTime? start= input.DateTime2[0]; 
                 query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
-                if (input.DateTime2Range.Count >1 && input.DateTime2Range[1].HasValue)
+                if (input.DateTime2.Count >1 && input.DateTime2[1].HasValue)
                 {
-                    var end = input.DateTime2Range[1].Value.AddDays(1);
+                    var end = input.DateTime2[1].Value.AddDays(1);
                     query = query.Where(u => u.DateTime2 < end);
                 }
         } 

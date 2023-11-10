@@ -319,21 +319,21 @@ namespace Admin.NET.Application;
         /// <summary>
         /// ProductionDate
         /// </summary>
-        public DateTime? ProductionDate { get; set; }
+        //public DateTime? ProductionDate { get; set; }
         
         /// <summary>
          /// ProductionDate范围
          /// </summary>
-         public List<DateTime?> ProductionDateRange { get; set; } 
+         public List<DateTime?> ProductionDate { get; set; } 
         /// <summary>
         /// ExpirationDate
         /// </summary>
-        public DateTime? ExpirationDate { get; set; }
+        //public DateTime? ExpirationDate { get; set; }
         
         /// <summary>
          /// ExpirationDate范围
          /// </summary>
-         public List<DateTime?> ExpirationDateRange { get; set; } 
+         public List<DateTime?> ExpirationDate { get; set; } 
         /// <summary>
         /// Remark
         /// </summary>
@@ -342,12 +342,12 @@ namespace Admin.NET.Application;
         /// <summary>
         /// InventoryTime
         /// </summary>
-        public DateTime InventoryTime { get; set; }
+        //public DateTime InventoryTime { get; set; }
         
         /// <summary>
          /// InventoryTime范围
          /// </summary>
-         public List<DateTime?> InventoryTimeRange { get; set; } 
+         public List<DateTime?> InventoryTime { get; set; } 
         /// <summary>
         /// Creator
         /// </summary>
@@ -356,12 +356,12 @@ namespace Admin.NET.Application;
         /// <summary>
         /// CreationTime
         /// </summary>
-        public DateTime? CreationTime { get; set; }
+        //public DateTime? CreationTime { get; set; }
         
         /// <summary>
          /// CreationTime范围
          /// </summary>
-         public List<DateTime?> CreationTimeRange { get; set; } 
+         public List<DateTime?> CreationTime { get; set; } 
         /// <summary>
         /// Updator
         /// </summary>
@@ -395,21 +395,21 @@ namespace Admin.NET.Application;
         /// <summary>
         /// DateTime1
         /// </summary>
-        public DateTime? DateTime1 { get; set; }
+        //public DateTime? DateTime1 { get; set; }
         
         /// <summary>
          /// DateTime1范围
          /// </summary>
-         public List<DateTime?> DateTime1Range { get; set; } 
+         public List<DateTime?> DateTime1 { get; set; } 
         /// <summary>
         /// DateTime2
         /// </summary>
-        public DateTime? DateTime2 { get; set; }
+        //public DateTime? DateTime2 { get; set; }
         
         /// <summary>
          /// DateTime2范围
          /// </summary>
-         public List<DateTime?> DateTime2Range { get; set; } 
+         public List<DateTime?> DateTime2 { get; set; } 
         /// <summary>
         /// Int1
         /// </summary>

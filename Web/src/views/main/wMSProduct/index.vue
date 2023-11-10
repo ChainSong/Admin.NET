@@ -12,7 +12,7 @@
               </template>
               <template v-else-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                  <el-select v-model="state.header[i.columnName]" clearable  filterable v-if="i.isSearchCondition" size="small"
                     placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
@@ -23,7 +23,7 @@
               </template>
               <template v-else-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                  <el-select v-model="state.header[i.columnName]" clearable  filterable v-if="i.isSearchCondition" size="small"
                     placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
@@ -195,7 +195,6 @@ const gettableColumn = async () => {
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
-  console.log(state.value.header);
   var res = await pageWMSProduct(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
   tableParams.value.total = res.data.result?.total;

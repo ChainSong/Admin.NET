@@ -227,10 +227,7 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
 	state.value.header.details = state.value.details
-	console.log(state.value.header);
 
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
@@ -238,12 +235,12 @@ const submit = async () => {
 				if (isValidDetail) {
 					let result = await updateWMSPreOrder(state.value.header);
 					if (result.data.result.code == "1") {
+						ElMessage.success("修改成功");
 						closeDialog();
 					} else {
-						ElMessage.error("添加失败");
+						ElMessage.error("修改失败");
 					}
 				} else {
-					console.log(Object.keys(fieldsDetail))
 					ElMessage({
 						message: `表单明细有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
 						type: "error",

@@ -313,7 +313,6 @@ const onSetTable = () => {
 						if (v.prop === val) headerList.push({ ...v });
 					});
 				});
-				console.log(headerList);
 				emit('sortHeader', headerList);
 			},
 		});

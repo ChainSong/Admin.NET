@@ -245,12 +245,12 @@ const dateRefreh = () => {
 	}
 	// 计时器为空，操作
 	intervalId.value = setInterval(async () => {
-		console.log("刷新" + new Date());
+		// console.log("刷新" + new Date());
 		let flag=state.noticeList.length;
 		// 加载未读的站内信
 		var resData = await getAPI(SysNoticeApi).apiSysNoticeUnReadListGet();
-		console.log("定时获取通知信息")
-		console.log(resData)
+		// console.log("定时获取通知信息")
+		// console.log(resData)
 		state.noticeList = resData.data.result ?? [];
 		// 接收站内信
 		signalR.on('PublicNotice', receiveNotice);

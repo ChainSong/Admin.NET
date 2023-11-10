@@ -262,6 +262,7 @@ const submit = async () => {
 				if (isValidDetail) {
 					let result = await addWMSASN(state.value.header);
 					if (result.data.result.code == "1") {
+						ElMessage.success("添加成功");
 						closeDialog();
 					} else {
 						ElMessage.error("添加失败");
@@ -350,8 +351,8 @@ const exportExcel = async () => {
 	// state.loading = false;
 
 	var fileName = getFileName(res.headers);
-	console.log(fileName)
-	console.log(res.data)
+	// console.log(fileName)
+	// console.log(res.data)
 	downloadByData(res.data as any, fileName);
 };
 

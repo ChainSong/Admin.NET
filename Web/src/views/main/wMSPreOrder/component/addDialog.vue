@@ -252,11 +252,7 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
 	state.value.header.details = state.value.details
-	console.log(state.value.header);
-
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
@@ -266,6 +262,7 @@ const submit = async () => {
 
 					let result = await addWMSPreOrder(state.value.header);
 					if (result.data.result.code == "1") {
+						ElMessage.success("添加成功");
 						closeDialog();
 					} else {
 						ElMessage.error("添加失败");
@@ -344,8 +341,6 @@ const exportExcel = async () => {
 	// state.loading = false;
 
 	var fileName = getFileName(res.headers);
-	console.log(fileName)
-	console.log(res.data)
 	downloadByData(res.data as any, fileName);
 };
 

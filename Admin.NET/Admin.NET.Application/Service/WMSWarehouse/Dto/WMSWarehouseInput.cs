@@ -1,4 +1,5 @@
 ﻿using Admin.NET.Core;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Admin.NET.Application;
@@ -203,7 +204,7 @@ namespace Admin.NET.Application;
         /// <summary>
         /// CreationTime
         /// </summary>
-        public object CreationTime { get; set; }
+        public List<DateTime?> CreationTime { get; set; }
         
     }
 
