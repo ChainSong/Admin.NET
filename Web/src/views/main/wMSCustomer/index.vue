@@ -117,7 +117,7 @@
               :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
-                  <el-tag  v-if="item.codeInt ==  state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr" show-icon
+                  <el-tag  v-if="item.codeInt ==  state.headers[scope.$index][v.columnName]" v-bind:key="item.codeInt" show-icon
                     :type="item.color">
                     {{ item.name }}
                   </el-tag>

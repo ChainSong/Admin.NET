@@ -164,8 +164,9 @@ const submit = async () => {
 			let result = await updateWMSWarehouse(state.value.header);
 			if (result.data.result.code == "1") {
 				closeDialog();
+				ElMessage.success("更新成功");
 			} else {
-				ElMessage.error("添加失败");
+				ElMessage.error("更新失败");
 			}
 
 		} else {

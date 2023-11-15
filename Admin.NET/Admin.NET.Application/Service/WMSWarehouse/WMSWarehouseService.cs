@@ -1,4 +1,5 @@
-﻿using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -68,7 +69,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
-    public async Task Add(AddWMSWarehouseInput input)
+    public async Task<Response> Add(AddWMSWarehouseInput input)
     {
         var entity = input.Adapt<WMSWarehouse>();
         await _rep.InsertAsync(entity);
@@ -91,6 +92,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
         //});
         await _repWarehouseUser.DeleteAsync(a => a.UserId == warehouseUserMapping.UserId && a.WarehouseId == warehouseUserMapping.WarehouseId);
         await _repWarehouseUser.InsertAsync(warehouseUserMapping);
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
     /// <summary>
@@ -113,10 +115,16 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSWarehouseInput input)
+    public async Task<Response> Update(UpdateWMSWarehouseInput input)
     {
+        //return Task.Run( () =>
+        //{
         var entity = input.Adapt<WMSWarehouse>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
+        //});
+
+
     }
 
     /// <summary>

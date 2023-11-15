@@ -1,4 +1,5 @@
-﻿using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -84,7 +85,7 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
-    public async Task Add(WMSCustomer input)
+    public async Task<Response> Add(WMSCustomer input)
     {
         var entity = input.Adapt<WMSCustomer>();
         await _db.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
@@ -101,6 +102,7 @@ public class WMSCustomerService : IDynamicApiController, ITransient
         customerUserMapping.CustomerName = input.CustomerName;
         await _repCustomerUser.DeleteAsync(a => a.UserId == customerUserMapping.UserId && a.CustomerId == customerUserMapping.CustomerId);
         await _repCustomerUser.InsertAsync(customerUserMapping);
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
 
     }
 
@@ -124,10 +126,11 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSCustomerInput input)
+    public async Task<Response> Updata(UpdateWMSCustomerInput input)
     {
         var entity = input.Adapt<WMSCustomer>();
         await _db.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
     /// <summary>

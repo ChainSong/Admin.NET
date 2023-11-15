@@ -208,6 +208,8 @@ const submit = async () => {
 
 			let result = await addWMSWarehouse(state.value.header);
 			if (result.data.result.code == "1") {
+				ElMessage.success("添加成功");
+
 				closeDialog();
 			} else {
 				ElMessage.error("添加失败");

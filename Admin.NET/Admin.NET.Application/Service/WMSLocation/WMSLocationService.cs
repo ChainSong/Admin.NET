@@ -108,10 +108,11 @@ public class WMSLocationService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(Update库位Input input)
+    public async Task<Response> Update(UpdateWMSLocationInput input)
     {
         var entity = input.Adapt<WMSLocation>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
     ///// <summary>

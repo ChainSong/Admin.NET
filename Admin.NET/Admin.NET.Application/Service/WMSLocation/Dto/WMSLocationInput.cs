@@ -229,7 +229,7 @@ namespace Admin.NET.Application;
     /// <summary>
     /// WMSLocation更新输入参数
     /// </summary>
-    public class Update库位Input : WMSLocationBaseInput
+    public class UpdateWMSLocationInput : WMSLocationBaseInput
 {
         /// <summary>
         /// Id

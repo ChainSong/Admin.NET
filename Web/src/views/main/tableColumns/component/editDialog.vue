@@ -240,6 +240,7 @@ const cancel = () => {
 const submit = async () => {
 
 	await updateTableColumns(state.value.tableColumns);
+	closeDialog();
 	ElMessage.success('操作成功');
 	// } else {
 	// 		await addTableColumns(values);

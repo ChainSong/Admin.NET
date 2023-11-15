@@ -105,10 +105,11 @@ public class WMSAreaService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSAreaInput input)
+    public async Task<Response> Update(UpdateWMSAreaInput input)
     {
         var entity = input.Adapt<WMSArea>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
     /// <summary>

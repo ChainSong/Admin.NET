@@ -48,7 +48,7 @@ export const updateTableColumnsDetail = (params?: any) =>
 // 编辑表管理
 export const getByTableNameList = async (params?: any) => {
 	let data = { data: { result: [] } };
-	// localStorage.setItem(params, null);
+	localStorage.setItem(params, null);
 	let tableColumnsStorage = localStorage.getItem(params);
 	if (tableColumnsStorage != null && tableColumnsStorage.length > 30) {
 		return JSON.parse(tableColumnsStorage) as Array<data>;

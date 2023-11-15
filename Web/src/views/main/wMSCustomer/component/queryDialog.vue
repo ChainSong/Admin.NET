@@ -16,15 +16,21 @@
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">
 									<template v-for="item in i.tableColumnsDetails">
-										<label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
-											show-icon :type="item.color" :key="item.codeStr"></label>
+										<el-tag   v-if="item.codeStr == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+										<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
+											show-icon :type="item.color" :key="item.codeStr"></label> -->
 									</template>
 								</template>
 								<template v-if="i.type == 'DropDownListInt'">
 									<template v-for="item in i.tableColumnsDetails">
 										<template v-if="item.codeStr == state.header[i.columnName]">
-											<label show-icon :type="item.color" v-text="item.name"
-												:key="item.codeInt"></label>
+											<el-tag   v-if="item.codeInt == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+											<!-- <label show-icon :type="item.color" v-text="item.name"
+												:key="item.codeInt"></label> -->
 										</template>
 									</template>
 								</template>
