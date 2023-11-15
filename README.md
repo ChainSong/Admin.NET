@@ -103,11 +103,7 @@
     </tr>
 </table>
 
-## 🎀捐赠支持
-```
-如果对您有帮助，请点击右上角⭐Star关注或扫码捐赠，感谢支持开源！
-```
-<img src="https://gitee.com/zuohuaijun/Admin.NET/raw/next/doc/img/pay.png"/>
+
 
 ## 💐特别鸣谢
 - 👉 Furion：[https://dotnetchina.gitee.io/furion](https://dotnetchina.gitee.io/furion)
