@@ -40,6 +40,7 @@ public class WarehouseUserMappingService : IDynamicApiController, ITransient
                     .WhereIF(input.Status > 0, u => u.Status == input.Status)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WarehouseUserMappingOutput>()
 ;
@@ -122,9 +123,9 @@ public class WarehouseUserMappingService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "List")]
-    public async Task<List<WarehouseUserMappingOutput>> List([FromQuery] WarehouseUserMappingInput input)
+    public async Task<List<WarehouseUserMappingOutput>> List(WarehouseUserMapping input)
     {
-        return await _rep.AsQueryable().Select<WarehouseUserMappingOutput>().ToListAsync();
+        return await _rep.AsQueryable().Where(a => a.UserId == input.UserId).Select<WarehouseUserMappingOutput>().ToListAsync();
     }
 
 

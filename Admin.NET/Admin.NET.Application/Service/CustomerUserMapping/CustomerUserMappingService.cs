@@ -30,27 +30,28 @@ public class CustomerUserMappingService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Page")]
     public async Task<SqlSugarPagedList<CustomerUserMappingOutput>> Page(CustomerUserMappingInput input)
     {
-        var query= _rep.AsQueryable()
-                    .WhereIF(input.UserId>0, u => u.UserId == input.UserId)
+        var query = _rep.AsQueryable()
+                    .WhereIF(input.UserId > 0, u => u.UserId == input.UserId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.UserName), u => u.UserName.Contains(input.UserName.Trim()))
-                    .WhereIF(input.CustomerId>0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.Status>0, u => u.Status == input.Status)
+                    .WhereIF(input.Status > 0, u => u.Status == input.Status)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
 
                     .Select<CustomerUserMappingOutput>()
 ;
-        if(input.CreationTimeRange != null && input.CreationTimeRange.Count >0)
+        if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
         {
-                DateTime? start= input.CreationTimeRange[0]; 
-                query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-                if (input.CreationTimeRange.Count >1 && input.CreationTimeRange[1].HasValue)
-                {
-                    var end = input.CreationTimeRange[1].Value.AddDays(1);
-                    query = query.Where(u => u.CreationTime < end);
-                }
-        } 
+            DateTime? start = input.CreationTimeRange[0];
+            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
+            {
+                var end = input.CreationTimeRange[1].Value.AddDays(1);
+                query = query.Where(u => u.CreationTime < end);
+            }
+        }
         query = query.OrderBuilder(input);
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
@@ -122,9 +123,9 @@ public class CustomerUserMappingService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "List")]
-    public async Task<List<CustomerUserMappingOutput>> List([FromQuery] CustomerUserMappingInput input)
+    public async Task<List<CustomerUserMappingOutput>> List(CustomerUserMappingInput input)
     {
-        return await _rep.AsQueryable().Select<CustomerUserMappingOutput>().ToListAsync();
+        return await _rep.AsQueryable().Where(a => a.UserId == input.UserId).Select<CustomerUserMappingOutput>().ToListAsync();
     }
 
 

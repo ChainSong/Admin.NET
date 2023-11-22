@@ -101,6 +101,10 @@ public class WMSReceiptService : IDynamicApiController, ITransient
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
+                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WMSReceiptOutput>()
 ;
@@ -272,7 +276,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
-
+       
 
         //var receiptData = _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id));
         var response = factory.Strategy(input);
@@ -304,6 +308,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         factory._repTableColumnsDetail = _repTableColumnsDetail;
         factory._repTableInventoryUsable = _repTableInventoryUsable;
         factory._repTableInventoryUsed = _repTableInventoryUsed;
+        //factory._repTableColumns = _repTableInventoryUsed;
         var response = factory.Strategy(input);
         IExporter exporter = new ExcelExporter();
         var result = exporter.ExportAsByteArray<DataTable>(response.Data);

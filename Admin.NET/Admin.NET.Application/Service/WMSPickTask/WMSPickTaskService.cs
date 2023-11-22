@@ -20,9 +20,20 @@ namespace Admin.NET.Application;
 public class WMSPickTaskService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPickTask> _rep;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep)
+    
+    private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
+    private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+
+
+    private readonly UserManager _userManager;
+    private readonly ISqlSugarClient _db;
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser)
     {
         _rep = rep;
+        _userManager = userManager;
+        _db = db;
+        _repWarehouseUser = repWarehouseUser;
+        _repCustomerUser = repCustomerUser;
     }
 
     /// <summary>
@@ -64,6 +75,10 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
+                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WMSPickTaskOutput>()
 ;
@@ -229,6 +244,23 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<WMSPickTaskOutput>().ToListAsync();
     }
 
+
+    /// <summary>
+    /// 获取WMSPickTask 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "AddPrintLog")]
+    public async Task AddPrintLog(long id)
+    {
+        var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+        entity.PrintNum += 1;
+        entity.PrintPersonnel = _userManager.Account;
+        entity.PrintTime = DateTime.Now;
+        await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+
+    }
 
 
 

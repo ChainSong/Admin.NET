@@ -1,4 +1,5 @@
-﻿using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -18,11 +19,13 @@ public class WMSProductService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _rep;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+    //private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     public WMSProductService(SqlSugarRepository<WMSProduct> rep, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager)
     {
         _rep = rep;
         _repCustomerUser = repCustomerUser;
         _userManager = userManager;
+        //_repWarehouseUser = repWarehouseUser;
     }
 
     /// <summary>
@@ -80,7 +83,9 @@ public class WMSProductService : IDynamicApiController, ITransient
                     .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
-
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                     //.Where(b => b.Associated == a.Associated && b.Status == 1).OrderBy(b => b.Order).ToList()
                     .Select<WMSProductOutput>()
 ;
         if (input.CreationTime != null && input.CreationTime.Count > 0)
@@ -104,10 +109,11 @@ public class WMSProductService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
-    public async Task Add(AddWMSProductInput input)
+    public async Task<Response> Add(AddWMSProductInput input)
     {
         var entity = input.Adapt<WMSProduct>();
         await _rep.InsertAsync(entity);
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
     /// <summary>
@@ -130,10 +136,11 @@ public class WMSProductService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSProductInput input)
+    public async Task<Response> Update(UpdateWMSProductInput input)
     {
         var entity = input.Adapt<WMSProduct>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
 

@@ -155,6 +155,7 @@ const submit = async () => {
 			let result = await updateWMSProduct(state.value.header);
 			if (result.data.result.code == "1") {
 				closeDialog();
+				ElMessage.success("修改成功");
 			} else {
 				ElMessage.error("添加失败");
 			}

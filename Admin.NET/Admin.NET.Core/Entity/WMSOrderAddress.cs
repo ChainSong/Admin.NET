@@ -84,5 +84,29 @@ public class WMSOrderAddress
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? ExpressNumber { get; set; }
+
+     /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string Creator { get; set; } = "";
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? CreationTime { get; set; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string Updator { get; set; } = "";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? UpdateTime { get; set; }
     
 }

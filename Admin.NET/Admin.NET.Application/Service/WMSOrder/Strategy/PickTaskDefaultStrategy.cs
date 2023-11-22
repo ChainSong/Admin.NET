@@ -155,7 +155,7 @@ namespace Admin.NET.Application.Strategy
                     Type = b.OrderType,
                     StatusCode = StatusCode.Success,
                     //StatusMsg = StatusCode.Success.ToString(),
-                    Msg = "成功"
+                    Msg = "生成拣货任务成功"
                 }); ;
             });
 

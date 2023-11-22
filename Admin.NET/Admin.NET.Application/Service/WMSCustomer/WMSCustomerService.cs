@@ -61,6 +61,9 @@ public class WMSCustomerService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WebSite), u => u.WebSite.Contains(input.WebSite.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
+                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.Id).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.Id).Count() > 0)
+                    //.Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WMSCustomerOutput>()
 ;

@@ -260,7 +260,7 @@ public class WMSASNInput : BasePageInput
     /// <summary>
     /// CustomerId
     /// </summary>
-    public long CustomerId { get; set; }
+    public long? CustomerId { get; set; } = 0;
 
     /// <summary>
     /// CustomerName
@@ -270,7 +270,7 @@ public class WMSASNInput : BasePageInput
     /// <summary>
     /// WarehouseId
     /// </summary>
-    public long WarehouseId { get; set; }
+    public long? WarehouseId { get; set; } = 0;
 
     /// <summary>
     /// WarehouseName

@@ -7,6 +7,10 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Core.Entity;
+using NewLife.Reflection;
+using SqlSugar;
+
 namespace Admin.NET.Core;
 
 public static class SqlSugarSetup
@@ -65,7 +69,7 @@ public static class SqlSugarSetup
                 if (config.DbSettings.EnableUnderLine && !entity.DbTableName.Contains('_'))
                     entity.DbTableName = UtilMethods.ToUnderLine(entity.DbTableName); // 驼峰转下划线
             },
-            EntityService = (type, column) => // 处理列
+            EntityService = (type, column) => // 处理列 SCMSCMSCMSCMSCM
             {
                 // 只处理贴了特性[SugarColumn]列
                 if (!type.GetCustomAttributes<SugarColumn>().Any())
@@ -146,6 +150,27 @@ public static class SqlSugarSetup
                 Console.WriteLine(log);
                 Console.ForegroundColor = originColor;
             }
+            //if (pars.Length > 0)
+            //{
+            //    foreach (var item in pars)
+            //    {
+            //        if (item.ParameterName == "@WarehouseId")
+            //        {
+            //            //多表Queryable查询
+            //            db.QueryFilter.Add(new SqlFilterItem()
+            //            {
+            //                FilterValue = it =>
+            //                {
+            //                    //Writable logic
+            //                    return new SqlFilterResult() { Sql = " WarehouseId =5 " };
+            //                },
+            //                //IsJoinQuery = false //多表生效
+            //            });
+            //        }
+            //    }
+
+            //}
+
         };
         // 数据审计
         db.Aop.DataExecuting = (oldValue, entityInfo) =>
@@ -196,6 +221,12 @@ public static class SqlSugarSetup
                             entityInfo.SetValue(App.User.FindFirst(ClaimConst.OrgId)?.Value);
                     }
                 }
+                //if (entityInfo.PropertyName == "CustomerId")
+                //{
+                //    db.Ado.SelectAll()
+                //    entityInfo.SetValue(DateTime.Now);
+                //}
+
             }
             if (entityInfo.OperationType == DataFilterType.UpdateByObject)
             {
@@ -204,11 +235,31 @@ public static class SqlSugarSetup
                 if (entityInfo.PropertyName == "UpdateUserId")
                     entityInfo.SetValue(App.User?.FindFirst(ClaimConst.UserId)?.Value);
             }
+            //Console.WriteLine(entityInfo.PropertyName);
+            //if (entityInfo.PropertyName == "WarehouseId")
+            //{
+            //    //多表Queryable查询
+            //    db.QueryFilter.Add(new SqlFilterItem()
+            //    {
+            //        FilterValue = it =>
+            //        {
+            //            //Writable logic
+            //            return new SqlFilterResult() { Sql = " WarehouseId =5 " };
+            //        },
+            //        //IsJoinQuery = false //多表生效
+            //    });
+            //}
         };
 
         // 超管时排除各种过滤器
         if (App.User?.FindFirst(ClaimConst.AccountType)?.Value == ((int)AccountTypeEnum.SuperAdmin).ToString())
             return;
+
+
+        //db.Deleteable<WMSOrder>().Where(it => it.Id == 0).ExecuteCommand();
+
+
+
 
         // 配置实体假删除过滤器
         db.QueryFilter.AddTableFilter<IDeletedFilter>(u => u.IsDelete == false);

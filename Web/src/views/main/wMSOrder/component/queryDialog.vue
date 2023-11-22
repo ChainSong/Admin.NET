@@ -79,7 +79,7 @@
 				<el-tab-pane label="明细信息" name="DateilInfo">
 					<el-table :data="state.details" style="width: 100%" height="250">
 						<template v-for="(v, index) in state.tableColumnDetails">
-							<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
+							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
 								width="150">
 								<template #default="scope">
 									<label v-text="scope.row[v.columnName]"></label>
@@ -91,7 +91,7 @@
 				<el-tab-pane label="分配信息" name="AllocationInfo">
 					<el-table :data="state.allocations" style="width: 100%" height="250">
 						<template v-for="(v, index) in state.tableColumnAllocations">
-							<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
+							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
 								width="150">
 								<template #default="scope">
 									<label v-text="scope.row[v.columnName]"></label>

@@ -52,6 +52,10 @@ namespace Admin.NET.Application.Strategy
 
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
+           
+
+
+            
             List<WMSReceipt> receipts = new List<WMSReceipt>();
             var entityASN = _repASN.AsQueryable().Includes(a => a.Details).Where(b => request.Contains(b.Id)).ToList();
 

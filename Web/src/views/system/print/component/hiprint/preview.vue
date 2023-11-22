@@ -26,9 +26,13 @@ const showDialog = (hiprintTemplate: any, printData: {}, width = 210) => {
 	state.dialogVisible = true;
 	state.width = width;
 	state.hiprintTemplate = hiprintTemplate;
+	// printData={"PickTaskNumber":"asdasdsad","Detail":[{"NAME":"名称"}]}
 	state.printData = printData;
 	nextTick(() => {
 		const newHtml = hiprintTemplate.getHtml(printData);
+		// console.log("newHtml")
+		// console.log(hiprintTemplate)
+		// console.log(newHtml[0])
 		previewContentRef.value.appendChild(newHtml[0]);
 	});
 };

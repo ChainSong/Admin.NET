@@ -43,7 +43,7 @@
 				<el-main>
 					<el-form>
 						<el-table :data="state.details" style="width: 100%" height="250">
-							<template v-for="v in state.tableColumnHeaders">
+							<template v-for="v in state.tableColumnDetails">
 								<template v-if="v.isShowInList">
 									<el-table-column v-if="v.type == 'DropDownListInt'" v-bind:key="v.columnName"
 										:fixed="false" :prop="v.columnName" :label="v.displayName" width="150"
@@ -173,6 +173,7 @@ const gettableColumn = async () => {
 	let resDetail = await getByTableNameList("WMS_PickTaskDetail");
 
 	state.value.tableColumnDetails = resDetail.data.result;
+	console.log(state.value.tableColumnDetails);
 
 
 };

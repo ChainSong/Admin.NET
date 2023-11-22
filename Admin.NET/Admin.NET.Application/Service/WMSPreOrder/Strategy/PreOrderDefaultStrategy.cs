@@ -41,6 +41,26 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
+
+            //判断是否有权限操作
+            //先判断是否能操作客户
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少客户操作权限";
+                return response;
+            }
+
+            //先判断是否能操作仓库
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少仓库操作权限";
+                return response;
+            }
+
             var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
             if (asnCheck != null && asnCheck.ToList().Count > 0)
             {
@@ -140,105 +160,121 @@ namespace Admin.NET.Application.Strategy
         }
 
 
-        public Task<Response<List<OrderStatusDto>>> UpdateStrategy(List<AddOrUpdateWMSPreOrderInput> request)
+        public async Task<Response<List<OrderStatusDto>>> UpdateStrategy(List<AddOrUpdateWMSPreOrderInput> request)
         {
-            return Task.Run(() =>
+
+            Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
+            //判断是否有权限操作
+            //先判断是否能操作客户
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
             {
-                Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少客户操作权限";
+                return response;
+            }
 
-                //var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
-                //if (asnCheck != null && asnCheck.ToList().Count > 0)
-                //{
-                //    asnCheck.ToList().ForEach(b =>
-                //    {
-                //        response.Data.Add(new OrderStatusDto()
-                //        {
-                //            ExternOrder = b.ExternOrderNumber,
-                //            SystemOrder = b.PreOrderNumber,
-                //            Type = b.OrderType,
-                //            Msg = "订单已存在"
-                //        });
+            //先判断是否能操作仓库
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少仓库操作权限";
+                return response;
+            }
+            //var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
+            //if (asnCheck != null && asnCheck.ToList().Count > 0)
+            //{
+            //    asnCheck.ToList().ForEach(b =>
+            //    {
+            //        response.Data.Add(new OrderStatusDto()
+            //        {
+            //            ExternOrder = b.ExternOrderNumber,
+            //            SystemOrder = b.PreOrderNumber,
+            //            Type = b.OrderType,
+            //            Msg = "订单已存在"
+            //        });
 
-                //    });
-                //    response.Code = StatusCode.error;
-                //    response.Msg = "订单异常";
-                //    return response;
-                //}
-
-
-
-
-                var config = new MapperConfiguration(cfg =>
-                {
-                    cfg.CreateMap<AddOrUpdateWMSPreOrderInput, WMSPreOrder>()
-                       //添加创建人为当前用户
-                       .ForMember(a => a.Updator, opt => opt.MapFrom(c => _userManager.Account))
-                       .ForMember(a => a.UpdateTime, opt => opt.MapFrom(c => DateTime.Now))
-                       .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
-                       //添加库存状态为可用
-                       .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
-
-                       .ForMember(a => a.Creator, opt => opt.Ignore())
-                       .ForMember(a => a.UpdateTime, opt => opt.Ignore())
-
-                       .AddTransform<string>(a => a == null ? "" : a);
+            //    });
+            //    response.Code = StatusCode.error;
+            //    response.Msg = "订单异常";
+            //    return response;
+            //}
 
 
-                    // cfg.CreateMap<AddWMSPreOrderInput, WMSPreOrderDetail>()
-                    ////添加创建人为当前用户
-                    //.ForMember(a => a.Creator, opt => opt.MapFrom(c => abpSession.UserName))
-                    //.ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
-                    //.ForMember(a => a.UpdateTime, opt => opt.Ignore());
 
-                });
-                //var idGen = new SequentialGuidIDGenerator();
-                //var guid = idGen.Create();
-                //// 更多参数
-                //var idGen2 = new SequentialGuidIDGenerator();
-                //var guid2 = idGen2.Create(new SequentialGuidSettings { LittleEndianBinary16Format = true });
 
-                //var ReceiptNumber = ShortIDGen.NextID(new GenerationOptions
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<AddOrUpdateWMSPreOrderInput, WMSPreOrder>()
+                   //添加创建人为当前用户
+                   .ForMember(a => a.Updator, opt => opt.MapFrom(c => _userManager.Account))
+                   .ForMember(a => a.UpdateTime, opt => opt.MapFrom(c => DateTime.Now))
+                   .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
+                   //添加库存状态为可用
+                   .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
+
+                   .ForMember(a => a.Creator, opt => opt.Ignore())
+                   .ForMember(a => a.UpdateTime, opt => opt.Ignore())
+
+                   .AddTransform<string>(a => a == null ? "" : a);
+
+
+                // cfg.CreateMap<AddWMSPreOrderInput, WMSPreOrderDetail>()
+                ////添加创建人为当前用户
+                //.ForMember(a => a.Creator, opt => opt.MapFrom(c => abpSession.UserName))
+                //.ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+                //.ForMember(a => a.UpdateTime, opt => opt.Ignore());
+
+            });
+            //var idGen = new SequentialGuidIDGenerator();
+            //var guid = idGen.Create();
+            //// 更多参数
+            //var idGen2 = new SequentialGuidIDGenerator();
+            //var guid2 = idGen2.Create(new SequentialGuidSettings { LittleEndianBinary16Format = true });
+
+            //var ReceiptNumber = ShortIDGen.NextID(new GenerationOptions
+            //{
+            //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
+            //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
+            var mapper = new Mapper(config);
+
+            var orderData = mapper.Map<List<WMSPreOrder>>(request);
+            int LineNumber = 1;
+            orderData.ForEach(item =>
+            {
+                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+                //ShortIDGen.NextID(new GenerationOptions
                 //{
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
-                var mapper = new Mapper(config);
-
-                var orderData = mapper.Map<List<WMSPreOrder>>(request);
-                int LineNumber = 1;
-                orderData.ForEach(item =>
+                //item.PreOrderNumber = PreOrderNumber;
+                item.CustomerId = CustomerId;
+                item.WarehouseId = WarehouseId;
+                item.DetailCount = item.Details.Sum(pd => pd.OrderQty);
+                item.Details.ForEach(a =>
                 {
-                    var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                    var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
-                    var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
-                    //ShortIDGen.NextID(new GenerationOptions
-                    //{
-                    //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
-                    //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
-                    //item.PreOrderNumber = PreOrderNumber;
-                    item.CustomerId = CustomerId;
-                    item.WarehouseId = WarehouseId;
-                    item.DetailCount = item.Details.Sum(pd => pd.OrderQty);
-                    item.Details.ForEach(a =>
-                    {
-                        a.PreOrderNumber = item.PreOrderNumber;
-                        a.CustomerId = CustomerId;
-                        a.CustomerName = item.CustomerName;
-                        a.WarehouseId = WarehouseId;
-                        a.WarehouseName = item.WarehouseName;
-                        a.ExternOrderNumber = item.ExternOrderNumber;
-                        a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
-                        a.Updator = _userManager.Account;
-                        a.CreationTime = DateTime.Now;
-                    });
-                    LineNumber++;
+                    a.PreOrderNumber = item.PreOrderNumber;
+                    a.CustomerId = CustomerId;
+                    a.CustomerName = item.CustomerName;
+                    a.WarehouseId = WarehouseId;
+                    a.WarehouseName = item.WarehouseName;
+                    a.ExternOrderNumber = item.ExternOrderNumber;
+                    a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
+                    a.Updator = _userManager.Account;
+                    a.CreationTime = DateTime.Now;
                 });
-
-                //开始插入数据
-                var aaa = _db.UpdateNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
-                //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
-                response.Code = StatusCode.Success;
-                return response;
+                LineNumber++;
             });
+
+            //开始插入数据
+            await _db.UpdateNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
+            response.Code = StatusCode.Success;
+            return response;
+
         }
     }
 }

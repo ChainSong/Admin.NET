@@ -55,6 +55,10 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
+                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.Id).Count() > 0)
+                    //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.Id).Count() > 0)
 
                     .Select<WMSWarehouseOutput>()
 ;
@@ -147,7 +151,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpGet]
     [ApiDescriptionSettings(Name = "List")]
-    public async Task<List<WMSWarehouseOutput>> List([FromQuery] WMSWarehouseInput input)
+    public async Task<List<WMSWarehouseOutput>> List(WMSWarehouseInput input)
     {
         return await _rep.AsQueryable().Select<WMSWarehouseOutput>().ToListAsync();
     }

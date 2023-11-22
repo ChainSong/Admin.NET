@@ -28,7 +28,7 @@
 				</div>
 			</el-col>
 		</el-row>
-		<el-row :gutter="15" class="home-card-three">
+		<!-- <el-row :gutter="15" class="home-card-three">
 			<el-col :xs="24" :sm="10" :md="10" :lg="8" :xl="8">
 				<div class="home-card-item">
 					<div class="home-card-item-title">快捷导航工具</div>
@@ -52,7 +52,7 @@
 					<div style="height: 100%" ref="homeBarRef"></div>
 				</div>
 			</el-col>
-		</el-row>
+		</el-row> -->
 	</div>
 </template>
 
@@ -187,13 +187,13 @@ const initLineChart = () => {
 	const option = {
 		backgroundColor: state.charts.bgColor,
 		title: {
-			text: '政策补贴额度',
+			text: '订单量',
 			x: 'left',
 			textStyle: { fontSize: '15', color: state.charts.color },
 		},
 		grid: { top: 70, right: 20, bottom: 30, left: 30 },
 		tooltip: { trigger: 'axis' },
-		legend: { data: ['预购队列', '最新成交价'], right: 0 },
+		legend: { data: ['武汉仓', '上海仓'], right: 0 },
 		xAxis: {
 			data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
 		},
@@ -206,7 +206,7 @@ const initLineChart = () => {
 		],
 		series: [
 			{
-				name: '预购队列',
+				name: '武汉仓',
 				type: 'line',
 				symbolSize: 6,
 				symbol: 'circle',
@@ -222,7 +222,7 @@ const initLineChart = () => {
 				},
 			},
 			{
-				name: '最新成交价',
+				name: '上海仓',
 				type: 'line',
 				symbolSize: 6,
 				symbol: 'circle',
@@ -266,7 +266,7 @@ const initLineChart = () => {
 const initPieChart = () => {
 	if (!state.global.dispose.some((b: any) => b === state.global.homeChartTwo)) state.global.homeChartTwo.dispose();
 	state.global.homeChartTwo = markRaw(echarts.init(homePieRef.value, state.charts.theme));
-	var getname = ['房屋及结构物', '专用设备', '通用设备', '文物和陈列品', '图书、档案'];
+	var getname = ['入库订单', '出库订单', '虚拟订单', '调整单', '取消单'];
 	var getvalue = [34.2, 38.87, 17.88, 9.05, 2.05];
 	var data = [];
 	for (var i = 0; i < getname.length; i++) {
@@ -276,7 +276,7 @@ const initPieChart = () => {
 	const option = {
 		backgroundColor: state.charts.bgColor,
 		title: {
-			text: '房屋建筑工程',
+			text: '订单类型',
 			x: 'left',
 			textStyle: { fontSize: '15', color: state.charts.color },
 		},
@@ -347,137 +347,137 @@ const initPieChart = () => {
 	state.global.homeChartTwo.setOption(option);
 	state.myCharts.push(state.global.homeChartTwo);
 };
-// 柱状图
-const initBarChart = () => {
-	if (!state.global.dispose.some((b: any) => b === state.global.homeCharThree)) state.global.homeCharThree.dispose();
-	state.global.homeCharThree = markRaw(echarts.init(homeBarRef.value, state.charts.theme));
-	const option = {
-		backgroundColor: state.charts.bgColor,
-		title: {
-			text: '地热开发利用',
-			x: 'left',
-			textStyle: { fontSize: '15', color: state.charts.color },
-		},
-		tooltip: { trigger: 'axis' },
-		legend: { data: ['供温', '回温', '压力值(Mpa)'], right: 0 },
-		grid: { top: 70, right: 80, bottom: 30, left: 80 },
-		xAxis: [
-			{
-				type: 'category',
-				data: ['1km', '2km', '3km', '4km', '5km', '6km'],
-				boundaryGap: true,
-				axisTick: { show: false },
-			},
-		],
-		yAxis: [
-			{
-				name: '供回温度(℃）',
-				nameLocation: 'middle',
-				nameTextStyle: { padding: [3, 4, 50, 6] },
-				splitLine: { show: true, lineStyle: { type: 'dashed', color: '#f5f5f5' } },
-				axisLine: { show: false },
-				axisTick: { show: false },
-				axisLabel: { color: state.charts.color, formatter: '{value} ' },
-			},
-			{
-				name: '压力值(Mpa)',
-				nameLocation: 'middle',
-				nameTextStyle: { padding: [50, 4, 5, 6] },
-				splitLine: { show: false },
-				axisLine: { show: false },
-				axisTick: { show: false },
-				axisLabel: { color: state.charts.color, formatter: '{value} ' },
-			},
-		],
-		series: [
-			{
-				name: '供温',
-				type: 'line',
-				smooth: true,
-				showSymbol: true,
-				// 矢量画五角星
-				symbol: 'path://M150 0 L80 175 L250 75 L50 75 L220 175 Z',
-				symbolSize: 12,
-				yAxisIndex: 0,
-				areaStyle: {
-					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-						{ offset: 0, color: 'rgba(250,180,101,0.3)' },
-						{ offset: 1, color: 'rgba(250,180,101,0)' },
-					]),
-					shadowColor: 'rgba(250,180,101,0.2)',
-					shadowBlur: 20,
-				},
-				itemStyle: { color: '#FF8000' },
-				// data中可以使用对象，value代表相应的值，另外可加入自定义的属性
-				data: [
-					{ value: 1, stationName: 's1' },
-					{ value: 3, stationName: 's2' },
-					{ value: 4, stationName: 's3' },
-					{ value: 9, stationName: 's4' },
-					{ value: 3, stationName: 's5' },
-					{ value: 2, stationName: 's6' },
-				],
-			},
-			{
-				name: '回温',
-				type: 'line',
-				smooth: true,
-				showSymbol: true,
-				symbol: 'emptyCircle',
-				symbolSize: 12,
-				yAxisIndex: 0,
-				areaStyle: {
-					color: new echarts.graphic.LinearGradient(
-						0,
-						0,
-						0,
-						1,
-						[
-							{ offset: 0, color: 'rgba(199, 237, 250,0.5)' },
-							{ offset: 1, color: 'rgba(199, 237, 250,0.2)' },
-						],
-						false
-					),
-				},
-				itemStyle: {
-					color: '#3bbc86',
-				},
-				data: [
-					{ value: 31, stationName: 's1' },
-					{ value: 36, stationName: 's2' },
-					{ value: 54, stationName: 's3' },
-					{ value: 24, stationName: 's4' },
-					{ value: 73, stationName: 's5' },
-					{ value: 22, stationName: 's6' },
-				],
-			},
-			{
-				name: '压力值(Mpa)',
-				type: 'bar',
-				barWidth: 30,
-				yAxisIndex: 1,
-				itemStyle: {
-					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-						{ offset: 0, color: 'rgba(108,80,243,0.3)' },
-						{ offset: 1, color: 'rgba(108,80,243,0)' },
-					]),
-					//柱状图圆角
-					borderRadius: [30, 30, 0, 0],
-				},
-				data: [
-					{ value: 11, stationName: 's1' },
-					{ value: 34, stationName: 's2' },
-					{ value: 54, stationName: 's3' },
-					{ value: 39, stationName: 's4' },
-					{ value: 63, stationName: 's5' },
-					{ value: 24, stationName: 's6' },
-				],
-			},
-		],
-	};
-	state.global.homeCharThree.setOption(option);
-	state.myCharts.push(state.global.homeCharThree);
-};
+// // 柱状图
+// const initBarChart = () => {
+// 	if (!state.global.dispose.some((b: any) => b === state.global.homeCharThree)) state.global.homeCharThree.dispose();
+// 	state.global.homeCharThree = markRaw(echarts.init(homeBarRef.value, state.charts.theme));
+// 	const option = {
+// 		backgroundColor: state.charts.bgColor,
+// 		title: {
+// 			text: '出库订单量',
+// 			x: 'left',
+// 			textStyle: { fontSize: '15', color: state.charts.color },
+// 		},
+// 		tooltip: { trigger: 'axis' },
+// 		legend: { data: ['供温', '回温', '压力值(Mpa)'], right: 0 },
+// 		grid: { top: 70, right: 80, bottom: 30, left: 80 },
+// 		xAxis: [
+// 			{
+// 				type: 'category',
+// 				data: ['1km', '2km', '3km', '4km', '5km', '6km'],
+// 				boundaryGap: true,
+// 				axisTick: { show: false },
+// 			},
+// 		],
+// 		yAxis: [
+// 			{
+// 				name: '供回温度(℃）',
+// 				nameLocation: 'middle',
+// 				nameTextStyle: { padding: [3, 4, 50, 6] },
+// 				splitLine: { show: true, lineStyle: { type: 'dashed', color: '#f5f5f5' } },
+// 				axisLine: { show: false },
+// 				axisTick: { show: false },
+// 				axisLabel: { color: state.charts.color, formatter: '{value} ' },
+// 			},
+// 			{
+// 				name: '压力值(Mpa)',
+// 				nameLocation: 'middle',
+// 				nameTextStyle: { padding: [50, 4, 5, 6] },
+// 				splitLine: { show: false },
+// 				axisLine: { show: false },
+// 				axisTick: { show: false },
+// 				axisLabel: { color: state.charts.color, formatter: '{value} ' },
+// 			},
+// 		],
+// 		series: [
+// 			{
+// 				name: '供温',
+// 				type: 'line',
+// 				smooth: true,
+// 				showSymbol: true,
+// 				// 矢量画五角星
+// 				symbol: 'path://M150 0 L80 175 L250 75 L50 75 L220 175 Z',
+// 				symbolSize: 12,
+// 				yAxisIndex: 0,
+// 				areaStyle: {
+// 					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+// 						{ offset: 0, color: 'rgba(250,180,101,0.3)' },
+// 						{ offset: 1, color: 'rgba(250,180,101,0)' },
+// 					]),
+// 					shadowColor: 'rgba(250,180,101,0.2)',
+// 					shadowBlur: 20,
+// 				},
+// 				itemStyle: { color: '#FF8000' },
+// 				// data中可以使用对象，value代表相应的值，另外可加入自定义的属性
+// 				data: [
+// 					{ value: 1, stationName: 's1' },
+// 					{ value: 3, stationName: 's2' },
+// 					{ value: 4, stationName: 's3' },
+// 					{ value: 9, stationName: 's4' },
+// 					{ value: 3, stationName: 's5' },
+// 					{ value: 2, stationName: 's6' },
+// 				],
+// 			},
+// 			{
+// 				name: '回温',
+// 				type: 'line',
+// 				smooth: true,
+// 				showSymbol: true,
+// 				symbol: 'emptyCircle',
+// 				symbolSize: 12,
+// 				yAxisIndex: 0,
+// 				areaStyle: {
+// 					color: new echarts.graphic.LinearGradient(
+// 						0,
+// 						0,
+// 						0,
+// 						1,
+// 						[
+// 							{ offset: 0, color: 'rgba(199, 237, 250,0.5)' },
+// 							{ offset: 1, color: 'rgba(199, 237, 250,0.2)' },
+// 						],
+// 						false
+// 					),
+// 				},
+// 				itemStyle: {
+// 					color: '#3bbc86',
+// 				},
+// 				data: [
+// 					{ value: 31, stationName: 's1' },
+// 					{ value: 36, stationName: 's2' },
+// 					{ value: 54, stationName: 's3' },
+// 					{ value: 24, stationName: 's4' },
+// 					{ value: 73, stationName: 's5' },
+// 					{ value: 22, stationName: 's6' },
+// 				],
+// 			},
+// 			{
+// 				name: '压力值(Mpa)',
+// 				type: 'bar',
+// 				barWidth: 30,
+// 				yAxisIndex: 1,
+// 				itemStyle: {
+// 					color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+// 						{ offset: 0, color: 'rgba(108,80,243,0.3)' },
+// 						{ offset: 1, color: 'rgba(108,80,243,0)' },
+// 					]),
+// 					//柱状图圆角
+// 					borderRadius: [30, 30, 0, 0],
+// 				},
+// 				data: [
+// 					{ value: 11, stationName: 's1' },
+// 					{ value: 34, stationName: 's2' },
+// 					{ value: 54, stationName: 's3' },
+// 					{ value: 39, stationName: 's4' },
+// 					{ value: 63, stationName: 's5' },
+// 					{ value: 24, stationName: 's6' },
+// 				],
+// 			},
+// 		],
+// 	};
+// 	state.global.homeCharThree.setOption(option);
+// 	state.myCharts.push(state.global.homeCharThree);
+// };
 // 批量设置 echarts resize
 const initEchartsResizeFun = () => {
 	nextTick(() => {
@@ -522,7 +522,7 @@ watch(
 				initPieChart();
 			}, 700);
 			setTimeout(() => {
-				initBarChart();
+				// initBarChart();
 			}, 1000);
 		});
 	},

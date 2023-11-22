@@ -41,11 +41,11 @@ export const pageWarehouseUserMapping = (params?: any) =>
 
 // 分页查询仓库用户关系
 export const listWarehouseUserMapping = (params?: any) =>
-	// {
+	//   {
 	request({
 		url: Api.ListWarehouseUserMapping,
 		method: 'post',
 		data: params,
 	});
-// 	console.log(params);
-// }
+//  	console.log(params);
+//  }

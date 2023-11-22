@@ -157,7 +157,8 @@ const handleCurrentChange = (val: number) => {
 //清除缓存
 const cleanCache = (row: any) =>
 {
-  var res =  cleanTableColumnsCache(Object.assign(queryParams.value, tableParams.value));
+  // console.log(row)
+  var res =  cleanTableColumnsCache(row);
 };
 
 handleQuery();

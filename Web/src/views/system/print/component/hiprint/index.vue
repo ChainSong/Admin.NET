@@ -2,7 +2,8 @@
 	<el-row :gutter="8" style="margin-bottom: 5px">
 		<el-col :span="4">
 			<!-- 流程下拉 模板选择 -->
-			<el-select v-model="state.mode" showSearch @change="changeMode" :defaultValue="0" option-label-prop="label" class="w100">
+			<el-select v-model="state.mode" showSearch @change="changeMode" :defaultValue="0" option-label-prop="label"
+				class="w100">
 				<el-option v-for="(opt, idx) in state.modeList" :key="idx" :label="opt.name" :value="idx">
 					{{ opt.name }}
 				</el-option>
@@ -12,13 +13,16 @@
 		<el-col :span="20">
 			<!-- 纸张设置 -->
 			<el-button-group style="margin: 0 2px">
-				<el-button v-for="(value, type) in state.paperTypes" :type="curPaperType === type ? 'primary' : ''" @click="setPaper(type, value)" :key="type">
+				<el-button v-for="(value, type) in state.paperTypes" :type="curPaperType === type ? 'primary' : ''"
+					@click="setPaper(type, value)" :key="type">
 					{{ type }}
 				</el-button>
 				<el-popover v-model="state.paperPopVisible" placement="bottom" width="300" title="设置纸张宽高(mm)">
 					<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px">
-						<el-input type="number" v-model="state.paperWidth" style="width: 100px; text-align: center" place="宽（mm）"></el-input>~
-						<el-input type="number" v-model="state.paperHeight" style="width: 100px; text-align: center" place="高（mm）"></el-input>
+						<el-input type="number" v-model="state.paperWidth" style="width: 100px; text-align: center"
+							place="宽（mm）"></el-input>~
+						<el-input type="number" v-model="state.paperHeight" style="width: 100px; text-align: center"
+							place="高（mm）"></el-input>
 					</div>
 					<div>
 						<el-button type="primary" style="width: 100%" @click="otherPaper">确定</el-button>
@@ -28,7 +32,8 @@
 					</template>
 				</el-popover>
 			</el-button-group>
-			<el-input-number style="margin-right: 8px" :value="state.scaleValue" :precision="2" :step="0.1" :min="state.scaleMin" :max="state.scaleMax" @change="changeScale"></el-input-number>
+			<el-input-number style="margin-right: 8px" :value="state.scaleValue" :precision="2" :step="0.1"
+				:min="state.scaleMin" :max="state.scaleMax" @change="changeScale"></el-input-number>
 
 			<el-button-group>
 				<el-tooltip content="左对齐" placement="bottom">
@@ -177,7 +182,12 @@ const curPaperType = computed(() => {
 
 // 选择模板
 const changeMode = () => {
+	// console.log("hiprintTemplate")
+	// console.log(hiprintTemplate)
 	let provider = providers[state.mode];
+	// console.log("provider.f")
+	// console.log(provider.f)
+	// console.log(provider)
 	hiprint.init({
 		providers: [provider.f],
 	});
@@ -204,6 +214,10 @@ const changeMode = () => {
 	hiprintTemplate.value.design('#hiprint-printTemplate');
 	// 获取当前放大比例, 当zoom时传true才会有
 	state.scaleValue = hiprintTemplate.value.editingPanel.scale || 1;
+
+	// console.log("hiprintTemplateasdasdasd")
+
+	// console.log(hiprintTemplate)
 };
 
 /**
@@ -311,6 +325,7 @@ onMounted(() => {
 	state.modeList = providers.map((e) => {
 		return { type: e.type, name: e.name, value: e.value };
 	});
+	console.log(state.modeList)
 	changeMode();
 	// otherPaper(); // 默认纸张
 });
@@ -348,11 +363,12 @@ defineExpose({ hiprintTemplate });
 :deep(.hiprint-option-item-submitBtn) {
 	background: var(--el-color-primary);
 }
+
 :deep(.hiprint-option-item-deleteBtn) {
 	background: var(--el-color-danger);
 }
+
 :deep(.prop-tabs .prop-tab-items li.active) {
 	color: var(--el-color-primary);
 	border-bottom: 2px solid var(--el-color-primary);
-}
-</style>
+}</style>

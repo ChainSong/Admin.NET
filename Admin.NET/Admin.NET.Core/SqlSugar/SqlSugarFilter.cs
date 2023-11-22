@@ -120,6 +120,13 @@ public static class SqlSugarFilter
             foreach (var filter in dataScopeFilter)
                 db.QueryFilter.AddTableFilter(filter.Key, filter.Value);
         }
+
+
+        //配置用户只能查询自己权限下的客户和仓库的过滤器
+        //获取获取客户信息
+        //userId
+
+
         return maxDataScope;
     }
 

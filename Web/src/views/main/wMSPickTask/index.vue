@@ -62,11 +62,18 @@
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSPickTask:page'"> 查询
-            </el-button>
+            </el-button> 
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
 
         </el-form-item>
+
+        <!-- <el-form-item>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Printer" @click="openPrint" v-auth="'wMSPickTask:page'"> 打印
+            </el-button>
+          </el-button-group>
+        </el-form-item> -->
         <!-- <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSPickTask:add'"> 新增
           </el-button>
@@ -118,6 +125,8 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
+            <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
+            </el-button>
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
             <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
               icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
@@ -135,6 +144,8 @@
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="handleQuery" />
+      
     </el-card>
 
     <!-- <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
@@ -153,6 +164,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSPickTask/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPickTask/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPickTask/component/queryDialog.vue'
+import printDialog from '/@/views/main/wMSPickTask/component/printDialog.vue'
 import { pageWMSPickTask, deleteWMSPickTask } from '/@/api/main/wMSPickTask';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -194,6 +206,7 @@ const state = ref({
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
+const printDialogRef = ref();
 const loading = ref(false);
 const multipleTableRef = ref();
 // const select_order_number = ref('') //表格select选中的条数
@@ -212,6 +225,7 @@ const tableParams = ref({
 // const editTitle = ref("");
 // const addTitle = ref("");
 const queryTitle = ref("");
+const ptintTitle = ref("");
 
 // 页面加载时
 onMounted(async () => {
@@ -254,6 +268,12 @@ const handleQuery = async () => {
 const openQuery = (row: any) => {
   queryTitle.value = '查看';
   queryDialogRef.value.openDialog(row);
+};
+
+// 打开打印询页面
+const openPrint = (row: any) => {
+  ptintTitle.value = '打印';
+  printDialogRef.value.openDialog(row);
 };
 
 // 删除

@@ -254,7 +254,7 @@ const dateRefreh = () => {
 		state.noticeList = resData.data.result ?? [];
 		// 接收站内信
 		signalR.on('PublicNotice', receiveNotice);
-		if (state.noticeList.length > 0 && flag!=state.noticeList.length) {
+		if (state.noticeList.length > 0 && flag!=state.noticeList.length && state.noticeList.length>flag) {
 			ElNotification({
 				title: '提示',
 				message: '您有未读消息...',
@@ -263,7 +263,7 @@ const dateRefreh = () => {
 			});
 		}
 
-	}, 30000);
+	}, 8000);
 };
 const receiveNotice = (msg: any) => {
 	state.noticeList.unshift(msg);

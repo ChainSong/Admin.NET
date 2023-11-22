@@ -87,10 +87,14 @@ onMounted(async () => {
 const handleQuery = async () => {
 	state.loading = true;
 	let params = Object.assign(state.queryParams, state.tableParams);
+ 
 	var res = await getAPI(SysPrintApi).apiSysPrintPagePost(params);
 	state.printData = res.data.result?.items ?? [];
 	state.tableParams.total = res.data.result?.total;
 	state.loading = false;
+
+
+	
 };
 
 // 重置操作
@@ -107,6 +111,7 @@ const openAddPrint = () => {
 
 // 打开编辑页面
 const openEditPrint = (row: any) => {
+	
 	state.editPrintTitle = '编辑打印模板';
 	editPrintRef.value?.openDialog(row);
 };

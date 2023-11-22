@@ -14,6 +14,7 @@ using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using MyProject.ReceiptReceivingCore.Dto;
 using Admin.NET.Application.CommonCore.EnumCommon;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
+using SkiaSharp;
 
 namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
 {
@@ -33,6 +34,8 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
         public SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable { get; set; }
         public SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed { get; set; }
 
+        public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+        public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         public ISqlSugarClient _db { get; set; }
 
         public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
@@ -58,16 +61,34 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
             List<WMSReceiptReceiving> receiptReceivings = new List<WMSReceiptReceiving>();
 
             //使用 一个临时变量作为缓存使用，减少数据库访问次数，且减少内存消耗
-            WMSReceipt receiptOrderTemp = new WMSReceipt();
+            //WMSReceipt receiptOrderTemp = new WMSReceipt();
 
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少客户操作权限";
+                return response;
+            }
+
+            //先判断是否能操作仓库
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少仓库操作权限";
+                return response;
+            }
+
+            //获取同订单下的数据作为校验
+            var checkData = _repReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
 
             foreach (var item in request)
             {
+                var receiptOrderTemp = checkData.Where(a => a.ReceiptNumber == item.ReceiptNumber).First();
                 if (receiptOrderTemp == null || receiptOrderTemp.ReceiptNumber != item.ReceiptNumber)
                 {
-                    //获取同订单下的数据作为校验
-                    receiptOrderTemp = _repReceipt.AsQueryable().Includes(a => a.Details).Where(a =>
-                    a.ReceiptNumber == item.ReceiptNumber).FirstAsync().Result;
+
                 }
                 if (receiptOrderTemp == null || string.IsNullOrEmpty(receiptOrderTemp.ReceiptNumber))
                 {
@@ -167,7 +188,21 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
             //.BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
             //修改入库单的上架数量
             //_wms_receiptdetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(a => new WMS_ReceiptDetail { ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ReceiptDetailId == a.Id).Sum(c => c.ReceivedQty) });
+            var checkDataTemp = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
 
+            checkDataTemp.ToList().ForEach(b =>
+            {
+                response.Data.Add(new OrderStatusDto()
+                {
+                    ExternOrder = b.ExternReceiptNumber,
+                    SystemOrder = b.ReceiptNumber,
+                    Type = b.ReceiptType,
+                    StatusCode = StatusCode.Success,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = "订单上架成功"
+                });
+
+            });
             response.Code = StatusCode.Success;
             response.Msg = "成功";
             //throw new NotImplementedException();

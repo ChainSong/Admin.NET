@@ -56,7 +56,7 @@ const state = reactive({
   warehouseUserCheck: [],
   warehouseUsers: new Array<WarehouseUser>(),
   warehouseUser: new WarehouseUser(),
-  user:{}, 
+  user: {},
 });
 
 
@@ -68,7 +68,7 @@ const ruleForm = ref<any>({});
 
 // 打开弹窗
 const openDialog = async (row: any) => {
-  state.user=row;
+  state.user = row;
   console.log(state.user);
   // console.log("dasdsadasdas");
   // state.selectedTabName = '0'; // 重置为第一个 tab 页
@@ -108,8 +108,15 @@ const handleQuery = async (row: any) => {
     })
   })
 
-  var warehouseUserCheck = await listWarehouseUserMapping({ UserId: row.id });
+  console.log("row")
+  console.log(row)
 
+  var warehouseUserCheck = await listWarehouseUserMapping({ "userId": row.id });
+
+  //  console.log("warehouses")
+  //  console.log(state.warehouses)
+  //  console.log(warehouseUserCheck.data.result)
+  state.warehouseUserCheck = [];
   warehouseUserCheck.data.result.forEach(a => {
     if (a.status == 1) {
       state.warehouseUserCheck.push(a.warehouseName);
@@ -120,20 +127,20 @@ const handleQuery = async (row: any) => {
       }
     })
   })
- 
 
-  console.log("state.warehouseUserCheck")
-  console.log(state.warehouseUserCheck);
+
+  // console.log("state.warehouseUserCheck")
+  // console.log(state.warehouseUserCheck);
   loading.value = false;
 };
 
 //点击多选框 处理数据
 const handleCheckedCitiesChange = async (e, w) => {
   state.warehouseUsers.forEach(a => {
-      if (a.warehouseName == w.warehouseName) {
-        a.status = e ? 1 : -1
-      }
-    })
+    if (a.warehouseName == w.warehouseName) {
+      a.status = e ? 1 : -1
+    }
+  })
   // console.log("row");
   // console.log(e);
   // console.log(w);

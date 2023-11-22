@@ -113,6 +113,11 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     .Where(a => a.ReceiptStatus >= (int)ReceiptReceivingStatusEnum.上架)
+                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+
                     .Select<WMSReceiptOutput>()
 ;
         if (input.ReceiptTime != null && input.ReceiptTime.Count > 0)
@@ -316,6 +321,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repReceiptReceiving = _repReceiptReceiving;
         factory._repTableColumns = _repTableColumns;
         factory._repLocation = _repLocation;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
 
         var response = await factory.Strategy(entityListDtos);
 

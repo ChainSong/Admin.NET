@@ -108,6 +108,10 @@ public class WMSASNService : IDynamicApiController, ITransient
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
+                    //.Where(a=>_repCustomerUser.AsQueryable().Where(b=>b.CustomerId==a.CustomerId).Count()>0)
+                    //.Where(a=>_repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WMSASNOutput>()
 ;
