@@ -1,4 +1,4 @@
-﻿using Admin.NET.Common.EnumCommon;
+﻿using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core;

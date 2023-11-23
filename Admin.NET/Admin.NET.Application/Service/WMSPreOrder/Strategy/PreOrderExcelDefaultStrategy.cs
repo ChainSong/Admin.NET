@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
-using Admin.NET.Common.EnumCommon;
+using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application.Strategy
 {

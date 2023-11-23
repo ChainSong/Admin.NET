@@ -1,4 +1,4 @@
-﻿using Admin.NET.Common.EnumCommon;
+﻿using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Common.MD5Common;
 using Admin.NET.Common.TextCommon;
 using Admin.NET.Application.Const;

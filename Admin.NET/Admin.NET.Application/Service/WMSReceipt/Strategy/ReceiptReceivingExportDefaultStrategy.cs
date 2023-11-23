@@ -9,7 +9,7 @@ using Admin.NET.Application.Interface;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core;
 using Admin.NET.Application.Dtos;
-using Admin.NET.Common.EnumCommon;
+using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application.Strategy
 {

@@ -12,7 +12,7 @@ using Admin.NET.Core;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
 //using MyProject.ReceiptReceivingCore.Dto;
-using Admin.NET.Common.EnumCommon;
+using Admin.NET.Application.Dtos.Enum;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
 using SkiaSharp;
 

@@ -1,6 +1,6 @@
 ﻿
 
-using Admin.NET.Common.EnumCommon;
+using Admin.NET.Application.Dtos.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
