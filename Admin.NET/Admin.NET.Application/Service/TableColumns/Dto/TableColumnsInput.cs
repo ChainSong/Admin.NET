@@ -312,7 +312,7 @@ public class TableColumnsInput : BasePageInput
     /// <summary>
     /// Order
     /// </summary>
-    public int Order { get; set; } = 0;
+   new public int Order { get; set; } = 0;
 
     /// <summary>
     /// Associated

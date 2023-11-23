@@ -9,7 +9,7 @@ using Admin.NET.Application.Interface;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core;
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Common.EnumCommon;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -66,7 +66,7 @@ namespace Admin.NET.Application.Strategy
             //塞数据
             receiptData.Result.ForEach(a =>
             {
-                DataRow row = dt.NewRow();
+
                 //判断是采用上架表数据，还是使用入库明细数据(上架表有数据，就采用上架表数据，否则采用入库明细数据)
                 //采用入库明细数据需要推荐上架库位
                 Type receiptType = a.GetType();
@@ -74,6 +74,7 @@ namespace Admin.NET.Application.Strategy
                 {
                     a.Details.ForEach(c =>
                     {
+                        DataRow row = dt.NewRow();
 
                         Type receiptDetailType = c.GetType();
                         headerTableColumn.ForEach(h =>
@@ -123,7 +124,7 @@ namespace Admin.NET.Application.Strategy
                                     //判断是库位 ，获取推荐库位
                                     if (d.DbColumnName == "Location")
                                     {
-                                        var LocationData = _repTableInventoryUsable.AsQueryable().Where(i => i.CustomerId == a.CustomerId && i.WarehouseId == a.WarehouseId && i.SKU == c.SKU).GroupBy(i => i.Location).OrderBy(i => i.Location).Select(b=>b.Location).First();
+                                        var LocationData = _repTableInventoryUsable.AsQueryable().Where(i => i.CustomerId == a.CustomerId && i.WarehouseId == a.WarehouseId && i.SKU == c.SKU).GroupBy(i => i.Location).OrderBy(i => i.Location).Select(b => b.Location).First();
                                         if (LocationData == null)
                                         {
                                             row[d.DisplayName] = "";
@@ -143,12 +144,14 @@ namespace Admin.NET.Application.Strategy
 
                             }
                         });
+                        dt.Rows.Add(row);
                     });
                 }
                 else
                 {
                     a.ReceiptReceivings.ForEach(c =>
                     {
+                        DataRow row = dt.NewRow();
                         Type receiptReceivingType = c.GetType();
                         headerTableColumn.ForEach(h =>
                         {
@@ -182,9 +185,10 @@ namespace Admin.NET.Application.Strategy
 
                             }
                         });
+                        dt.Rows.Add(row);
                     });
                 }
-                dt.Rows.Add(row);
+
 
             });
             response.Data = dt;

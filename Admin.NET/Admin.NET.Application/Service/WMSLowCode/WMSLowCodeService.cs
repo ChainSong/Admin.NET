@@ -1,6 +1,6 @@
-﻿using Admin.NET.Application.CommonCore.EnumCommon;
-using Admin.NET.Application.CommonCore.MD5Common;
-using Admin.NET.Application.CommonCore.TextCommon;
+﻿using Admin.NET.Common.EnumCommon;
+using Admin.NET.Common.MD5Common;
+using Admin.NET.Common.TextCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -100,6 +101,12 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     public async Task<Response> Add(AddWMSLowCodeInput input)
     {
         Response response = new Response();
+        //判断SQL 语句有没有注入的风险
+        if (!ProcessSqlStr(input.SQLCode)) {
+            response.Code = StatusCode.Warning;
+            response.Msg = "有风险的SQL语句";
+            return response;
+        }
         //判断是否存在
         var menuCheck = _repMenu.AsQueryable().Where(a => a.Title == input.MenuName);
         if (menuCheck.Count() > 0)
@@ -136,10 +143,10 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
 
         //构建新的权限
         var menuId = _repMenu.AsQueryable().Where(a => a.Title == input.MenuName).ToList().First();
-        
+
         var getRoleId = _repUserRole.AsQueryable().Where(a => a.UserId == _userManager.UserId).First();
         //1300000000101
-        SysRoleMenu roleMenuData=new SysRoleMenu();
+        SysRoleMenu roleMenuData = new SysRoleMenu();
         //var roleMenuData = _repRoleMenu.AsQueryable().Where(a => a.RoleId == getRoleId.Id).ToList().First();
         roleMenuData.MenuId = menuId.Id;
         //针对超级管理员特殊操作
@@ -154,6 +161,34 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
 
 
 
+
+    /// 
+    /// 判断字符串中是否有SQL攻击代码
+    /// 
+    /// 传入用户提交数据
+    /// true-安全；false-有注入攻击现有；
+    public bool ProcessSqlStr(string inputString)
+    {
+        string SqlStr = @"and|or|exec|execute|insert|select|delete|update|alter|create|drop|count|\*|chr|char|asc|mid|substring|master|truncate|declare|xp_cmdshell|restore|backup|net +user|net +localgroup +administrators";
+        try
+        {
+            if ((inputString != null) && (inputString != String.Empty))
+            {
+                string str_Regex = @"\b(" + SqlStr + @")\b";
+
+                Regex Regex = new Regex(str_Regex, RegexOptions.IgnoreCase);
+                //string s = Regex.Match(inputString).Value; 
+                if (true == Regex.IsMatch(inputString))
+                    return false;
+
+            }
+        }
+        catch
+        {
+            return false;
+        }
+        return true;
+    }
 
 
     /// <summary>

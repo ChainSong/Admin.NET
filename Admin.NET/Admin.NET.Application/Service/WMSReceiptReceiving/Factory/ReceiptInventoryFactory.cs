@@ -2,7 +2,7 @@
 
 using Admin.NET.Application.ReceiptCore.Interface; 
 using Admin.NET.Application.Strategy;
-using MyProject.ReceiptReceivingCore;
+//using MyProject.ReceiptReceivingCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;

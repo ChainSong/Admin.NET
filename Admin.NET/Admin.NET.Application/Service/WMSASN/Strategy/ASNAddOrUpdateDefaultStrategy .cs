@@ -1,5 +1,5 @@
 ﻿
-using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Common.EnumCommon;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
@@ -75,7 +75,7 @@ namespace Admin.NET.Application.Strategy
 
             //1判断PreOrder 是否已经存在已有的订单
 
-            var asnCheck = _repASN.AsQueryable().Where(a => request.Select(r => r.ExternReceiptNumber + r.CustomerId).ToList().Contains(a.ExternReceiptNumber + a.CustomerId));
+            var asnCheck = _repASN.AsQueryable().Where(a => request.Select(r => r.ExternReceiptNumber + r.CustomerName.ToString()).ToList().Contains(a.ExternReceiptNumber + a.CustomerName.ToString()));
             if (asnCheck != null && asnCheck.ToList().Count > 0)
             {
                 asnCheck.ToList().ForEach(b =>

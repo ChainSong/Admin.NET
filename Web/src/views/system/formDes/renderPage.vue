@@ -40,8 +40,9 @@
 				<!-- <el-button type="primary" @click="activeOK">确 定3</el-button> -->
 			</div>
 			<span class="dialog-footer">
-				<el-button @click="state.dialogVisible = false">取 消</el-button>
-				<el-button type="primary" @click="activeOK">确 定</el-button>
+				<!-- <el-button @click="state.dialogVisible = false">取 消</el-button> -->
+				<el-button type="primary" @click="state.active--">上一步</el-button>
+				<el-button type="primary" @click="activeOK">下一步</el-button>
 			</span>
 		</el-dialog>
 
@@ -73,6 +74,23 @@ const handleClose = () => {
 const activeOK = async () => {
 	// alert(state.value.active);
 	if (state.value.active++ > 2) {
+		state.value.active=3;
+		if(state.value.configModel.uiCode==""){
+			ElMessage.error("请输入UI设计");
+			return;
+		}
+		if(state.value.configModel.sqlCode==""){
+			ElMessage.error("请输入数据源");
+			return;
+		}
+		if(state.value.configModel.menuName==""){
+			ElMessage.error("请输入菜单名称");
+			return;
+		}
+		if(state.value.configModel.uiCode==""){
+			ElMessage.error("请输入UI设计");
+			return;
+		}
 		state.value.formJson = JSON.parse(state.value.configModel.uiCode);
 		// alert("dasdad");
 		var res = await addWMSLowCode(state.value.configModel);

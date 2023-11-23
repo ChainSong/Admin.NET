@@ -1,5 +1,5 @@
-﻿using Admin.NET.Application.CommonCore.EnumCommon;
-using Admin.NET.Application.CommonCore.ExcelCommon;
+﻿using Admin.NET.Common.EnumCommon;
+using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
@@ -14,7 +14,7 @@ using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Microsoft.AspNetCore.Http;
-using MyProject.ReceiptReceivingCore.Dto;
+//using MyProject.ReceiptReceivingCore.Dto;
 using NewLife.Net;
 using System.Collections.Generic;
 using System.Data;
@@ -299,7 +299,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         var data = factoryExcel.Strategy(dataExcel);
 
 
-        var entityListDtos = data.Data.TableToList<WMSReceiptReceivingEditDto>();
+        var entityListDtos = data.Data.TableToList<WMSReceiptReceiving>();
         //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
 
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)

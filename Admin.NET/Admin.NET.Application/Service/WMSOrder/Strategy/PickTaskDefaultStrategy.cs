@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Common.EnumCommon;
 using Admin.NET.Application.Enumerate;
 using AutoMapper;
 using NewLife.Net;

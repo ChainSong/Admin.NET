@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyProject.ReceiptReceivingCore.Dto;
+//using MyProject.ReceiptReceivingCore.Dto;
 
 namespace Admin.NET.Application.ReceiptReceivingCore.Interface
 {
@@ -36,6 +36,6 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Interface
 
         public ISqlSugarClient _db { get; set; }
 
-        Task<Response<List<OrderStatusDto>>> Strategy(List<WMSReceiptReceivingEditDto> request);
+        Task<Response<List<OrderStatusDto>>> Strategy(List<WMSReceiptReceiving> request);
     }
 }

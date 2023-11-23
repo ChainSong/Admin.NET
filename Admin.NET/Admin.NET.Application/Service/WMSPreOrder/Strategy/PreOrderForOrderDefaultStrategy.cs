@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Enumerate;
-using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Common.EnumCommon;
 using Admin.NET.Common.SnowflakeCommon;
 
 namespace Admin.NET.ApplicationCore.Strategy

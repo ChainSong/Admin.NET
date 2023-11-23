@@ -1,4 +1,4 @@
-﻿using Admin.NET.Application.CommonCore.ExcelCommon;
+﻿using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
@@ -336,7 +336,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
-        var response = factory.AddStrategy(entityListDtos);
+        var response = factory.AddStrategy(ASNs);
         return await response;
 
 

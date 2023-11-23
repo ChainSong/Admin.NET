@@ -1,4 +1,4 @@
-﻿using Admin.NET.Application.CommonCore.EnumCommon;
+﻿using Admin.NET.Common.EnumCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;

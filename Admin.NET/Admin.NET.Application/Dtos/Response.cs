@@ -1,5 +1,6 @@
 ﻿
-using Admin.NET.Application.CommonCore.EnumCommon;
+
+using Admin.NET.Common.EnumCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;

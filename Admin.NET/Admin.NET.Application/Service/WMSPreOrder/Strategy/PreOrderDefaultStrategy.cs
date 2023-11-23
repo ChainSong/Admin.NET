@@ -1,5 +1,5 @@
 ﻿
-using Admin.NET.Application.CommonCore.EnumCommon;
+using Admin.NET.Common.EnumCommon;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
@@ -61,7 +61,7 @@ namespace Admin.NET.Application.Strategy
                 return response;
             }
 
-            var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
+            var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber + r.CustomerName).ToList().Contains(a.ExternOrderNumber + a.CustomerName));
             if (asnCheck != null && asnCheck.ToList().Count > 0)
             {
                 asnCheck.ToList().ForEach(b =>

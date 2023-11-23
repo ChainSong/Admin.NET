@@ -1,4 +1,4 @@
-﻿using Admin.NET.Application.CommonCore.ExcelCommon;
+﻿using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
@@ -334,22 +334,22 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
 
         //将散装的主表和明细表 组合到一起 
-        List<AddOrUpdateWMSPreOrderInput> PreOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
-        PreOrders.ForEach(item =>
+        List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
+        preOrders.ForEach(item =>
         {
             item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
         });
 
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var CustomerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
-        long CustomerId = 0;
-        if (CustomerData != null)
+        var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+        long customerId = 0;
+        if (customerData != null)
         {
-            CustomerId = CustomerData.CustomerId;
+            customerId = customerData.CustomerId;
         }
         //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
         //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(CustomerId);
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(customerId);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         factory._db = _db;
@@ -358,7 +358,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
-        var response = await factory.AddStrategy(entityListDtos);
+        var response = await factory.AddStrategy(preOrders);
         return response;
 
     }

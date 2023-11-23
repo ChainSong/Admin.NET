@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.CommonCore.EnumCommon
+namespace Admin.NET.Common.EnumCommon
 {
     public enum StatusCode
     {

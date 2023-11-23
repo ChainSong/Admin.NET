@@ -11,8 +11,8 @@ using Admin.NET.Core.Entity;
 using Admin.NET.Core;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
-using MyProject.ReceiptReceivingCore.Dto;
-using Admin.NET.Application.CommonCore.EnumCommon;
+//using MyProject.ReceiptReceivingCore.Dto;
+using Admin.NET.Common.EnumCommon;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
 using SkiaSharp;
 
@@ -48,7 +48,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
         }
 
         //默认方法不做任何处理
-        public async Task<Response<List<OrderStatusDto>>> Strategy(List<WMSReceiptReceivingEditDto> request)
+        public async Task<Response<List<OrderStatusDto>>> Strategy(List<WMSReceiptReceiving> request)
         {
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };

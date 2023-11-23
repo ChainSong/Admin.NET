@@ -1,4 +1,4 @@
-﻿using Admin.NET.Application.CommonCore.EnumCommon;
+﻿using Admin.NET.Common.EnumCommon;
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
@@ -72,7 +72,7 @@ public class WMSAreaService : IDynamicApiController, ITransient
     public async Task<Response> Add(AddWMSAreaInput input)
     {
         var entity = input.Adapt<WMSArea>();
-        await _rep.InsertAsync(entity);
+        //await _rep.InsertAsync(entity);
 
         //添加之前先校验有没有
         var data = _rep.AsQueryable().Where(a => a.AreaName == entity.AreaName && a.WarehouseId == entity.WarehouseId);
