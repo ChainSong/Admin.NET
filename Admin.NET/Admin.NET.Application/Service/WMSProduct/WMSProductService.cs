@@ -83,9 +83,9 @@ public class WMSProductService : IDynamicApiController, ITransient
                     .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                     //.Where(b => b.Associated == a.Associated && b.Status == 1).OrderBy(b => b.Order).ToList()
+                    //.Where(b => b.Associated == a.Associated && b.Status == 1).OrderBy(b => b.Order).ToList()
                     .Select<WMSProductOutput>()
 ;
         if (input.CreationTime != null && input.CreationTime.Count > 0)
@@ -179,23 +179,24 @@ public class WMSProductService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "SelectSKU")]
-    public async Task<List<SelectListItem>> SelectSKU(dynamic objData )
+    public async Task<List<SelectListItem>> SelectSKU(dynamic input)
     {
-        string sku = objData.inputData;
-     
-        if (!string.IsNullOrEmpty(sku) &&  sku.Length > 3)
-        {
-            long customerId = objData.objData.CustomerId;
-            //获取可以使用的仓库权限
-            var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerId).ToList();
-            //string sku = objData.inputData;
-            //long customerId = objData.objData.CustomerId;
-            return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().ToListAsync();
-        }
-        else
-        {
-            return new List<SelectListItem>();
-        }
+        
+            string sku = input.inputData;
+            if (!string.IsNullOrEmpty(sku) && sku.Length > 3)
+            {
+                long customerId = input.whereData.customerId;
+                //获取可以使用的仓库权限
+                var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerId).ToList();
+                //string sku = objData.inputData;
+                //long customerId = objData.objData.CustomerId;
+                return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().ToListAsync();
+            }
+            else
+            {
+                return new List<SelectListItem>();
+            }
+       
     }
 
 

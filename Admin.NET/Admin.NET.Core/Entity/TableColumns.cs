@@ -4,8 +4,15 @@
 /// 自定义字段
 /// </summary>
 [SugarTable("TableColumns", "TableColumns")]
-public class TableColumns  
+[IncreTableAttribute]
+public class TableColumns : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     [SqlSugar.SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDescription = "主键")]
     public long Id { get; set; }
@@ -14,7 +21,7 @@ public class TableColumns
     /// 
     /// </summary>
     //[SugarColumn(ColumnDescription = "")]
-    public long TenantId { get; set; }
+    //public long TenantId { get; set; }
     
     /// <summary>
     /// 

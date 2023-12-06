@@ -44,7 +44,7 @@ public class WMSAreaService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
                     //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSAreaOutput>()
 ;
@@ -149,15 +149,20 @@ public class WMSAreaService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "SelectArea")]
     public async Task<List<SelectListItem>> SelectArea(dynamic input)
     {
-        try
+        //try
+        //{
+        //第一次加载可能没有选择仓库,但是需要触发  没想到什么好的办法,直接错误
+        //try
+        //{
+        //获取可以使用的仓库权限
+        var warehouse = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.WarehouseName).ToList();
+        var whereData = input.whereData;
+        //string whereDatasss = input.whereData.warehouseName;
+        if (whereData != null)
         {
-
-
-            //获取可以使用的仓库权限
-            var warehouse = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.WarehouseName).ToList();
             //是否选择了仓库
-            string WarehouseName = input.objData.warehouseName;
-            string AreaName = input.objData.areaName;
+            string WarehouseName = input.whereData.warehouseName;
+            string AreaName = input.inputData;
             //选择了仓库就推荐库位{
             if (!string.IsNullOrEmpty(WarehouseName))
             {
@@ -169,11 +174,21 @@ public class WMSAreaService : IDynamicApiController, ITransient
                 return new List<SelectListItem>();
             }
         }
-        catch (Exception)
+        else
         {
-
             return new List<SelectListItem>();
         }
+        //}
+        //catch (Exception)
+        //{
+        //    return new List<SelectListItem>();
+        //}
+        //}
+        //catch (Exception)
+        //{
+
+        //    return new List<SelectListItem>();
+        //}
     }
 
 

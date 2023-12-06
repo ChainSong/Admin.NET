@@ -4,8 +4,15 @@
 /// 库位表
 /// </summary>
 [SugarTable("WMS_Location","库位表")]
-public class WMSLocation   
+[IncreTableAttribute]
+public class WMSLocation : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// 雪花Id
@@ -119,7 +126,14 @@ public class WMSLocation
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Creator { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? UpdateTime { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -131,5 +145,8 @@ public class WMSLocation
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Updator { get; set; }
-    
+
+
+  
+
 }

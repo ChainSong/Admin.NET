@@ -11,6 +11,8 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.Grou
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECLeagueHeadSupplierOrderGetResponse.Types.CommssionOrder.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECMerchantAddFreightTemplateRequest.Types.FreightTemplate.Types;
 using System.Reflection.Emit;
+using Admin.NET.Core.Service;
+using Admin.NET.Application.Enumerate;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -20,18 +22,20 @@ namespace Admin.NET.Application;
 public class WMSPickTaskService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPickTask> _rep;
-    
+
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
 
 
     private readonly UserManager _userManager;
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
+    private readonly SysCacheService _sysCacheService;
+
     public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser)
     {
         _rep = rep;
         _userManager = userManager;
-        _db = db;
+        //_db = db;
         _repWarehouseUser = repWarehouseUser;
         _repCustomerUser = repCustomerUser;
     }
@@ -77,8 +81,8 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSPickTaskOutput>()
 ;
@@ -175,7 +179,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         query = query.OrderBuilder(input);
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
-
+   
     /// <summary>
     /// 增加WMSPickTask
     /// </summary>
@@ -210,12 +214,38 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSPickTaskInput input)
+    public async Task Update(WMSPickTaskBaseInput input)
     {
         var entity = input.Adapt<WMSPickTask>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
 
+
+    /// <summary>
+    /// 更新WMSPickTask
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "WMSPickComplete")]
+    public async Task WMSPickComplete(UpdateWMSPickTaskInput input)
+    {
+        //var entity = input.Adapt<WMSPickTask>();
+        //await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(a => a.Id == input.Id).FirstAsync();
+        entity.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+        entity.StartTime = DateTime.Now;
+        entity.EndTime = DateTime.Now;
+        entity.Details.ForEach(a =>
+        {
+            a.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+            a.PickQty = a.Qty;
+            a.PikcTime = DateTime.Now;
+        });
+        //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        await _rep.Context.UpdateNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
+
+    }
 
 
 
@@ -259,10 +289,5 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         entity.PrintPersonnel = _userManager.Account;
         entity.PrintTime = DateTime.Now;
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
-
     }
-
-
-
-
 }

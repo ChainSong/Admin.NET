@@ -36,5 +36,10 @@ namespace Admin.NET.Application.Dtos.Enum
         /// </summary>
         Info = 10,
 
+        /// <summary>
+        /// 完成
+        /// </summary>
+        Finish = 99,
+
     }
 }

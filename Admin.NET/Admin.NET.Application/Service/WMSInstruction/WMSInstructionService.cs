@@ -3,6 +3,7 @@ using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
 namespace Admin.NET.Application;
@@ -13,9 +14,11 @@ namespace Admin.NET.Application;
 public class WMSInstructionService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSInstruction> _rep;
-    public WMSInstructionService(SqlSugarRepository<WMSInstruction> rep)
+    private readonly UserManager _userManager;
+    public WMSInstructionService(SqlSugarRepository<WMSInstruction> rep, UserManager userManager)
     {
         _rep = rep;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -42,6 +45,8 @@ public class WMSInstructionService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Message), u => u.Message.Contains(input.Message.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
+                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSInstructionOutput>()
 ;

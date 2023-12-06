@@ -4,8 +4,15 @@
 /// 出库地址信息
 /// </summary>
 [SugarTable("WMS_OrderAddress","出库地址信息")]
-public class WMSOrderAddress  
+[IncreTableAttribute]
+public class WMSOrderAddress : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -16,7 +23,7 @@ public class WMSOrderAddress
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 10)]
+    [SugarColumn(ColumnDescription = "")]
     public long PreOrderId { get; set; }
     
     /// <summary>
@@ -29,7 +36,7 @@ public class WMSOrderAddress
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? ExternReceiptNumber { get; set; }
+    public string? ExternOrderNumber { get; set; }
     
     /// <summary>
     /// 联系人
@@ -70,7 +77,7 @@ public class WMSOrderAddress
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? Address { get; set; }
     
     /// <summary>

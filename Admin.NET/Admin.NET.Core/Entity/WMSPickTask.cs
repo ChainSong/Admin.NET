@@ -4,8 +4,15 @@
 /// 拣货
 /// </summary>
 [SugarTable("WMS_PickTask","拣货")]
-public class WMSPickTask  
+[IncreTableAttribute]
+public class WMSPickTask : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -118,7 +125,7 @@ public class WMSPickTask
     /// </summary>
     //[Required]
     [SugarColumn(ColumnDescription = "")]
-    public string PickContainer { get; set; }
+    public string? PickContainer { get; set; }
     
 
 
@@ -139,7 +146,13 @@ public class WMSPickTask
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Updator { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? UpdateTime { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

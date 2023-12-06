@@ -22,8 +22,8 @@
 									</el-select>
 								</template>
 								<template v-if="i.type == 'DropDownListStrRemote'">
-									<select-Remote :objData="state.header" :isDisabled="i.isUpdate" :columnData="i" :defaultvValue="state.header[i.columnName]"
-										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+									<select-Remote :whereData="state.header" :isDisabled="i.isUpdate" :columnData="i" :defaultvValue="state.header[i.columnName]"
+										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">

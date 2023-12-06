@@ -4,8 +4,15 @@
 /// 预入库表
 /// </summary>
 [SugarTable("WMS_ASN","预入库表")]
-public class WMSASN  
+[IncreTableAttribute]
+public class WMSASN : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// 雪花Id

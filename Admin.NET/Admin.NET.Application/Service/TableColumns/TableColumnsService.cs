@@ -28,7 +28,7 @@ public class TableColumnsService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<TableColumns> _rep;
     private readonly SqlSugarRepository<TableColumnsDetail> _repDetail;
     private readonly UserManager _userManager;
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     //private readonly UserService _userService;
 
     private readonly SysCacheService _sysCacheService;
@@ -38,7 +38,7 @@ public class TableColumnsService : IDynamicApiController, ITransient
         _repDetail = repDetail;
         _sysCacheService = sysCacheService;
         _userManager = userManager;
-        _db = db;
+        //_db = db;
     }
 
     /// <summary>
@@ -208,76 +208,76 @@ public class TableColumnsService : IDynamicApiController, ITransient
 
                       //模糊搜索TableName
                       a.TableName == (input.TableName))
-        .WhereIF(input.TenantId != 0, a =>
-                        //模糊搜索TenantId
-                        a.TenantId == (input.TenantId))
+
          .WhereIF(input.CustomerId != 0, a =>
                         //模糊搜索CustomerId
                         a.CustomerId == (input.CustomerId))
         .WhereIF(!input.RoleName.IsNullOrEmpty(), a =>
                       //模糊搜索RoleName
                       a.RoleName == (input.RoleName)
-        ).Select(a => new TableColumnsOutput
-        {
-            Id = a.Id
+        ).Where(a =>
+                        //模糊搜索TenantId
+                        a.TenantId == (_userManager.TenantId)).Select(a => new TableColumnsOutput
+                        {
+                            Id = a.Id
           //,TenantId = a.TenantId
           ,
-            ProjectId = a.ProjectId
+                            ProjectId = a.ProjectId
           ,
-            RoleName = a.RoleName
+                            RoleName = a.RoleName
           ,
-            CustomerId = a.CustomerId
+                            CustomerId = a.CustomerId
           ,
-            TableName = a.TableName
+                            TableName = a.TableName
           ,
-            TableNameCH = a.TableNameCH
+                            TableNameCH = a.TableNameCH
           ,
-            DisplayName = a.DisplayName
+                            DisplayName = a.DisplayName
           ,
-            //由于框架约定大于配置， 数据库的字段首字母小写
-            //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-            DbColumnName = a.DbColumnName
+                            //由于框架约定大于配置， 数据库的字段首字母小写
+                            //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+                            DbColumnName = a.DbColumnName
           ,
-            IsKey = a.IsKey
+                            IsKey = a.IsKey
           ,
-            IsSearchCondition = a.IsSearchCondition
+                            IsSearchCondition = a.IsSearchCondition
           ,
-            IsHide = a.IsHide
+                            IsHide = a.IsHide
           ,
-            IsReadOnly = a.IsReadOnly
+                            IsReadOnly = a.IsReadOnly
           ,
-            IsShowInList = a.IsShowInList
+                            IsShowInList = a.IsShowInList
           ,
-            IsImportColumn = a.IsImportColumn
+                            IsImportColumn = a.IsImportColumn
           ,
-            IsDropDownList = a.IsDropDownList
+                            IsDropDownList = a.IsDropDownList
           ,
-            Associated = a.Associated
+                            Associated = a.Associated
 
             ,
-            TableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1).OrderBy(b => b.Order).ToList()
+                            TableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).OrderBy(b => b.Order).ToList()
             ,
-            IsCreate = a.IsCreate
+                            IsCreate = a.IsCreate
           ,
-            IsUpdate = a.IsUpdate
+                            IsUpdate = a.IsUpdate
           ,
-            SearchConditionOrder = a.SearchConditionOrder
+                            SearchConditionOrder = a.SearchConditionOrder
           ,
-            Validation = a.Validation
+                            Validation = a.Validation
           ,
-            Group = a.Group
+                            Group = a.Group
           ,
-            Default = a.Default,
-            RelationDBColumn = a.RelationDBColumn,
-            Type = a.Type,
-            Order = a.Order,
-            Precision = a.Precision,
-            Step = a.Step,
-            Max = a.Max,
-            Min = a.Min,
-            Link = a.Link,
-            ForView = a.ForView
-        }).OrderBy(a => a.Order);
+                            Default = a.Default,
+                            RelationDBColumn = a.RelationDBColumn,
+                            Type = a.Type,
+                            Order = a.Order,
+                            Precision = a.Precision,
+                            Step = a.Step,
+                            Max = a.Max,
+                            Min = a.Min,
+                            Link = a.Link,
+                            ForView = a.ForView
+                        }).OrderBy(a => a.Order);
         //.Mapper(c => {
         //    c.TableColumnsDetail = _repDetail.AsQueryable().Where(b => b.Associated == c.Associated).ToList();
         //});
@@ -360,15 +360,16 @@ public class TableColumnsService : IDynamicApiController, ITransient
         {
             x.Order = index++;
             x.TenantId = _userManager.TenantId;
-            x.DbColumnName=x.DbColumnName.Trim();
+            x.DbColumnName = x.DbColumnName.Trim();
             int indexDetail = 1;
             foreach (var item in x.tableColumnsDetails.OrderBy(v => v.Order))
             {
                 item.Order = indexDetail++;
                 item.Status = 1;
+                item.TenantId = _userManager.TenantId;
                 item.Creator = _userManager.Account;
                 item.CreationTime = DateTime.Now;
-                
+
             }
         });
         //await _db.UpdateNav(entity).Include(a => a.tableColumnsDetails).ExecuteCommandAsync();
@@ -402,14 +403,15 @@ public class TableColumnsService : IDynamicApiController, ITransient
     {
         //var currentUser = _userManager.
 
-        await _repDetail.DeleteAsync(a => (input.Select(b => b.Associated).ToList().Contains(a.Associated)));
+        await _repDetail.DeleteAsync(a => (input.Select(b => b.Associated).ToList().Contains(a.Associated) && a.TenantId == _userManager.TenantId));
         int index = 1;
         input.OrderBy(o => o.Order).ForEach(a =>
         {
             a.Order = index++;
             a.Status = 1;
             a.CreationTime = DateTime.Now;
-            a.Creator = _userManager.Account; 
+            a.TenantId = _userManager.TenantId;
+            a.Creator = _userManager.Account;
         });
         await _repDetail.InsertRangeAsync(input);
 
@@ -453,8 +455,8 @@ public class TableColumnsService : IDynamicApiController, ITransient
     public void CleanTableColumnsCache(TableColumnsInput input)
     {
         // TODO:批量删除前的逻辑判断，是否允许删除
-        _sysCacheService.SetValue("TableColumn_" + input.TableName + "_" + input.TenantId + "_" + input.CustomerId, new List<TableColumns>());
-        _sysCacheService.SetValue("TableColumn_" + input.TableName + "_" + input.TenantId + "_" + input.CustomerId, new List<TableColumns>());
+        _sysCacheService.Set("TableColumn_" + input.TableName + "_" + input.TenantId + "_" + input.CustomerId, new List<TableColumns>());
+        _sysCacheService.Set("TableColumn_" + input.TableName + "_" + input.TenantId + "_" + input.CustomerId, new List<TableColumns>());
     }
 
 

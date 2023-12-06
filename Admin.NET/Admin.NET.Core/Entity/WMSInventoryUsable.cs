@@ -4,8 +4,15 @@
 /// 可用库存
 /// </summary>
 [SugarTable("WMS_Inventory_Usable", "可用库存")]
-public class WMSInventoryUsable  
+[IncreTableAttribute]
+public class WMSInventoryUsable : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public virtual long Id { get; set; }
@@ -108,7 +115,37 @@ public class WMSInventoryUsable
     /// </summary>
     [Required]
     [SugarColumn(ColumnDescription = "")]
-    public long RelatedId { get; set; }  
+    public long RelatedId { get; set; }
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50, DefaultValue = "")]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50, DefaultValue = "")]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "")]
+    public double Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "")]
+    public double Volume { get; set; }
+
 
     /// <summary>
     /// 

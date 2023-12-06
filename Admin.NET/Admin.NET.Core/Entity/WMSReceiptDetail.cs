@@ -4,8 +4,15 @@
 /// 入库明细表
 /// </summary>
 [SugarTable("WMS_ReceiptDetail","入库明细表")]
-public class WMSReceiptDetail  
+[IncreTableAttribute]
+public class WMSReceiptDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -97,7 +104,7 @@ public class WMSReceiptDetail
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string UPC { get; set; }
+    public string? UPC { get; set; }
     
     /// <summary>
     /// 
@@ -129,6 +136,34 @@ public class WMSReceiptDetail
     [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? BatchCode { get; set; }
 
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Volume { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -159,7 +194,7 @@ public class WMSReceiptDetail
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Onwer { get; set; }
+    public string? Onwer { get; set; }
     
     /// <summary>
     /// 

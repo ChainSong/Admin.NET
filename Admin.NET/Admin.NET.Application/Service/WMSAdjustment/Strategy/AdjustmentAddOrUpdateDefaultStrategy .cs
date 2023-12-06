@@ -20,7 +20,7 @@ namespace Admin.NET.Application.Strategy
     {
 
         //注入数据库实例
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         //注入权限仓储
         public UserManager _userManager { get; set; }
@@ -142,7 +142,7 @@ namespace Admin.NET.Application.Strategy
             });
 
             ////开始插入订单
-            await _db.InsertNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repAdjustment.Context.InsertNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();
 
 
             AdjustmentData.ToList().ForEach(b =>
@@ -234,7 +234,7 @@ namespace Admin.NET.Application.Strategy
 
 
             ////开始插入订单
-            await _db.UpdateNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repAdjustment.Context.UpdateNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();
 
             AdjustmentData.ToList().ForEach(b =>
             {

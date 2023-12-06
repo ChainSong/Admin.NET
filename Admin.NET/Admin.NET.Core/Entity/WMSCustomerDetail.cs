@@ -4,8 +4,15 @@
 /// 客户明细表
 /// </summary>
 [SugarTable("WMS_CustomerDetail","客户明细表")]
-public class WMSCustomerDetail   
+[IncreTableAttribute]
+public class WMSCustomerDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     [SugarColumn( IsPrimaryKey = true, IsIdentity = true)]
     public virtual long Id { get; set; }

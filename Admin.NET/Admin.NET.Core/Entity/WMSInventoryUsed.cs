@@ -4,10 +4,17 @@
 /// 不可用库存
 /// </summary>
 [SugarTable("WMS_Inventory_Used","不可用库存")]
-public class WMSInventoryUsed  
+[IncreTableAttribute]
+public class WMSInventoryUsed : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
 
-    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+
+    [SugarColumn(IsPrimaryKey = true)]
     public virtual long Id { get; set; }
 
     
@@ -130,7 +137,33 @@ public class WMSInventoryUsed
     [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string Onwer { get; set; }
-    
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Volume { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
@@ -158,7 +191,22 @@ public class WMSInventoryUsed
     [Required]
     [SugarColumn(ColumnDescription = "")]
     public double Qty { get; set; }
-    
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    //[SugarColumn(ColumnDescription = "")]
+    //public double? Weight { get; set; }
+
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    //[Required]
+    //[SugarColumn(ColumnDescription = "")]
+    //public double? Volume { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

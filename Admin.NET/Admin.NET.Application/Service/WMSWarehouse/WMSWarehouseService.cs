@@ -8,7 +8,7 @@ using Furion.FriendlyException;
 using StackExchange.Profiling.Internal;
 using System.Collections.Generic;
 using System.Linq;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
+//using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -58,7 +58,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.Id).Count() > 0)
                     //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.Id).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.Id && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSWarehouseOutput>()
 ;
@@ -181,7 +181,6 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
         //获取可以使用的仓库权限
         var warehouse = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.WarehouseName).ToList();
         return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
-
     }
 
 

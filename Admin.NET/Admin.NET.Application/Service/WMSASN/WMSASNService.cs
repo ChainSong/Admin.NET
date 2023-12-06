@@ -20,6 +20,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
+using Admin.NET.Express;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -32,7 +33,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
 
 
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
@@ -46,7 +47,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     public WMSASNService(SqlSugarRepository<WMSASN> rep, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail)
     {
         _rep = rep;
-        _db = db;
+        //_db = db;
         _repCustomer = repCustomer;
         _repCustomerUser = repCustomerUser;
         _userManager = userManager;
@@ -67,8 +68,6 @@ public class WMSASNService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Page")]
     public async Task<SqlSugarPagedList<WMSASNOutput>> Page(WMSASNInput input)
     {
-
-
         var query = _rep.AsQueryable()
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
@@ -110,8 +109,8 @@ public class WMSASNService : IDynamicApiController, ITransient
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     //.Where(a=>_repCustomerUser.AsQueryable().Where(b=>b.CustomerId==a.CustomerId).Count()>0)
                     //.Where(a=>_repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSASNOutput>()
 ;
@@ -214,7 +213,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         entityListDtos.Add(input);
         //使用简单工厂定制化修改和新增的方法
         IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repASNDetail = _repASNDetail;
@@ -252,7 +251,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         entityListDtos.Add(input);
         //使用简单工厂定制化修改和新增的方法
         IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
@@ -301,6 +300,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
+    
         //FileDir是存储临时文件的目录，相对路径
         //private const string FileDir = "/File/ExcelTemp";
         string url = await ImprotExcel.WriteFile(file);
@@ -331,7 +331,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
         //使用简单工厂定制化修改和新增的方法
         IASNInterface factory = ASNFactory.AddOrUpdate(CustomerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
@@ -358,7 +358,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         }
         //使用简单工厂定制化修改和新增的方法
         IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(customerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repASNDetail = _repASNDetail;

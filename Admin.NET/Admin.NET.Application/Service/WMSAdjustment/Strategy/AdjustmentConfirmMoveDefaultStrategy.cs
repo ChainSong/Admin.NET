@@ -22,7 +22,7 @@ namespace Admin.NET.Application.Strategy
     {
 
         //注入数据库实例
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         //注入权限仓储
         public UserManager _userManager { get; set; }

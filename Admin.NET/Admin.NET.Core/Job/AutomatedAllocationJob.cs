@@ -37,6 +37,7 @@ public class AutomatedAllocationJob : IJob
         using var serviceScope = _serviceProvider.CreateScope();
 
         // 获取指令仓储 
+        var repWarehouse = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSWarehouse>>();
         var repInstruction = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSInstruction>>();
         var repSysUser = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysUser>>();
         var repSysNotice = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNotice>>();

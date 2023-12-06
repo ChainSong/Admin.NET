@@ -36,7 +36,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
 
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 
@@ -63,8 +63,8 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
             //使用 一个临时变量作为缓存使用，减少数据库访问次数，且减少内存消耗
             //WMSReceipt receiptOrderTemp = new WMSReceipt();
 
-            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
-            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少客户操作权限";
@@ -72,8 +72,8 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
             }
 
             //先判断是否能操作仓库
-            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
-            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.GroupBy(a => a.WarehouseName).Count() != request.GroupBy(a => a.WarehouseName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少仓库操作权限";
@@ -151,6 +151,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
 
                     dto.Area = area.AreaName;
                     dto.Location = item.Location;
+                    dto.GoodsStatus= (int)GoodsStatusEnum.正常;
                     dto.ReceivedQty = item.ReceivedQty;
                     dto.ReceiptDetailId = receiptOrderLineData.Id;
                     dto.ReceiptReceivingStatus = (int)ReceiptReceivingStatusEnum.上架;

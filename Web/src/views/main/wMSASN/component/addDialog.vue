@@ -25,9 +25,9 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :objData="state.header" :isDisabled="i.isCreate" :columnData="i"
+											<select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
 												:defaultvValue="state.header[i.columnName]"
-												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
 											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
@@ -85,7 +85,7 @@
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :objData="state.header" :isDisabled="v.isCreate"
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
@@ -262,10 +262,14 @@ const submit = async () => {
 				if (isValidDetail) {
 					let result = await addWMSASN(state.value.header);
 					if (result.data.result.code == "1") {
-						ElMessage.success("添加成功");
+						ElMessage.success("保存成功");
 						closeDialog();
 					} else {
-						ElMessage.error("添加失败");
+						state.value.orderStatus = result.data.result;
+						// console.log(state.value.orderStatus);
+						//导入弹框提醒
+						resultPopupShow.value = true;
+						// ElMessage.error(result.data.result.msg);
 					}
 
 				} else {
@@ -329,7 +333,7 @@ const ImportExcel = (response, file, fileList) => {
 		// console.log(state.value.orderStatus);
 		//导入弹框提醒
 		resultPopupShow.value = true;
-	}else{
+	} else {
 		ElMessage.info(response.result.msg);
 	}
 	// if (response.result.code == "1") {

@@ -4,8 +4,15 @@
 /// 库区
 /// </summary>
 [SugarTable("WMS_Area","库区")]
-public class WMSArea   
+[IncreTableAttribute]
+public class WMSArea : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
 
     /// <summary>

@@ -27,7 +27,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Interface
 
         public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         //Task<Response<List<OrderStatusDto>>> Strategy(List<long> request);
        Task<Response<List<OrderStatusDto>>> Strategy(List<long> request);
     }

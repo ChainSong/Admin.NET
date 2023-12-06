@@ -22,7 +22,7 @@ namespace Admin.NET.Application.Strategy
     {
 
         //注入数据库实例
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         //注入权限仓储
         public UserManager _userManager { get; set; }
@@ -83,7 +83,8 @@ namespace Admin.NET.Application.Strategy
             //{
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<WMSASN, WMSReceipt>()
+                cfg.CreateMap<WMSASN, WMSReceipt>() 
+                 .AddTransform<string>(a => a == null ? "" : a)
                  //自定义投影，将ASN ID 投影到入库表中
                  .ForMember(a => a.ASNId, opt => opt.MapFrom(c => c.Id))
                  //添加创建人为当前用户
@@ -100,6 +101,7 @@ namespace Admin.NET.Application.Strategy
                  .ForMember(a => a.UpdateTime, opt => opt.Ignore());
 
                 cfg.CreateMap<WMSASNDetail, WMSReceiptDetail>()
+                 .AddTransform<string>(a => a == null ? "" : a)
                  //自定义投影，将ASN明细 ID 投影到入库明细表中
                  .ForMember(a => a.ASNDetailId, opt => opt.MapFrom(c => c.Id))
                  //默认转入同等数量的入库单
@@ -255,7 +257,7 @@ namespace Admin.NET.Application.Strategy
             {
                 //插入入库单
                 ////开始插入订单
-                await _db.InsertNav(receipts).Include(it => it.Details).ExecuteCommandAsync();
+                await _repASN.Context.InsertNav(receipts).Include(it => it.Details).ExecuteCommandAsync();
 
                 await _repASN.UpdateAsync(it => new WMSASN() { ASNStatus = (int)ASNStatusEnum.转入库单, Updator = _userManager.Account, UpdateTime = DateTime.Now }, it => entityASN.Select(b => b.Id).Contains(it.Id));
 

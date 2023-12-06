@@ -3,7 +3,6 @@
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="1000" draggable="">
 			<el-tabs v-model="activeName">
 				<el-tab-pane label="页面创建" name="PageCreate">
-
 					<el-card>
 						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 							<el-row :gutter="35">
@@ -12,7 +11,7 @@
 									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
 										:prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
-											<el-input placeholder="请输入内容" size="small" style="width:90%"
+											<el-input :placeholder=i.displayName size="small" style="width:90%"
 												v-model="state.header[i.columnName]" v-if="i.isCreate">
 											</el-input>
 										</template>
@@ -25,9 +24,9 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :objData="state.header" :isDisabled="i.isCreate" :columnData="i"
-												:defaultvValue="state.header[i.columnName]"
-												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+											<select-Remote :whereData="state.header" :isDisabled="i.isCreate"
+												:columnData="i" :defaultvValue="state.header[i.columnName]"
+												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
 											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
@@ -85,7 +84,7 @@
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :objData="state.header" :isDisabled="v.isCreate"
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
@@ -122,6 +121,84 @@
 						</el-form>
 					</el-card>
 				</el-tab-pane>
+				<el-tab-pane label="地址信息" name="AddressInfo">
+					<el-card>
+						<el-form ref="headerRuleRef" label-position="top" :model="state.orderAddress">
+							<el-row :gutter="35">
+								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
+									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isCreate == 1)"
+									v-bind:key="i.id">
+									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
+										:prop="i.columnName">
+										<template v-if="i.type == 'TextBox'">
+											<el-input :placeholder=i.displayName size="small" style="width:90%"
+												v-model="state.orderAddress[i.columnName]" v-if="i.isCreate">
+											</el-input>
+										</template>
+										<template v-if="i.type == 'DropDownListInt'">
+											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
+												placeholder="请选择" size="small" style="width:90%" filterable>
+												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
+													:label="item.name" :value="item.codeInt">
+												</el-option>
+											</el-select>
+										</template>
+										<template v-if="i.type == 'DropDownListStrRemote'">
+											<select-Remote :whereData="state.orderAddress" :isDisabled="i.isCreate"
+												:columnData="i" :defaultvValue="state.header[i.columnName]"
+												@select:model="data => { state.orderAddress[i.columnName] = data.text; state.orderAddress[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
+										</template>
+										<template v-if="i.type == 'DropDownListStr'">
+											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
+												placeholder="请选择" size="small" style="width:90%" filterable>
+												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
+													:label="item.name" :value="item.codeStr">
+												</el-option>
+											</el-select>
+										</template>
+										<template v-if="i.type == 'DatePicker'">
+											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
+												type="date" placeholder="选择日期" size="small" style="width:90%">
+											</el-date-picker>
+										</template>
+										<template v-if="i.type == 'DateTimePicker'">
+											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
+												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
+											</el-date-picker>
+										</template>
+									</el-form-item>
+								</el-col>
+							</el-row>
+						</el-form>
+					</el-card>
+					<!-- <el-descriptions class="margin-top" :column="2" size="small" border>
+						<template v-for="i in state.tableColumnOrderAddresss">
+							<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
+								v-if="i.isCreate || i.isKey">
+								<template>
+								</template>
+								<template v-if="i.type == 'DropDownListStr'">
+									<template v-for="item in i.tableColumnsDetails">
+										<label v-if="item.codeStr == state.orderAddress[i.columnName]" v-text="item.name"
+											show-icon :type="item.color" :key="item.codeStr"></label>
+									</template>
+								</template>
+								<template v-else-if="i.type == 'DropDownListInt'">
+									<template v-for="item in i.tableColumnsDetails">
+										<template v-if="item.codeStr == state.orderAddress[i.columnName]">
+											<label show-icon :type="item.color" v-text="item.name"
+												:key="item.codeInt"></label>
+										</template>
+									</template>
+								</template>
+								<template v-else>
+									<label font-family="Helvetica Neue" v-text="state.orderAddress[i.columnName]"></label>
+								</template>
+							</el-descriptions-item>
+						</template>
+					</el-descriptions> -->
+				</el-tab-pane>
+
 				<el-tab-pane label="Excel导入" name="ExcelCreate">
 					<el-row>
 						<el-col>
@@ -165,6 +242,7 @@ import { getByTableNameList, getImportExcelTemplate } from "/@/api/main/tableCol
 import Header from "/@/entities/preOrder";
 import Detail from "/@/entities/preOrderDetail";
 import orderStatus from "/@/entities/orderStatus";
+import OrderAddress from "/@/entities/orderAddress";
 import TableColumns from "/@/entities/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import { Local, Session } from '/@/utils/storage';
@@ -188,11 +266,17 @@ const state = ref({
 	header: new Header(),
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
+	orderAddress: new OrderAddress(),
 	//通用的表字段
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
 	tableColumnDetail: new TableColumns(),
 	tableColumnDetails: new Array<TableColumns>(),
+
+
+	tableColumnOrderAddress: new TableColumns(),
+	tableColumnOrderAddresss: new Array<TableColumns>(),
+
 	//导入提示
 	orderStatus: new Array<orderStatus>(),
 	// header: new Array<Details>(),
@@ -252,7 +336,8 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	state.value.header.details = state.value.details
+	state.value.header.details = state.value.details;
+	state.value.header.orderAddress = state.value.orderAddress;
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
@@ -265,7 +350,11 @@ const submit = async () => {
 						ElMessage.success("添加成功");
 						closeDialog();
 					} else {
-						ElMessage.error("添加失败");
+						// ElMessage.error(result.data.result.msg);
+						state.value.orderStatus = result.data.result;
+						// console.log(state.value.orderStatus);
+						//导入弹框提醒
+						resultPopupShow.value = true;
 					}
 				} else {
 					ElMessage({
@@ -317,6 +406,10 @@ const gettableColumn = async () => {
 		}
 	});
 
+	// console.log("dasdasdasdsa");
+	let resorderAddress = await getByTableNameList("WMS_OrderAddress");
+	state.value.tableColumnOrderAddresss = resorderAddress.data.result;
+	// console.log(state.value.tableColumnOrderAddresss);
 };
 
 // -------------------------------非可公用部分----------------------------------------
@@ -328,10 +421,10 @@ const ImportExcel = (response, file, fileList) => {
 		// console.log(state.value.orderStatus);
 		//导入弹框提醒
 		resultPopupShow.value = true;
-	}else{
-		ElMessage.success(response.result.msg);
+	} else {
+		ElMessage.error(response.result.msg);
 	}
-	 
+
 }
 //获取导入的模板
 // 导出日志

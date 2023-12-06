@@ -34,7 +34,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Interface
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         Task<Response<List<OrderStatusDto>>> Strategy(List<WMSReceiptReceiving> request);
     }

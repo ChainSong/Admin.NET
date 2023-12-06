@@ -4,8 +4,15 @@
 /// 拣货明细
 /// </summary>
 [SugarTable("WMS_PickTaskDetail","拣货明细")]
-public class WMSPickTaskDetail  
+[IncreTableAttribute]
+public class WMSPickTaskDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -73,6 +80,13 @@ public class WMSPickTaskDetail
     [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string ExternOrderNumber { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PreOrderNumber { get; set; }
     
     /// <summary>
     /// 
@@ -197,7 +211,22 @@ public class WMSPickTaskDetail
     [Required]
     [SugarColumn(ColumnDescription = "", Length = 100)]
     public string BatchCode { get; set; }
-    
+
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string LotCode { get; set; }
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string PoCode { get; set; }
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string Weight { get; set; }
+
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string Volume { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -234,7 +263,20 @@ public class WMSPickTaskDetail
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
     public DateTime? CreationTime { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Updator { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? UpdateTime { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>

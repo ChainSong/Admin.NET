@@ -4,9 +4,15 @@
 /// 指令
 /// </summary>
 [SugarTable("WMS_Instruction", "指令")]
-[SystemTable]
-public class WMSInstruction //: IEntityNotKey
+[IncreTableAttribute]
+public class WMSInstruction : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
 
     /// <summary>
@@ -89,14 +95,14 @@ public class WMSInstruction //: IEntityNotKey
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 
 
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public string Remark { get; set; }
+    public string? Remark { get; set; }
 
     /// <summary>
     /// 

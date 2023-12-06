@@ -24,15 +24,15 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrder> _rep;
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
 
-    private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
-    private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
+    //private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
+    //private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
   
@@ -43,19 +43,19 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail; 
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
-        _repReceipt = repReceipt;
-        _repReceiptDetail = repReceiptDetail;
+        //_repReceipt = repReceipt;
+        //_repReceiptDetail = repReceiptDetail;
         _repCustomer = repCustomer;
         _repCustomerUser = repCustomerUser;
         _repWarehouseUser = repWarehouseUser;
         _repTableColumns = repTableColumns;
         _repTableColumnsDetail = repTableColumnsDetail;
         _repTableInventoryUsable = repTableInventoryUsable;
-        _db = db;
+        //_db = db;
         _userManager = userManager;
         _repTableInventoryUsed = repTableInventoryUsed;
         _repInstruction = repInstruction;
@@ -114,8 +114,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSOrderOutput>()
 ;
@@ -289,7 +289,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         IAutomatedAllocationInterface factory = AutomatedAllocationFactory.AutomatedAllocation();
 
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
@@ -310,11 +310,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
     public async Task<Response<List<OrderStatusDto>>> CreatePickTask(List<long> input)
     {
         //使用简单工厂定制化  / 
-
         IPickTaskInterface factory = PickTaskFactory.PickTask();
-
-
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
@@ -322,7 +319,6 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         var response = await factory.Strategy(input);
-
         return response;
 
     }

@@ -4,8 +4,15 @@
 /// 预出库
 /// </summary>
 [SugarTable("WMS_PreOrder","预出库")]
-public class WMSPreOrder  
+[IncreTableAttribute]
+public class WMSPreOrder : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -299,7 +306,7 @@ public class WMSPreOrder
     [Navigate(NavigateType.OneToMany, nameof(WMSPreOrderDetail.PreOrderId))]
     public List<WMSPreOrderDetail> Details { get; set; }
 
-    [Navigate(NavigateType.OneToOne, nameof(WMSOrderAddress.Id))]
+    [Navigate(NavigateType.OneToOne,nameof(Id), nameof(WMSOrderAddress.PreOrderId))]
     public WMSOrderAddress OrderAddress { get; set; }
 
 }

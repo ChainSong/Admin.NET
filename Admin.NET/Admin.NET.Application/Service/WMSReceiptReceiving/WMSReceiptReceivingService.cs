@@ -31,7 +31,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
 
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
@@ -48,7 +48,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
-        _db = db;
+        //_db = db;
         _repCustomer = repCustomer;
         _repCustomerUser = repCustomerUser;
         _repWarehouseUser = repWarehouseUser;
@@ -115,8 +115,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
                     .Where(a => a.ReceiptStatus >= (int)ReceiptReceivingStatusEnum.上架)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSReceiptOutput>()
 ;
@@ -289,7 +289,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
         //1根据用户的角色 解析出Excel
         IReceiptReceivingExcelInterface factoryExcel = ReceiptReceivingExcelFactory.GetReceipt();
-        factoryExcel._db = _db;
+        //factoryExcel._db = _db;
         factoryExcel._repReceipt = _rep;
         factoryExcel._repReceiptDetail = _repReceiptDetail;
         factoryExcel._repReceiptReceiving = _repReceiptReceiving;
@@ -315,7 +315,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         }
         //使用简单工厂定制化修改和新增的方法
         IReceiptReceivingInterface factory = ReceiptReceivingFactory.GetReceiptReceiving(customerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;
         factory._repReceiptReceiving = _repReceiptReceiving;
@@ -323,7 +323,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repLocation = _repLocation;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
-
+        factory._userManager = _userManager;
         var response = await factory.Strategy(entityListDtos);
 
         return response;
@@ -352,11 +352,12 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
 
         IReceiptReceivingReturnInterface factory = ReceiptReceivingReturnFactory.ReturnReceiptReceiving(customerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;
         factory._repReceiptReceiving = _repReceiptReceiving;
         factory._repTableColumns = _repTableColumns;
+        factory._userManager = _userManager;
         factory._repLocation = _repLocation;
         return await factory.Strategy(input);
 
@@ -408,7 +409,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         }
         //使用简单工厂定制化修改和新增的方法
         IReceiptInventoryInterface factory = ReceiptInventoryFactory.AddInventory(customerData.CustomerId);
-        factory._db = _db;
+        //factory._db = _db;
         factory._repASN = _repASN;
         factory._repASNDetail = _repASNDetail;
         factory._repReceipt = _rep;

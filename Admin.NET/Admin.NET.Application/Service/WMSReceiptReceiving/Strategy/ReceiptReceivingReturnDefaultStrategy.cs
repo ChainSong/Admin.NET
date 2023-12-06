@@ -30,7 +30,7 @@ namespace MyProAdmin.NET.Applicationject.ReceiptReceivingCore.Strategy
 
         public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
 
 
@@ -92,6 +92,7 @@ namespace MyProAdmin.NET.Applicationject.ReceiptReceivingCore.Strategy
             });
             //_wms_receiptRepository.Update(a => new WMS_Receipt {  ReceiptStatus== ReceiptStatusEnum.新增 } );
             response.Code = StatusCode.Success;
+            response.Msg = "操作成功";
             //throw new NotImplementedException();
             return response;
             //});

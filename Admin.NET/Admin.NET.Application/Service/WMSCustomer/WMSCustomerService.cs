@@ -62,7 +62,7 @@ public class WMSCustomerService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.Id).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.Id).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.Id && b.UserId == _userManager.UserId).Count() > 0)
                     //.Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
 
                     .Select<WMSCustomerOutput>()
@@ -91,8 +91,8 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     public async Task<Response> Add(WMSCustomer input)
     {
         var entity = input.Adapt<WMSCustomer>();
-        await _db.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
-
+        //await _db.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+        await _rep.Context.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
 
         //给自己添加客户权限
         CustomerUserMapping customerUserMapping = new CustomerUserMapping();

@@ -4,8 +4,15 @@
 /// 调整明细表
 /// </summary>
 [SugarTable("WMS_AdjustmentDetail","调整明细表")]
-public class WMSAdjustmentDetail 
+[IncreTableAttribute]
+public class WMSAdjustmentDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -51,7 +58,7 @@ public class WMSAdjustmentDetail
     /// 
     /// </summary>
     //[Required]
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "")]
     public long WarehouseId { get; set; }
     
     /// <summary>

@@ -4,8 +4,15 @@
 /// 预入库明细表
 /// </summary>
 [SugarTable("WMS_ASNDetail","预入库明细表")]
-public class WMSASNDetail  
+[IncreTableAttribute]
+public class WMSASNDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// 雪花Id
@@ -109,7 +116,35 @@ public class WMSASNDetail
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? BatchCode { get; set; }
-    
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "")]
+    public double Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "")]
+    public double Volume { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
@@ -147,13 +182,13 @@ public class WMSASNDetail
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public object? ProductionDate { get; set; }
+    public DateTime? ProductionDate { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public object? ExpirationDate { get; set; }
+    public DateTime? ExpirationDate { get; set; }
     
     /// <summary>
     /// 
@@ -367,3 +402,5 @@ public class WMSASNDetail
     public int? Int5 { get; set; }
     
 }
+
+

@@ -1,0 +1,412 @@
+﻿// 麻省理工学院许可证
+//
+// 版权所有 (c) 2021-2023 zuohuaijun，大名科技（天津）有限公司  联系电话/微信：18020030720  QQ：515096995
+//
+// 特此免费授予获得本软件的任何人以处理本软件的权利，但须遵守以下条件：在所有副本或重要部分的软件中必须包括上述版权声明和本许可声明。
+//
+// 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
+// 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
+
+using Admin.NET.Application.Interface;
+using Admin.NET.Common.InterfaceUtils;
+using Admin.NET.Core.Entity;
+using Admin.NET.Core.Service;
+using Admin.NET.Core;
+using Admin.NET.Express;
+using Admin.NET.Express.Enumerate;
+using Admin.NET.Express.Interface;
+using Admin.NET.Express.Strategy;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using System.Xml;
+using XSystem.Security.Cryptography;
+
+using AutoMapper;
+using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Express.Strategy.SFExpress.Dto;
+using NewLife.Serialization;
+using Admin.NET.Application.Service.WMSExpress.Interface;
+using NPOI.SS.Formula.PTG;
+
+namespace Admin.NET.Application.Service.WMSExpress.Strategy;
+
+/// <summary>
+/// 顺丰快递
+/// </summary>
+public class SFExpressStrategy : IExpressInterface
+{
+
+    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
+    public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+    public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+    public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+
+    public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
+    public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
+    public UserManager _userManager { get; set; }
+    //public ISqlSugarClient _db { get; set; }
+    public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
+
+
+    public SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery { get; set; }
+    public SqlSugarRepository<WMSExpressConfig> _repExpressConfig { get; set; }
+
+    public SysCacheService _sysCacheService { get; set; }
+    /// <summary>
+    /// 获取快递信息
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task<Response> GetExpressData(ScanPackageInput request)
+    {
+        Response response = new Response();
+        //request.PackageNumber = "126370824143168";
+
+        //获取包裹信息
+        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+        //如果已经有了快递单号直接打印
+        if (package != null && !string.IsNullOrEmpty(package.ExpressNumber))
+        {
+            response.Msg = "成功";
+            response.Code = StatusCode.Success;
+            return response;
+        }
+        var packageDetail = _repPackageDetail.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber);
+
+        //获取快递信息
+        var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
+
+
+
+        List<SFCargodetail> sFCargodetails = new List<SFCargodetail>();
+        packageDetail.ForEach(a =>
+        {
+            sFCargodetails.Add(new SFCargodetail { name = a.GoodsName });
+        });
+
+
+        //获取寄件人信息
+        var sender = _repWarehouse.AsQueryable().Where(a => a.Id == package.WarehouseId).First();
+        List<SFContactinfolist> sFContactinfolists = new List<SFContactinfolist>();
+        sFContactinfolists.Add(new SFContactinfolist()
+        {
+            address = sender.Address,
+            city = sender.City,
+            contact = sender.Contractor,
+            contactType = 1,
+            county = sender.Country,
+            mobile = sender.Mobile,
+            tel = sender.Phone,
+            province = sender.Province,
+            company = sender.Company,
+        });
+        //package.PreOrderNumber = "125840648167744";
+        //获取收件人信息
+        var receiver = _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == package.PreOrderNumber).First();
+        sFContactinfolists.Add(new SFContactinfolist()
+        {
+            address = receiver.Address,
+            city = receiver.City,
+            contact = receiver.Name,
+            contactType = 2,
+            county = receiver.Country,
+            mobile = receiver.Phone,
+            tel = receiver.Phone,
+            province = receiver.Province,
+            //company = receiver.Company,
+        });
+
+        string monthlyCard = "";//顺丰月结卡号 月结支付时传值，现结不需传值；沙箱联调可使用测试月结卡号7551234567（非正式，无须绑定，仅支持联调使用）
+
+        //var detail = _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == detail.First().PreOrderNumber);
+
+
+        //SFExpressServiceStrategy strategy = new SFExpressServiceStrategy();
+        SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>();
+        input.Data = new SFRootobject()
+        {
+            orderId = package.PackageNumber,
+            monthlyCard = getExpressConfig.MonthAccount,//顺丰月结卡号 月结支付时传值，现结不需传值；沙箱联调可使用测试月结卡号7551234567（非正式，无须绑定，仅支持联调使用）
+            language = "zh-CN",
+            payMethod = 1, //付款方式，支持以下值： 1:寄方付 2:收方付 3:第三方付
+            parcelQty = 1,//包裹数，一个包裹对应一个运单号；若包裹数大于1，则返回一个母运单号和N-1个子运单号
+            totalWeight = 1,//订单货物总重量（郑州空港海关必填）， 若为子母件必填， 单位千克， 精确到小数点后3位，如果提供此值， 必须>0 (子母件需>6)
+            isOneselfPickup = 1,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
+            customsInfo = new SFCustomsinfo(),
+            expressTypeId = 1,
+            //extraInfoList = ,
+            cargoDetails = sFCargodetails,
+            contactInfoList = sFContactinfolists
+
+        };
+        input.Checkword = getExpressConfig.Checkword;
+        input.Url = getExpressConfig.Url;
+        input.PartnerId = getExpressConfig.PartnerId;
+        input.ServiceCode = "EXP_RECE_CREATE_ORDER"; //下单方法
+        string Express = ExpressApplication.GetExpress(input);
+
+        Rootobject output = Express.ToJsonEntity<Rootobject>();
+        Apiresultdata apiresultdata = output.apiResultData.ToJsonEntity<Apiresultdata>();
+
+        if (apiresultdata.success.ToUpper() == "false".ToUpper())
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = apiresultdata.errorMsg;
+            return response;
+        }
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<WMSPackage, WMSExpressDelivery>()
+               //添加创建人为当前用户
+               .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+               .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+               .ForMember(a => a.PackageId, opt => opt.MapFrom(c => c.Id))
+               // 
+               //.ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
+               //添加
+               //.ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber))
+               //忽略
+               .ForMember(a => a.UpdateTime, opt => opt.Ignore())
+               .ForMember(a => a.Updator, opt => opt.Ignore());
+            //.AddTransform<string>(a => a == null ? "" : a);
+
+            cfg.CreateMap<Routelabeldata, WMSSFExpress>()
+              //添加创建人为当前用户
+              .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+              .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
+            //添加
+
+        });
+        var mapper = new Mapper(config);
+        var packageData = mapper.Map<WMSExpressDelivery>(package);
+        var sfexpress = mapper.Map<WMSSFExpress>(apiresultdata.msgData.routeLabelInfo[0].routeLabelData);
+        packageData.SenderCompany = sender.Company;
+        packageData.SenderProvince = sender.Province;
+        packageData.SenderCity = sender.City;
+        packageData.SenderContact = sender.Contractor;
+        packageData.SenderTel = sender.Phone;
+        packageData.SenderCountry = sender.Country;
+        packageData.SenderAddress = sender.Address;
+        packageData.SenderPostCode = "";
+        packageData.RecipientsProvince = receiver.Province;
+        packageData.RecipientsCity = receiver.City;
+        packageData.RecipientsCountry = receiver.Country;
+        packageData.RecipientsCompany = receiver.ExpressCompany;
+        packageData.ExpressNumber = sfexpress.WaybillNo;
+        packageData.RecipientsContact = receiver.Name;
+        packageData.RecipientsTel = receiver.Phone;
+        packageData.RecipientsAddress = receiver.Address;
+        packageData.RecipientsPostCode = "";
+        packageData.PrintTime = DateTime.Now;
+        packageData.PrintPersonnel = _userManager.Account;
+        //packageData.Details = sfexpress;
+        await _repExpressDelivery.InsertAsync(packageData);
+        await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
+        //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
+
+        response.Msg = "成功";
+        response.Code = StatusCode.Success;
+        return response;
+
+    }
+
+    /// <summary>
+    /// 获取快递配置信息
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task<Response<dynamic>> GetExpressConfig(ScanPackageInput request)
+    {
+        Response<dynamic> response = new Response<dynamic>();
+        //request.PackageNumber = "126370824143168";
+        SFExpressInput<SFRootobjectPrint> input = new SFExpressInput<SFRootobjectPrint>();
+
+        //获取包裹信息
+        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+
+        var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + package.CustomerId + "_" + package.WarehouseId);
+
+        if (expressConfig != null)
+        {
+            response.Msg = "成功";
+            response.Code = StatusCode.Success;
+            response.Data = expressConfig;
+            return response;
+
+        }
+
+
+        //获取快递信息
+        var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
+
+        //var Express = _repExpressDelivery.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).FirstAsync();
+
+
+
+
+        //WMSExpressConfigOutput wMSExpress = new WMSExpressConfigOutput();
+
+        var wMSExpressConfig = getExpressConfig.Adapt<WMSExpressConfigOutput>();
+
+        if (getExpressConfig != null)
+        {
+            input.Checkword = getExpressConfig.Checkword;
+            input.Url = getExpressConfig.Url;
+            input.PartnerId = getExpressConfig.PartnerId;
+            input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
+                                                                 //input.Data = new SFRootobjectPrint()
+                                                                 //{
+                                                                 //    templateCode = "fm_150_standard_HJSRJOEY88G9",
+                                                                 //    version = "2.0",
+                                                                 //    fileType = "pdf",
+                                                                 //    sync = "true",
+                                                                 //    documents = new List<Document>() { new Document() { masterWaybillNo = package.ExpressNumber } }
+                                                                 //};
+
+            string ResultData = ExpressApplication.TokenExpress(input);
+
+            RootobjectPrint rootobjectPrint = ResultData.ToJsonEntity<RootobjectPrint>();
+            wMSExpressConfig.Token = rootobjectPrint.accessToken;
+            //RootobjectPrint_obj RootobjectResult = rootobjectPrint.apiResultData.ToJsonEntity<RootobjectPrint_obj>();
+            //rootobjectPrint
+
+            _sysCacheService.Set("SFExpress_" + package.CustomerId + "_" + package.WarehouseId, wMSExpressConfig, new TimeSpan(1, 30, 0));
+            response.Msg = "成功";
+            response.Code = StatusCode.Success;
+            response.Data = wMSExpressConfig;
+            return response;
+        }
+        //var config = new MapperConfiguration(cfg =>
+        //{
+        //    cfg.CreateMap<WMSPackage, WMSExpressDelivery>()
+        //       //添加创建人为当前用户
+        //       .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+        //       .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+        //       .ForMember(a => a.PackageId, opt => opt.MapFrom(c => c.Id))
+        //       // 
+        //       //.ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
+        //       //添加
+        //       //.ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber))
+        //       //忽略
+        //       .ForMember(a => a.UpdateTime, opt => opt.Ignore())
+        //       .ForMember(a => a.Updator, opt => opt.Ignore());
+        //    //.AddTransform<string>(a => a == null ? "" : a);
+
+        //    //cfg.CreateMap<PackageData, WMSPackageDetail>()
+        //    //  //添加创建人为当前用户
+        //    //  .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+        //    //  .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+        //    //  //添加
+        //    //  .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
+        //});
+        //var mapper = new Mapper(config);
+        //var packageData = mapper.Map<WMSExpressDelivery>(package);
+        //packageData.SenderCompany = sender.Company;
+        //packageData.SenderProvince = sender.Province;
+        //packageData.SenderCity = sender.City;
+        //packageData.SenderContact = sender.Contractor;
+        //packageData.SenderTel = sender.Phone;
+        //packageData.SenderCountry = sender.Country;
+        //packageData.SenderAddress = sender.Address;
+        //packageData.SenderPostCode = "";
+        //packageData.RecipientsProvince = receiver.Province;
+        //packageData.RecipientsCity = receiver.City;
+        //packageData.RecipientsCountry = receiver.Country;
+        //packageData.RecipientsCompany = receiver.ExpressCompany;
+        //packageData.RecipientsContact = receiver.Name;
+        //packageData.RecipientsTel = receiver.Phone;
+        //packageData.RecipientsAddress = receiver.Address;
+        //packageData.RecipientsPostCode = "";
+        //packageData.PrintTime = DateTime.Now;
+        //packageData.PrintPersonnel = _userManager.Account;
+
+        //await _repExpressDelivery.InsertAsync(packageData);
+
+        response.Msg = "快递单号不存在";
+        response.Code = StatusCode.Error;
+        return response;
+    }
+
+    /// <summary>
+    /// 打印快递信息
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task<Response<dynamic>> PrintExpressData(ScanPackageInput request)
+    {
+        Response<dynamic> response = new Response<dynamic>();
+        //request.PackageNumber = "126370824143168";
+
+        //获取包裹信息
+        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+        if (package != null && !string.IsNullOrEmpty(package.ExpressNumber))
+        {
+            package.PrintNum =((package.PrintNum ?? 0) +1);
+            package.PrintPersonnel = _userManager.Account;
+            package.PrintTime = DateTime.Now;
+            await _repPackage.UpdateAsync(package);
+
+            response.Data = package;
+            response.Msg = "成功";
+            response.Code = StatusCode.Success;
+            return response;
+        }
+        else
+        {
+            response.Data = package;
+            response.Msg = "失败";
+            response.Code = StatusCode.Error;
+            return response;
+        }
+
+        //获取快递信息
+        var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
+
+        var Express = _repExpressDelivery.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).FirstAsync();
+
+        SFExpressInput<SFRootobjectPrint> input = new SFExpressInput<SFRootobjectPrint>();
+
+
+        if (Express.Result != null)
+        {
+            input.Checkword = getExpressConfig.Checkword;
+            input.Url = getExpressConfig.Url;
+            input.PartnerId = getExpressConfig.PartnerId;
+            input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
+            input.Data = new SFRootobjectPrint()
+            {
+                templateCode = "fm_150_standard_HJSRJOEY88G9",
+                version = "2.0",
+                fileType = "pdf",
+                sync = "true",
+                documents = new List<Document>() { new Document() { masterWaybillNo = package.ExpressNumber } }
+            };
+            var ResultData = ExpressApplication.PrintExpress(input);
+
+            RootobjectPrint rootobjectPrint = ResultData.ToJsonEntity<RootobjectPrint>();
+            RootobjectPrint_obj RootobjectResult = rootobjectPrint.apiResultData.ToJsonEntity<RootobjectPrint_obj>();
+            //rootobjectPrint
+            response.Msg = "成功";
+            response.Code = StatusCode.Success;
+            response.Data = RootobjectResult.obj.files[0].token;
+            return response;
+        }
+
+        response.Msg = "快递单号不存在";
+        response.Code = StatusCode.Error;
+        return response;
+
+    }
+
+}
+
+
+

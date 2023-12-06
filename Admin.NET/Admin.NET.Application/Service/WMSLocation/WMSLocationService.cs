@@ -16,11 +16,12 @@ public class WMSLocationService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSLocation> _rep;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
-
-    public WMSLocationService(SqlSugarRepository<WMSLocation> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser)
+    private readonly UserManager _userManager;
+    public WMSLocationService(SqlSugarRepository<WMSLocation> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager)
     {
         _rep = rep;
         _repWarehouseUser = repWarehouseUser;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ public class WMSLocationService : IDynamicApiController, ITransient
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
                     //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSLocationOutput>()
 ;

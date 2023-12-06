@@ -18,7 +18,7 @@ import { getSelect } from '/@/api/main/toolsUtilService';
 interface Props {
     value?: any;
     defaultvValue?: any;
-    objData?: any;
+    whereData?: any;
     placeholder?: string;
     apiUrl: string;
     isDisabled: number;
@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
     value: '',
     defaultvValue: '',
     //请求参数
-    objData: '',
+    whereData: '',
     //请求URL(已经弃用，可以从columnData获取)
     apiUrl: '',
     isDisabled: 1,
@@ -62,16 +62,16 @@ const valueChange = (data) => {
 
 const getDropDownListRemoteData = async (data) => {
    
-    let result = await getSelect(props.columnData.associated, {"objData":props.objData,"inputData":data})
+    let result = await getSelect(props.columnData.associated, {"whereData":props.whereData,"inputData":data})
     list.value = result.data.result;
 }
 
 onMounted(async () => {
     list.value = [];
     modelValue.value = props.defaultvValue;
-    console.log("props.objData");
-    console.log(props.objData);
-    const result = await getSelect(props.columnData.associated, props.objData)
+    console.log("props.whereData");
+    console.log(props.whereData);
+    const result = await getSelect(props.columnData.associated, props.whereData)
     list.value = result.data.result;
 });
 </script>

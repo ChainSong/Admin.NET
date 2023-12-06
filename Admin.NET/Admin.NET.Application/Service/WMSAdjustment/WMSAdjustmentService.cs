@@ -35,7 +35,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
 
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     public WMSAdjustmentService(SqlSugarRepository<WMSAdjustment> rep, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, ISqlSugarClient db, SqlSugarRepository<WMSAdjustmentDetail> repAdjustmentDetail)
     {
         _rep = rep;
@@ -44,7 +44,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         _repCustomer = repCustomer;
         _repWarehouseUser = repWarehouseUser;
         _repCustomerUser = repCustomerUser;
-        _db = db;
+        //_db = db;
         _repAdjustmentDetail = repAdjustmentDetail;
     }
 
@@ -96,8 +96,8 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     //.Where(a=> _repCustomerUser.AsQueryable().Where(b=>b.CustomerId==a.CustomerId).Count()>0)
                     //.Where(a=> _repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
@@ -183,7 +183,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         IAdjustmentInterface factory = AdjustmentFactory.AddOrUpdate(input.CustomerId);
         factory._repAdjustment = _rep;
         factory._repAdjustmentDetail = _repAdjustmentDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -226,7 +226,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         IAdjustmentInterface factory = AdjustmentFactory.AddOrUpdate(input.CustomerId);
         factory._repAdjustment = _rep;
         factory._repAdjustmentDetail = _repAdjustmentDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -291,7 +291,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         IAdjustmentConfirmInterface factory = AdjustmentConfirmFactory.Confirm(customerId, adjustmentType);
         factory._repAdjustment = _rep;
         factory._repAdjustmentDetail = _repAdjustmentDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -348,7 +348,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
             IAdjustmentInterface factory = AdjustmentFactory.AddOrUpdate(customerId);
             factory._repAdjustment = _rep;
             factory._repAdjustmentDetail = _repAdjustmentDetail;
-            factory._db = _db;
+            //factory._db = _db;
             factory._userManager = _userManager;
             factory._repCustomerUser = _repCustomerUser;
             factory._repWarehouseUser = _repWarehouseUser;

@@ -22,8 +22,8 @@
 										</el-select>
 									</template>
 									<template v-if="i.type == 'DropDownListStrRemote'">
-										<select-Remote :objData="state.header" :isDisabled="i.isCreate" :columnData="i"
-											@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+										<select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
+											@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 
 									</template>
 									<template v-if="i.type == 'DropDownListStr'">
@@ -164,10 +164,10 @@ const submit = async () => {
 			let result = await addWMSProduct(state.value.header);
 			if (result.data.result.code == "1") {
 				closeDialog();
-				ElMessage.success("添加成功");
+				ElMessage.success("保存成功");
 
 			} else {
-				ElMessage.error("添加失败");
+				ElMessage.error("保存失败:"+result.data.result.msg);
 			}
 
 

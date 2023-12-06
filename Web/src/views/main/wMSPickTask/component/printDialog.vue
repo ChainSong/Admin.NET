@@ -17,16 +17,17 @@
 import { ref, onMounted, nextTick, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import type { FormRules } from "element-plus";
-import { addWMSPickTask, updateWMSPickTask, getWMSPickTask,addWMSPickTaskPrintLog } from "/@/api/main/wMSPickTask";
+import { addWMSPickTask, updateWMSPickTask, getWMSPickTask, addWMSPickTaskPrintLog } from "/@/api/main/wMSPickTask";
 import { getByTableNameList } from "/@/api/main/tableColumns";
+import { queryPrintTemplate } from "/@/api/main/printTemplate";
 import Header from "/@/entities/pickTask";
 import Detail from "/@/entities/pickTaskDetail";
 import TableColumns from "/@/entities/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import printJS from 'print-js'
-import { getAPI } from '/@/utils/axios-utils';
-import { SysPrintApi } from '/@/api-services/api';
-import { SysPrint } from '/@/api-services/models';
+// import { getAPI } from '/@/utils/axios-utils';
+// import { SysPrintApi } from '/@/api-services/api';
+// import { SysPrint } from '/@/api-services/models';
 import { hiprint } from 'vue-plugin-hiprint';
 const state = ref({
 	vm: {
@@ -136,11 +137,11 @@ const showDialog = (hiprintTemplate: any, printData: {}, width = 210) => {
 // }
 
 //打印
-const print =async () => {
+const print = async () => {
 	staterReactive.waitShowPrinter = true;
 	// console.log(staterReactive.printData);
 	//修改打印的时间和打印次数
-    await addWMSPickTaskPrintLog(state.value.header.id);
+	await addWMSPickTaskPrintLog(state.value.header.id);
 
 	staterReactive.hiprintTemplate.print(
 		staterReactive.printData,
@@ -159,6 +160,7 @@ const print =async () => {
 
 //获取订单数据
 const get = async () => {
+
 	let result = await getWMSPickTask(state.value.header.id);
 	console.log("result");
 	console.log(result);
@@ -171,9 +173,14 @@ const get = async () => {
 
 // 获取打印模板
 const getPrintTemplate = async () => {
-	var res = await getAPI(SysPrintApi).apiSysPrintPagePost({ "name": "拣货单打印模板" });
-	let printData = res.data.result?.items ?? [];
-	staterReactive.hiprintTemplate = new hiprint.PrintTemplate({ template: JSON.parse(printData[0].template) });
+	// var res = await getAPI(SysPrintApi).apiSysPrintPagePost({ "name": "拣货单打印模板" });
+	var res = await queryPrintTemplate("拣货单打印模板");
+	// console.log("res");
+	// console.log(res);
+	let printData = res.data.result ?? {};
+	// console.log("printData");
+	// console.log(printData);
+	staterReactive.hiprintTemplate = new hiprint.PrintTemplate({ template: JSON.parse(printData.template) });
 	staterReactive.printData = state.value.header;
 	showDialog(staterReactive.hiprintTemplate, JSON.stringify(state.value.header))
 }
@@ -181,6 +188,7 @@ const getPrintTemplate = async () => {
 
 // 页面加载时
 onMounted(async () => {
+
 	get();
 });
 

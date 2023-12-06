@@ -17,9 +17,10 @@ namespace Admin.NET.Application.Enumerate;
 public enum PickTaskStatusEnum
 {
     新增 = 1,
-    拣货中 = 5,
-    挂起 = 10,
-    拣货完成 = 99
+    拣货中 = 10,
+    挂起 = 20,
+    拣货完成 = 99,
+    包装完成 = 199
 
 
 }

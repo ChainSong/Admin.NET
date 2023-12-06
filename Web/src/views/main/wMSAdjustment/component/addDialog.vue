@@ -25,7 +25,7 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :objData="state.header" :isDisabled="i.isCreate" :columnData="i"
+											<select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
 												:defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
@@ -85,7 +85,7 @@
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :objData="state.header" :isDisabled="v.isCreate"
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>

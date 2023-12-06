@@ -6,6 +6,8 @@ enum Api {
   PageWMSPickTask = '/api/wMSPickTask/page',
   GetWMSPickTask = '/api/wMSPickTask/Query',
   AddWMSPickTaskPrintLog = '/api/wMSPickTask/AddPrintLog',
+  WMSPickComplete = '/api/wMSPickTask/WMSPickComplete',
+  
 }
 
 // 增加WMSPickTask
@@ -54,3 +56,10 @@ request({
 	method: 'get'
 });
 
+// 单条查询WMSPickTask
+export const wmsPickComplete = (params?: any) => 
+request({
+	url: Api.WMSPickComplete,
+	method: 'post',
+	data: params,
+});

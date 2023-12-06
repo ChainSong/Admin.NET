@@ -4,8 +4,15 @@
 /// 仓库表
 /// </summary>
 [SugarTable("WMS_Warehouse","仓库表")]
-public class WMSWarehouse 
+[IncreTableAttribute]
+public class WMSWarehouse : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -68,6 +75,13 @@ public class WMSWarehouse
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? City { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Country { get; set; }
+
     
     /// <summary>
     /// 
@@ -136,5 +150,9 @@ public class WMSWarehouse
  
     [SugarColumn(ColumnDescription = "创建时间", IsOnlyIgnoreUpdate = true)]
     public DateTime? CreationTime { get; set; }
-    
+
+
+    [SugarColumn(ColumnDescription = "修改时间")]
+    public DateTime? UpdateTime { get; set; }
+
 }

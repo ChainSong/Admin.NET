@@ -21,7 +21,7 @@ namespace Admin.NET.ApplicationCore.Strategy
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
 
 
@@ -89,6 +89,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                      .ForMember(a => a.OrderStatus, opt => opt.MapFrom(c => OrderStatusEnum.新增))
                      .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                      .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+                  
                      //忽略修改时间
                      .ForMember(a => a.UpdateTime, opt => opt.Ignore())
                      //忽略修改人
@@ -140,7 +141,7 @@ namespace Admin.NET.ApplicationCore.Strategy
 
             //开始提交出库单
             //_repOrder.GetDbContext().BulkInsert(orderData, options => options.IncludeGraph = true);
-            await _db.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
             //更新预出库单状态
             _repPreOrder.AsQueryable().Where(a => request.Contains(a.Id)).ToList().ForEach(e =>
             {

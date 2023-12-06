@@ -42,7 +42,7 @@ namespace Admin.NET.Application.Strategy
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
 
         public ReceiptInventoryDefaultStrategy(

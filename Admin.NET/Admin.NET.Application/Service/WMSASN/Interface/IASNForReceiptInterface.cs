@@ -14,7 +14,7 @@ namespace Admin.NET.Application.Interface
     {
 
         //数据库实例
-        ISqlSugarClient _db { get; set; }
+        //ISqlSugarClient _db { get; set; }
         //用户仓储
         UserManager _userManager { get; set; }
         //asn仓储

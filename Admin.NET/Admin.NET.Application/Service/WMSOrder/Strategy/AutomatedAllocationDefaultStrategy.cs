@@ -23,7 +23,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }

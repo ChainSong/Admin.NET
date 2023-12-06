@@ -513,6 +513,7 @@ public class AddOrUpdateWMSPreOrderInput : WMSPreOrderBaseInput
     [Required(ErrorMessage = "Id不能为空")]
     public long Id { get; set; }
     public List<WMSPreOrderDetail> Details { get; set; }
+    public WMSOrderAddress OrderAddress { get; set; }
 }
 
 /// <summary>

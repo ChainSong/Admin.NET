@@ -24,7 +24,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Interface
 
         public SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
         //public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
         Response<DataTable> Strategy(dynamic request);

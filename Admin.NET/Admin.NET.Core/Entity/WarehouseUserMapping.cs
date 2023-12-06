@@ -4,8 +4,15 @@
 /// 仓库用户关系
 /// </summary>
 [SugarTable("Warehouse_User_Mapping","仓库用户关系")]
-public class WarehouseUserMapping  
+[IncreTableAttribute]
+public class WarehouseUserMapping : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     [SqlSugar.SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDescription = "主键")]
     public long Id { get; set; }

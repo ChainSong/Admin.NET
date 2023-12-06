@@ -3,6 +3,7 @@ using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
 namespace Admin.NET.Application;
@@ -16,11 +17,13 @@ public class WMSInventoryUsableService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
-    public WMSInventoryUsableService(SqlSugarRepository<WMSInventoryUsable> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser)
+    private readonly UserManager _userManager;
+    public WMSInventoryUsableService(SqlSugarRepository<WMSInventoryUsable> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager)
     {
         _rep = rep;
         _repWarehouseUser = repWarehouseUser;
         _repCustomerUser = repCustomerUser;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -63,10 +66,10 @@ public class WMSInventoryUsableService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Str5), u => u.Str5.Contains(input.Str5.Trim()))
                     .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
-                    //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+        //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+        //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSInventoryUsableOutput>()
 ;

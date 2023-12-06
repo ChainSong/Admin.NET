@@ -28,6 +28,10 @@ export default class pickTaskDetail extends Entity<number>{
     boxCode: string;
     trayCode: string;
     batchCode: string;
+    lotCode: String;
+    poCode: String;
+    weight: Number;
+    volume: Number;
     qty: number;
     productionDate: string;
     expirationDate: string;

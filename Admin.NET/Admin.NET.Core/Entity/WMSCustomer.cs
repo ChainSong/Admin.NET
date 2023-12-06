@@ -4,8 +4,15 @@
 /// 客户表
 /// </summary>
 [SugarTable("WMS_Customer", "客户表")]
-public class WMSCustomer: IDeletedFilter
+[IncreTableAttribute]
+public class WMSCustomer : IDeletedFilter, ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// 雪花Id
@@ -166,7 +173,7 @@ public class WMSCustomer: IDeletedFilter
     /// 创建时间
     /// </summary>
     [SugarColumn(ColumnDescription = "创建时间", IsOnlyIgnoreUpdate = true)]
-    public virtual DateTime? CreationTime { get; set; }
+    public virtual DateTime? CreateTime { get; set; }
 
     /// <summary>
     /// 更新时间
@@ -174,17 +181,17 @@ public class WMSCustomer: IDeletedFilter
     [SugarColumn(ColumnDescription = "更新时间", IsOnlyIgnoreInsert = true)]
     public virtual DateTime? UpdateTime { get; set; }
 
-    /// <summary>
-    /// 创建者Id
-    /// </summary>
-    [SugarColumn(ColumnDescription = "创建者Id", IsOnlyIgnoreUpdate = true)]
-    public virtual long? CreateUserId { get; set; }
+    ///// <summary>
+    ///// 创建者Id
+    ///// </summary>
+    //[SugarColumn(ColumnDescription = "创建者Id", IsOnlyIgnoreUpdate = true)]
+    //public virtual long? CreateUserId { get; set; }
 
-    /// <summary>
-    /// 修改者Id
-    /// </summary>
-    [SugarColumn(ColumnDescription = "修改者Id", IsOnlyIgnoreInsert = true)]
-    public virtual long? UpdateUserId { get; set; }
+    ///// <summary>
+    ///// 修改者Id
+    ///// </summary>
+    //[SugarColumn(ColumnDescription = "修改者Id", IsOnlyIgnoreInsert = true)]
+    //public virtual long? UpdateUserId { get; set; }
 
     /// <summary>
     /// 软删除
@@ -199,5 +206,5 @@ public class WMSCustomer: IDeletedFilter
 
     [Navigate(NavigateType.OneToMany, nameof(WMSCustomerDetail.CustomerId))]
 
-    public virtual List<WMSCustomerDetail> Details { get; set; } 
+    public virtual List<WMSCustomerDetail> Details { get; set; }
 }

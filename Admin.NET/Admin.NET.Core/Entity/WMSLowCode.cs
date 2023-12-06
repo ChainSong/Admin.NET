@@ -4,8 +4,15 @@
 /// 低代码
 /// </summary>
 [SugarTable("WMS_LowCode","低代码")]
-public class WMSLowCode   
+[IncreTableAttribute]
+public class WMSLowCode : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id

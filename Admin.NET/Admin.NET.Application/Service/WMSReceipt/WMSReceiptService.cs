@@ -30,7 +30,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
@@ -38,7 +38,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
-        _db = db;
+        //_db = db;
         _repCustomer = repCustomer;
         _repCustomerUser = repCustomerUser;
         _repWarehouseUser = repWarehouseUser;
@@ -103,8 +103,8 @@ public class WMSReceiptService : IDynamicApiController, ITransient
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSReceiptOutput>()
 ;
@@ -204,6 +204,10 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         var entity = input.Adapt<WMSReceipt>();
         await _rep.InsertAsync(entity);
     }
+
+
+
+    
 
     /// <summary>
     /// 删除WMSReceipt

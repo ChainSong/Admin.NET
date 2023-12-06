@@ -188,6 +188,7 @@ const get = async () => {
 	if (result.data.result != null) {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
+		state.value.orderAddress = result.data.result.orderAddress;
 	}
 	// console.log(state.value.details );
 }

@@ -24,6 +24,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Plugin.Elsa", "Pl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Common", "Admin.NET.Common\Admin.NET.Common.csproj", "{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Express", "Admin.NET.Express\Admin.NET.Express.csproj", "{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{273C34E1-FF2F-49EB-B5B2-9AAE49A2D209}.Release|Any CPU.Build.0 = Release|Any CPU
+		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

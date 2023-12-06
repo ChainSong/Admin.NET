@@ -82,9 +82,30 @@ namespace Admin.NET.Application.Strategy
                             if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
                             {
                                 PropertyInfo property = receiptType.GetProperty(h.DbColumnName);
+
+
                                 if (property != null)
                                 {
-                                    row[h.DisplayName] = property.GetValue(a);
+
+                                    // 判断是下拉列表 就取下拉列表的数据
+                                    if (h.Type == "DropDownListInt")
+                                    {
+                                        try
+                                        {
+
+
+                                            row[h.DisplayName] = _repTableColumnsDetail.AsQueryable().Where(q => q.Associated == h.Associated).First().Name;
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            row[h.DisplayName] = property.GetValue(a);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        row[h.DisplayName] = property.GetValue(a);
+                                    }
                                 }
                                 else
                                 {
@@ -211,7 +232,9 @@ namespace Admin.NET.Application.Strategy
                   //由于框架约定大于配置， 数据库的字段首字母小写
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,
-                  IsImportColumn = a.IsImportColumn
+                  IsImportColumn = a.IsImportColumn,
+                  Associated = a.Associated,
+                  Type = a.Type
               }).ToList();
         }
     }

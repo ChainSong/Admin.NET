@@ -30,7 +30,7 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     //private readonly SqlSugarRepository<TableColumnsDetail> _repDetail;
     private readonly UserManager _userManager;
 
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
 
     //private readonly SqlSugarRepository<TableColumnsDetail> _repDetail;
     //private readonly SysRoleMenu _repRoleMenu;
@@ -47,7 +47,7 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     {
         _rep = rep;
         _userManager = userManager;
-        _db = db;
+        //_db = db;
         _repMenu = repMenu;
         _repRoleMenu = repRoleMenu;
         _repUserRole = repUserRole;
@@ -316,7 +316,7 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
                     strSql.Append(" and " + item.Key + "='" + item.Value + "'");
                 }
             }
-            var data = _db.Ado.GetDataTable(strSql.ToString());
+            var data = _rep.Context.Ado.GetDataTable(strSql.ToString());
             response.Data = data;
         }
         return response;

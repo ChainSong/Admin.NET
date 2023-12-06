@@ -400,11 +400,22 @@ public static class SqlSugarSetup
         if (!entityTypes.Any()) return;
         foreach (var entityType in entityTypes)
         {
-            var splitTable = entityType.GetCustomAttribute<SplitTableAttribute>();
-            if (splitTable == null)
-                db.CodeFirst.InitTables(entityType);
-            else
-                db.CodeFirst.SplitTables().InitTables(entityType);
+            try
+            {
+
+
+                var splitTable = entityType.GetCustomAttribute<SplitTableAttribute>();
+                Console.WriteLine(entityType.Name);
+                if (splitTable == null)
+                    db.CodeFirst.InitTables(entityType);
+                else
+                    db.CodeFirst.SplitTables().InitTables(entityType);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
         }
     }
 }

@@ -4,8 +4,15 @@
 /// 预出库明细
 /// </summary>
 [SugarTable("WMS_PreOrderDetail","预出库明细")]
-public class WMSPreOrderDetail  
+[IncreTableAttribute]
+public class WMSPreOrderDetail : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id
@@ -125,7 +132,37 @@ public class WMSPreOrderDetail
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 100)]
     public string BatchCode { get; set; } = "";
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     
+    [SugarColumn(ColumnDescription = "")]
+    public double? Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    
+    [SugarColumn(ColumnDescription = "")]
+    public double? Volume { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -176,7 +213,7 @@ public class WMSPreOrderDetail
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 200)]
-    public string Remark { get; set; } = "";
+    public string? Remark { get; set; } = "";
 
     /// <summary>
     /// 

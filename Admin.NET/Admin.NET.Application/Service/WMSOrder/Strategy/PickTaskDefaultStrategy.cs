@@ -25,7 +25,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
@@ -101,6 +101,7 @@ namespace Admin.NET.Application.Strategy
                          .ForMember(a => a.PickStatus, opt => opt.MapFrom(c => (int)PickTaskStatusEnum.新增))
                          .ForMember(a => a.ExternOrderNumber, opt => opt.MapFrom(c => data.ExternOrderNumber))
                          .ForMember(a => a.OrderNumber, opt => opt.MapFrom(c => data.OrderNumber))
+                         .ForMember(a => a.PreOrderNumber, opt => opt.MapFrom(c => data.PreOrderNumber))
                          .ForMember(a => a.PickTaskNumber, opt => opt.MapFrom(c => pickTaskNumber))
                          .ForMember(a => a.Id, opt => opt.Ignore())
                          //添加创建人为当前用户
@@ -108,7 +109,6 @@ namespace Admin.NET.Application.Strategy
                          .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
 
                 });
-
 
                 var mapper = new Mapper(config);
                 var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation);
@@ -141,7 +141,7 @@ namespace Admin.NET.Application.Strategy
             });
 
             //_repPickTask.AsQueryable().Includes(a => a.Detail).Where(a => request.Contains(a.Id)).ToList();
-            await _db.InsertNav(pickTasks).Include(a => a.Details).ExecuteCommandAsync();
+            await _repOrder.Context.InsertNav(pickTasks).Include(a => a.Details).ExecuteCommandAsync();
 
 
             var orderResule = _repOrder.AsQueryable().Where(a => request.Contains(a.Id)).ToList();

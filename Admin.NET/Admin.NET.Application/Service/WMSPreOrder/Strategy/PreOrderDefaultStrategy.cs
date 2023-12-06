@@ -21,7 +21,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
 
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
@@ -44,8 +44,8 @@ namespace Admin.NET.Application.Strategy
 
             //判断是否有权限操作
             //先判断是否能操作客户
-            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
-            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少客户操作权限";
@@ -53,8 +53,8 @@ namespace Admin.NET.Application.Strategy
             }
 
             //先判断是否能操作仓库
-            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
-            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.GroupBy(a => a.WarehouseName).Count() != request.GroupBy(a => a.WarehouseName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少仓库操作权限";
@@ -93,6 +93,7 @@ namespace Admin.NET.Application.Strategy
                    .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                    .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                    .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
+                   .ForMember(a => a.OrderAddress, opt => opt.MapFrom(c => c.OrderAddress))
                    //添加库存状态为可用
                    .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
 
@@ -147,11 +148,18 @@ namespace Admin.NET.Application.Strategy
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
                 });
+
+                item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
+                item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
+                item.OrderAddress.Creator = _userManager.Account;
+                item.OrderAddress.CreationTime = DateTime.Now;
+                item.OrderAddress.UpdateTime = DateTime.Now;
                 LineNumber++;
             });
 
             //开始插入数据
-            await _db.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            //await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).Include(b=>b.OrderAddress).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             response.Msg = "添加成功";
@@ -270,7 +278,7 @@ namespace Admin.NET.Application.Strategy
             });
 
             //开始插入数据
-            await _db.UpdateNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             return response;

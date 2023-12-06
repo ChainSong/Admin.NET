@@ -207,7 +207,7 @@ const submit = async () => {
 					if (result.data.result.code == "1") {
 						closeDialog();
 					} else {
-						ElMessage.error("添加失败");
+						ElMessage.error("保存失败:"+result.data.result.msg);
 					} 
 				} else {
 					ElMessage({

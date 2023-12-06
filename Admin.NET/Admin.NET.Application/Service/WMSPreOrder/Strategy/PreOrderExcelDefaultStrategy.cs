@@ -18,7 +18,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
 
 
@@ -43,6 +43,7 @@ namespace Admin.NET.Application.Strategy
 
             var headerTableColumn = GetColumns("WMS_PreOrder");
             var detailTableColumn = GetColumns("WMS_PreOrderDetail");
+            var orderAddressTableColumn = GetColumns("WMS_OrderAddress");
 
 
             //循环datatable
@@ -55,7 +56,10 @@ namespace Admin.NET.Application.Strategy
                 {
                     Column = detailTableColumn.Where(a => a.DisplayName == s).FirstOrDefault();
                 }
-
+                if (Column == null)
+                {
+                    Column = orderAddressTableColumn.Where(a => a.DisplayName == s).FirstOrDefault();
+                }
                 if (Column == null)
                 {
                     continue;

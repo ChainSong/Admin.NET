@@ -24,9 +24,9 @@
                 </template>
                 <template v-if="i.type == 'DropDownListStrRemote'">
                   <el-form-item class="mb-0" :label="i.displayName">
-                    <select-Remote :objData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
+                    <select-Remote :whereData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
                       :defaultvValue="state.header[i.columnName]"
-                      @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+                      @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
                   </el-form-item>
                 </template>
 
@@ -225,12 +225,8 @@ onMounted(async () => {
 });
 
 const gettableColumn = async () => {
-
   let res = await getByTableNameList("WMS_PreOrder");
   state.value.tableColumnHeaders = res.data.result;
-
-
-
 };
 
 // 查询操作

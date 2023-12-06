@@ -4,8 +4,15 @@
 /// 分配
 /// </summary>
 [SugarTable("WMS_OrderAllocation","分配")]
-public class WMSOrderAllocation  
+[IncreTableAttribute]
+public class WMSOrderAllocation : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
 
     /// <summary>
@@ -96,7 +103,35 @@ public class WMSOrderAllocation
     [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string GoodsType { get; set; }
-    
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Weight { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public double? Volume { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -184,6 +219,19 @@ public class WMSOrderAllocation
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 200)]
     public string Remark { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string Creator { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? Creationtime { get; set; }
+
     
     /// <summary>
     /// 

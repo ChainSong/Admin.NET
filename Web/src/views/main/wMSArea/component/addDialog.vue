@@ -24,7 +24,7 @@
 								</template>
 								<template v-if="i.type == 'DropDownListStrRemote'">
 									<select-Remote :objData="state.header" :isDisabled="i.isCreate" :columnData="i"
-										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">
@@ -162,7 +162,7 @@ const submit = async () => {
 			if (result.data.result.code == "1") {
 				closeDialog();
 			} else {
-				ElMessage.error("添加失败:"+result.data.result.msg);
+				ElMessage.error("保存失败:"+result.data.result.msg);
 			}
 		} else {
 			ElMessage({

@@ -25,9 +25,9 @@
               </template>
               <template v-if="i.type == 'DropDownListStrRemote'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <select-Remote :objData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
+                  <select-Remote :whereData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
                     :defaultvValue="state.header[i.columnName]"
-                    @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
+                    @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
                 </el-form-item>
               </template>
 
@@ -83,13 +83,13 @@
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
 
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
-        style="width: 100%">
+        >
         <el-table-column type="selection" width="55">
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
             <el-table-column v-if="v.type == 'DropDownListInt'" v-bind:key="v.columnName" :fixed="false"
-              :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
+              :prop="v.columnName" :label="v.displayName"   max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
                   <el-tag v-if="item.codeInt == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
@@ -100,7 +100,7 @@
               </template>
             </el-table-column>
             <el-table-column v-else-if="v.type == 'DropDownListStr'" v-bind:key="v.columnName" :fixed="false"
-              :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
+              :prop="v.columnName" :label="v.displayName"  max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
                   <el-tag v-if="item.codeStr == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
@@ -111,7 +111,7 @@
               </template>
             </el-table-column>
             <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName"
-              width="150" max-height="50">
+               max-height="50">
             </el-table-column>
           </template>
         </template>

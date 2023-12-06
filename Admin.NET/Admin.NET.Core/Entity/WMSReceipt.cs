@@ -4,8 +4,15 @@
 /// 入库表
 /// </summary>
 [SugarTable("WMS_Receipt","入库表")]
-public class WMSReceipt  
+[IncreTableAttribute]
+public class WMSReceipt : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     /// <summary>
     /// Id

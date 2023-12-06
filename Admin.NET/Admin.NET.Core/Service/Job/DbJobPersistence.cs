@@ -34,6 +34,10 @@ public class DbJobPersistence : IJobPersistence
 
         // 获取所有定义的作业
         var allJobs = App.EffectiveTypes.ScanToBuilders().ToList();
+        if (jobDetailRep == null)
+        {
+            return allJobs;
+        }
         // 若数据库不存在任何作业，则直接返回
         if (!jobDetailRep.IsAny(u => true)) return allJobs;
 

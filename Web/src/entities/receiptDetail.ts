@@ -18,6 +18,10 @@ export default class receiptDetail extends Entity<number>{
     boxCode: string;
     trayCode: string;
     batchCode: string;
+    lotCode: String;
+    poCode: String;
+    weight: Number;
+    volume: Number;
     expectedQty: Number;
     receivedQty: Number;
     receiptQty: Number;

@@ -28,7 +28,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
 
         public SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving { get; set; }
 
-        public ISqlSugarClient _db { get; set; }
+        //public ISqlSugarClient _db { get; set; }
 
  
 

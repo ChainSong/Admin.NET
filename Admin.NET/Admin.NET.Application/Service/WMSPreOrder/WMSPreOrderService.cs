@@ -26,7 +26,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPreOrder> _rep;
 
     private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
-    private readonly ISqlSugarClient _db;
+    //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
 
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -42,7 +42,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
         _userManager = userManager;
-        _db = db;
+        //_db = db;
         _repCustomerUser = repCustomerUser;
         _repWarehouseUser = repWarehouseUser;
         _repTableColumns = repTableColumns;
@@ -100,8 +100,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSPreOrderOutput>()
 ;
@@ -208,7 +208,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -256,7 +256,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -320,7 +320,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
         factoryExcel._repPreOrder = _rep;
         factoryExcel._repWarehouseUser = _repWarehouseUser;
-        factoryExcel._db = _db;
+        //factoryExcel._db = _db;
         factoryExcel._userManager = _userManager;
 
         factoryExcel._repCustomerUser = _repCustomerUser;
@@ -352,7 +352,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(customerId);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -386,7 +386,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(customerId);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._db = _db;
+        //factory._db = _db;
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;

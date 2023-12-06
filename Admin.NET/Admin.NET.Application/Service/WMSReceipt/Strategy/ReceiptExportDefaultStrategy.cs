@@ -150,7 +150,7 @@ namespace Admin.NET.Application.Strategy
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,
                   IsImportColumn = a.IsImportColumn,
-                  tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1).ToList()
+                  tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId==a.TenantId).ToList()
                   //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
                   //.Select()
               }).ToList();

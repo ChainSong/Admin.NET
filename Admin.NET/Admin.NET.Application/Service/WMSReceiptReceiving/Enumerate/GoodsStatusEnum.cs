@@ -8,6 +8,11 @@ namespace Admin.NET.Application
 {
     public enum GoodsStatusEnum
     {
+
+        /// <summary>
+        /// GoodsStatusEnum 正常 1
+        /// </summary>
+        正常 = 1,
         /// <summary>
         /// GoodsStatusEnum 多货 10
         /// </summary>
