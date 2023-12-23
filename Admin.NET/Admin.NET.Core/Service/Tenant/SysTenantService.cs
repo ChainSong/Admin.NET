@@ -7,6 +7,9 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Core.Entity;
+using SqlSugar;
+
 namespace Admin.NET.Core.Service;
 
 /// <summary>
@@ -27,6 +30,11 @@ public class SysTenantService : IDynamicApiController, ITransient
     private readonly SysRoleMenuService _sysRoleMenuService;
     private readonly SysConfigService _sysConfigService;
     private readonly SysCacheService _sysCacheService;
+    private readonly ISqlSugarClient _db;
+    
+    
+    private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+    private readonly SqlSugarRepository<TableColumnsDetail> _repDetailTableColumnsDetail;
 
     public SysTenantService(SqlSugarRepository<SysTenant> sysTenantRep,
         SqlSugarRepository<SysOrg> sysOrgRep,
@@ -39,7 +47,10 @@ public class SysTenantService : IDynamicApiController, ITransient
         SysUserRoleService sysUserRoleService,
         SysRoleMenuService sysRoleMenuService,
         SysConfigService sysConfigService,
-        SysCacheService sysCacheService)
+        SysCacheService sysCacheService,
+        ISqlSugarClient db,
+        SqlSugarRepository<TableColumns> repTableColumns,
+        SqlSugarRepository<TableColumnsDetail> repDetailTableColumnsDetail)
     {
         _sysTenantRep = sysTenantRep;
         _sysOrgRep = sysOrgRep;
@@ -53,6 +64,10 @@ public class SysTenantService : IDynamicApiController, ITransient
         _sysRoleMenuService = sysRoleMenuService;
         _sysConfigService = sysConfigService;
         _sysCacheService = sysCacheService;
+        _db = db;
+        _repTableColumns = repTableColumns;
+        _repDetailTableColumnsDetail = repDetailTableColumnsDetail;
+
     }
 
     /// <summary>
@@ -399,6 +414,27 @@ public class SysTenantService : IDynamicApiController, ITransient
                 EnableUnderLine = defautConfig.DbSettings.EnableUnderLine,
             }
         };
+
+        
+
         SqlSugarSetup.InitTenantDatabase(App.GetRequiredService<ISqlSugarClient>().AsTenant(), config);
+
+        //创建完成租户数据库,将原有的种子数据,移植过去;
+        //var tableColumnss = _db.Queryable<TableColumns>().Where(a=>a.TenantId== 1300000000001).ToList();
+        //tableColumnss.ForEach(a =>
+        //{
+        //    a.TenantId = input.Id;
+        //});
+        //await _repTableColumns.InsertRangeAsync(tableColumnss);
+
+        ////创建完成租户数据库,将原有的种子数据,移植过去;
+        //var tableColumnsDetails = _db.Queryable<TableColumnsDetail>().Where(a => a.TenantId == 1300000000001).ToList();
+        //tableColumnsDetails.ForEach(a =>
+        //{
+        //    a.TenantId = input.Id;
+        //});
+        //await _repDetailTableColumnsDetail.InsertRangeAsync(tableColumnsDetails);
+
+
     }
 }

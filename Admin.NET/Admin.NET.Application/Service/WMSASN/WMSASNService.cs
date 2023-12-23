@@ -21,6 +21,7 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
 using Admin.NET.Express;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -257,9 +258,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         //factory._userManager = _userManager;
-        return await factory.UpdateStrategy(entityListDtos);
-        //var entity = input.Adapt<WMSASN>();
-        //await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return await factory.UpdateStrategy(entityListDtos); 
     }
 
 
@@ -339,10 +338,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         var response = factory.AddStrategy(ASNs);
         return await response;
 
-
-
-
-
+         
     }
 
 
@@ -368,6 +364,5 @@ public class WMSASNService : IDynamicApiController, ITransient
         var response = factory.Strategy(input);
         return await response;
     }
-
 }
 

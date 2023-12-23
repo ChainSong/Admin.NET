@@ -105,6 +105,7 @@ if (@column.ColumnKey == "True"){
         @:var entity = await _rep.GetFirstAsync(u => u.@(@column.ColumnName) == input.@(@column.ColumnName)) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
 }
 }
+      var entity = input.Adapt<@Model.BusName>();
         await _rep.FakeDeleteAsync(entity);   //假删除
     }
 

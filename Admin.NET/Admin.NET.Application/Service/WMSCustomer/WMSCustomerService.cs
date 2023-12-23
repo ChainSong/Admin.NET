@@ -132,7 +132,7 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     public async Task<Response> Updata(UpdateWMSCustomerInput input)
     {
         var entity = input.Adapt<WMSCustomer>();
-        await _db.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+        await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 

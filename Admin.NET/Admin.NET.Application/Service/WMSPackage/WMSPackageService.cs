@@ -16,6 +16,7 @@ using Admin.NET.Express;
 using Admin.NET.Express.Enumerate;
 using AngleSharp.Dom;
 using AutoMapper;
+using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using NewLife.Reflection;
@@ -51,6 +52,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSExpressConfig> _repExpressConfig;
 
 
+    private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
 
     //private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
 
@@ -58,7 +60,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -75,6 +77,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repExpressConfig = repExpressConfig;
         _repOrderDetail = repOrderDetail;
         _repOrder = repOrder;
+        _repRFPackageAcquisition = repRFPackageAcquisition;
     }
 
     /// <summary>
@@ -305,6 +308,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "scanPackageData")]
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
@@ -316,6 +320,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repCustomerUser = _repCustomerUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
         factory._userManager = _userManager;
         //factory._db = _db;
         factory._repPackageDetail = _repPackageDetail;
@@ -335,6 +340,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "AddPackage")]
     public async Task<Response<ScanPackageOutput>> AddPackageData(ScanPackageInput input)
     {
@@ -345,6 +351,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
         factory._repCustomerUser = _repCustomerUser;
         factory._userManager = _userManager;
         //factory._db = _db;
@@ -365,6 +372,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "printExpress")]
     public async Task<Response<dynamic>> PrintExpress(ScanPackageInput input)
     {
@@ -377,7 +385,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repCustomerUser = _repCustomerUser;
         factory._userManager = _userManager;
+    
         //factory._db = _db;
+        
         factory._repPackageDetail = _repPackageDetail;
         factory._sysCacheService = _sysCacheService;
         factory._repWarehouse = _repWarehouse;

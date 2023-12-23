@@ -75,15 +75,17 @@
         </el-form-item> -->
 
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="automatedAllocationFun" v-auth="'wMSOrder:add'"> 分配库存
+          <el-button type="primary" icon="ele-Share" @click="automatedAllocationFun" v-auth="'wMSOrder:allocation'"> 分配库存
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="createPickTaskFun" v-auth="'wMSOrder:add'"> 拣货任务
+          <el-button type="primary" icon="ele-Plus" @click="createPickTaskFun" v-auth="'wMSOrder:pickTask'"> 拣货任务
           </el-button>
         </el-form-item>
-
-
+        <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="completeOrderFun" v-auth="'wMSOrder:completeOrder'"> 完成
+          </el-button>
+        </el-form-item>
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
@@ -126,6 +128,9 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
+            <el-button @click="del(scope.row)" class="el-icon-s-comment" type="text" size="small">删除
+            </el-button>
+            
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
             <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
@@ -162,7 +167,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask} from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask,completeOrder} from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/order";
@@ -170,7 +175,10 @@ import Details from "/@/entities/orderDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
-
+import { useUserInfo } from '/@/stores/userInfo';
+import { storeToRefs } from 'pinia';
+import { Local, Session } from '/@/utils/storage';
+// import { useRoute } from 'vue-router'
 
 const state = ref({
   vm: {
@@ -198,7 +206,9 @@ const state = ref({
   // tableColumnsDetails: new Array<TableColumnsDetails>(),
   //   tableColumnsDetail = ref();
 });
-
+// 定义变量内容
+const stores = useUserInfo();
+const { userInfos } = storeToRefs(stores);
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
@@ -230,11 +240,17 @@ const gettableColumn = async () => {
 
   let res = await getByTableNameList("WMS_Order");
   state.value.tableColumnHeaders = res.data.result;
-
+ 
 };
-
 // 查询操作
 const handleQuery = async () => {
+  // console.log("user");
+  // console.log(stores);
+  // console.log(userInfos);
+  // console.log("Session.get('userInfo')")
+  // console.log(Session.get('userInfo'))
+  // Storage.prototype.setCanExpireLocal('userJson', JSON.stringify(state.value.tableColumnHeaders ), 1) 
+  // console.log(Storage.prototype.getCanExpireLocal('userJson') );
   loading.value = true;
   var res = await pageWMSOrder(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
@@ -260,6 +276,8 @@ const openQuery = (row: any) => {
 };
 
 // 删除
+
+// 删除
 const del = (row: any) => {
   ElMessageBox.confirm(`确定要删除吗?`, "提示", {
     confirmButtonText: "确定",
@@ -267,12 +285,30 @@ const del = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      await deleteWMSOrder(row);
+      let res =   await deleteWMSOrder(row);
+      if (res.data.result.code == "1") {
+        ElMessage.success(res.data.result.msg);
+      } else {
+        ElMessage.error(res.data.result.msg);
+      }
       handleQuery();
-      ElMessage.success("删除成功");
+      // ElMessage.success("删除成功");
     })
     .catch(() => { });
 };
+// const del = (row: any) => {
+//   ElMessageBox.confirm(`确定要删除吗?`, "提示", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//   })
+//     .then(async () => {
+//       await deleteWMSOrder(row);
+//       handleQuery();
+//       ElMessage.success("删除成功");
+//     })
+//     .catch(() => { });
+// };
 
 
 
@@ -356,6 +392,40 @@ const createPickTaskFun = () => {
     })
     .catch(() => { });
 };
+
+
+
+//完成订单
+const completeOrderFun = () => {
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    if (a.orderStatus >=20) {
+      ids.push(a.id);
+    }
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选已分配订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要完成订单?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => { 
+      let result = await completeOrder(ids);
+      if (result.data.result.data.length > 0) {
+        state.value.orderStatus = result.data.result.data;
+        //导入弹框提醒
+        resultPopupShow.value = true;
+        handleQuery();
+      } else {
+        ElMessage.info(result.data.result.msg);
+      }
+    })
+    .catch(() => { });
+};
+
 // 改变页面容量
 const handleSizeChange = (val: number) => {
   tableParams.value.pageSize = val;

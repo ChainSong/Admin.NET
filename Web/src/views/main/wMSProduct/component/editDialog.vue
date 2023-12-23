@@ -1,5 +1,5 @@
 ﻿<template>
-	<div class="wMSCustomer-container">
+	<div class="wMSProduct-container">
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="700" draggable="">
 
 			<el-card>
@@ -7,15 +7,15 @@
 					<el-row :gutter="35">
 						<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
 							v-for="i in state.tableColumnHeaders.filter(a => a.isUpdate == 1)" v-bind:key="i.id">
-							<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
+							<el-form-item :label="i.displayName"  style="width: 90%;height: 45px;"
 								:prop="i.columnName">
 								<template v-if="i.type == 'TextBox'">
 									<el-input placeholder="请输入内容" size="small" style="width:90%"
-										v-model="state.header[i.columnName]" v-if="i.isCreate">
+										v-model="state.header[i.columnName]"  >
 									</el-input>
 								</template>
 								<template v-if="i.type == 'DropDownListInt'">
-									<el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+									<el-select v-model="state.header[i.columnName]"  placeholder="请选择"
 										size="small" style="width:90%" filterable>
 										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
 											:label="item.name" :value="item.codeInt">
@@ -30,7 +30,7 @@
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">
 
-									<el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+									<el-select v-model="state.header[i.columnName]" placeholder="请选择"
 										size="small" style="width:90%" filterable>
 										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
 											:label="item.name" :value="item.codeStr">
@@ -38,12 +38,12 @@
 									</el-select>
 								</template>
 								<template v-if="i.type == 'DatePicker'">
-									<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate" type="date"
+									<el-date-picker v-model="state.header[i.columnName]"  type="date"
 										placeholder="选择日期" size="small" style="width:90%">
 									</el-date-picker>
 								</template>
 								<template v-if="i.type == 'DateTimePicker'">
-									<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate" type="datetime"
+									<el-date-picker v-model="state.header[i.columnName]"  type="datetime"
 										start-placeholder="选择日期时间" size="small" style="width:90%">
 									</el-date-picker>
 								</template>

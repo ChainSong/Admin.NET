@@ -13,6 +13,8 @@ namespace System.Data
     {
         public static List<T> TableToList<T>(this DataTable dt) where T : class, new()
         {
+
+
             Type type = typeof(T);
             List<T> list = new List<T>();
             foreach (DataRow row in dt.Rows)
@@ -21,6 +23,7 @@ namespace System.Data
                 T model = new T();
                 foreach (PropertyInfo p in properties)
                 {
+
 
                     //判断model中的字段在datatable中存不存在
                     if (row.Table.Columns.Contains(p.Name))
@@ -78,10 +81,13 @@ namespace System.Data
                             }
                         }
                     }
+
                 }
                 list.Add(model);
             }
             return list;
+
+
         }
     }
 }

@@ -34,6 +34,12 @@ public class CacheConst
     /// </summary>
     public const string KeyUserOrg = "sys_user_org:";
 
+
+    /// <summary>
+    /// 用户客户仓库缓存
+    /// </summary>
+    public const string KeyUserCustomerWarehouse = "sys_user_customerWarehouse:";
+
     /// <summary>
     /// 角色最大数据范围缓存
     /// </summary>

@@ -4,8 +4,14 @@
 /// 客户用户关系
 /// </summary>
 [SugarTable("Customer_User_Mapping","客户用户关系")]
-public class CustomerUserMapping  
+public class CustomerUserMapping : ITenantIdFilter
 {
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
 
     [SqlSugar.SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDescription = "主键")]
     public long Id { get; set; }

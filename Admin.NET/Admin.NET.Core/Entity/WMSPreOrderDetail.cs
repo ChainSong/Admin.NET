@@ -139,28 +139,28 @@ public class WMSPreOrderDetail : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? LotCode { get; set; }
+    public string LotCode { get; set; } = "";
 
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? PoCode { get; set; }
+    public string PoCode { get; set; } = "";
 
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    [SugarColumn(ColumnDescription = "")]
+    public double Weight { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     
     [SugarColumn(ColumnDescription = "")]
-    public double? Weight { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    
-    [SugarColumn(ColumnDescription = "")]
-    public double? Volume { get; set; }
+    public double Volume { get; set; }
 
 
     /// <summary>

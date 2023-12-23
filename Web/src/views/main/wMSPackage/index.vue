@@ -298,6 +298,67 @@ const del = (row: any) => {
 };
 
 
+// 打印快递单
+const printExpress = async (row: any) => {
+
+ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+  confirmButtonText: "确定",
+  cancelButtonText: "取消",
+  type: "warning",
+})
+  .then(async () => {
+    // console.log(row);
+    if (row.expressCompany == "顺丰快递") {
+      // console.log(row);
+      let res = await printExpressData(row);
+      // alert(res.data.result.data.expressNumber);
+      // console.log(expressConfig.value);
+      sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+      sdkParams.partnerID = expressConfig.value.partnerId;
+      sdkParams.callback = sdkCallback;
+      sdkParams.notips = true;
+      printSdk = new SCPPrint(sdkParams);
+      let resToken = await getExpressConfig(row);
+      // console.log("resToken")
+      if (resToken.data.result.code == 1) {
+        // console.log(resToken)
+        expressConfig.value = resToken.data.result.data;
+      }
+      print(res.data.result.data.expressNumber);
+      handleQuery();
+      ElMessage.success("打印成功");
+    }
+  })
+  .catch(() => { });
+// allPackage(state.value.vm.form);
+};
+
+
+
+
+// 改变页面容量
+const handleSizeChange = (val: number) => {
+  tableParams.value.pageSize = val;
+  handleQuery();
+};
+
+// 改变页码序号
+const handleCurrentChange = (val: number) => {
+  tableParams.value.page = val;
+  handleQuery();
+};
+
+
+handleQuery();
+
+
+
+
+
+
+
+
+
 
 // --------------------顺丰快递打印-----------------------
 // 寮曞叆SDK鍚庡垵濮嬪寲瀹炰緥锛屼粎鎵ц涓€娆�
@@ -309,58 +370,6 @@ let sdkParams = {
   notips: true
 };
 let printSdk = new SCPPrint(sdkParams);
-
-
-
-// 打印快递单
-const printExpress = async (row: any) => {
-
-  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  })
-    .then(async () => {
-      // console.log(row);
-      if (row.expressCompany == "顺丰快递") {
-        // console.log(row);
-        let res = await printExpressData(row);
-        // alert(res.data.result.data.expressNumber);
-        // console.log(expressConfig.value);
-        sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-        sdkParams.partnerID = expressConfig.value.partnerId;
-        sdkParams.callback = sdkCallback;
-        sdkParams.notips = true;
-        printSdk = new SCPPrint(sdkParams);
-        let resToken = await getExpressConfig(row);
-        // console.log("resToken")
-        if (resToken.data.result.code == 1) {
-          // console.log(resToken)
-          expressConfig.value = resToken.data.result.data;
-        }
-        print(res.data.result.data.expressNumber);
-        handleQuery();
-        ElMessage.success("打印成功");
-      }
-    })
-    .catch(() => { });
-  // allPackage(state.value.vm.form);
-};
-
-
-
-// token.value = res.data;
-
-
-// Storage.prototype.setCanExpireLocal('userJson', JSON.stringify(obj), 0.1) 
-// Storage.prototype.getCanExpireLocal('userJson') 
-// // 打开打印页面
-// const openPrint = (row: any) => {
-//   ptintTitle.value = '打印';
-//   printDialogRef.value.openDialog(row);
-// };
-
-
 
 
 // 鑾峰彇鎵撳嵃鏈哄垪琛�
@@ -419,20 +428,6 @@ const print = (masterWaybillNo: string) => {
 
 
 
-// 改变页面容量
-const handleSizeChange = (val: number) => {
-  tableParams.value.pageSize = val;
-  handleQuery();
-};
-
-// 改变页码序号
-const handleCurrentChange = (val: number) => {
-  tableParams.value.page = val;
-  handleQuery();
-};
-
-
-handleQuery();
 </script>
 
 

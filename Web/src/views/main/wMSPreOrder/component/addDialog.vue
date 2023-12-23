@@ -107,6 +107,7 @@
 														v-if="v.isCreate"></el-input-number>
 
 												</template>
+												
 											</el-form-item>
 										</template>
 									</el-table-column>
@@ -165,7 +166,8 @@
 											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
 												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
 											</el-date-picker>
-										</template>
+										</template> 
+										
 									</el-form-item>
 								</el-col>
 							</el-row>

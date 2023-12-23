@@ -10,7 +10,7 @@
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
-using Admin.NET.Application.Interface; 
+using Admin.NET.Application.Interface;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -23,6 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentEmail.Core;
 using Admin.NET.Application.Service;
+using XAct;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
@@ -39,8 +40,10 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     public SysCacheService _sysCacheService { get; set; }
 
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
+
+    public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
-    TimeSpan timeSpan = new TimeSpan(72,0,0);
+    TimeSpan timeSpan = new TimeSpan(72, 0, 0);
     public async Task<Response<ScanPackageOutput>> GetPackage(ScanPackageInput request)
     {
 
@@ -49,10 +52,38 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         //{
         //    request.PickTaskNumber = "";
         //}
+        //判断扫描的是不是条形码（有两种条形码）
+        if (!string.IsNullOrEmpty(request.Input))
+        {
+            var skuInfo = request.Input.Split('|');
+            if (skuInfo.Length > 1)
+            {
+                if (skuInfo.Length == 3)
+                {
+                    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+                    request.SN = skuInfo[2];
+
+
+                }
+                else
+                {
+                    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+                    request.Lot = skuInfo[2];
+                    request.AcquisitionData = skuInfo[3];
+                    request.SN = skuInfo[4];
+
+                }
+            };
+        }
+
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
         response.Data.Input = request.Input;
+        response.Data.SN = request.SN;
+        response.Data.Lot = request.Lot;
+        response.Data.AcquisitionData = request.AcquisitionData;
+
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
@@ -63,7 +94,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 //判断有没有扫描数据
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
                 {
-                    var result = await PackingComplete(pickData, request);
+                    var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                     response.Code = result.Code;
                     response.Msg = result.Msg;
                     return response;
@@ -150,7 +181,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
             if (pickData.Count > 0)
             {
-               
+
                 _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
@@ -165,6 +196,10 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         {
             response.Data.SKU = request.Input;
 
+            //判断有没有SN,有SN 就记录出库SN
+            //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
+            //wMSRF.
+            //_repRFPackageAcquisition
             var PickSKUData = pickData.Where(a => a.SKU == request.Input);
             if (PickSKUData.Count() > 0)
             {
@@ -173,13 +208,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                     pick.ScanQty += 1;
                     pick.RemainingQty -= 1;
-
+                    pick.ScanPackageInput = new List<ScanPackageInput>();
+                    pick.ScanPackageInput.Add(request);
                     _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
                     //判断是不是包装完成
                     if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
                     {
-                        var result = await PackingComplete(pickData, request);
+                        var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                         response.Data.PackageDatas = pickData;
                         response.Code = result.Code;
                         response.Msg = result.Msg;
@@ -225,10 +261,10 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         var pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
 
         //保存缓存中的已经包装的数据
-        if (pickData != null)
+        if (pickData != null && pickData.Sum(a => a.ScanQty) > 0)
         {
 
-            var PackingCompleteCheck = await PackingComplete(pickData, request);
+            var PackingCompleteCheck = await PackingComplete(pickData, request, PackageBoxTypeEnum.新增);
             pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             response.Data.PackageDatas = pickData;
             if (PackingCompleteCheck.Code == StatusCode.Finish)
@@ -328,8 +364,45 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Msg = "系统错误";
         return response;
     }
+    public async Task<Response<ScanPackageOutput>> ShortagePackage(ScanPackageInput request)
+    {
 
-    private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request)
+        Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
+        response.Data.PickTaskNumber = request.PickTaskNumber;
+        response.Data.Weight = request.Weight;
+        response.Data.SKU = request.SKU;
+        response.Data.Input = request.Input;
+        var pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+
+        //保存缓存中的已经包装的数据
+        if (pickData != null)
+        {
+
+            var PackingCompleteCheck = await PackingComplete(pickData, request, PackageBoxTypeEnum.短包);
+            pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+            response.Data.PackageDatas = pickData;
+            if (PackingCompleteCheck.Code == StatusCode.Finish)
+            {
+                response.Code = PackingCompleteCheck.Code;
+                response.Msg = PackingCompleteCheck.Msg;
+                return response;
+            }
+            else
+            {
+
+                response.Code = PackingCompleteCheck.Code;
+                response.Msg = PackingCompleteCheck.Msg;
+                //response.Msg = PackingCompleteCheck.Msg;
+                return response;
+            }
+        }
+
+
+        response.Code = StatusCode.Error;
+        response.Msg = "系统错误";
+        return response;
+    }
+    private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
         Response response = new Response();
 
@@ -345,11 +418,18 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
                    //添加创建人为当前用户
                    .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                   .ForMember(a => a.PickTaskId, opt => opt.MapFrom(c => c.PickTaskId))
                    .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                    .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => DateTime.Now))
                    // 
                    .ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
                    .ForMember(a => a.Id, opt => opt.Ignore())
+                   //将为Null的字段设置为"" () 
+                   .AddTransform<string>(a => a == null ? "" : a)
+                   //将为Null的字段设置为"" () 
+                   .AddTransform<int?>(a => a == null ? 0 : a)
+                   //将为Null的字段设置为"" () 
+                   .AddTransform<double?>(a => a == null ? 0 : a)
                    //添加
                    .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
                 //.AddTransform<string>(a => a == null ? "" : a);
@@ -359,12 +439,20 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                   .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                   .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                   .ForMember(a => a.Qty, opt => opt.MapFrom(c => c.ScanQty))
+                   //将为Null的字段设置为"" () 
+                   .AddTransform<int?>(a => a == null ? 0 : a)
+                   //将为Null的字段设置为"" () 
+                   .AddTransform<double?>(a => a == null ? 0 : a)
                   //添加
                   .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
             });
+
+
             var mapper = new Mapper(config);
             var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
+            //var packageDetailDetail = .WMSRFPackageAcquisition
+
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
             packageData.Details.ForEach(a =>
@@ -377,11 +465,45 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 a.ExternOrderNumber = packageData.ExternOrderNumber;
                 a.PreOrderNumber = packageData.PreOrderNumber;
                 a.OrderNumber = packageData.OrderNumber;
+                a.PickTaskId = packageData.PickTaskId;
+                //a.Weight = 0;
             });
+
+            List<WMSRFPackageAcquisition> PackageAcquisitions = new List<WMSRFPackageAcquisition>();
+            foreach (var item in pickData)
+            {
+                var PackageAcquisition = item.ScanPackageInput.Adapt<List<WMSRFPackageAcquisition>>();
+                foreach (var p in PackageAcquisition)
+                {
+                    p.Qty = 1;
+                    p.CustomerId = packageData.CustomerId;
+                    p.CustomerName = packageData.CustomerName;
+                    p.WarehouseId = packageData.WarehouseId;
+                    p.WarehouseName = packageData.WarehouseName;
+                    p.OrderId = packageData.OrderId.Value;
+                    p.ExternOrderNumber = packageData.ExternOrderNumber;
+                    p.PreOrderNumber = packageData.PreOrderNumber;
+                    p.OrderNumber = packageData.OrderNumber;
+                    p.PickTaskId = packageData.PickTaskId;
+                    p.Creator = _userManager.Account;
+                    p.CreationTime = DateTime.Now;
+                }
+                PackageAcquisitions.AddRange(PackageAcquisition);
+            }
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
+            packageData.Id = 0;
+            //try
+            //{
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
+            //await _repPackage.InsertAsync();
+            //}
+            //catch (Exception asdas)
+            //{
+            //    throw;
+            //}
             //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
             pickData.ForEach(a =>
             {
@@ -393,7 +515,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             //判断是否包装完成
             var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
             var CheckPickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.PickQty);
-            if (CheckPackageData == CheckPickData)
+            if (CheckPackageData == CheckPickData || packageBox == PackageBoxTypeEnum.短包)
             {
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
@@ -419,4 +541,98 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         }
         //PackageData. = PackageDetailData.Sum(a => a.Qty);
     }
+
+
+
+
+    //private async Task<Response> PackingComplete_Shortage(List<PackageData> pickData, ScanPackageInput request)
+    //{
+    //    Response response = new Response();
+
+    //    //判断是不是输入了重量
+    //    if (request.Weight > 0.2)
+    //    {
+    //        var pickDataTemp = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+    //             .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+    //             .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).FirstAsync();
+    //        var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+    //        var config = new MapperConfiguration(cfg =>
+    //        {
+    //            cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
+    //               //添加创建人为当前用户
+    //               .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+    //               .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+    //               .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => DateTime.Now))
+    //               // 
+    //               .ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
+    //               .ForMember(a => a.Id, opt => opt.Ignore())
+    //               //添加
+    //               .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
+    //            //.AddTransform<string>(a => a == null ? "" : a);
+
+    //            cfg.CreateMap<PackageData, WMSPackageDetail>()
+    //              //添加创建人为当前用户
+    //              .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+    //              .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+    //              .ForMember(a => a.Qty, opt => opt.MapFrom(c => c.ScanQty))
+    //              //添加
+    //              .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
+    //        });
+    //        var mapper = new Mapper(config);
+    //        var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
+    //        var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
+    //        packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
+    //        packageData.Details = packageDetailData;
+    //        packageData.Details.ForEach(a =>
+    //        {
+    //            a.CustomerId = packageData.CustomerId;
+    //            a.CustomerName = packageData.CustomerName;
+    //            a.WarehouseId = packageData.WarehouseId;
+    //            a.WarehouseName = packageData.WarehouseName;
+    //            a.OrderId = packageData.OrderId;
+    //            a.ExternOrderNumber = packageData.ExternOrderNumber;
+    //            a.PreOrderNumber = packageData.PreOrderNumber;
+    //            a.OrderNumber = packageData.OrderNumber;
+    //        });
+    //        packageData.ExpressCompany = request.ExpressCompany;
+    //        packageData.GrossWeight = request.Weight;
+    //        packageData.NetWeight = request.Weight;
+    //        await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
+    //        //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+    //        pickData.ForEach(a =>
+    //        {
+
+    //            a.PackageQty += a.ScanQty;
+    //            a.ScanQty = 0;
+    //        });
+    //        _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
+    //        //判断是否包装完成
+    //        //var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
+    //        //var CheckPickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.PickQty);
+    //        //if (CheckPackageData == CheckPickData)
+    //        //{
+    //        await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
+    //        await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
+    //        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, (a => a.OrderNumber == pickData.First().OrderNumber));
+    //        //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+    //        //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+    //        _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+    //        response.Code = StatusCode.Finish;
+    //        response.Msg = "订单完成";
+    //        return response;
+    //        //}
+    //        //response.Code = StatusCode.Success;
+    //        //response.Msg = "成功";
+    //        //return response;
+    //        //return response;
+    //    }
+    //    else
+    //    {
+    //        response.Code = StatusCode.Error;
+    //        response.Msg = "请输入重量";
+    //        return response;
+    //        //return response;
+    //    }
+    //    //PackageData. = PackageDetailData.Sum(a => a.Qty);
+    //}
 }

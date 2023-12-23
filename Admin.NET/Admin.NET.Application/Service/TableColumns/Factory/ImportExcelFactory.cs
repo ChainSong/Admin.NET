@@ -26,6 +26,9 @@ namespace Admin.NET.Application
                 case "WMS_Adjustment":
                     return new ImportExcelTemplateAdjustmentDefault();
 
+                case "WMS_Product":
+                    return new ImportExcelTemplateProductDefault();
+
                 default:
                     return new ImportExcelTemplateASNDefault();
             }

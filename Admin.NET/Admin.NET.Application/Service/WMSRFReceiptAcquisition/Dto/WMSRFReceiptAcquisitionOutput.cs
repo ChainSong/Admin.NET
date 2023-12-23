@@ -65,6 +65,17 @@ public class WMSRFReceiptAcquisitionOutput
     public string Lot { get; set; }
 
     /// <summary>
+    /// SN
+    /// </summary>
+    public string SN { get; set; }
+
+    public double Qty { get; set; }
+
+    /// <summary>
+    /// ReceiptAcquisitionStatus
+    /// </summary>
+    public int ReceiptAcquisitionStatus { get; set; }
+    /// <summary>
     /// ProductionDate
     /// </summary>
     public object? ProductionDate { get; set; }

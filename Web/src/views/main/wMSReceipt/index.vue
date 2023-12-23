@@ -5,7 +5,6 @@
           <el-row :gutter="[16, 15]">
             <template v-for="i in  state.tableColumnHeaders">
               <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
-
                 <template v-if="i.type == 'TextBox'">
                   <el-form-item class="mb-0" :label="i.displayName">
                     <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
@@ -70,13 +69,17 @@
 
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="ele-Plus" @click="exportReceipts" v-auth="'wMSReceipt:add'"> 导出入库信息
+            <el-button type="primary" icon="ele-Upload" @click="exportReceipts" v-auth="'wMSReceipt:receipt'"> 导出入库信息
             </el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="ele-Plus" @click="exportReceiptReceivingfun" v-auth="'wMSReceipt:add'"> 导出上架信息
+            <el-button type="primary" icon="ele-Download" @click="exportReceiptReceivingfun" v-auth="'wMSReceipt:receiptReceiving'"> 导出上架信息
             </el-button>
           </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="ele-Printer" @click="openPrint" v-auth="'wMSPickTask:Print'"> 打印
+            </el-button>
+        </el-form-item>
 
         </el-form>
       </el-card>
@@ -116,9 +119,10 @@
             </template>
           </template>
           <el-table-column fixed="right" label="操作" width="200">
-
             <template #default="scope">
               <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
+              </el-button>
+              <el-button @click="del(scope.row)" class="el-icon-s-comment" type="text" size="small">删除
               </el-button>
               <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
               <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
@@ -138,6 +142,7 @@
         <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
         <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
         <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+        <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="handleQuery" />
       </el-card>
   </div>
 </template>
@@ -151,13 +156,14 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSReceipt/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSReceipt/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSReceipt/component/queryDialog.vue'
-import { pageWMSReceipt, deleteWMSReceipt, exportReceipt, exportReceiptReceiving } from '/@/api/main/wMSReceipt';
+import { pageWMSReceipt, deleteWMSReceipt, exportReceipt, exportReceiptReceiving,getReceipts } from '/@/api/main/wMSReceipt';
 import { getByTableNameList } from "/@/api/main/tableColumns";
+import printDialog from '/@/views/tools/printDialog.vue';
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/receipt";
 import Details from "/@/entities/receiptDetail";
 import TableColumns from "/@/entities/tableColumns";
-import { number } from "echarts";
+// import { number } from "echarts";
 import { downloadByData, getFileName } from '/@/utils/download';
 
 const state = ref({
@@ -203,6 +209,10 @@ const tableParams = ref({
 const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
+
+let ids = ref(Array<Number>);
+const ptintTitle = ref("");
+const printDialogRef = ref();
 
 // 页面加载时
 onMounted(async () => {
@@ -250,9 +260,14 @@ const del = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      await deleteWMSReceipt(row);
+      let res =   await deleteWMSReceipt(row);
+      if (res.data.result.code == "1") {
+        ElMessage.success(res.data.result.msg);
+      } else {
+        ElMessage.error(res.data.result.msg);
+      }
       handleQuery();
-      ElMessage.success("删除成功");
+      // ElMessage.success("删除成功");
     })
     .catch(() => { });
 };
@@ -298,6 +313,42 @@ const exportReceiptReceivingfun = async () => {
   var fileName = getFileName(res.headers);
   downloadByData(res.data as any, fileName);
 }
+
+
+//-----------------打印上架--------------------------------------------------------- 
+
+// 打开打印询页面
+const openPrint = async () => {
+  ptintTitle.value = '上架单打印';
+  ids.value = new Array<Number>();
+
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.value.push(a.id);
+  });
+  if (ids.value.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  let printData = new Array<Header>();
+  let result = await getReceipts(ids.value);
+  // console.log("result");
+  // console.log(result);
+  if (result.data.result != null) {
+    printData = result.data.result;
+    // state.value.details = result.data.result.details;
+  }
+  printDialogRef.value.openDialog({ "printData": printData, "templateName": "上架单打印模板" });
+};
+
+
+//打印
+// const printOrder = async () => {
+
+//   //修改打印的时间和打印次数
+//   await addWMSPickTaskPrintLog(ids.value);
+//   handleQuery();
+// };
+
 
 
 // 改变页码序号

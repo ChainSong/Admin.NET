@@ -188,7 +188,8 @@ public class SysAuthService : IDynamicApiController, ITransient
             OrgName = org?.Name,
             OrgType = org?.OrgType,
             PosName = pos?.Name,
-            Buttons = buttons
+            Buttons = buttons,
+            TenantId = user.TenantId,
         };
     }
 

@@ -51,6 +51,7 @@
 										style="width:90%">
 									</el-date-picker>
 								</template>
+
 							</el-form-item>
 						</el-col>
 					</el-row>
@@ -112,6 +113,7 @@
 												:disabled="v.update">
 											</el-input>
 										</template>
+										
 									</el-form-item>
 								</template>
 							</el-table-column>
@@ -238,7 +240,7 @@ const submit = async () => {
 						ElMessage.success("修改成功");
 						closeDialog();
 					} else {
-						ElMessage.error("修改失败:"+result.data.result.msg);
+						ElMessage.error("修改失败:" + result.data.result.msg);
 					}
 				} else {
 					ElMessage({

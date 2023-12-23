@@ -65,6 +65,11 @@ public class LoginUserOutput
     public string PosName { get; set; }
 
     /// <summary>
+    /// 租户ID
+    /// </summary>
+    public long? TenantId { get; set; }
+
+    /// <summary>
     /// 按钮权限集合
     /// </summary>
     public List<string> Buttons { get; set; }

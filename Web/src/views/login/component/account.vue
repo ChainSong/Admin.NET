@@ -160,6 +160,8 @@ const onSignIn = async () => {
 				getCaptcha(); // 重新获取验证码
 				return;
 			}
+			// console.log("res.data.result")
+			// console.log(res.data.result)
 			if (res.data.result?.accessToken == undefined) {
 				getCaptcha(); // 重新获取验证码
 				ElMessage.error('登录失败，请检查账号！');

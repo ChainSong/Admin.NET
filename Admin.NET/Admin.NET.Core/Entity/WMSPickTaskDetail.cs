@@ -23,7 +23,7 @@ public class WMSPickTaskDetail : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public long PickId { get; set; }
+    public long PickTaskId { get; set; }
     
     /// <summary>
     /// 

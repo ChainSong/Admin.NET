@@ -1,22 +1,23 @@
 ﻿<template>
-	<div class="wMSCustomer-container">
+	<div class="wMSProduct-container">
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="700" draggable="">
 			<el-container>
 				<el-main>
 					<el-descriptions class="margin-top" :column="2" size="small" border>
-						<template v-for="i in state.tableColumnHeaders">
-							<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
-								v-if="i.isCreate">
-								<template>
-								</template>
+						<template v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1 || a.isKey == 1)"
+							v-bind:key="i.id">
+							<el-descriptions-item :prop="i.displayName" :label="i.displayName">
+								<!-- <template>
+								</template> -->
 								<template v-if="i.type == 'TextBox'">
 									<label font-family="Helvetica Neue" v-text="state.header[i.columnName]"></label>
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">
 									<template v-for="item in i.tableColumnsDetails">
-										<el-tag   v-if="item.codeStr == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
+										<el-tag v-if="item.codeStr == state.header[i.columnName]" v-bind:key="item.color"
+											show-icon :type="item.color">
+											{{ item.name }}
+										</el-tag>
 										<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
 											show-icon :type="item.color" :key="item.codeStr"></label> -->
 									</template>
@@ -24,9 +25,10 @@
 								<template v-if="i.type == 'DropDownListInt'">
 									<template v-for="item in i.tableColumnsDetails">
 										<template v-if="item.codeStr == state.header[i.columnName]">
-											<el-tag   v-if="item.codeInt == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
+											<el-tag v-if="item.codeInt == state.header[i.columnName]"
+												v-bind:key="item.color" show-icon :type="item.color">
+												{{ item.name }}
+											</el-tag>
 											<!-- <label show-icon :type="item.color" v-text="item.name"
 												:key="item.codeInt"></label> -->
 										</template>
@@ -79,8 +81,8 @@ const state = ref({
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
-	tableColumnDetail: new TableColumns(),
-	tableColumnDetails: new Array<TableColumns>()
+	// tableColumnDetail: new TableColumns(),
+	// tableColumnDetails: new Array<TableColumns>()
 	// header: new Array<Details>(),
 })
 
@@ -132,10 +134,10 @@ const cancel = () => {
 const gettableColumn = async () => {
 	let res = await getByTableNameList("WMS_Product");
 	state.value.tableColumnHeaders = res.data.result;
-	
-	let resDetail = await getByTableNameList("CustomerDetail");
-	state.value.tableColumnDetails = resDetail.data.result;
-	
+
+	// let resDetail = await getByTableNameList("CustomerDetail");
+	// state.value.tableColumnDetails = resDetail.data.result;
+
 };
 
 const get = async () => {

@@ -1,13 +1,14 @@
 ﻿import request from '/@/utils/request';
 enum Api {
-  AddWMSOrder = '/api/wMSOrder/add',
-  DeleteWMSOrder = '/api/wMSOrder/delete',
-  UpdateWMSOrder = '/api/wMSOrder/update',
-  PageWMSOrder = '/api/wMSOrder/page',
-  GetWMSOrder = '/api/wMSOrder/Query',
-  AutomatedAllocation = '/api/wMSOrder/AutomatedAllocation',
-  CreatePickTask = '/api/wMSOrder/CreatePickTask',
-  
+	AddWMSOrder = '/api/wMSOrder/add',
+	DeleteWMSOrder = '/api/wMSOrder/delete',
+	UpdateWMSOrder = '/api/wMSOrder/update',
+	PageWMSOrder = '/api/wMSOrder/page',
+	GetWMSOrder = '/api/wMSOrder/Query',
+	AutomatedAllocation = '/api/wMSOrder/AutomatedAllocation',
+	CreatePickTask = '/api/wMSOrder/CreatePickTask',
+	CompleteOrder = '/api/wMSOrder/CompleteOrder',
+
 }
 
 // 增加WMSOrder
@@ -19,51 +20,58 @@ export const addWMSOrder = (params?: any) =>
 	});
 
 // 删除WMSOrder
-export const deleteWMSOrder = (params?: any) => 
+export const deleteWMSOrder = (params?: any) =>
 	request({
-			url: Api.DeleteWMSOrder,
-			method: 'post',
-			data: params,
-		});
+		url: Api.DeleteWMSOrder,
+		method: 'post',
+		data: params,
+	});
 
 // 编辑WMSOrder
-export const updateWMSOrder = (params?: any) => 
+export const updateWMSOrder = (params?: any) =>
 	request({
-			url: Api.UpdateWMSOrder,
-			method: 'post',
-			data: params,
-		});
+		url: Api.UpdateWMSOrder,
+		method: 'post',
+		data: params,
+	});
 
 // 分页查询WMSOrder
-export const pageWMSOrder = (params?: any) => 
+export const pageWMSOrder = (params?: any) =>
 	request({
-			url: Api.PageWMSOrder,
-			method: 'post',
-			data: params,
-		});
+		url: Api.PageWMSOrder,
+		method: 'post',
+		data: params,
+	});
 // 单条查询WMSOrder
-export const getWMSOrder = (params?: any) => 
-request({
-	url: `${Api.GetWMSOrder}/${params}`,
-	method: 'get'
-});
+export const getWMSOrder = (params?: any) =>
+	request({
+		url: `${Api.GetWMSOrder}/${params}`,
+		method: 'get'
+	});
 
 
- //转入库单
- export const automatedAllocation = (params?: any) => 
- request({
-		 url: Api.AutomatedAllocation,
-		 method: 'post',
-		 data: params,
-	 });
- 
- //转入库单
- export const createPickTask = (params?: any) => 
- request({
-		 url: Api.CreatePickTask,
-		 method: 'post',
-		 data: params,
-	 });
- 
- 
-	 
+//分配
+export const automatedAllocation = (params?: any) =>
+	request({
+		url: Api.AutomatedAllocation,
+		method: 'post',
+		data: params,
+	});
+
+//创建拣货任务
+export const createPickTask = (params?: any) =>
+	request({
+		url: Api.CreatePickTask,
+		method: 'post',
+		data: params,
+	});
+
+//完成订单
+export const completeOrder = (params?: any) =>
+	request({
+		url: Api.CompleteOrder,
+		method: 'post',
+		data: params,
+	});
+
+

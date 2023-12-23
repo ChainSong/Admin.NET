@@ -7,8 +7,8 @@
             <el-row :gutter="[12, 24]" width="50%">
               <el-row style="width: 100%;">
                 <el-button style="font-size:20px;" type="primary">清空重扫</el-button>
-                <el-button style="font-size:20px;" type="success" @click="printExpress">打印</el-button>
-                <el-button style="font-size:20px;" type="info">短包</el-button>
+                <!-- <el-button style="font-size:20px;" type="success" @click="printExpress">打印</el-button>-->
+                <el-button style="font-size:20px;" type="info" @click="shortagePackage">短包</el-button>
                 <!-- <el-button type="warning">换箱</el-button> -->
                 <el-button style="font-size:20px;" type="danger" @click="addPackage">新增箱</el-button>
 
@@ -121,7 +121,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -144,6 +144,9 @@ const state = ref({
       sku: "",
       pickTaskNumber: "",
       weight: 0,
+      expirationDate:"", 
+      lot:"",
+      sn:"",
     },
     tableData: [],
     packageData: [],
@@ -218,22 +221,10 @@ const getExpress = async () => {
   // console.log(res);
   // token.value=res.
 
-}
-const gettableColumn = async () => {
-  let res = await getByTableNameList("WMS_Package");
-  state.value.tableColumnHeaders = res.data.result;
 };
-
-const allPackage = async (data: any) => {
-  let res = await allWMSPackage(data);
-  state.value.vm.packageData = res.data.result;
-
-};
-
-const addPackage = async (data: any) => {
-  state.value.vm.form.expressCompany = expressValue.value;
-  // allPackage(state.value.vm.form);
-  let res = await addPackageData(state.value.vm.form);
+const shortagePackage = async () => {
+  let res = await shortagePackageData(state.value.vm.form);
+  // let res = await addPackageData(state.value.vm.form);
   // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
     state.value.vm.form = res.data.result.data;
@@ -241,7 +232,7 @@ const addPackage = async (data: any) => {
   } else if (res.data.result.code == 99) {
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
-    state.value.vm.form.pickTaskNumber = "";
+    // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
       state.value.vm.tableData = res.data.result.data.packageDatas;
 
@@ -260,8 +251,67 @@ const addPackage = async (data: any) => {
   allPackage(state.value.vm.form);
 };
 
+const gettableColumn = async () => {
+  let res = await getByTableNameList("WMS_Package");
+  state.value.tableColumnHeaders = res.data.result;
+};
+
+const allPackage = async (data: any) => {
+  let res = await allWMSPackage(data);
+  state.value.vm.packageData = res.data.result;
+};
+
+// const shortagePackage = async (data: any) => {
+//   let res = await shortagePackageData(data);
+//   state.value.vm.packageData = res.data.result;
+
+// };
+
+const addPackage = async (data: any) => {
+  state.value.vm.form.expressCompany = expressValue.value;
+  // allPackage(state.value.vm.form);
+  let res = await addPackageData(state.value.vm.form);
+  // let res = await scanPackageData(state.value.vm.form);
+  if (res.data.result.code == 1) {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+  } else if (res.data.result.code == 99) {
+    state.value.vm.form.input = "";
+    state.value.vm.form.sku = "";
+    // state.value.vm.form.pickTaskNumber = "";
+    state.value.vm.form.weight = 0,
+      state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.success(res.data.result.msg);
+  } else {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.error(res.data.result.msg);
+  }
+  input.value = true;
+  input.value = false;
+  nextTick(() => {
+    input.value.focus();
+    input.value.select();
+  });
+  allPackage(state.value.vm.form);
+};
+
 
 const scanPackage = async () => {
+
+  // let acquisitionData = state.value.vm.form.scanInput.split('|');
+ 
+	// if (acquisitionData.length == 3) {
+	// 	state.value.vm.form.sku = acquisitionData[1];
+	// 	state.value.vm.form.sn = acquisitionData[2] ?? "";
+	// } else {
+		 
+	// 	state.value.vm.form.sku = acquisitionData[1];
+	// 	state.value.vm.form.lot = acquisitionData[2] ?? "";
+	// 	state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
+	// 	state.value.vm.form.sn = acquisitionData[4] ?? "";
+	// }
+
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
@@ -273,7 +323,7 @@ const scanPackage = async () => {
     allPackage(state.value.vm.form);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
-    state.value.vm.form.pickTaskNumber = "";
+    // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
       state.value.vm.tableData = res.data.result.data.packageDatas;
 

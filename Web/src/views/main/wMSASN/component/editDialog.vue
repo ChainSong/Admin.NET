@@ -102,6 +102,12 @@
 												start-placeholder="选择日期时间" style="width: 100%">
 											</el-date-picker>
 										</template>
+										<template v-if="v.type == 'InputNumber'">
+													<el-input-number placeholder="请输入内容" size="small"
+														v-model="state.details[scope.$index][v.columnName]"
+														v-if="v.isCreate"></el-input-number>
+
+												</template>
 									</el-form-item>
 								</template>
 							</el-table-column>

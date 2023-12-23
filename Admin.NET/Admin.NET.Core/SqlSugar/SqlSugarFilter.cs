@@ -7,6 +7,8 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Core.Entity;
+
 namespace Admin.NET.Core;
 
 public static class SqlSugarFilter
@@ -76,6 +78,64 @@ public static class SqlSugarFilter
         }
     }
 
+    /// <summary>
+    /// 删除用户客户仓库集合过滤器
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="dbConfigId"></param>
+    public static void DeleteUserCustomerWarehouseCache(long userId, string dbConfigId)
+    {
+        // 删除用户机构集合缓存
+        App.GetService<SysCacheService>().Remove($"{CacheConst.KeyUserCustomerWarehouse}{userId}");
+        // 删除用户机构（数据范围）过滤器缓存
+        _cache.Remove($"db:{dbConfigId}:orgList:{userId}");
+    }
+    /// <summary>
+    /// 配置用户客户仓库集合过滤器
+    /// </summary>
+    public static void SetCustomerWarehouseEntityFilter(SqlSugarScopeProvider db)
+    {
+        // 若仅本人数据，则直接返回
+        //if (SetDataScopeFilter(db) == (int)DataScopeEnum.Self) return;
+
+        var userId = App.User?.FindFirst(ClaimConst.UserId)?.Value;
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        // 配置用户机构集合缓存
+        var cacheKey = $"db:{db.CurrentConnectionConfig.ConfigId}:orgList:{userId}";
+        var orgFilter = _cache.Get<ConcurrentDictionary<Type, LambdaExpression>>(cacheKey);
+        if (orgFilter == null)
+        {
+            // 获取用户所属客户，仓库
+            //var CustomerUserMappings = App.GetService<CustomerUserMapping>();
+            //if (CustomerUserMappings == null || CustomerUserMappings.Count() == 0) return;
+
+            // 获取业务实体数据表
+            var entityTypes = App.EffectiveTypes.Where(u => !u.IsInterface && !u.IsAbstract && u.IsClass
+                && !u.IsDefined(typeof(IncreTableAttribute), false));
+            if (!entityTypes.Any()) return;
+
+            orgFilter = new ConcurrentDictionary<Type, LambdaExpression>();
+            foreach (var entityType in entityTypes)
+            {
+                // 排除非当前数据库实体
+                var tAtt = entityType.GetCustomAttribute<TenantAttribute>();
+                if ((tAtt != null && db.CurrentConnectionConfig.ConfigId.ToString() != tAtt.configId.ToString()))
+                    continue;
+
+                //var lambda = DynamicExpressionParser.ParseLambda(new[] {
+                //    Expression.Parameter(entityType, "u") }, typeof(bool), $"@0.Contains(u.{nameof(EntityBaseData.CreateOrgId)}??{default(long)})", orgIds);
+                //db.QueryFilter.AddTableFilter(entityType, lambda);
+                //orgFilter.TryAdd(entityType, lambda);
+            }
+            _cache.Add(cacheKey, orgFilter);
+        }
+        else
+        {
+            foreach (var filter in orgFilter)
+                db.QueryFilter.AddTableFilter(filter.Key, filter.Value);
+        }
+    }
     /// <summary>
     /// 配置用户仅本人数据过滤器
     /// </summary>

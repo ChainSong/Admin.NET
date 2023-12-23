@@ -117,10 +117,7 @@ public class WMSPackageDetail : ITenantIdFilter
     /// </summary>
     [Required]
     [SugarColumn(ColumnDescription = "货品名称", Length = 50)]
-    public string GoodsName { get; set; }
-
-
-  
+    public string GoodsName { get; set; } 
 
     /// <summary>
     /// 货品等级
@@ -135,7 +132,7 @@ public class WMSPackageDetail : ITenantIdFilter
     /// </summary>
 
     [SugarColumn(ColumnDescription = "UnitCode", Length = 50)]
-    public string UnitCode { get; set; }
+    public string UnitCode { get; set; } = "";
 
 
     /// <summary>
@@ -143,33 +140,34 @@ public class WMSPackageDetail : ITenantIdFilter
     /// </summary>
 
     [SugarColumn(ColumnDescription = "Onwer", Length = 50)]
-    public string Onwer { get; set; }
+    public string Onwer { get; set; } = "";
 
     /// SKU
     /// </summary>
 
     [SugarColumn(ColumnDescription = "BoxCode", Length = 50)]
-    public string BoxCode { get; set; }
+    public string BoxCode { get; set; } = "";
+
 
     [SugarColumn(ColumnDescription = "TrayCode", Length = 50)]
-    public string TrayCode { get; set; }
+    public string TrayCode { get; set; } = "";
 
 
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string BatchCode { get; set; }
+    public string BatchCode { get; set; } = "";
 
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string LotCode { get; set; }
+    public string LotCode { get; set; } = "";
 
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string PoCode { get; set; }
+    public string PoCode { get; set; } = "";
 
-    [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Weight { get; set; }
+    //[SugarColumn(ColumnDescription = "")]
+    public double Weight { get; set; } = 0;
 
 
-    [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Volume { get; set; }
+    //[SugarColumn(ColumnDescription = "")]
+    public double Volume { get; set; } = 0;
 
 
     /// <summary>

@@ -19,7 +19,10 @@ public class ScanPackageInput
 {
     public string Input { get; set; }
     public string SKU { get; set; }
-
+    public string SN { get; set; }
+    public string Lot { get; set; }
+    public string AcquisitionData { get; set; }
+    
     public string GoodsName { get; set; }
     public string GoodsType { get; set; }
 

@@ -28,7 +28,7 @@
                     :defaultvValue="state.header[i.columnName]"
                     @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
                 </el-form-item>
-              </template> 
+              </template>
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
@@ -62,7 +62,15 @@
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSPickTask:page'"> 查询
-            </el-button> 
+            </el-button>
+            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
+          </el-button-group>
+
+        </el-form-item>
+        <el-form-item>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Printer" @click="openPrint" v-auth="'wMSPickTask:page'"> 打印
+            </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
 
@@ -125,8 +133,8 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
-            </el-button>
+            <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
+            </el-button> -->
             <el-button @click="complete(scope.row)" class="el-icon-s-comment" type="text" size="small">完成
             </el-button>
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
@@ -146,8 +154,8 @@
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
-      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="handleQuery" />
-      
+      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="printOrder" />
+
     </el-card>
 
     <!-- <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
@@ -166,9 +174,10 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSPickTask/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPickTask/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPickTask/component/queryDialog.vue'
-import printDialog from '/@/views/main/wMSPickTask/component/printDialog.vue'
-import { pageWMSPickTask, deleteWMSPickTask,wmsPickComplete } from '/@/api/main/wMSPickTask';
+// import printDialog from '/@/views/main/wMSPickTask/component/printDialog.vue'
+import { pageWMSPickTask, deleteWMSPickTask, wmsPickComplete, getPickTasks, addWMSPickTaskPrintLog } from '/@/api/main/wMSPickTask';
 import { getByTableNameList } from "/@/api/main/tableColumns";
+import printDialog from '/@/views/tools/printDialog.vue';
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "/@/entities/pickTask";
 import Details from "/@/entities/pickTaskDetail";
@@ -199,6 +208,8 @@ const state = ref({
   tableColumnDetails: new Array<TableColumns>(),
   //自定义提示
   orderStatus: new Array<orderStatus>(),
+
+
   // tableColumn: new TableColumns(),
   // tableColumns: new Array<TableColumns>(),
   // tableColumnsDetails: new Array<TableColumnsDetails>(),
@@ -217,17 +228,17 @@ const multipleTableRef = ref();
 const resultPopupShow = ref(false);
 // const tableData = ref<any>
 // ([]);
-const queryParams = ref<any>
-  ({});
+const queryParams = ref<any>({});
 const tableParams = ref({
   page: 1,
   pageSize: 10,
   total: 0,
 });
 // const editTitle = ref("");
-// const addTitle = ref("");
-const queryTitle = ref("");
+let ids = ref(Array<Number>);
 const ptintTitle = ref("");
+const queryTitle = ref("");
+
 
 // 页面加载时
 onMounted(async () => {
@@ -235,10 +246,8 @@ onMounted(async () => {
 });
 
 const gettableColumn = async () => {
-
   let res = await getByTableNameList("WMS_PickTask");
   state.value.tableColumnHeaders = res.data.result;
-
 };
 
 // 查询操作
@@ -250,20 +259,20 @@ const handleQuery = async () => {
   loading.value = false;
 };
 
-const complete = async  (row: any) => {
+const complete = async (row: any) => {
   ElMessageBox.confirm(`确定要完成拣货吗?`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(async () => {
-        await wmsPickComplete(row);
+      await wmsPickComplete(row);
       handleQuery();
       ElMessage.success("拣货完成");
     })
     .catch(() => { });
   // loading.value = true;
- 
+
   // state.value.headers = res.data.result?.items ?? [];
   // tableParams.value.total = res.data.result?.total;
   // loading.value = false;
@@ -294,11 +303,43 @@ const openQuery = (row: any) => {
 };
 
 // 打开打印询页面
-const openPrint = (row: any) => {
-  ptintTitle.value = '打印';
-  printDialogRef.value.openDialog(row);
+const openPrint = async () => {
+  ptintTitle.value = '拣货单打印';
+  ids.value = new Array<Number>();
+
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.value.push(a.id);
+  });
+  if (ids.value.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  let printData = new Array<Header>();
+  let result = await getPickTasks(ids.value);
+  // console.log("result");
+  // console.log(result);
+  if (result.data.result != null) {
+    printData = result.data.result;
+    // state.value.details = result.data.result.details;
+  }
+  printDialogRef.value.openDialog({ "printData": printData, "templateName": "拣货单打印模板" });
 };
 
+
+//打印
+const printOrder = async () => {
+  // let ids = new Array<Number>();
+  // multipleTableRef.value.getSelectionRows().forEach(a => {
+  //     ids.push(a.id);
+  // });
+  // if (ids.length == 0) {
+  //   ElMessage.error("请勾选需要打印的订单");
+  //   return;
+  // }
+  //修改打印的时间和打印次数
+  await addWMSPickTaskPrintLog(ids.value);
+  handleQuery();
+};
 // 删除
 const del = (row: any) => {
   ElMessageBox.confirm(`确定要删除吗?`, "提示", {

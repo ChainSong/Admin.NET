@@ -7,17 +7,20 @@
 						<el-input v-model="state.vm.form.externReceiptNumber" clearable="" placeholder="请输入外部单号" />
 					</el-form-item>
 					<el-form-item label="扫描框" style="width: 100%;">
-						<el-input v-model="state.vm.form.scanInput" v-select="input" ref="input"
-							v-on:keyup.enter="scanAcquisition" clearable="" placeholder="请输入外部单号" />
+						<el-input v-model="state.vm.form.scanInput"  v-focus="input" v-select="input" ref="input"   
+							v-on:keyup.enter="scanAcquisition" clearable="" placeholder="请扫描" />
 					</el-form-item>
 					<el-form-item label="SKU" style="width: 100%;">
-						<el-input v-model="state.vm.form.sku" clearable="" placeholder="请输入外部单号" />
+						<el-input v-model="state.vm.form.sku" clearable="" placeholder="SKU" />
 					</el-form-item>
 					<el-form-item label="Lot" style="width: 100%;">
-						<el-input v-model="state.vm.form.lot" clearable="" placeholder="请输入外部单号" />
+						<el-input v-model="state.vm.form.lot" clearable="" placeholder="Lot" />
 					</el-form-item>
 					<el-form-item label="效期" style="width: 100%;">
-						<el-input v-model="state.vm.form.expirationDate" clearable="" placeholder="请输入外部单号" />
+						<el-input v-model="state.vm.form.expirationDate" clearable="" placeholder="效期" />
+					</el-form-item>
+					<el-form-item label="SN" style="width: 100%;">
+						<el-input v-model="state.vm.form.sn" clearable="" placeholder="SN" />
 					</el-form-item>
 				</el-form>
 			</div>
@@ -72,13 +75,24 @@ const closeDialog = () => {
 };
 
 const scanAcquisition = async () => {
+
+	state.value.vm.form.sku = "";
+	state.value.vm.form.lot = "";
+	state.value.vm.form.expirationDate = "";
+	state.value.vm.form.sn = "";
 	// let acquisitionData=JSON.parse(state.value.vm.form.scanInput);split('-')
 	let acquisitionData = state.value.vm.form.scanInput.split('|');
-	state.value.vm.form.sku = acquisitionData[1];
-	state.value.vm.form.lot = acquisitionData[2] ?? "";
-	state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
-
-
+ 
+	if (acquisitionData.length == 3) {
+		state.value.vm.form.sku = acquisitionData[1];
+		state.value.vm.form.sn = acquisitionData[2] ?? "";
+	} else {
+		 
+		state.value.vm.form.sku = acquisitionData[1];
+		state.value.vm.form.lot = acquisitionData[2] ?? "";
+		state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
+		state.value.vm.form.sn = acquisitionData[4] ?? "";
+	}
 	let res = await saveAcquisition(state.value.vm.form);
 	if (res.data.result.code == "1") {
 		ElMessage.success("操作成功");

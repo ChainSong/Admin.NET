@@ -332,12 +332,21 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         var data = factoryExcel.Strategy(dataExcel);
         var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
         var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
+        var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
 
         //将散装的主表和明细表 组合到一起 
         List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
         preOrders.ForEach(item =>
         {
             item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
+        });
+
+
+        //将散装的地址表和主表组合到一起 
+        //List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
+        preOrders.ForEach(item =>
+        {
+            item.OrderAddress = entityAddressListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).First();
         });
 
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)

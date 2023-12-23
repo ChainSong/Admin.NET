@@ -1,6 +1,7 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service.WMSRFReceiptAcquisition.Enumerate;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
@@ -113,12 +114,23 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
         input.CustomerName = getReceipt.CustomerName;
         input.WarehouseId = getReceipt.WarehouseId;
         input.ReceiptDetailId = getReceipt.Id;
+        input.ReceiptAcquisitionStatus = (int)ReceiptAcquisitionStatusEnum.新增;
         input.WarehouseName = getReceipt.WarehouseName;
-        input.ExpirationDate = input.ExpirationDate != "" ? DateTime.Parse(input.ExpirationDate.Replace("EXP", "")).ToString() : null;
-        input.Lot = input.Lot != "" ? input.Lot.Replace("SER", "") : "";
+        input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(input.ExpirationDate.Replace("EXP", "")).ToString() : null;
+        input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
         input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
         var entity = input.Adapt<WMSRFReceiptAcquisition>();
+        if (string.IsNullOrEmpty(entity.SN))
+        {
+            entity.Qty = 1;
+        }
+        else
+        {
+            entity.Qty = 0;
+        }
         //var dasd=input.ExpirationDate.re
+        //先删除已经存在的SN 
+        await _rep.DeleteAsync(a => a.SKU == entity.SKU && a.SN == entity.SN && a.CustomerId == entity.CustomerId && !string.IsNullOrEmpty(a.SN));
         await _rep.InsertAsync(entity);
         await _repReceiptDetail.UpdateAsync(a => new WMSReceiptDetail { ExpirationDate = input.ExpirationDate.ToDateTime(), Remark = input.Lot }, (a => a.SKU == input.SKU && a.ReceiptNumber == input.ReceiptNumber));
         response.Code = StatusCode.Success;

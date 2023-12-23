@@ -2,6 +2,7 @@
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DatabaseAccessor;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using XAct;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -35,15 +37,17 @@ public class WMSOrderService : IDynamicApiController, ITransient
     //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
-  
+
     private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
     private readonly SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation;
 
     private readonly SqlSugarRepository<WMSPickTask> _repPickTask;
-    private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail; 
+    private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
+   
 
-
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
+    private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
+    private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -60,8 +64,10 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repTableInventoryUsed = repTableInventoryUsed;
         _repInstruction = repInstruction;
         _repOrderAllocation = repOrderAllocation;
-        _repPickTask= repPickTask;
-        _repPickTaskDetail= repPickTaskDetail;
+        _repPickTask = repPickTask;
+        _repPickTaskDetail = repPickTaskDetail;
+        _reppreOrderDetail = reppreOrderDetail;
+        _repPreOrder = repPreOrder;
     }
 
     /// <summary>
@@ -223,10 +229,27 @@ public class WMSOrderService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Delete")]
-    public async Task Delete(DeleteWMSOrderInput input)
+    [UnitOfWork]
+    public async Task<Response<List<OrderStatusDto>>> Delete(DeleteWMSOrderInput input)
     {
-        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        await _rep.DeleteAsync(entity);   //假删除
+        //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        //await _rep.DeleteAsync(entity);   //假删除
+        //使用简单工厂定制化  /
+        List<DeleteWMSOrderInput> request = new List<DeleteWMSOrderInput>();
+        request.Add(input);
+        IOrderReturnInterface factory = OrderReturnFactory.OrderReturn(0);
+
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repPreOrder = _repPreOrder;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+
+        //factory._repTableColumns = _repTableInventoryUsed;
+        return await factory.OrderReturn(request);
     }
 
     /// <summary>
@@ -297,9 +320,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         var response = await factory.Strategy(input);
-
         return response;
-
     }
 
 
@@ -322,6 +343,28 @@ public class WMSOrderService : IDynamicApiController, ITransient
         return response;
 
     }
+
+
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "CompleteOrder")]
+    public async Task<Response<List<OrderStatusDto>>> CompleteOrder(List<long> input)
+    {
+        //使用简单工厂定制化  / 
+        IOrderInterface factory = OrderFactory.CompleteOrder();
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        var response = await factory.CompleteOrder(input);
+        return response;
+
+    }
+
+
 
 }
 

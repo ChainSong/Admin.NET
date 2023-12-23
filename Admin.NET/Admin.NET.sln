@@ -26,6 +26,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Common", "Admin.N
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Express", "Admin.NET.Express\Admin.NET.Express.csproj", "{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.WorkerService", "Admin.NET.WorkerService\Admin.NET.WorkerService.csproj", "{42FDA91A-5926-477B-BB15-92E1D405A71E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin.NET.ML", "Admin.NET.ML\Admin.NET.ML.csproj", "{A273EB54-28A7-4FF3-B2FF-C16380C8491A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +68,14 @@ Global
 		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{475F710D-6E9A-4BE5-BA2B-B6538B3343EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42FDA91A-5926-477B-BB15-92E1D405A71E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42FDA91A-5926-477B-BB15-92E1D405A71E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42FDA91A-5926-477B-BB15-92E1D405A71E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42FDA91A-5926-477B-BB15-92E1D405A71E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A273EB54-28A7-4FF3-B2FF-C16380C8491A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A273EB54-28A7-4FF3-B2FF-C16380C8491A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A273EB54-28A7-4FF3-B2FF-C16380C8491A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A273EB54-28A7-4FF3-B2FF-C16380C8491A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

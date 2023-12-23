@@ -2,7 +2,7 @@ import Entity from './entity'
 import TableColumnsDetails from './tableColumnsDetails'
 // import AbpBase from "../../lib/abpbase";
 export default class pickTaskDetail extends Entity<number>{
-    pickId: number;
+    pickTaskId: number;
     inventoryId: number;
     orderId: number;
     orderDetailId: number;

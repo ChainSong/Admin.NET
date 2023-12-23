@@ -7,14 +7,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <COMReference Include="{bee4bfec-6683-3e67-9167-3c0cbc68f40a}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>4</VersionMinor>
+      <VersionMajor>2</VersionMajor>
+      <Guid>bee4bfec-6683-3e67-9167-3c0cbc68f40a</Guid>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
+    <PackageReference Include="EcoCore" Version="7.0.0.15288" />
+    <PackageReference Include="iTextSharp" Version="5.5.13.3" />
     <PackageReference Include="Magicodes.IE.Excel" Version="2.7.4.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.23.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
+    <PackageReference Include="Mvc2Futures" Version="2.0.50217" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NPOI" Version="2.6.2" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.4" />
     <PackageReference Include="XAct.Core.PCL" Version="0.0.5014" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="SqlSugerUtils\" />
   </ItemGroup>
 

@@ -275,7 +275,7 @@ public class WMSPickTask : ITenantIdFilter
 
 
 
-    [Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickId))]
+    [Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickTaskId))]
     public List<WMSPickTaskDetail> Details { get; set; }
 
 }

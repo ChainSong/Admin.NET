@@ -14,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 using Admin.NET.Core.Service;
 using Admin.NET.Application.Service;
 
@@ -39,6 +39,18 @@ public interface IPackageOperationInterface
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
 
+    public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
     Task<Response<ScanPackageOutput>> GetPackage(ScanPackageInput request);
+    /// <summary>
+    /// 添加新的箱子
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task<Response<ScanPackageOutput>> AddPackage(ScanPackageInput request);
+    /// <summary>
+    /// 缺货包装（短包）
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    Task<Response<ScanPackageOutput>> ShortagePackage(ScanPackageInput request);
 }

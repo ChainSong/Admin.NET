@@ -9,6 +9,7 @@ enum Api {
   PrintExpress = '/api/wMSPackage/PrintExpress',
   AllWMSPackage = '/api/wMSPackage/All',
   AddPackageData = '/api/wMSPackage/AddPackage',
+  ShortagePackageData = '/api/wMSPackage/ShortagePackage',
   
 }
 
@@ -51,6 +52,14 @@ export const scanPackageData = (params?: any) =>
 			data: params,
 		});		
 
+// 分页查询WMSPackage
+export const shortagePackageData = (params?: any) => 
+	request({
+			url: Api.ShortagePackageData,
+			method: 'post',
+			data: params,
+		});				
+		
 		
 // 单条查询WMSPackage
 export const getWMSPackage = (params?: any) => 

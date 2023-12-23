@@ -15,6 +15,10 @@ export default class asnDetail extends Entity<number>{
     boxCode:String;
     trayCode:String;
     batchCode:String;
+    lotCode:String;
+    poCode:String;
+    weight:Number;
+    volume:Number;
     expectedQty:Number;
     receivedQty:Number;
     receiptQty:Number;

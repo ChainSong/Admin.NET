@@ -198,6 +198,7 @@ export function getAPI<T extends BaseAPI>(
 	basePath: string = BASE_PATH,
 	axiosObject: AxiosInstance = axiosInstance
 ) {
+
 	return new apiType(configuration, basePath, axiosObject);
 }
 

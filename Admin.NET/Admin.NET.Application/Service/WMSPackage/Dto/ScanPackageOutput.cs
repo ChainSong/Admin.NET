@@ -22,6 +22,9 @@ public class ScanPackageOutput
     public string PickTaskNumber { get; set; }
     public double Weight { get; set; }
 
+    public string SN { get; set; }
+    public string Lot { get; set; }
+    public string AcquisitionData { get; set; }
     public List<PackageData> PackageDatas { get; set; }
 
 }
@@ -29,7 +32,7 @@ public class ScanPackageOutput
 
 public class PackageData
 {
-    
+
     public string OrderNumber { get; set; }
     public string SKU { get; set; }
     public string PickTaskNumber { get; set; }
@@ -38,9 +41,11 @@ public class PackageData
     public double ScanQty { get; set; }
     public double RemainingQty { get; set; }
 
-    
+
     public string GoodsName { get; set; }
     public string GoodsType { get; set; }
+
+    public List<ScanPackageInput> ScanPackageInput { get; set; }
 
     //public List<PackageData> packageDatas { get; set; }
 

@@ -69,6 +69,7 @@
 										<el-dropdown-menu>
 											<el-dropdown-item icon="ele-RefreshLeft" @click="customerMapper(scope.row)" > 客户关系 </el-dropdown-item> <!-- :disabled="!auth('sysUser:customerMapper')" -->
 											<el-dropdown-item icon="ele-RefreshLeft" @click="warehouseMapper(scope.row)" > 仓库关系 </el-dropdown-item>  <!-- :disabled="!auth('sysUser:warehouseMapper')" -->
+											<el-dropdown-item icon="ele-RefreshLeft" @click="supplierMapper(scope.row)" > 供应商关系 </el-dropdown-item>  <!-- :disabled="!auth('sysUser:warehouseMapper')" -->
 											<el-dropdown-item icon="ele-RefreshLeft" @click="resetUserPwd(scope.row)" :disabled="!auth('sysUser:resetPwd')"> 重置密码 </el-dropdown-item>
 											<el-dropdown-item icon="ele-Delete" @click="delUser(scope.row)" divided :disabled="!auth('sysUser:delete')"> 删除账号 </el-dropdown-item>
 										</el-dropdown-menu>
@@ -95,6 +96,7 @@
 		<EditUser ref="editUserRef" :title="state.editUserTitle" :orgData="state.orgTreeData" @handleQuery="handleQuery" />
 		<CustomerUser ref="customerUserRef"   :orgData="state.orgTreeData" @handleQuery="handleQuery" />
 		<WarehouseUser ref="warehouseUserRef"  :orgData="state.orgTreeData" @handleQuery="handleQuery" />
+		<SupplierUser ref="supplierUserRef"  :orgData="state.orgTreeData" @handleQuery="handleQuery" />
 	</div>
 </template>
 
@@ -106,15 +108,17 @@ import { auth } from '/@/utils/authFunction';
 import OrgTree from '/@/views/system/org/component/orgTree.vue';
 import EditUser from '/@/views/system/user/component/editUser.vue';
 // import EditUser from '/@/views/system/user/component/editUser.vue';
-import CustomerUser from '/@/views/main/customerUserMapping/index.vue'
-import WarehouseUser from '/@/views/main/warehouseUserMapping/index.vue'
+import CustomerUser from '/@/views/main/customerUserMapping/index.vue';
+import WarehouseUser from '/@/views/main/warehouseUserMapping/index.vue';
+import SupplierUser from '/@/views/main/supplierUserMapping/index.vue';
 import { getAPI } from '/@/utils/axios-utils';
 import { SysUserApi, SysOrgApi } from '/@/api-services/api';
 import { SysUser, SysOrg } from '/@/api-services/models';
 
 const orgTreeRef = ref<InstanceType<typeof OrgTree>>();
 const editUserRef = ref<InstanceType<typeof EditUser>>();
-const customerUserRef = ref<InstanceType<typeof CustomerUser>>();
+const customerUserRef = ref<InstanceType<typeof CustomerUser>>(); 
+const supplierUserRef = ref<InstanceType<typeof SupplierUser>>();
 const warehouseUserRef = ref<InstanceType<typeof WarehouseUser>>();
 const state = reactive({
 	loading: false,
@@ -221,19 +225,7 @@ const changeStatus = (row: any) => {
 const customerMapper = async (row: any) => {
 	// state.editUserTitle = '编辑账号';
 	customerUserRef.value?.openDialog(row);
-	// ElMessageBox.confirm(`确定重置密码：【${row.account}】?`, '提示', {
-	// 	confirmButtonText: '确定',
-	// 	cancelButtonText: '取消',
-	// 	type: 'warning',
-	// })
-	// 	.then(async () => {
-	// 		await getAPI(SysUserApi)
-	// 			.apiSysUserResetPwdPost({ id: row.id })
-	// 			.then((res) => {
-	// 				ElMessage.success(`密码重置成功为：${res.data.result}`);
-	// 			});
-	// 	})
-	// 	.catch(() => {});
+	
 };
 
 
@@ -241,21 +233,16 @@ const customerMapper = async (row: any) => {
 const warehouseMapper = async (row: any) => {
 	// state.editUserTitle = '编辑账号';
 	warehouseUserRef.value?.openDialog(row);
-	// ElMessageBox.confirm(`确定重置密码：【${row.account}】?`, '提示', {
-	// 	confirmButtonText: '确定',
-	// 	cancelButtonText: '取消',
-	// 	type: 'warning',
-	// })
-	// 	.then(async () => {
-	// 		await getAPI(SysUserApi)
-	// 			.apiSysUserResetPwdPost({ id: row.id })
-	// 			.then((res) => {
-	// 				ElMessage.success(`密码重置成功为：${res.data.result}`);
-	// 			});
-	// 	})
-	// 	.catch(() => {});
+
 };
 
+
+// 供应商关系
+const supplierMapper = async (row: any) => {
+	// state.editUserTitle = '编辑账号';
+	supplierUserRef.value?.openDialog(row);
+
+};
 // 重置密码
 const resetUserPwd = async (row: any) => {
 	ElMessageBox.confirm(`确定重置密码：【${row.account}】?`, '提示', {

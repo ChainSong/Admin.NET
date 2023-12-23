@@ -75,10 +75,9 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" icon="ele-Plus" @click="PreOrderForOrderFun" v-auth="'wMSPreOrder:preOrderForOrder'"> 转出库单
+            <el-button type="primary" icon="ele-Fold" @click="PreOrderForOrderFun" v-auth="'wMSPreOrder:preOrderForOrder'"> 转出库单
             </el-button>
           </el-form-item>
-
         </el-form>
       </el-card>
       <el-card class="full-table" shadow="hover" style="margin-top: 8px">

@@ -9,6 +9,7 @@
 
 
 using Admin.NET.Core.Entity;
+using SqlSugar;
 
 namespace Admin.NET.Core;
 
@@ -24,6 +25,9 @@ namespace Admin.NET.Core;
 public class AutomatedAllocationJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;
+
+
+
 
     public AutomatedAllocationJob(IServiceProvider serviceProvider)
     {
@@ -42,42 +46,115 @@ public class AutomatedAllocationJob : IJob
         var repSysUser = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysUser>>();
         var repSysNotice = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNotice>>();
         var repSysNoticeUser = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNoticeUser>>();
-
-
-        //获取最早的任务编号，通过任务编号
-        var data = repInstruction.AsQueryable().Where(a => a.BusinessType == "自动分配" && a.InstructionStatus == 1).OrderBy(a => a.Id).FirstAsync();
-        if (data.Result != null)
+        var repSysTenant = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysTenant>>();
+        var tenantdata = repSysTenant.AsQueryable().Select(a => a).ToList();
+        foreach (var tenant in tenantdata)
         {
-            var sugarParameter = new SugarParameter("@InstructionTaskNo", data.Result.InstructionTaskNo, typeof(string), ParameterDirection.Input);
+            //if (tenant.Id == 1300000000001)
+            //{
+            //    continue;
+            //}
+            // 默认数据库配置
+            var defautConfig = App.GetOptions<DbConnectionOptions>().ConnectionConfigs.FirstOrDefault();
 
-             await repSysUser.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
-            //var ysxx = await _db.Ado.UseStoredProcedure().GetDataTableAsync("exec Proc_WMS_AutomatedOutbound ", sugarParameter);
-
-            SysNotice notice = new SysNotice();
-            notice.Title = "自动分配";
-            notice.PublicTime = DateTime.Now;
-            notice.Type = NoticeTypeEnum.NOTICE;
-            notice.Content = "分配完成";
-            notice.Status = NoticeStatusEnum.PUBLIC;
-            notice.PublicOrgId = 0;
-            notice.PublicUserId = 0;
-            notice.PublicOrgName = "";
-            await repSysNotice.InsertAsync(notice);
-            data.Result.InstructionStatus = 99;
-            //修改任务状态
-            await repInstruction.UpdateAsync(data.Result);
-
-            //// 通知到的人（发布分配的人)
-            var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == data.Result.Creator).Select(u => u.Id).ToListAsync();
-            //var userIdList= data.Result.InstructionStatus.
-            await repSysNoticeUser.DeleteAsync(u => u.NoticeId == notice.Id);
-            var noticeUserList = userIdList.Select(u => new SysNoticeUser
+            var config = new DbConnectionConfig
             {
-                NoticeId = notice.Id,
-                UserId = u,
-            }).ToList();
-            await repSysNoticeUser.InsertRangeAsync(noticeUserList);
+                ConfigId = tenant.Id.ToString(),
+                DbType = tenant.DbType,
+                ConnectionString = tenant.Connection,
+                DbSettings = new DbSettings()
+                {
+                    EnableInitDb = true,
+                    EnableDiffLog = false,
+                    EnableUnderLine = defautConfig.DbSettings.EnableUnderLine,
+                }
+            };
+
+
+            ITenant iTenant = App.GetRequiredService<ISqlSugarClient>().AsTenant();
+            SqlSugarSetup.SetDbConfig(config);
+            iTenant.AddConnection(config);
+            using SqlSugarScopeProvider db = iTenant.GetConnectionScope(config.ConfigId);
+            db.DbMaintenance.CreateDatabase();
+            //db.DbMaintenance.c
+            //var dasd = db.Queryable<WMSInstruction>();
+            var data = db.Ado.SqlQuery<WMSInstruction>("  select * from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by id");
+            if (data != null)
+            {
+                foreach (var instruction in data)
+                {
+                    var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
+                    await db.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
+                    SysNotice notice = new SysNotice();
+                    notice.Title = "自动分配";
+                    notice.PublicTime = DateTime.Now;
+                    notice.Type = NoticeTypeEnum.NOTICE;
+                    notice.Content = "分配完成";
+                    notice.Status = NoticeStatusEnum.PUBLIC;
+                    notice.PublicOrgId = 0;
+                    notice.PublicUserId = 0;
+                    notice.PublicOrgName = "";
+                    await repSysNotice.InsertAsync(notice);
+                    instruction.InstructionStatus = 99;
+                    //修改任务状态
+                    //await repInstruction.UpdateAsync(data.Result);
+                    db.Ado.SqlQuery<WMSInstruction>("  update WMS_Instruction set  InstructionStatus=99 where InstructionTaskNo='" + instruction.InstructionTaskNo + "' ");
+
+                    //// 通知到的人（发布分配的人)
+                    var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == instruction.Creator).Select(u => u.Id).ToListAsync();
+                    //var userIdList= data.Result.InstructionStatus.
+                    await repSysNoticeUser.DeleteAsync(u => u.NoticeId == notice.Id);
+                    var noticeUserList = userIdList.Select(u => new SysNoticeUser
+                    {
+                        NoticeId = notice.Id,
+                        UserId = u,
+                    }).ToList();
+                    await repSysNoticeUser.InsertRangeAsync(noticeUserList);
+                }
+            }
         }
+        //var dasd = repWarehouse.AsTenant;
+
+
+
+
+        //serviceScope.ServiceProvider.GetService<>();
+
+
+        ////获取最早的任务编号，通过任务编号
+        //var data = repInstruction.AsQueryable().Where(a => a.BusinessType == "自动分配" && a.InstructionStatus == 1).OrderBy(a => a.Id).FirstAsync();
+        //if (data.Result != null)
+        //{
+        //    var sugarParameter = new SugarParameter("@InstructionTaskNo", data.Result.InstructionTaskNo, typeof(string), ParameterDirection.Input);
+
+        //     await repSysUser.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
+        //    //var ysxx = await _db.Ado.UseStoredProcedure().GetDataTableAsync("exec Proc_WMS_AutomatedOutbound ", sugarParameter);
+
+        //    SysNotice notice = new SysNotice();
+        //    notice.Title = "自动分配";
+        //    notice.PublicTime = DateTime.Now;
+        //    notice.Type = NoticeTypeEnum.NOTICE;
+        //    notice.Content = "分配完成";
+        //    notice.Status = NoticeStatusEnum.PUBLIC;
+        //    notice.PublicOrgId = 0;
+        //    notice.PublicUserId = 0;
+        //    notice.PublicOrgName = "";
+        //    await repSysNotice.InsertAsync(notice);
+        //    data.Result.InstructionStatus = 99;
+        //    //修改任务状态
+        //    await repInstruction.UpdateAsync(data.Result);
+
+        //    //// 通知到的人（发布分配的人)
+        //    var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == data.Result.Creator).Select(u => u.Id).ToListAsync();
+        //    //var userIdList= data.Result.InstructionStatus.
+        //    await repSysNoticeUser.DeleteAsync(u => u.NoticeId == notice.Id);
+        //    var noticeUserList = userIdList.Select(u => new SysNoticeUser
+        //    {
+        //        NoticeId = notice.Id,
+        //        UserId = u,
+        //    }).ToList();
+        //    await repSysNoticeUser.InsertRangeAsync(noticeUserList);
+        //}
 
 
         // 更新发布状态和时间

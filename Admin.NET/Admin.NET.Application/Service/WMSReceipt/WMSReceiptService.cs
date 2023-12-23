@@ -1,9 +1,11 @@
 ﻿using Admin.NET.Application.Const;
+using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using AutoMapper.Internal.Mappers;
+using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
@@ -23,7 +25,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceipt> _rep;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
 
-    
+
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
@@ -34,7 +36,13 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
-    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed)
+
+
+
+    private readonly SqlSugarRepository<WMSASN> _repASN;
+    //注入ASNDetail仓储
+    private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
+    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -47,6 +55,8 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         _repTableColumnsDetail = repTableColumnsDetail;
         _repTableInventoryUsable = repTableInventoryUsable;
         _repTableInventoryUsed = repTableInventoryUsed;
+        _repASN = repASN;
+        _repASNDetail = repASNDetail;
         //this._repTableInventoryUsable = repTableInventoryUsable;
 
     }
@@ -207,7 +217,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
 
 
 
-    
+
 
     /// <summary>
     /// 删除WMSReceipt
@@ -216,10 +226,25 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Delete")]
-    public async Task Delete(DeleteWMSReceiptInput input)
+    [UnitOfWork]
+    public async Task<Response<List<OrderStatusDto>>> Delete(DeleteWMSReceiptInput input)
     {
-        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        await _rep.DeleteAsync(entity);   //假删除
+        //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        //await _rep.DeleteAsync(entity);   //假删除
+        //使用简单工厂定制化  /
+        List<DeleteWMSReceiptInput> request = new List<DeleteWMSReceiptInput>();
+        request.Add(input);
+        IReceiptReturnInterface factory = ReceiptReturnFactory.ReturnReceipt(0);
+        factory._repReceipt = _rep;
+        factory._repReceiptDetail = _repReceiptDetail;
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repASN = _repASN;
+        factory._repASNDetail = _repASNDetail;
+        //factory._repTableColumns = _repTableInventoryUsed;
+        return await factory.Strategy(request);
+
     }
 
     /// <summary>
@@ -252,6 +277,21 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     }
 
     /// <summary>
+    /// 获取WMSReceipt 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetReceipts")]
+    public async Task<List<WMSReceipt>> GetReceipts(List<long> ids)
+    {
+        var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => ids.Contains(u.Id)).ToListAsync();
+        return entity;
+    }
+
+
+
+    /// <summary>
     /// 获取WMSReceipt列表
     /// </summary>
     /// <param name="input"></param>
@@ -271,6 +311,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     public ActionResult ExportReceipt(List<long> input)
     {
         //使用简单工厂定制化
@@ -280,8 +321,6 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
-       
-
         //var receiptData = _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id));
         var response = factory.Strategy(input);
         IExporter exporter = new ExcelExporter();
@@ -290,7 +329,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
         return new FileStreamResult(fs, "application/octet-stream")
         {
-            FileDownloadName = "下载文件.xlsx" // 配置文件下载显示名
+            FileDownloadName = "入库单.xlsx" // 配置文件下载显示名
         };
     }
 
@@ -320,7 +359,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
         return new FileStreamResult(fs, "application/octet-stream")
         {
-            FileDownloadName = "下载文件.xlsx" // 配置文件下载显示名
+            FileDownloadName = "上架单.xlsx" // 配置文件下载显示名
         };
     }
 

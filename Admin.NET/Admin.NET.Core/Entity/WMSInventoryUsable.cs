@@ -122,14 +122,16 @@ public class WMSInventoryUsable : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
+    [Required]
     [SugarColumn(ColumnDescription = "", Length = 50, DefaultValue = "")]
-    public string? LotCode { get; set; }
+    public string LotCode { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
+    [Required]
     [SugarColumn(ColumnDescription = "", Length = 50, DefaultValue = "")]
-    public string? PoCode { get; set; }
+    public string PoCode { get; set; }
 
 
     /// <summary>

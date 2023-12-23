@@ -13,6 +13,9 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECMerchantAddFreight
 using System.Reflection.Emit;
 using Admin.NET.Core.Service;
 using Admin.NET.Application.Enumerate;
+using Furion.RemoteRequest;
+using Org.BouncyCastle.Crypto;
+using Furion.DatabaseAccessor;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -179,7 +182,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         query = query.OrderBuilder(input);
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
-   
+
     /// <summary>
     /// 增加WMSPickTask
     /// </summary>
@@ -227,6 +230,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "WMSPickComplete")]
     public async Task WMSPickComplete(UpdateWMSPickTaskInput input)
     {
@@ -243,7 +247,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
             a.PikcTime = DateTime.Now;
         });
         //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
-        await _rep.Context.UpdateNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
+        await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
 
     }
 
@@ -263,11 +267,24 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     }
 
     /// <summary>
+    /// 获取WMSPickTask 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetPickTasks")]
+    public async Task<List<WMSPickTask>> GetPickTasks(List<long> ids)
+    {
+        var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => ids.Contains(u.Id)).ToListAsync();
+        return entity;
+    }
+    /// <summary>
     /// 获取WMSPickTask列表
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "List")]
     public async Task<List<WMSPickTaskOutput>> List([FromQuery] WMSPickTaskInput input)
     {
@@ -278,16 +295,36 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     /// <summary>
     /// 获取WMSPickTask 
     /// </summary>
+    ///// <param name="input"></param>
+    ///// <returns></returns>
+    //[HttpGet]
+    //[ApiDescriptionSettings(Name = "AddPrintLog")]
+    //public async Task AddPrintLog(long id)
+    //{
+    //    var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+    //    entity.PrintNum += 1;
+    //    entity.PrintPersonnel = _userManager.Account;
+    //    entity.PrintTime = DateTime.Now;
+    //    await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+    //}
+
+    /// <summary>
+    /// 获取WMSPickTask 
+    /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    [HttpGet]
+    [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "AddPrintLog")]
-    public async Task AddPrintLog(long id)
+    public async Task AddPrintLog(List<long> ids)
     {
-        var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
-        entity.PrintNum += 1;
-        entity.PrintPersonnel = _userManager.Account;
-        entity.PrintTime = DateTime.Now;
+        var entity = _rep.AsQueryable().Where(u => ids.Contains(u.Id)).ToList();
+        entity.ForEach(u =>
+        {
+            u.PrintNum += 1;
+            u.PrintPersonnel = _userManager.Account;
+            u.PrintTime = DateTime.Now;
+        });
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
 }

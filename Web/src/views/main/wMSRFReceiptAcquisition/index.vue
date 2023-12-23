@@ -52,8 +52,7 @@ import { pageWMSRFReceiptAcquisition, deleteWMSRFReceiptAcquisition,allWMSRFRece
 
 const editDialogRef = ref();
 const loading = ref(false);
-const tableData = ref<any>
-  ([]);
+const tableData = ref<any> ([]);
 
 const editWMSRFReceiptAcquisitionTitle = ref("");
 

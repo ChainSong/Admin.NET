@@ -1,4 +1,6 @@
 ﻿import request from '/@/utils/request';
+import { Local, Session } from '/@/utils/storage';
+// import { useRoute } from 'vue-router'
 enum Api {
 	AddTableColumns = '/api/tableColumns/add',
 	DeleteTableColumns = '/api/tableColumns/delete',
@@ -13,7 +15,7 @@ enum Api {
 	GetImportExcelTemplate = '/api/tableColumns/ImportExcelTemplate',
 
 }
-
+const user=Session.get('userInfo');
 // 增加表管理
 export const addTableColumns = (params?: any) =>
 	request({
@@ -31,12 +33,14 @@ export const deleteTableColumns = (params?: any) =>
 	});
 
 // 编辑表管理
-export const updateTableColumns = (params?: any) =>
+export const updateTableColumns = (params?: any) =>{
+	localStorage.setItem(params[0].tableName+"_"+user.tenantId, null);
 	request({
 		url: Api.UpdateTableColumns,
 		method: 'post',
 		data: params,
 	});
+}
 // 编辑表管理
 export const updateTableColumnsDetail = (params?: any) =>
 	request({
@@ -45,17 +49,19 @@ export const updateTableColumnsDetail = (params?: any) =>
 		data: params,
 	});
 
-// 编辑表管理
+// get表管理
 export const getByTableNameList = async (params?: any) => {
+	// console.log("user");
+	// console.log(); 
 	let data = { data: { result: [] } };
 	// localStorage.setItem(params, null);
-	let tableColumnsStorage = localStorage.getItem(params);
+	let tableColumnsStorage = localStorage.getItem(params+"_"+user.tenantId);
 	if (tableColumnsStorage != null && tableColumnsStorage.length > 30) {
 		return JSON.parse(tableColumnsStorage) as Array<data>;
 	} else {
 		let tableNameListData = await tableNameList(params);
 		data.data.result = tableNameListData.data.result;
-		localStorage.setItem(params, JSON.stringify(data));
+		localStorage.setItem(params+"_"+user.tenantId, JSON.stringify(data));
 		return data;
 	}
 
@@ -107,7 +113,7 @@ export const pageAllTableColumns = (params?: any) =>
 
 // 清理表结构缓存
 export const cleanTableColumnsCache = (params?: any) => {
-	localStorage.setItem(params.tableName, null);
+	localStorage.setItem(params.tableName+"_"+user.tenantId, null);
 	request({
 		url: Api.CleanTableColumnsCache,
 		method: 'post',

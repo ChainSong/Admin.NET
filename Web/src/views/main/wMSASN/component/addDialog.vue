@@ -103,10 +103,9 @@
 													</el-date-picker>
 												</template>
 												<template v-if="v.type == 'InputNumber'">
-													<el-input-number placeholder="请输入内容" size="small"
+													<el-input-number placeholder="请输入内容"  
 														v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate"></el-input-number>
-
 												</template>
 											</el-form-item>
 										</template>
@@ -252,8 +251,8 @@ const cancel = () => {
 
 // 提交
 const submit = async () => {
-	console.log("state.value.details");
-	console.log(state.value.details);
+	// console.log("state.value.details");
+	// console.log(state.value.details);
 	state.value.header.details = state.value.details
 	console.log(state.value.header);
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {

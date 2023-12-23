@@ -74,7 +74,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单
+          <el-button type="primary" icon="ele-Fold" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单
           </el-button>
         </el-form-item>
 
