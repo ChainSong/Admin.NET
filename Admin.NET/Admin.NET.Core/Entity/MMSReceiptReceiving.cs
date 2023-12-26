@@ -82,8 +82,8 @@ public class MMSReceiptReceiving : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "")]
-    public DateTime? ReceiptReceivingTime { get; set; }
+    //[SugarColumn(ColumnDescription = "")]
+    //public DateTime? ReceiptReceivingTime { get; set; }
     
     /// <summary>
     /// 
@@ -95,6 +95,7 @@ public class MMSReceiptReceiving : ITenantIdFilter
     [SugarColumn(ColumnDescription = "")]
 
     public DateTime? ReceiptReceivingStartTime { get; set; }
+
     [SugarColumn(ColumnDescription = "")]
 
     public DateTime? ReceiptReceivingEndTime { get; set; }

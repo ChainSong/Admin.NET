@@ -131,6 +131,7 @@ import PickTaskDetail from "/@/entities/pickTaskDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
+import sfExpress from "/@/api/expressInterface/sfExpress";
 // import SCPPrint from "";
 
 import { addWMSPickTask } from "/@/api/main/wMSPickTask";
@@ -145,6 +146,7 @@ const state = ref({
       pickTaskNumber: "",
       weight: 0,
       expirationDate:"", 
+      expressCompany:"",
       lot:"",
       sn:"",
     },
@@ -192,14 +194,14 @@ const expressConfig = ref({});
 
 // --------------------顺丰快递打印-----------------------
 // 寮曞叆SDK鍚庡垵濮嬪寲瀹炰緥锛屼粎鎵ц涓€娆�
-const sdkCallback = result => { };
-let sdkParams = {
-  env: expressConfig.value.env, // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-  partnerID: expressConfig.value.partnerId,
-  callback: sdkCallback,
-  notips: true
-};
-let printSdk = new SCPPrint(sdkParams);
+// const sdkCallback = result => { };
+// let sdkParams = {
+//   env: expressConfig.value.env, // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+//   partnerID: expressConfig.value.partnerId,
+//   callback: sdkCallback,
+//   notips: true
+// };
+// let printSdk = new SCPPrint(sdkParams);
 
 // 页面加载时
 onMounted(async () => {
@@ -360,28 +362,27 @@ const printExpress = async (row: any) => {
 
       console.log(row);
       if (row.expressCompany == "顺丰快递") {
-        let resToken = await getExpressConfig(row);
-        // console.log("resToken")
-        if (resToken.data.result.code == 1) {
-          // console.log(resToken)
-          expressConfig.value = resToken.data.result.data;
-        }
+        // let resToken = await getExpressConfig(row);
+        // // console.log("resToken")
+        // if (resToken.data.result.code == 1) {
+        //   // console.log(resToken)
+        //   expressConfig.value = resToken.data.result.data;
+        // }
 
         // console.log(row);
         let res = await printExpressData(row);
         // alert(res.data.result.data.expressNumber);
-        // console.log(expressConfig.value);
-        sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-        sdkParams.partnerID = expressConfig.value.partnerId;
-        sdkParams.callback = sdkCallback;
-        sdkParams.notips = true;
-        printSdk = new SCPPrint(sdkParams);
+        // // console.log(expressConfig.value);
+        // sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+        // sdkParams.partnerID = expressConfig.value.partnerId;
+        // sdkParams.callback = sdkCallback;
+        // sdkParams.notips = true;
+        // printSdk = new SCPPrint(sdkParams);
         // };
-        print(res.data.result.data.expressNumber);
+        // print(res.data.result.data.expressNumber);
+        sfExpress.print(res.data.result.data)
         allPackage(state.value.vm.form);
       }
-
-
     })
     .catch(() => { });
 
@@ -400,59 +401,59 @@ const printExpress = async (row: any) => {
 
 
 
-// 鑾峰彇鎵撳嵃鏈哄垪琛�
-const getPrintersCallback = result => {
-  if (result.code === 1) {
-    const printers = result.printers;
+// // 鑾峰彇鎵撳嵃鏈哄垪琛�
+// const getPrintersCallback = result => {
+//   if (result.code === 1) {
+//     const printers = result.printers;
 
-    const selectElement = document.getElementById("printers");
+//     const selectElement = document.getElementById("printers");
 
-    // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
-    for (let i = 0; i < printers.length; i++) {
-      const item = printers[i];
-      var option = document.createElement("option");
-      option.innerHTML = item.name;
-      option.value = item.index;
-      selectElement.appendChild(option);
-    }
+//     // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
+//     for (let i = 0; i < printers.length; i++) {
+//       const item = printers[i];
+//       var option = document.createElement("option");
+//       option.innerHTML = item.name;
+//       option.value = item.index;
+//       selectElement.appendChild(option);
+//     }
 
-    // 璁剧疆榛樿鎵撳嵃鏈�
-    var printer = 0;
-    selectElement.value = printer;
-    printSdk.setPrinter(printer);
-  }
-};
-printSdk.getPrinters(getPrintersCallback);
+//     // 璁剧疆榛樿鎵撳嵃鏈�
+//     var printer = 0;
+//     selectElement.value = printer;
+//     printSdk.setPrinter(printer);
+//   }
+// };
+// printSdk.getPrinters(getPrintersCallback);
 
-// 閫夋嫨鎵撳嵃鏈�
-const selectPrinter = (e) => {
-  // 璁剧疆鎵撳嵃鏈�
-  printSdk.setPrinter(e.target.value);
-}
+// // 閫夋嫨鎵撳嵃鏈�
+// const selectPrinter = (e) => {
+//   // 璁剧疆鎵撳嵃鏈�
+//   printSdk.setPrinter(e.target.value);
+// }
 
-// 鎵撳嵃
-const print = (masterWaybillNo: string) => {
-  // console.log(result);
-  const data = {
-    requestID: expressConfig.value.partnerId,
-    accessToken: expressConfig.value.token,
-    templateCode: expressConfig.value.templateCode,
-    templateVersion: "",
-    documents: [
-      {
-        masterWaybillNo: masterWaybillNo
-      }
-    ],
-    extJson: {},
-    customTemplateCode: ""
-  };
-  const callback = function (result) { };
-  const options = {
-    lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
-  };
-  console.log(printSdk);
-  console.log(printSdk.print(data, callback, options));
-};
+// // 鎵撳嵃
+// const print = (masterWaybillNo: string) => {
+//   // console.log(result);
+//   const data = {
+//     requestID: expressConfig.value.partnerId,
+//     accessToken: expressConfig.value.token,
+//     templateCode: expressConfig.value.templateCode,
+//     templateVersion: "",
+//     documents: [
+//       {
+//         masterWaybillNo: masterWaybillNo
+//       }
+//     ],
+//     extJson: {},
+//     customTemplateCode: ""
+//   };
+//   const callback = function (result) { };
+//   const options = {
+//     lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
+//   };
+//   console.log(printSdk);
+//   console.log(printSdk.print(data, callback, options));
+// };
 
 // // 改变页面容量
 // const handleSizeChange = (val: number) => {

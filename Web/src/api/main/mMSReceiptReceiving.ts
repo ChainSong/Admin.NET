@@ -5,6 +5,8 @@ enum Api {
   UpdateMMSReceiptReceiving = '/api/mMSReceiptReceiving/update',
   PageMMSReceiptReceiving = '/api/mMSReceiptReceiving/page',
   GetMMSReceiptReceiving = '/api/mMSReceiptReceiving/Query',
+  ReturnReceiptReceiving = '/api/mMSReceiptReceiving/ReturnReceiptReceiving',
+  AddInventory = '/api/mMSReceiptReceiving/addInventory',
 }
 
 // 增加MMSReceiptReceiving
@@ -46,4 +48,22 @@ request({
 });
 
 
+// 上架回退
+export const returnReceiptReceiving = (params?: any) =>
+	request({
+		url: `${Api.ReturnReceiptReceiving}`,
+		method: 'post',
+		data: params,
+	});
+
+	// 加入库存
+export const addInventory = (params?: any) =>
+request({
+	url: `${Api.AddInventory}`,
+	method: 'post',
+	data: params,
+});
+
+
+	
 

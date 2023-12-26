@@ -34,6 +34,7 @@ using Admin.NET.Express.Strategy.SFExpress.Dto;
 using NewLife.Serialization;
 using Admin.NET.Application.Service.WMSExpress.Interface;
 using NPOI.SS.Formula.PTG;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 
 namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 
@@ -230,9 +231,9 @@ public class SFExpressStrategy : IExpressInterface
         SFExpressInput<SFRootobjectPrint> input = new SFExpressInput<SFRootobjectPrint>();
 
         //获取包裹信息
-        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+        //var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
 
-        var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + package.CustomerId + "_" + package.WarehouseId);
+        var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + request.CustomerId + "_" + request.WarehouseId);
 
         if (expressConfig != null)
         {
@@ -245,7 +246,7 @@ public class SFExpressStrategy : IExpressInterface
 
 
         //获取快递信息
-        var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
+        var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == request.CustomerId && a.WarehouseId == request.WarehouseId && a.Status == 1).First();
 
         //var Express = _repExpressDelivery.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).FirstAsync();
 
@@ -278,7 +279,7 @@ public class SFExpressStrategy : IExpressInterface
             //RootobjectPrint_obj RootobjectResult = rootobjectPrint.apiResultData.ToJsonEntity<RootobjectPrint_obj>();
             //rootobjectPrint
 
-            _sysCacheService.Set("SFExpress_" + package.CustomerId + "_" + package.WarehouseId, wMSExpressConfig, new TimeSpan(1, 30, 0));
+            _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId, wMSExpressConfig, new TimeSpan(1, 30, 0));
             response.Msg = "成功";
             response.Code = StatusCode.Success;
             response.Data = wMSExpressConfig;
@@ -410,3 +411,5 @@ public class SFExpressStrategy : IExpressInterface
 
 
 
+
+    

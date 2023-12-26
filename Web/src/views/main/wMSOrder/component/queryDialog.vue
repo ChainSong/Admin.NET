@@ -221,6 +221,7 @@ const get = async () => {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
 		state.value.allocations = result.data.result.allocation;
+		state.value.orderAddress = result.data.result.orderAddress;
 	} 
 }
 

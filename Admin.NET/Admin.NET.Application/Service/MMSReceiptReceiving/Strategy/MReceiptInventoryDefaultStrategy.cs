@@ -49,7 +49,8 @@ namespace Admin.NET.Application.Strategy
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<MMSReceiptReceivingDetail, MMSInventoryUsable>()
                 //自定义投影，将上架表ID 投影到库存表中
-                .ForMember(a => a.ReceiptReceivingId, opt => opt.MapFrom(c => c.Id))
+                .ForMember(a => a.ReceiptReceivingId, opt => opt.MapFrom(c => c.ReceiptReceivingId))
+                .ForMember(a => a.ReceiptReceivingDetailId, opt => opt.MapFrom(c => c.Id))
                 //添加创建人为当前用户
                 .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                 //创建时间
@@ -91,7 +92,7 @@ namespace Admin.NET.Application.Strategy
                 WMSInventoryUsable aa = new WMSInventoryUsable();
 
                 var receipt = _repMReceiptReceiving.AsQueryable().Includes(b => b.Details).Where(b => b.Id == a).First();
-                if (receipt != null && receipt.ReceiptReceivingStatus == (int)ReceiptStatusEnum.上架)
+                if (receipt != null && receipt.ReceiptReceivingStatus == (int)MReceiptReceivingStatusEnum.已上架)
                 {
                     //var receiptreceiving = _wms_receiptreceivingRepository.GetAll().Where(b => b.ReceiptId == a).ToList();
                     if (receipt.Details.Sum(r => r.ReceivedQty) == receipt.Details.Sum(r => r.ReceivedQty))
@@ -102,7 +103,7 @@ namespace Admin.NET.Application.Strategy
                         //await _repTableInventoryUsable.AsInsertable(inventoryData).ExecuteCommandAsync();
                         await _repInventoryUsable.InsertRangeAsync(inventoryData);
                         //修改入库单状态
-                        await _repMReceipt.UpdateAsync(a => new MMSReceipt { ReceiptStatus = (int)ReceiptStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.Id));
+                        await _repMReceipt.UpdateAsync(a => new MMSReceipt { ReceiptStatus = (int)MReceiptStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.Id));
                         //修改入库单明细中的入库数量
                         //_wms_receiptdetailRepository.GetDbContext().BulkUpdate();
                         var receiptDetailData = _repMReceiptDetail.AsQueryable().Where(a => a.ReceiptId == receipt.Id).ToList();
@@ -116,7 +117,7 @@ namespace Admin.NET.Application.Strategy
                         await _repMReceiptDetail.UpdateRangeAsync(receiptDetailData);
                         //_repReceiptDetail.AsUpdateable(receiptDetailData).ExecuteCommandAsync();
                         //修改上架表中的状态
-                        await _repMReceiptReceiving.UpdateAsync(a => new MMSReceiptReceiving { ReceiptReceivingStatus = (int)ReceiptStatusEnum.完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => request.Contains(a.Id)));
+                        await _repMReceiptReceiving.UpdateAsync(a => new MMSReceiptReceiving { ReceiptReceivingStatus = (int)MReceiptStatusEnum.完成,CompleteTime=DateTime.Now, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => request.Contains(a.Id)));
 
 
 
@@ -143,7 +144,7 @@ namespace Admin.NET.Application.Strategy
                         });
                     }
                 }
-                else if (receipt.ReceiptReceivingStatus != (int)ReceiptStatusEnum.上架)
+                else if (receipt.ReceiptReceivingStatus != (int)MReceiptReceivingStatusEnum.上架中)
                 {
                     orderStatuses.Add(new OrderStatusDto()
                     {

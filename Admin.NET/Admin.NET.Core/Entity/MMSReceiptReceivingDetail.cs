@@ -217,7 +217,7 @@ public class MMSReceiptReceivingDetail : ITenantIdFilter
     /// 
     /// </summary>
     [Required]
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "")]
     public int GoodsStatus { get; set; }
 
 

@@ -8,10 +8,16 @@ namespace Admin.NET.Application
 {
     public enum MReceiptReceivingStatusEnum
     {
+
+        /// <summary>
+        /// ReceiptReceivingStatus 上架中 15
+        /// </summary>
+        上架中 = 15,
+
         /// <summary>
         /// ReceiptReceivingStatus 上架 20
         /// </summary>
-        上架 = 20,
+        已上架 = 20,
 
         /// <summary>
         /// ReceiptReceivingStatus 完成 99

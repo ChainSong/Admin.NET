@@ -17,6 +17,8 @@ using Admin.NET.Application.Dtos.Enum;
 using SkiaSharp;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service.Enumerate;
+using Admin.NET.Common.SnowflakeCommon;
+using FluentEmail.Core;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -80,7 +82,8 @@ namespace Admin.NET.Application.Strategy
             }
 
             //获取同订单下的数据作为校验
-            var checkData = _repMReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
+            var checkData = await _repMReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToListAsync();
+
 
             //var config = new MapperConfiguration(cfg => cfg.CreateMap<WMSReceiptDetail, WMSReceiptReceiving>());
             //var mapper = new Mapper(config);
@@ -95,29 +98,36 @@ namespace Admin.NET.Application.Strategy
             .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
             //创建时间
             .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
-            .ForMember(a => a.ReceiptReceivingTime, opt => opt.MapFrom(c => DateTime.Now))
+            //.ForMember(a => a.ReceiptReceivingTime, opt => opt.MapFrom(c => DateTime.Now))
             .ForMember(a => a.ReceiptReceivingStartTime, opt => opt.MapFrom(c => DateTime.Now))
             .ForMember(a => a.ReceiptReceivingEndTime, opt => opt.MapFrom(c => DateTime.Now))
             //数量
             //.ForMember(a => a.Qty, opt => opt.MapFrom(c => c.qty))
             //添加库存状态为可用
-            .ForMember(a => a.ReceiptReceivingStatus, opt => opt.MapFrom(c => (int)MReceiptReceivingStatusEnum.上架))
+            .ForMember(a => a.ReceiptReceivingStatus, opt => opt.MapFrom(c => (int)MReceiptReceivingStatusEnum.已上架))
+            .ForMember(a => a.ReceiptReceivingType, opt => opt.MapFrom(c => (int)MReceiptReceivingTypeEnum.正常上架))
             //.ForMember(a => a.InventoryStatus, opt => opt.MapFrom(c => 1))
             //将为Null的字段设置为"" () 
             .AddTransform<string>(a => a == null ? "" : a)
+            .AddTransform<int?>(a => a == null ? 0 : a)
+            .AddTransform<double?>(a => a == null ? 0 : a)
             //.AddTransform<DateTime?>(a => a is null ? null : )
             //忽略空值映射
             //.IgnoreNullValues(true)
             //忽略需要转换的字段 
-            .ForMember(a => a.Id, opt => opt.Ignore())
+            //.ForMember(a => a.Id, opt => opt.Ignore())
+            .ForMember(a => a.Id, opt => opt.MapFrom(c => 0))
             .ForMember(a => a.Updator, opt => opt.Ignore())
             .ForMember(a => a.UpdateTime, opt => opt.Ignore());
-
                 cfg.CreateMap<MMSReceiptDetail, MMSReceiptReceivingDetail>()
+                 .AddTransform<string>(a => a == null ? "" : a)
+                 .AddTransform<int?>(a => a == null ? 0 : a)
+                 .AddTransform<double?>(a => a == null ? 0 : a)
+                 .ForMember(a => a.GoodsStatus, opt => opt.MapFrom(c => (int)MGoodsStatusEnum.正常))
                  .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                  .ForMember(a => a.ReceiptId, opt => opt.MapFrom(c => c.Id))
+                 .ForMember(a => a.Id, opt => opt.MapFrom(c => 0))
                  //忽略需要转换的字段 
-                 .ForMember(a => a.Id, opt => opt.Ignore())
                  .ForMember(a => a.Updator, opt => opt.Ignore())
                  .ForMember(a => a.UpdateTime, opt => opt.Ignore());
                 //.ForMember(a => a.ReceiptDetailId, opt => opt.MapFrom(c => c.Id));
@@ -126,6 +136,9 @@ namespace Admin.NET.Application.Strategy
             //config.
 
             var mapper = new Mapper(config);
+            //receiptReceivings = checkData.Adapt<List<MMSReceiptReceiving>>();
+            receiptReceivings = mapper.Map<List<MMSReceiptReceiving>>(checkData);
+
             foreach (var item in request)
             {
                 var receiptOrderTemp = checkData.Where(a => a.ReceiptNumber == item.ReceiptNumber).First();
@@ -166,7 +179,7 @@ namespace Admin.NET.Application.Strategy
                     //return response;
                 }
 
-                var receiptOrderLineData = receiptOrderTemp.Details.Where(a => a.SKU == item.SKU && a.LineNumber == item.LineNumber).FirstOrDefault();
+                var receiptOrderLineData = receiptOrderTemp.Details.Where(a => a.SKU == item.SKU).FirstOrDefault();
 
                 if (receiptOrderLineData != null)
                 {
@@ -206,10 +219,17 @@ namespace Admin.NET.Application.Strategy
                 }
             }
 
-            receiptReceivings = checkData.Adapt<List<MMSReceiptReceiving>>();
+
             foreach (var item in receiptReceivings)
             {
-                item.Details.AddRange(receiptReceivingDetails.Where(a => a.ReceiptNumber == item.ReceiptNumber));
+                var receiptReceivingNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+                item.ReceiptReceivingNumber = receiptReceivingNumber;
+                var receiptReceivingDetailData = receiptReceivingDetails.Where(a => a.ReceiptNumber == item.ReceiptNumber);
+                receiptReceivingDetailData.ForEach(a =>
+                {
+                    a.ReceiptReceivingNumber = receiptReceivingNumber;
+                });
+                item.Details = receiptReceivingDetailData.ToList();
             }
             //先删除原来的单子
 
@@ -219,7 +239,7 @@ namespace Admin.NET.Application.Strategy
             var receiptData = _repMReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToList();
             receiptData.ForEach(c =>
             {
-                c.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
+                c.ReceiptStatus = (int)MReceiptReceivingStatusEnum.已上架;
             });
             await _repMReceipt.UpdateRangeAsync(receiptData);
             //await _repReceipt.AsUpdateable(receiptData).ExecuteCommandAsync();

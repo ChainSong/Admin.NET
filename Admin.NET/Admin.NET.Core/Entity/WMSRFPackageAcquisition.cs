@@ -29,7 +29,7 @@ public class WMSRFPackageAcquisition : ITenantIdFilter
     /// 
     /// </summary>
     [Required]
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "")]
     public long PickTaskId { get; set; }
     
     /// <summary>

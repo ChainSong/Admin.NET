@@ -312,7 +312,7 @@ public class TableColumnsService : IDynamicApiController, ITransient
 
         //var table_ColumnsListDtos = ObjectMapper.Map<List<Table_ColumnsListDto>>(table_ColumnsList);
         //query = query.OrderBuilder(input, "", "TableName");
-        return await query.ToListAsync();
+         return await query.ToListAsync();
         //return new PagedResultDto<Table_ColumnsListDto>(count, table_ColumnsListDtos);
 
 

@@ -19,6 +19,10 @@ using Admin.NET.Applicationt.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.ReceiptCore.Factory;
 using Admin.NET.Application.ReceiptCore.Interface;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using System.IO;
+using Admin.NET.Application.ReceiptReceivingCore.Factory;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -260,7 +264,7 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<MMSReceiptReceiving> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable().Includes(a=>a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
 
@@ -308,7 +312,7 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
         //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
 
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var supplier = _rep.AsQueryable().Where(a => a.ReceiptNumber == entityListDtos.First().ReceiptNumber).First();
+        var supplier = _repMReceipt.AsQueryable().Where(a => a.ReceiptNumber == entityListDtos.First().ReceiptNumber).First();
         long supplierId = 0;
         if (supplier != null)
         {
@@ -339,6 +343,41 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
 
     }
 
+
+
+
+    /// <summary>
+    /// 状态回退
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    public async Task<Response<List<OrderStatusDto>>> ReturnReceiptReceiving(List<long> input)
+    {
+        //Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>();
+        //获取客户的id
+        var customerData = _rep.AsQueryable().Where(a => a.Id == input[0]).First();
+        long customerId = 0;
+        //if (customerData != null)
+        //{
+        //    customerId = customerData.CustomerId;
+        //}
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+
+        IReceiptReceivingReturnInterface factory = ReceiptReceivingReturnFactory.ReturnReceiptReceiving(customerId);
+        //factory._db = _db;
+        //factory._repReceipt = _rep;
+        //factory._repReceiptDetail = _repReceiptDetail;
+        //factory._repReceiptReceiving = _repReceiptReceiving;
+        //factory._repTableColumns = _repTableColumns;
+        //factory._userManager = _userManager;
+        //factory._repLocation = _repLocation;
+        return await factory.Strategy(input);
+
+        //return response;
+    }
 
 
     /// <summary>
@@ -379,6 +418,7 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repMReceiptReceivingDetail = _repMReceiptReceivingDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repLocation = _repLocation;
+        factory._repInventoryUsable = _repInventoryUsable;
 
         //List<long> ids = new List<long>();
         //ids.Add(input);
@@ -387,6 +427,43 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
         //var entity = await _wms_receiptRepository.GetAllIncluding(a => a.ReceiptReceivings).Where(b => b.Id == input.Id).FirstAsync();
         //var dto = ObjectMapper.Map<WMS_ReceiptListDto>(entity);
         return response;
+    }
+
+
+
+    [HttpPost]
+    public ActionResult ExportReceiptReceiving(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+        IMReceiptReceivingExcelInterface factory = MReceiptReceivingExcelFactory.ExportReceipt();
+
+        factory._repMReceiptReceiving = _rep;
+        factory._repMReceipt = _repMReceipt;
+        factory._repMReceiptDetail = _repMReceiptDetail;
+        factory._repTableColumns = _repTableColumns;
+        //factory._repLocation = _repLocation;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._userManager = _userManager;
+        factory._repSupplier = _repSupplier;
+        factory._repSupplierUser = _repSupplierUser;
+        factory._repMReceiptReceivingDetail = _repMReceiptReceivingDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repLocation = _repLocation;
+        //factory._repTableColumns = _repTableInventoryUsed;
+        var response = factory.Strategy(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "上架单.xlsx" // 配置文件下载显示名
+        };
     }
 
 }

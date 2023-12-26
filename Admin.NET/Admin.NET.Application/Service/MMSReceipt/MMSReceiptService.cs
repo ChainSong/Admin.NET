@@ -2,12 +2,17 @@
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using XAct;
 
 namespace Admin.NET.Application;
@@ -30,8 +35,9 @@ public class MMSReceiptService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<MMSReceiptReceivingDetail> _repMReceiptReceivingDetail;
     private readonly SqlSugarRepository<MMSReceiptReceiving> _repMReceiptReceiving;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
+    private readonly SqlSugarRepository<MMSInventoryUsable> _repInventoryUsable;
 
-    public MMSReceiptService(SqlSugarRepository<MMSReceipt> rep, SqlSugarRepository<MMSReceiptDetail> repMReceiptDetail, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<MMSSupplier> repSupplier, SqlSugarRepository<SupplierUserMapping> repSupplierUser, SqlSugarRepository<MMSReceiptReceivingDetail> repMReceiptReceivingDetail, SqlSugarRepository<MMSReceiptReceiving> repMReceiptReceiving, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser)
+    public MMSReceiptService(SqlSugarRepository<MMSReceipt> rep, SqlSugarRepository<MMSReceiptDetail> repMReceiptDetail, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<MMSSupplier> repSupplier, SqlSugarRepository<SupplierUserMapping> repSupplierUser, SqlSugarRepository<MMSReceiptReceivingDetail> repMReceiptReceivingDetail, SqlSugarRepository<MMSReceiptReceiving> repMReceiptReceiving, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<MMSInventoryUsable> repInventoryUsable)
     {
         _rep = rep;
         _repMReceiptDetail = repMReceiptDetail;
@@ -43,6 +49,7 @@ public class MMSReceiptService : IDynamicApiController, ITransient
         _repMReceiptReceivingDetail = repMReceiptReceivingDetail;
         _repMReceiptReceiving = repMReceiptReceiving;
         _repWarehouseUser = repWarehouseUser;
+        _repInventoryUsable = repInventoryUsable;
     }
 
     /// <summary>
@@ -207,7 +214,7 @@ public class MMSReceiptService : IDynamicApiController, ITransient
         factory._repSupplier = _repSupplier;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repMReceiptDetail = _repMReceiptDetail;
-
+        factory._repInventoryUsable = _repInventoryUsable;
         //factory._repASNDetail = _repASNDetail;
         //factory._repCustomerUser = _repCustomerUser;
         //factory._repWarehouseUser = _repWarehouseUser;
@@ -255,6 +262,7 @@ public class MMSReceiptService : IDynamicApiController, ITransient
         factory._repSupplier = _repSupplier;
         factory._repMReceiptDetail = _repMReceiptDetail;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repInventoryUsable = _repInventoryUsable;
 
         //factory._repASNDetail = _repASNDetail;
         //factory._repCustomerUser = _repCustomerUser;
@@ -293,8 +301,70 @@ public class MMSReceiptService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<MMSReceiptOutput>().ToListAsync();
     }
 
+    [HttpPost]
+    public ActionResult ExportReceipt(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+        IMReceiptExcelInterface factory = MReceiptExcelFactory.Export();
+
+        factory._userManager = _userManager;
+        factory._repMReceipt = _rep;
+        factory._repSupplierUser = _repSupplierUser;
+        factory._repMReceiptReceiving = _repMReceiptReceiving;
+        factory._repMReceiptReceivingDetail = _repMReceiptReceivingDetail;
+        factory._repSupplier = _repSupplier;
+        factory._repMReceiptDetail = _repMReceiptDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repInventoryUsable = _repInventoryUsable;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        var response = factory.ExportReceipt(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "入库单.xlsx" // 配置文件下载显示名
+        };
+    }
 
 
+    [HttpPost]
+    public ActionResult ExportReceiptReceiving(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+        IMReceiptExcelInterface factory = MReceiptExcelFactory.Export();
+
+        factory._userManager = _userManager;
+        factory._repMReceipt = _rep;
+        factory._repSupplierUser = _repSupplierUser;
+        factory._repMReceiptReceiving = _repMReceiptReceiving;
+        factory._repMReceiptReceivingDetail = _repMReceiptReceivingDetail;
+        factory._repSupplier = _repSupplier;
+        factory._repTableColumns= _repTableColumns;
+        factory._repTableColumnsDetail= _repTableColumnsDetail;
+        factory._repMReceiptDetail = _repMReceiptDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repInventoryUsable = _repInventoryUsable;
+        var response = factory.ExportReceiptReceiving(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "上架单模板.xlsx" // 配置文件下载显示名
+        };
+    }
 
 
 }

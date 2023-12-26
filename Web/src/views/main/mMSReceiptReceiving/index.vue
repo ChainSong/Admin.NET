@@ -2,373 +2,310 @@
   <div class="mMSReceiptReceiving-container">
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
-        <el-form-item label="Id">
-          <el-input v-model="queryParams.id" clearable="" placeholder="请输入Id"/>
-          
-        </el-form-item>
-        <el-form-item label="ReceiptId">
-          <el-input v-model="queryParams.receiptId" clearable="" placeholder="请输入ReceiptId"/>
-          
-        </el-form-item>
-        <el-form-item label="ReceiptNumber">
-          <el-input v-model="queryParams.receiptNumber" clearable="" placeholder="请输入ReceiptNumber"/>
-          
-        </el-form-item>
-        <el-form-item label="ReceiptReceivingNumber">
-          <el-input v-model="queryParams.receiptReceivingNumber" clearable="" placeholder="请输入ReceiptReceivingNumber"/>
-          
-        </el-form-item>
-        <el-form-item label="PurchaseOrderNumber">
-          <el-input v-model="queryParams.purchaseOrderNumber" clearable="" placeholder="请输入PurchaseOrderNumber"/>
-          
-        </el-form-item>
-        <el-form-item label="ExternReceiptNumber">
-          <el-input v-model="queryParams.externReceiptNumber" clearable="" placeholder="请输入ExternReceiptNumber"/>
-          
-        </el-form-item>
-        <el-form-item label="SupplierId">
-          <el-input v-model="queryParams.supplierId" clearable="" placeholder="请输入SupplierId"/>
-          
-        </el-form-item>
-        <el-form-item label="SupplierName">
-          <el-input v-model="queryParams.supplierName" clearable="" placeholder="请输入SupplierName"/>
-          
-        </el-form-item>
-        <el-form-item label="WarehouseId">
-          <el-input v-model="queryParams.warehouseId" clearable="" placeholder="请输入WarehouseId"/>
-          
-        </el-form-item>
-        <el-form-item label="WarehouseName">
-          <el-input v-model="queryParams.warehouseName" clearable="" placeholder="请输入WarehouseName"/>
-          
-        </el-form-item>
-        <el-form-item label="ReceiptReceivingStartTime">
-          <el-date-picker placeholder="请选择ReceiptReceivingStartTime" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.receiptReceivingStartTimeRange" />
-          
-        </el-form-item>
-        <el-form-item label="ReceiptReceivingEndTime">
-          <el-date-picker placeholder="请选择ReceiptReceivingEndTime" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.receiptReceivingEndTimeRange" />
-          
-        </el-form-item>
-        <el-form-item label="ReceiptReceivingStatus">
-          <el-input-number v-model="queryParams.receiptReceivingStatus"  clearable="" placeholder="请输入ReceiptReceivingStatus"/>
-          
-        </el-form-item>
-        <el-form-item label="ReceiptReceivingType">
-          <el-input v-model="queryParams.receiptReceivingType" clearable="" placeholder="请输入ReceiptReceivingType"/>
-          
-        </el-form-item>
-        <el-form-item label="CompleteTime">
-          <el-date-picker placeholder="请选择CompleteTime" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.completeTimeRange" />
-          
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="queryParams.remark" clearable="" placeholder="请输入Remark"/>
-          
-        </el-form-item>
-        <el-form-item label="Creator">
-          <el-input v-model="queryParams.creator" clearable="" placeholder="请输入Creator"/>
-          
-        </el-form-item>
-        <el-form-item label="CreationTime">
-          <el-date-picker placeholder="请选择CreationTime" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.creationTimeRange" />
-          
-        </el-form-item>
-        <el-form-item label="Updator">
-          <el-input v-model="queryParams.updator" clearable="" placeholder="请输入Updator"/>
-          
-        </el-form-item>
-        <el-form-item label="Str1">
-          <el-input v-model="queryParams.str1" clearable="" placeholder="请输入Str1"/>
-          
-        </el-form-item>
-        <el-form-item label="Str2">
-          <el-input v-model="queryParams.str2" clearable="" placeholder="请输入Str2"/>
-          
-        </el-form-item>
-        <el-form-item label="Str3">
-          <el-input v-model="queryParams.str3" clearable="" placeholder="请输入Str3"/>
-          
-        </el-form-item>
-        <el-form-item label="Str4">
-          <el-input v-model="queryParams.str4" clearable="" placeholder="请输入Str4"/>
-          
-        </el-form-item>
-        <el-form-item label="Str5">
-          <el-input v-model="queryParams.str5" clearable="" placeholder="请输入Str5"/>
-          
-        </el-form-item>
-        <el-form-item label="Str6">
-          <el-input v-model="queryParams.str6" clearable="" placeholder="请输入Str6"/>
-          
-        </el-form-item>
-        <el-form-item label="Str7">
-          <el-input v-model="queryParams.str7" clearable="" placeholder="请输入Str7"/>
-          
-        </el-form-item>
-        <el-form-item label="Str8">
-          <el-input v-model="queryParams.str8" clearable="" placeholder="请输入Str8"/>
-          
-        </el-form-item>
-        <el-form-item label="Str9">
-          <el-input v-model="queryParams.str9" clearable="" placeholder="请输入Str9"/>
-          
-        </el-form-item>
-        <el-form-item label="Str10">
-          <el-input v-model="queryParams.str10" clearable="" placeholder="请输入Str10"/>
-          
-        </el-form-item>
-        <el-form-item label="Str11">
-          <el-input v-model="queryParams.str11" clearable="" placeholder="请输入Str11"/>
-          
-        </el-form-item>
-        <el-form-item label="Str12">
-          <el-input v-model="queryParams.str12" clearable="" placeholder="请输入Str12"/>
-          
-        </el-form-item>
-        <el-form-item label="Str13">
-          <el-input v-model="queryParams.str13" clearable="" placeholder="请输入Str13"/>
-          
-        </el-form-item>
-        <el-form-item label="Str14">
-          <el-input v-model="queryParams.str14" clearable="" placeholder="请输入Str14"/>
-          
-        </el-form-item>
-        <el-form-item label="Str15">
-          <el-input v-model="queryParams.str15" clearable="" placeholder="请输入Str15"/>
-          
-        </el-form-item>
-        <el-form-item label="Str16">
-          <el-input v-model="queryParams.str16" clearable="" placeholder="请输入Str16"/>
-          
-        </el-form-item>
-        <el-form-item label="Str17">
-          <el-input v-model="queryParams.str17" clearable="" placeholder="请输入Str17"/>
-          
-        </el-form-item>
-        <el-form-item label="Str18">
-          <el-input v-model="queryParams.str18" clearable="" placeholder="请输入Str18"/>
-          
-        </el-form-item>
-        <el-form-item label="Str19">
-          <el-input v-model="queryParams.str19" clearable="" placeholder="请输入Str19"/>
-          
-        </el-form-item>
-        <el-form-item label="Str20">
-          <el-input v-model="queryParams.str20" clearable="" placeholder="请输入Str20"/>
-          
-        </el-form-item>
-        <el-form-item label="DateTime1">
-          <el-date-picker placeholder="请选择DateTime1" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.dateTime1Range" />
-          
-        </el-form-item>
-        <el-form-item label="DateTime2">
-          <el-date-picker placeholder="请选择DateTime2" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.dateTime2Range" />
-          
-        </el-form-item>
-        <el-form-item label="DateTime3">
-          <el-date-picker placeholder="请选择DateTime3" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.dateTime3Range" />
-          
-        </el-form-item>
-        <el-form-item label="DateTime4">
-          <el-date-picker placeholder="请选择DateTime4" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.dateTime4Range" />
-          
-        </el-form-item>
-        <el-form-item label="DateTime5">
-          <el-date-picker placeholder="请选择DateTime5" value-format="YYYY/MM/DD" type="daterange" v-model="queryParams.dateTime5Range" />
-          
-        </el-form-item>
-        <el-form-item label="Int1">
-          <el-input-number v-model="queryParams.int1"  clearable="" placeholder="请输入Int1"/>
-          
-        </el-form-item>
-        <el-form-item label="Int2">
-          <el-input-number v-model="queryParams.int2"  clearable="" placeholder="请输入Int2"/>
-          
-        </el-form-item>
-        <el-form-item label="Int3">
-          <el-input-number v-model="queryParams.int3"  clearable="" placeholder="请输入Int3"/>
-          
-        </el-form-item>
-        <el-form-item label="Int4">
-          <el-input-number v-model="queryParams.int4"  clearable="" placeholder="请输入Int4"/>
-          
-        </el-form-item>
-        <el-form-item label="Int5">
-          <el-input-number v-model="queryParams.int5"  clearable="" placeholder="请输入Int5"/>
-          
-        </el-form-item>
+        <el-row :gutter="[16, 15]">
+          <template v-for="i in  state.tableColumnHeaders">
+            <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
+
+              <template v-if="i.type == 'TextBox'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
+                </el-form-item>
+              </template>
+              <template v-if="i.type == 'DropDownListInt'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
+                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
+                      :label="item.name" :value="item.codeInt">
+                    </el-option>
+                  </el-select>
+
+                </el-form-item>
+
+              </template>
+              <template v-if="i.type == 'DropDownListStrRemote'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <select-Remote :whereData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
+                    :defaultvValue="state.header[i.columnName]"
+                    @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
+                </el-form-item>
+              </template>
+
+
+              <template v-if="i.type == 'DropDownListStr'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
+                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
+                      :label="item.name" :value="item.codeStr">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </template>
+              <template v-if="i.type == 'DatePicker'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <el-date-picker v-model="state.header[i.columnName]" type="daterange" size="small"
+                    v-if="i.isSearchCondition" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
+                    style="width: 100%">
+                  </el-date-picker>
+                </el-form-item>
+              </template>
+              <template v-if="i.type == 'DateTimePicker'">
+                <el-form-item class="mb-0" :label="i.displayName">
+                  <el-date-picker v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                    type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
+                    style="width: 100%">
+                  </el-date-picker>
+                </el-form-item>
+              </template>
+            </el-col>
+          </template>
+        </el-row>
         <el-form-item>
           <el-button-group>
-            <el-button type="primary"  icon="ele-Search" @click="handleQuery" v-auth="'mMSReceiptReceiving:page'"> 查询 </el-button>
-            <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button>
-            
+            <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'mMSReceiptReceiving:page'"> 查询 </el-button>
+            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-          
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAddMMSReceiptReceiving" v-auth="'mMSReceiptReceiving:add'"> 新增 </el-button>
-          
+          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'mMSReceiptReceiving:add'"> 导入上架信息
+          </el-button>
         </el-form-item>
-        
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-      <el-table
-				:data="tableData"
-				style="width: 100%"
-				v-loading="loading"
-				tooltip-effect="light"
-				row-key="id"
-				border="">
-        <el-table-column type="index" label="序号" width="55" align="center"/>
-         <el-table-column prop="id" label="Id" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptId" label="ReceiptId" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptNumber" label="ReceiptNumber" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptReceivingNumber" label="ReceiptReceivingNumber" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="purchaseOrderNumber" label="PurchaseOrderNumber" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="externReceiptNumber" label="ExternReceiptNumber" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="supplierId" label="SupplierId" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="supplierName" label="SupplierName" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="warehouseId" label="WarehouseId" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="warehouseName" label="WarehouseName" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptReceivingStartTime" label="ReceiptReceivingStartTime" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptReceivingEndTime" label="ReceiptReceivingEndTime" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptReceivingStatus" label="ReceiptReceivingStatus" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="receiptReceivingType" label="ReceiptReceivingType" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="completeTime" label="CompleteTime" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="remark" label="Remark" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="creator" label="Creator" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="creationTime" label="CreationTime" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="updator" label="Updator" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str1" label="Str1" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str2" label="Str2" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str3" label="Str3" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str4" label="Str4" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str5" label="Str5" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str6" label="Str6" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str7" label="Str7" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str8" label="Str8" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str9" label="Str9" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str10" label="Str10" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str11" label="Str11" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str12" label="Str12" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str13" label="Str13" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str14" label="Str14" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str15" label="Str15" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str16" label="Str16" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str17" label="Str17" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str18" label="Str18" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str19" label="Str19" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="str20" label="Str20" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="dateTime1" label="DateTime1" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="dateTime2" label="DateTime2" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="dateTime3" label="DateTime3" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="dateTime4" label="DateTime4" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="dateTime5" label="DateTime5" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="int1" label="Int1" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="int2" label="Int2" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="int3" label="Int3" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="int4" label="Int4" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="int5" label="Int5" fixed="" show-overflow-tooltip="" />
-        <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip="" v-if="auth('mMSReceiptReceiving:edit') || auth('mMSReceiptReceiving:delete')">
+
+      <el-table :data="state.headers" show-overflow-tooltip tooltip-effect="light" row-key="id" style="width: 100%">
+        <template v-for="v in state.tableColumnHeaders">
+          <template v-if="v.isShowInList">
+            <el-table-column v-if="v.type == 'DropDownListInt'" v-bind:key="v.columnName" :fixed="false"
+              :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
+              <template #default="scope">
+                <template v-for="item in v.tableColumnsDetails">
+                  <el-tag v-if="item.codeInt == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
+                    show-icon :type="item.color">
+                    {{ item.name }}
+                  </el-tag>
+                </template>
+              </template>
+            </el-table-column>
+            <el-table-column v-else-if="v.type == 'DropDownListStr'" v-bind:key="v.columnName" :fixed="false"
+              :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
+              <template #default="scope">
+                <template v-for="item in v.tableColumnsDetails">
+                  <el-tag v-if="item.codeStr == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
+                    show-icon :type="item.color">
+                    {{ item.name }}
+                  </el-tag>
+                </template>
+              </template>
+            </el-table-column>
+            <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName"
+              width="150" max-height="50">
+            </el-table-column>
+          </template>
+        </template>
+        <el-table-column fixed="right" label="操作" width="250">
+
           <template #default="scope">
-            <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openEditMMSReceiptReceiving(scope.row)" v-auth="'mMSReceiptReceiving:edit'"> 编辑 </el-button>
-            <el-button icon="ele-Delete" size="small" text="" type="primary" @click="delMMSReceiptReceiving(scope.row)" v-auth="'mMSReceiptReceiving:delete'"> 删除 </el-button>
+            <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
+            </el-button>
+            <el-button @click="addInventoryFun(scope.row)" class="el-icon-s-comment" type="text" size="small">加入库存
+            </el-button>
+            <el-button type="text" class="el-icon-delete" @click="del(scope.row)" style="color:#F56C6C;margin-left: 10px;"
+              size="small">删除</el-button>
+            <!-- <el-popconfirm confirm-button-text="确定"   cancel-button-text="取消"
+                icon="el-icon-info" icon-color="red" @confirm="del(scope.row)" title="确定删除吗？"> -->
+            <!-- <el-button @click="del(scope.row)" class="el-icon-s-comment" type="text" size="small">删除
+            </el-button> -->
+            <!-- </el-popconfirm> -->
+
+
+            <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
+            <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
+                icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
+                <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
+                  size="small">删除</el-button>
+              </el-popconfirm> -->
+
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-				v-model:currentPage="tableParams.page"
-				v-model:page-size="tableParams.pageSize"
-				:total="tableParams.total"
-				:page-sizes="[10, 20, 50, 100]"
-				small=""
-				background=""
-				@size-change="handleSizeChange"
-				@current-change="handleCurrentChange"
-				layout="total, sizes, prev, pager, next, jumper"
-	/>
-      <editDialog
-			    ref="editDialogRef"
-			    :title="editMMSReceiptReceivingTitle"
-			    @reloadTable="handleQuery"
-      />
+
+      <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+      <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
+      <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
+      <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
+
   </div>
 </template>
 
 <script lang="ts" setup="" name="mMSReceiptReceiving">
-  import { ref } from "vue";
-  import { ElMessageBox, ElMessage } from "element-plus";
-  import { auth } from '/@/utils/authFunction';
-  //import { formatDate } from '/@/utils/formatTime';
+import { ref, onMounted } from "vue";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { auth } from '/@/utils/authFunction';
+//import { formatDate } from '/@/utils/formatTime';
 
-  import editDialog from '/@/views/main/mMSReceiptReceiving/component/editDialog.vue'
-  import { pageMMSReceiptReceiving, deleteMMSReceiptReceiving } from '/@/api/main/mMSReceiptReceiving';
-
-
-    const editDialogRef = ref();
-    const loading = ref(false);
-    const tableData = ref<any>
-      ([]);
-      const queryParams = ref<any>
-        ({});
-        const tableParams = ref({
-        page: 1,
-        pageSize: 10,
-        total: 0,
-        });
-        const editMMSReceiptReceivingTitle = ref("");
+import editDialog from '/@/views/main/mMSReceiptReceiving/component/editDialog.vue'
+import addDialog from '/@/views/main/mMSReceiptReceiving/component/addDialog.vue'
+import queryDialog from '/@/views/main/mMSReceiptReceiving/component/queryDialog.vue'
+import { pageMMSReceiptReceiving, deleteMMSReceiptReceiving,addInventory } from '/@/api/main/mMSReceiptReceiving';
+import { getByTableNameList } from "/@/api/main/tableColumns";
+import selectRemote from '/@/views/tools/select-remote.vue'
+import Header from "/@/entities/mReceiptReceiving";
+import Details from "/@/entities/mReceiptReceivingDetail";
+import TableColumns from "/@/entities/tableColumns";
+import { number } from "echarts";
 
 
-        // 查询操作
-        const handleQuery = async () => {
-        loading.value = true;
-        var res = await pageMMSReceiptReceiving(Object.assign(queryParams.value, tableParams.value));
-        tableData.value = res.data.result?.items ?? [];
-        tableParams.value.total = res.data.result?.total;
-        loading.value = false;
-        };
+const state = ref({
+  vm: {
+    id: "",
 
-        // 打开新增页面
-        const openAddMMSReceiptReceiving = () => {
-        editMMSReceiptReceivingTitle.value = '添加MMSReceiptReceiving';
-        editDialogRef.value.openDialog({});
-        };
+    // form: {
+    //     customerDetails: []
+    // } as any,
+  },
+  visible: false,
+  loading: false,
+  header: new Header(),
+  headers: new Array<Header>(),
+  details: new Array<Details>(),
+  // header: new Array<Details>(),
 
-        // 打开编辑页面
-        const openEditMMSReceiptReceiving = (row: any) => {
-        editMMSReceiptReceivingTitle.value = '编辑MMSReceiptReceiving';
-        editDialogRef.value.openDialog(row);
-        };
+  tableColumnHeader: new TableColumns(),
+  tableColumnHeaders: new Array<TableColumns>(),
+  tableColumnDetail: new TableColumns(),
+  tableColumnDetails: new Array<TableColumns>()
 
-        // 删除
-        const delMMSReceiptReceiving = (row: any) => {
-        ElMessageBox.confirm(`确定要删除吗?`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        })
-        .then(async () => {
-        await deleteMMSReceiptReceiving(row);
-        handleQuery();
-        ElMessage.success("删除成功");
-        })
-        .catch(() => {});
-        };
+  // tableColumn: new TableColumns(),
+  // tableColumns: new Array<TableColumns>(),
+  // tableColumnsDetails: new Array<TableColumnsDetails>(),
+  //   tableColumnsDetail = ref();
+});
 
-        // 改变页面容量
-        const handleSizeChange = (val: number) => {
-        tableParams.value.pageSize = val;
-        handleQuery();
-        };
+const editDialogRef = ref();
+const addDialogRef = ref();
+const queryDialogRef = ref();
+const loading = ref(false);
+// const tableData = ref<any>
+// ([]);
+const queryParams = ref<any>
+  ({});
+const tableParams = ref({
+  page: 1,
+  pageSize: 10,
+  total: 0,
+});
+const editTitle = ref("");
+const addTitle = ref("");
+const queryTitle = ref("");
 
-        // 改变页码序号
-        const handleCurrentChange = (val: number) => {
-        tableParams.value.page = val;
-        handleQuery();
-        };
+// 页面加载时
+onMounted(async () => {
+  gettableColumn();
+});
+
+const gettableColumn = async () => {
+
+  let res = await getByTableNameList("MMS_ReceiptReceiving");
+  state.value.tableColumnHeaders = res.data.result;
+
+};
+
+// 查询操作
+const handleQuery = async () => {
+  loading.value = true;
+  var res = await pageMMSReceiptReceiving(Object.assign(state.value.header, tableParams.value));
+  state.value.headers = res.data.result?.items ?? [];
+  tableParams.value.total = res.data.result?.total;
+  loading.value = false;
+};
+
+// 打开新增页面
+const openAdd = () => {
+  addTitle.value = '添加';
+  addDialogRef.value.openDialog({});
+};
+
+// 打开编辑页面
+const openEdit = (row: any) => {
+  editTitle.value = '编辑';
+  editDialogRef.value.openDialog(row);
+};
+// 打开查询页面
+const openQuery = (row: any) => {
+  queryTitle.value = '查看';
+  queryDialogRef.value.openDialog(row);
+};
+
+// 删除
+const del = (row: any) => {
+  if (row.receiptStatus == 99) {
+    ElMessage.warning("该订单已入库");
+    return;
+  }
+  ElMessageBox.confirm(`确定要删除吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      // await returnReceiptReceiving([row.id]);
+      // handleQuery();
+      // ElMessage.success("删除成功");
+      let result = await returnReceiptReceiving([row.id]);
+      if (result.data.result.code == "1") {
+        ElMessage.success(result.data.result.msg);
+      } else {
+        ElMessage.error(result.data.result.msg);
+      }
+      handleQuery();
+    })
+    .catch(() => { });
+};
+
+//加入库存
+const addInventoryFun = (row: any) => {
+
+  if (row.receiptStatus == 99) {
+    ElMessage.warning("该订单已入库");
+    return;
+  }
+  ElMessageBox.confirm(`确定要加入库存吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      let result = await addInventory([row.id]);
+      if (result.data.result.code == "1") {
+        ElMessage.success(result.data.result.msg);
+      } else {
+        ElMessage.error(result.data.result.msg);
+      }
+      handleQuery();
+
+    })
+    .catch(() => { });
+
+
+}
+
+// 改变页面容量
+const handleSizeChange = (val: number) => {
+  tableParams.value.pageSize = val;
+  handleQuery();
+};
+
+// 改变页码序号
+const handleCurrentChange = (val: number) => {
+  tableParams.value.page = val;
+  handleQuery();
+};
 
 
 handleQuery();

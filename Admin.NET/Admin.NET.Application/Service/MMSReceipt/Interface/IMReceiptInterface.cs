@@ -27,6 +27,7 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<MMSReceiptReceiving> _repMReceiptReceiving { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
+        public SqlSugarRepository<MMSInventoryUsable> _repInventoryUsable { get; set; }
         Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateMMSReceiptInput> request);
         Task<Response<List<OrderStatusDto>>> UpdateStrategy(List<AddOrUpdateMMSReceiptInput> request);
     }

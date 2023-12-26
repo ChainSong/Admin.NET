@@ -34,6 +34,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<MMSReceiptReceivingDetail> _repMReceiptReceivingDetail { get; set; }
         public SqlSugarRepository<MMSReceiptReceiving> _repMReceiptReceiving { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+        public SqlSugarRepository<MMSInventoryUsable> _repInventoryUsable { get; set; }
 
         public MReceiptDefaultStrategy()
         {

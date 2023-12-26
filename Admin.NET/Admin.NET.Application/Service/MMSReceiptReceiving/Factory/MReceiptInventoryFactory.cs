@@ -19,9 +19,9 @@ namespace Admin.NET.Application.ReceiptCore.Factory
             switch (CustomerId)
             {
                 case (long)ReceiptEnum.ReceiptExportDefault:
-                    return new ReceiptInventoryDefaultStrategy();
+                    return new MReceiptInventoryDefaultStrategy();
                 default:
-                    return new ReceiptInventoryDefaultStrategy();
+                    return new MReceiptInventoryDefaultStrategy();
             }
             //return new ASNDefaultStrategy();
         }
