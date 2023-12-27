@@ -2,7 +2,12 @@
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
+using Nest;
 using System.Collections.Generic;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECMerchantAddFreightTemplateRequest.Types.FreightTemplate.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace Admin.NET.Application;
 /// <summary>

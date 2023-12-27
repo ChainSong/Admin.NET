@@ -244,7 +244,7 @@ const openQuery = (row: any) => {
 
 // 删除
 const del = (row: any) => {
-  if (row.receiptStatus == 99) {
+  if (row.ReceiptReceivingStatus == 99) {
     ElMessage.warning("该订单已入库");
     return;
   }
@@ -271,7 +271,7 @@ const del = (row: any) => {
 //加入库存
 const addInventoryFun = (row: any) => {
 
-  if (row.receiptStatus == 99) {
+  if (row.receiptReceivingStatus == 99) {
     ElMessage.warning("该订单已入库");
     return;
   }

@@ -48,7 +48,6 @@ const get  = async () => {
 	state.value.formData = result;
 	state.value.optionData = result;
 	state.value.optionData = result;
-
 	formData.value = result;
 	optionData.value = result;
 

@@ -166,7 +166,7 @@ import Header from "/@/entities/adjustment";
 import Detail from "/@/entities/adjustmentDetail";
 import orderStatus from "/@/entities/orderStatus";
 import TableColumns from "/@/entities/tableColumns";
-import selectRemote from '../../../tools/selectRemote.vue'
+import selectRemote from '/@/views/tools/select-remote.vue'
 import { Local, Session } from '/@/utils/storage';
 
 import { getAPI } from '/@/utils/axios-utils';
