@@ -31,7 +31,7 @@ namespace System.Data
                         if (row.Table.Columns.Contains(p.Name))
                         {
                             object value = row[p.Name];
-                            if (value == DBNull.Value)
+                            if (value == DBNull.Value && string.IsNullOrEmpty(value.ToString()))
                             {
                                 if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name == "DateTime").Count() > 0)
                                 {

@@ -20,7 +20,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using System.Xml;
-using XAct;
 using XSystem.Security.Cryptography;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.BuildMarketingPartnershipRequest.Types;
 

@@ -6,6 +6,8 @@ export default class orderAddress extends Entity<number>{
     preOrderNumber:string;
     externReceiptNumber:string;
     name:string;
+    companyName:string;
+    addressTag:string;
     phone:string;
     zipCode:string;
     province:string;

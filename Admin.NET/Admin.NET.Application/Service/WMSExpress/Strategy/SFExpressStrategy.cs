@@ -24,9 +24,7 @@ using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using System.Xml;
-using XSystem.Security.Cryptography;
-
+using System.Xml; 
 using AutoMapper;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;

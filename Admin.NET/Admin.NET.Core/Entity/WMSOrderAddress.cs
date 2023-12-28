@@ -43,7 +43,18 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "联系人", Length = 50)]
     public string? Name { get; set; }
-    
+
+    /// <summary>
+    /// 联系人
+    /// </summary>
+    [SugarColumn(ColumnDescription = "单位名称", Length = 50)]
+    public string? CompanyName { get; set; }
+    /// <summary>
+    /// 联系人
+    /// </summary>
+    [SugarColumn(ColumnDescription = "地址标签", Length = 50)]
+    public string? AddressTag { get; set; }
+
     /// <summary>
     /// 联系电话
     /// </summary>

@@ -181,7 +181,26 @@ namespace Admin.NET.Application.Strategy
                                 PropertyInfo property = receiptType.GetProperty(h.DbColumnName);
                                 if (property != null)
                                 {
-                                    row[h.DisplayName] = property.GetValue(a);
+                                    //row[h.DisplayName] = property.GetValue(a);
+                                    // 判断是下拉列表 就取下拉列表的数据
+                                    if (h.Type == "DropDownListInt")
+                                    {
+                                        try
+                                        {
+
+
+                                            row[h.DisplayName] = _repTableColumnsDetail.AsQueryable().Where(q => q.Associated == h.Associated).First().Name;
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            row[h.DisplayName] = property.GetValue(a);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        row[h.DisplayName] = property.GetValue(a);
+                                    }
                                 }
                                 else
                                 {

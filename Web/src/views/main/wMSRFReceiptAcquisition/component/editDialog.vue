@@ -7,8 +7,8 @@
 						<el-input v-model="state.vm.form.externReceiptNumber" clearable="" placeholder="请输入外部单号" />
 					</el-form-item>
 					<el-form-item label="扫描框" style="width: 100%;">
-						<el-input v-model="state.vm.form.scanInput"  v-focus="input" v-select="input" ref="input"   
-							v-on:keyup.enter="scanAcquisition" clearable="" placeholder="请扫描" />
+						<el-input v-model="state.vm.form.scanInput" id="scanInput" v-focus="input" v-select="input" ref="input"   
+						v-on:keyup.enter.native ="scanAcquisition" clearable="" placeholder="请扫描" />
 					</el-form-item>
 					<el-form-item label="SKU" style="width: 100%;">
 						<el-input v-model="state.vm.form.sku" clearable="" placeholder="SKU" />
@@ -91,7 +91,7 @@ const scanAcquisition = async () => {
 		state.value.vm.form.sku = acquisitionData[1];
 		state.value.vm.form.lot = acquisitionData[2] ?? "";
 		state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
-		state.value.vm.form.sn = acquisitionData[4] ?? "";
+		// state.value.vm.form.sn = acquisitionData[4] ?? "";
 	}
 	let res = await saveAcquisition(state.value.vm.form);
 	if (res.data.result.code == "1") {
@@ -103,6 +103,9 @@ const scanAcquisition = async () => {
 		input.value.focus();
 		input.value.select();
 	});
+	console.log("dasdasd");
+	// document.getElementById("scanInput").focus();
+	// document.getElementById("scanInput").select();
 
 	//   state.value.tableColumnHeaders = res.data.result;
 };
