@@ -51,10 +51,24 @@ public class WMSPickTask : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [Required]
+    //[Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string PickTaskNumber { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "", Length = 800)]
+    public string OrderNumber { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "", Length = 800)]
+    public string ExternOrderNumber { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

@@ -1,25 +1,49 @@
 ﻿import request from '/@/utils/request';
 enum Api {
- 
-	InvrntoryDataPage = '/api/WMSInventoryReport/InvrntoryDataPage',
-	InvrntoryDataExport = '/api/WMSInventoryReport/InvrntoryDataExport',
-	
+  AddWMSInventoryReport = '/api/wMSInventoryReport/add',
+  DeleteWMSInventoryReport = '/api/wMSInventoryReport/delete',
+  UpdateWMSInventoryReport = '/api/wMSInventoryReport/update',
+  PageWMSInventoryReport = '/api/wMSInventoryReport/page',
+  GetWMSInventoryReport = '/api/wMSInventoryReport/Query',
 }
 
-// invrntoryDataPage
-export const invrntoryDataPage = (params?: any) =>
+// 增加WMSInventoryReport
+export const addWMSInventoryReport = (params?: any) =>
 	request({
-		url: Api.InvrntoryDataPage,
+		url: Api.AddWMSInventoryReport,
 		method: 'post',
 		data: params,
 	});
 
-	// invrntoryDataPage
-export const invrntoryDataExport = (params?: any) =>
+// 删除WMSInventoryReport
+export const deleteWMSInventoryReport = (params?: any) => 
+	request({
+			url: Api.DeleteWMSInventoryReport,
+			method: 'post',
+			data: params,
+		});
+
+// 编辑WMSInventoryReport
+export const updateWMSInventoryReport = (params?: any) => 
+	request({
+			url: Api.UpdateWMSInventoryReport,
+			method: 'post',
+			data: params,
+		});
+
+// 分页查询WMSInventoryReport
+export const pageWMSInventoryReport = (params?: any) => 
+	request({
+			url: Api.PageWMSInventoryReport,
+			method: 'post',
+			data: params,
+		});
+// 单条查询WMSInventoryReport
+export const getWMSInventoryReport = (params?: any) => 
 request({
-	url: Api.InvrntoryDataExport,
-	method: 'post',
-	data: params,
-	responseType: 'blob',
+	url: `${Api.GetWMSInventoryReport}/${params}`,
+	method: 'get'
 });
-	
+
+
+

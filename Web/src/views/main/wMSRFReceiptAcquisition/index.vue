@@ -22,8 +22,8 @@
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
       <el-table :data="state.vm.data" style="width: 100%" v-loading="loading" tooltip-effect="light" row-key="id" border="">
         <!-- <el-table-column type="index" label="序号" width="55"/> -->
-        <el-table-column prop="asnNumber" label="预入库单号" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="receiptNumber" label="入库单号" fixed="" show-overflow-tooltip="" />
+        <!-- <el-table-column prop="asnNumber" label="预入库单号" fixed="" show-overflow-tooltip="" /> -->
+        <!-- <el-table-column prop="receiptNumber" label="入库单号" fixed="" show-overflow-tooltip="" /> -->
         <el-table-column prop="externReceiptNumber" label="外部单号" fixed="" show-overflow-tooltip="" />
         <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip="">
           <template #default="scope">

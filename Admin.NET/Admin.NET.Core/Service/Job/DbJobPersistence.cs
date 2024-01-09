@@ -181,7 +181,6 @@ public class DbJobPersistence : IJobPersistence
             case PersistenceBehavior.Removed:
                 jobTriggerRep.AsDeleteable().Where(u => u.TriggerId == jobTrigger.TriggerId && u.JobId == jobTrigger.JobId).ExecuteCommand();
                 break;
-
             default:
                 throw new ArgumentOutOfRangeException();
         }

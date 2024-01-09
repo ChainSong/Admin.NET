@@ -66,7 +66,13 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "邮编", Length = 50)]
     public string? ZipCode { get; set; }
-    
+
+
+    /// <summary>
+    /// 国家
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 20)]
+    public string? Country { get; set; }
     /// <summary>
     /// 
     /// </summary>
@@ -78,12 +84,12 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 20)]
     public string? City { get; set; }
-    
+
     /// <summary>
-    /// 
+    /// 区县
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 20)]
-    public string? Country { get; set; }
+    public string? County { get; set; }
     
     /// <summary>
     /// 

@@ -163,11 +163,11 @@ public class WMSPackageDetail : ITenantIdFilter
     public string PoCode { get; set; } = "";
 
     //[SugarColumn(ColumnDescription = "")]
-    public double Weight { get; set; } = 0;
+    public double Weight { get; set; } = 0.0;
 
 
     //[SugarColumn(ColumnDescription = "")]
-    public double Volume { get; set; } = 0;
+    public double Volume { get; set; } = 0.0;
 
 
     /// <summary>

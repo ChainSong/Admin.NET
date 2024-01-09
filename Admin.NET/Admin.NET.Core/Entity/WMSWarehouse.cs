@@ -63,7 +63,13 @@ public class WMSWarehouse : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Address { get; set; }
-    
+
+    /// <summary>
+    /// 国家
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Country { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
@@ -77,12 +83,12 @@ public class WMSWarehouse : ITenantIdFilter
     public string? City { get; set; }
 
     /// <summary>
-    /// 
+    /// 区县
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? Country { get; set; }
-
+    public string? County { get; set; }
     
+
     /// <summary>
     /// 
     /// </summary>
@@ -155,4 +161,10 @@ public class WMSWarehouse : ITenantIdFilter
     [SugarColumn(ColumnDescription = "修改时间")]
     public DateTime? UpdateTime { get; set; }
 
-}
+
+
+    [Navigate(NavigateType.OneToMany, nameof(WMSWarehouseDetail.WarehouseId))]
+    public List<WMSWarehouseDetail> Details{  get; set;  }
+
+
+    }

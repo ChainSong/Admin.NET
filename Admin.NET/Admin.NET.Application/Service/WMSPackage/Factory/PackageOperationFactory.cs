@@ -20,7 +20,7 @@ namespace Admin.NET.Application.Service.Factory;
 internal static class PackageOperationFactory
 {
 
-    public static IPackageOperationInterface packageOperationFactory(string FactoryName) {
+    public static IPackageOperationInterface PackageOperation(string FactoryName) {
         return new PackageOperationDefaultStrategy();
     }
 }

@@ -61,6 +61,8 @@ namespace Admin.NET.Application.Strategy
             });
             if (response.Data != null && response.Data.Count > 0)
             {
+                response.Code = StatusCode.Warning;
+                response.Msg = "状态异常";
                 return response;
             }
 

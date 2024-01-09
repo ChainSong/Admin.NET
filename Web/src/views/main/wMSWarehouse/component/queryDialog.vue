@@ -39,22 +39,22 @@
 					</el-descriptions>
 				</el-main>
 			</el-container>
-			<!-- <el-container title="明细信息">
+			<el-container title="明细信息">
 				<el-main>
-						<el-form >
-							<el-table :data="state.details" style="width: 100%" height="250">
-								<template v-for="(v, index) in state.tableColumnDetails">
-									<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
-										width="150">
-										<template #default="scope">
-											<label v-text="scope.row[v.columnName]"></label>
-										</template>
-									</el-table-column>
-								</template>
-							</el-table>
-						</el-form>
+					<el-form>
+						<el-table :data="state.details" style="width: 100%" height="250">
+							<template v-for="(v, index) in state.tableColumnDetails">
+								<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
+									width="150">
+									<template #default="scope">
+										<label v-text="scope.row[v.columnName]"></label>
+									</template>
+								</el-table-column>
+							</template>
+						</el-table>
+					</el-form>
 				</el-main>
-			</el-container> -->
+			</el-container>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel" size="default">取 消</el-button>
@@ -71,8 +71,10 @@ import { ElMessage } from "element-plus";
 import type { FormRules } from "element-plus";
 import { addWMSWarehouse, updateWMSWarehouse, getWMSWarehouse } from "/@/api/main/wMSWarehouse";
 import { getByTableNameList } from "/@/api/main/tableColumns";
-import Header from "/@/entities/Warehouse";
+import Header from "/@/entities/warehouse";
 // import Detail from "/@/entities/customerDetail";
+
+import Detail from "/@/entities/warehouseDetail";
 import TableColumns from "/@/entities/tableColumns";
 // import { getWMSCustomer } from "/@/api/main/wMSCustomer";
 
@@ -89,7 +91,7 @@ const state = ref({
 	loading: false,
 	header: new Header(),
 	headers: new Array<Header>(),
-	// details: new Array<Detail>(),
+	details: new Array<Detail>(),
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
@@ -166,6 +168,9 @@ const cancel = () => {
 const gettableColumn = async () => {
 	let res = await getByTableNameList("WMS_Warehouse");
 	state.value.tableColumnHeaders = res.data.result;
+
+	let resDetail = await getByTableNameList("WMS_WarehouseDetail");
+	state.value.tableColumnDetails = resDetail.data.result;
 	// headerRule.value = {};
 	//验证
 	// state.value.tableColumnHeaders.forEach((a) => {
@@ -180,10 +185,10 @@ const gettableColumn = async () => {
 	// 		];
 	// 	}
 	// });
-	let resDetail = await getByTableNameList("CustomerDetail");
+	// let resDetail = await getByTableNameList("CustomerDetail");
 	// console.log("asdasdasdasdasdasddasdas")
 	// console.log(resDetail);
-	state.value.tableColumnDetails = resDetail.data.result;
+	// state.value.tableColumnDetails = resDetail.data.result;
 	// detailRule.value = {};
 	// // state.value.tableColumnDetails.forEach((a) => {
 	// // 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
@@ -211,7 +216,7 @@ const get = async () => {
 	let result = await getWMSWarehouse(state.value.header.id);
 	// console.log(result);
 	state.value.header = result.data.result;
-	// state.value.details = result.data.result.details;
+	state.value.details = result.data.result.details;
 	// console.log(state.value.header);
 	// console.log(state.value.details);
 

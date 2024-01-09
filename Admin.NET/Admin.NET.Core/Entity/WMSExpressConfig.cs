@@ -66,6 +66,13 @@ public class WMSExpressConfig : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? Url { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 100)]
+    public string? UrlToken { get; set; }
     
     /// <summary>
     /// 

@@ -1,4 +1,7 @@
-﻿namespace Admin.NET.Application;
+﻿using Admin.NET.Core.Entity;
+using System.Collections.Generic;
+
+namespace Admin.NET.Application;
 
 /// <summary>
 /// WMSWarehouse输出参数
@@ -59,6 +62,7 @@ public class WMSWarehouseDto
     /// Country
     /// </summary>
     public string? Country { get; set; }
+    public string? County { get; set; }
 
 
     /// <summary>
@@ -110,5 +114,8 @@ public class WMSWarehouseDto
     /// CreationTime
     /// </summary>
     public object CreationTime { get; set; }
+
+    public List<WMSWarehouseDetail> Detail { get; set; }
+
 
 }

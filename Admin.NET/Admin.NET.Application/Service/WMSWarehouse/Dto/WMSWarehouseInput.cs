@@ -1,4 +1,5 @@
 ﻿using Admin.NET.Core;
+using Admin.NET.Core.Entity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -59,6 +60,9 @@ public class WMSWarehouseBaseInput
     /// </summary>
     public string? Country { get; set; }
 
+    public string? County { get; set; }
+
+
     /// <summary>
     /// Contractor
     /// </summary>
@@ -109,6 +113,9 @@ public class WMSWarehouseBaseInput
     /// </summary>
     public virtual object CreationTime { get; set; }
 
+    public List<WMSWarehouseDetail> Details { get; set; }
+
+
 }
 
 /// <summary>
@@ -145,6 +152,11 @@ public class WMSWarehouseInput : BasePageInput
     /// Company
     /// </summary>
     public string? Company { get; set; }
+
+    public string? County { get; set; }
+
+    public string? Country { get; set; }
+
 
     /// <summary>
     /// Address
@@ -211,6 +223,9 @@ public class WMSWarehouseInput : BasePageInput
     /// </summary>
     public List<DateTime?> CreationTime { get; set; }
 
+    public List<WMSWarehouseDetail> Detail { get; set; }
+
+
 }
 
 /// <summary>
@@ -218,6 +233,8 @@ public class WMSWarehouseInput : BasePageInput
 /// </summary>
 public class AddWMSWarehouseInput : WMSWarehouseBaseInput
 {
+    //public List<WMSWarehouseDetail> Detail { get; set; }
+
 }
 
 /// <summary>

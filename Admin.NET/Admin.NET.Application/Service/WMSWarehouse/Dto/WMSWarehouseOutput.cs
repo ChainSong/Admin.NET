@@ -59,6 +59,8 @@ public class WMSWarehouseOutput
     /// Country
     /// </summary>
     public string? Country { get; set; }
+    public string? County { get; set; }
+
 
     /// <summary>
     /// Contractor

@@ -44,6 +44,7 @@ public class WMSExpressConfigOutput
     /// Url
     /// </summary>
     public string? Url { get; set; }
+    public string? UrlToken { get; set; }
 
     /// <summary>
     /// AppKey

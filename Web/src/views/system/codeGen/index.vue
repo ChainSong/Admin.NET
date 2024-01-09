@@ -181,6 +181,7 @@ const handleGenerate = (row: any) => {
 </script>
 
 <style lang="scss" scoped>
+ 
 //搜索区域Label固定宽度
 .sys-codeGen-container {
 	::v-deep(.el-form-item__label) {

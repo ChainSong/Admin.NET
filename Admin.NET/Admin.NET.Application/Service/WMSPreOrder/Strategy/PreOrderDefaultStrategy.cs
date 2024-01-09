@@ -174,8 +174,9 @@ namespace Admin.NET.Application.Strategy
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
             //判断是否有权限操作
             //先判断是否能操作客户
-            var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
-            if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少客户操作权限";
@@ -183,13 +184,29 @@ namespace Admin.NET.Application.Strategy
             }
 
             //先判断是否能操作仓库
-            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
-            if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.GroupBy(a => a.WarehouseName).Count() != request.GroupBy(a => a.WarehouseName).Count())
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少仓库操作权限";
                 return response;
             }
+            //var customerCheck = _repCustomerUser.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            //if (customerCheck.Count != request.GroupBy(a => a.CustomerName).Count())
+            //{
+            //    response.Code = StatusCode.Error;
+            //    response.Msg = "用户缺少客户操作权限";
+            //    return response;
+            //}
+
+            ////先判断是否能操作仓库
+            //var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            //if (warehouseCheck.Count != request.GroupBy(a => a.WarehouseName).Count())
+            //{
+            //    response.Code = StatusCode.Error;
+            //    response.Msg = "用户缺少仓库操作权限";
+            //    return response;
+            //}
             //var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
             //if (asnCheck != null && asnCheck.ToList().Count > 0)
             //{

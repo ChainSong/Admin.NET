@@ -11,6 +11,7 @@ using Admin.NET.Common.ExpressInterfaceUtils;
 using Admin.NET.Core;
 using Admin.NET.Express.Interface;
 using Admin.NET.Express.Strategy.SFExpress.Dto;
+using Qiniu.Util;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -36,9 +37,9 @@ public class SFExpressServiceStrategy: IExpressServiceInterface
         string checkword = request.Checkword;//此处替换为您在丰桥平台获取的校验码  
         string reqURL = request.Url;//生产环境
         string serviceCode = request.ServiceCode;//  "EXP_RECE_CREATE_ORDER";//下订单
-        request.Data.contactInfoList[0].tel = "13647294728";
-        request.Data.contactInfoList[1].tel = "13647294728";
-        request.Data.orderId = request.Data.orderId+"2";
+        //request.Data.contactInfoList[0].tel = "13647294728";
+        //request.Data.contactInfoList[1].tel = "13647294728";
+        //request.Data.orderId = request.Data.orderId+"2";
 
         string timestamp = GetTimeStamp(); //获取时间戳       
 
@@ -93,7 +94,9 @@ public class SFExpressServiceStrategy: IExpressServiceInterface
     {
         string partnerId = request.PartnerId;//此处替换为您在丰桥平台获取的顾客编码       
         string checkword = request.Checkword;//此处替换为您在丰桥平台获取的校验码  
-        string reqURL = "https://sfapi-sbox.sf-express.com/oauth2/accessToken";//生产环境
+        //request.e
+        string reqURL = request.UrlToken;
+            //"https://sfapi-sbox.sf-express.com/oauth2/accessToken";//生产环境
         string serviceCode = request.ServiceCode;//  "EXP_RECE_CREATE_ORDER";//下订单
 
 

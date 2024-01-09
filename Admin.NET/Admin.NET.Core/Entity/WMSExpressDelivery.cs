@@ -135,6 +135,9 @@ public class WMSExpressDelivery : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? SenderCountry { get; set; }
 
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? SenderCounty { get; set; }
+    
     /// <summary>
     /// 
     /// </summary>
@@ -165,6 +168,9 @@ public class WMSExpressDelivery : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? RecipientsCountry { get; set; }
 
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? RecipientsCounty { get; set; }
+    
     /// <summary>
     /// 
     /// </summary>

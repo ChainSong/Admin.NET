@@ -39,11 +39,14 @@
         /// PickStatus
         /// </summary>
         public int PickStatus { get; set; }
-        
-        /// <summary>
-        /// PickType
-        /// </summary>
-        public string PickType { get; set; }
+
+    public string OrderNumber { get; set; }
+    public string ExternOrderNumber { get; set; }
+
+    /// <summary>
+    /// PickType
+    /// </summary>
+    public string PickType { get; set; }
         
         /// <summary>
         /// StartTime

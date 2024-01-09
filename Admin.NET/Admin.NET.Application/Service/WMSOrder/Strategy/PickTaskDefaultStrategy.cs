@@ -40,6 +40,7 @@ namespace Admin.NET.Application.Strategy
 
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+        //public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
         public PickTaskDefaultStrategy(
             )
@@ -120,6 +121,8 @@ namespace Admin.NET.Application.Strategy
                     WarehouseId = data.WarehouseId,
                     WarehouseName = data.WarehouseName,
                     PickTaskNumber = pickTaskNumber,
+                    ExternOrderNumber = data.ExternOrderNumber,
+                    OrderNumber = data.OrderNumber,
                     PickStatus = (int)OrderStatusEnum.新增,
                     PickType = "普通拣货",
                     //StartTime

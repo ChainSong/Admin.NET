@@ -128,7 +128,7 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="250">
 
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
@@ -136,6 +136,8 @@
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->
             <el-button @click="complete(scope.row)" class="el-icon-s-comment" type="text" size="small">完成
+            </el-button>
+            <el-button @click="pickTaskReturn(scope.row)" class="el-icon-s-comment" type="text" size="small">回退
             </el-button>
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
             <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
@@ -184,6 +186,7 @@ import Details from "/@/entities/pickTaskDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
+import pickTask from "/@/entities/pickTask";
 
 
 const state = ref({
@@ -258,6 +261,27 @@ const handleQuery = async () => {
   tableParams.value.total = res.data.result?.total;
   loading.value = false;
 };
+
+
+const pickTaskReturn = async (row: any) => {
+  ElMessageBox.confirm(`确定要回退拣货吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      await deleteWMSPickTask(row);
+      handleQuery();
+      ElMessage.success("回退完成");
+    })
+    .catch(() => { });
+  // loading.value = true;
+
+  // state.value.headers = res.data.result?.items ?? [];
+  // tableParams.value.total = res.data.result?.total;
+  // loading.value = false;
+};
+
 
 const complete = async (row: any) => {
   ElMessageBox.confirm(`确定要完成拣货吗?`, "提示", {

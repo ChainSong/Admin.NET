@@ -31,7 +31,7 @@ namespace Admin.NET.Application;
 public class WMSPackageService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPackage> _rep;
-
+    private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
 
     private readonly SqlSugarRepository<WMSPickTask> _repPickTask;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
@@ -42,7 +42,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
-    private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
+ 
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
 
     private readonly SysCacheService _sysCacheService;
@@ -313,7 +313,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
 
-        IPackageOperationInterface factory = PackageOperationFactory.packageOperationFactory("");
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
@@ -345,7 +345,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     public async Task<Response<ScanPackageOutput>> AddPackageData(ScanPackageInput input)
     {
 
-        IPackageOperationInterface factory = PackageOperationFactory.packageOperationFactory("");
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;

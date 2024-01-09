@@ -49,7 +49,7 @@
 					</el-row>
 				</el-form>
 			</el-card>
-			<!-- <el-button @click="handleAdd" type="primary" size="large" class="toolbar-btn">添加一条</el-button>
+			<el-button @click="handleAdd" type="primary" size="large" class="toolbar-btn">添加一条</el-button>
 			<el-card>
 				<el-form label-position="top" :model="state" ref="detailRuleRef" :rules="detailRule">
 					<el-table :data="state.details" height="250">
@@ -78,6 +78,12 @@
 												placeholder="选择日期" style="width: 100%">
 											</el-date-picker>
 										</template>
+										<template v-if="v.type == 'DropDownListStrRemote'">
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
+														:columnData="v"
+														:defaultvValue="state.details[scope.$index][v.columnName]"
+														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
+												</template>
 										<template v-if="v.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" type="datetime"
 												start-placeholder="选择日期时间" style="width: 100%">
@@ -94,7 +100,7 @@
 						</el-table-column>
 					</el-table>
 				</el-form>
-			</el-card> -->
+			</el-card> 
 			<div>
 				<!-- <Button @click="cancel">{{ L("Cancel") }}</Button>
 				<Button @click="save" type="primary">{{ L("OK") }}</Button> -->
@@ -115,9 +121,10 @@ import { ElMessage } from "element-plus";
 import type { FormRules } from "element-plus";
 import { addWMSWarehouse, updateWMSWarehouse } from "/@/api/main/wMSWarehouse";
 
+import selectRemote from '/@/views/tools/select-remote.vue'
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import Header from "/@/entities/warehouse";
-// import Detail from "/@/entities/customerDetail";
+import Detail from "/@/entities/warehouseDetail";
 import TableColumns from "/@/entities/tableColumns";
 
 //父级传递来的参数
@@ -142,7 +149,7 @@ const state = ref({
 	loading: false,
 	header: new Header(),
 	headers: new Array<Header>(),
-	// details: new Array<Detail>(),
+    details: new Array<Detail>(),
 
 
 	tableColumnHeader: new TableColumns(),
@@ -170,13 +177,13 @@ const isShowDialog = ref(false);
 // const rules = ref<FormRules>({});
 
 //添加一行明细
-// const handleAdd = (row: any) => {
-// 	state.value.details.push(new Detail());
-// }
-// //删除一行明细
-// const handleDelete = (index: any) => {
-// 	state.value.details.splice(index, 1);
-// }
+const handleAdd = (row: any) => {
+	state.value.details.push(new Detail());
+}
+//删除一行明细
+const handleDelete = (index: any) => {
+	state.value.details.splice(index, 1);
+}
 // 打开弹窗
 const openDialog = (row: any) => {
 	// ruleForm.value = JSON.parse(JSON.stringify(row));
@@ -202,7 +209,7 @@ const submit = async () => {
 	// console.log(state.value.details);
 	// state.value.header.details = state.value.details
 	// console.log(state.value.header);
-
+	state.value.header.details = state.value.details;
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 
@@ -244,10 +251,29 @@ const gettableColumn = async () => {
 			];
 		}
 	});
-	let resDetail = await getByTableNameList("CustomerDetail");
+
+	let resDetail = await getByTableNameList("WMS_WarehouseDetail");
 	// console.log("asdasdasdasdasdasddasdas")
 	// console.log(resDetail);
 	state.value.tableColumnDetails = resDetail.data.result;
+	detailRule.value = {};
+	state.value.tableColumnDetails.forEach((a) => {
+		if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+			//  console.log("添加验证"+a.columnName)
+			detailRule.value[a.columnName] = [
+				{
+					required: true,
+					message: a.displayName,
+					trigger: "blur",
+				},
+			];
+		}
+	});
+
+	// let resDetail = await getByTableNameList("CustomerDetail");
+	// console.log("asdasdasdasdasdasddasdas")
+	// console.log(resDetail);
+	// state.value.tableColumnDetails = resDetail.data.result;
 	// detailRule.value = {};
 	// state.value.tableColumnDetails.forEach((a) => {
 	// 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
@@ -272,7 +298,7 @@ const gettableColumn = async () => {
 // 页面加载时
 onMounted(async () => {
 	gettableColumn();
-	// state.value.details = [new Detail()];
+	state.value.details = [new Detail()];
 });
 
 //将属性或者函数暴露给父组件

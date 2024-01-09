@@ -35,6 +35,7 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+    //private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     public WMSInventoryReportService(UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns)
     {
 
@@ -126,6 +127,43 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         {
             FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
         };
+
+        //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
+    }
+
+
+
+    /// <summary>
+    /// InvrntoryData
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "InvrntoryDataExport")]
+    public async Task<List<WMSInventoryUsable>>   InvrntoryDataReport(WMSInventoryUsableInput input)
+    {
+
+        return null;
+        //return Json(new { Code = "" });
+        //使用简单工厂定制化  / 
+        //IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
+        ////factory._db = _db;
+        //factory._userManager = _userManager;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repInventoryUsable = _repInventoryUsable;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repTableColumns = _repTableColumns;
+        //factory._repTableColumnsDetail = _repTableColumnsDetail;
+        //var response = factory.InvrntoryDataExport(input);
+        ////var response = factory.Strategy(input);
+        //IExporter exporter = new ExcelExporter();
+        //var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        //var fs = new MemoryStream(result.Result);
+        ////return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        //return new FileStreamResult(fs, "application/octet-stream")
+        //{
+        //    FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
+        //};
 
         //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
     }

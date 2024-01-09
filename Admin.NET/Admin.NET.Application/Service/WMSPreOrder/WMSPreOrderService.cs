@@ -245,6 +245,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSPreOrderInput input)
     {
@@ -380,6 +381,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [ApiDescriptionSettings(Name = "PreOrderForOrder")]
+    [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> PreOrderForOrder(List<long> input)
     {
 

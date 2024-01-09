@@ -1,7 +1,20 @@
 <template>
 	<div class="home-container layout-pd">
 		<el-row :gutter="15" class="home-card-one mb15">
-			<el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6" v-for="(v, k) in state.homeOne" :key="k" :class="{ 'home-media home-media-lg': k > 1, 'home-media-sm': k === 1 }">
+			<el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6"   
+				class="home-media home-media-lg">
+				<select>
+					<option key="dasd" value="dasd"></option>
+				</select>
+				<select>
+					<option key="dasd" value="dasd"></option>
+				</select>
+			</el-col>
+
+		</el-row>
+		<el-row :gutter="15" class="home-card-one mb15">
+			<el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6" v-for="(v, k) in state.homeOne" :key="k"
+				:class="{ 'home-media home-media-lg': k > 1, 'home-media-sm': k === 1 }">
 				<div class="home-card-item flex">
 					<div class="flex-margin flex w100" :class="` home-one-animation${k}`">
 						<div class="flex-auto">
@@ -535,8 +548,10 @@ watch(
 
 <style scoped lang="scss">
 $homeNavLengh: 8;
+
 .home-container {
 	overflow: hidden;
+
 	.home-card-one,
 	.home-card-two,
 	.home-card-three {
@@ -550,19 +565,23 @@ $homeNavLengh: 8;
 			background: var(--el-color-white);
 			color: var(--el-text-color-primary);
 			border: 1px solid var(--next-border-color-light);
+
 			&:hover {
 				box-shadow: 0 2px 12px var(--next-color-dark-hover);
 				transition: all ease 0.3s;
 			}
+
 			&-icon {
 				width: 70px;
 				height: 70px;
 				border-radius: 100%;
 				flex-shrink: 1;
+
 				i {
 					color: var(--el-text-color-placeholder);
 				}
 			}
+
 			&-title {
 				font-size: 15px;
 				font-weight: bold;
@@ -570,6 +589,7 @@ $homeNavLengh: 8;
 			}
 		}
 	}
+
 	.home-card-one {
 		@for $i from 0 through 3 {
 			.home-one-animation#{$i} {
@@ -581,18 +601,22 @@ $homeNavLengh: 8;
 			}
 		}
 	}
+
 	.home-card-two,
 	.home-card-three {
 		.home-card-item {
 			height: 400px;
 			width: 100%;
 			overflow: hidden;
+
 			.home-monitor {
 				height: 100%;
+
 				.flex-warp-item {
 					width: 25%;
 					height: 111px;
 					display: flex;
+
 					.flex-warp-item-box {
 						margin: auto;
 						text-align: center;
@@ -602,11 +626,13 @@ $homeNavLengh: 8;
 						background: var(--next-bg-color);
 						cursor: pointer;
 						transition: all 0.3s ease;
+
 						&:hover {
 							background: var(--el-color-primary-light-9);
 							transition: all 0.3s ease;
 						}
 					}
+
 					@for $i from 0 through $homeNavLengh {
 						.home-animation#{$i} {
 							opacity: 0;

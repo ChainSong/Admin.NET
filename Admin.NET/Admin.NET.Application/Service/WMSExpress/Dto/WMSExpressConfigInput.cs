@@ -43,6 +43,8 @@ public class WMSExpressConfigBaseInput
     /// Url
     /// </summary>
     public virtual string? Url { get; set; }
+    public virtual string? UrlToken { get; set; }
+    
 
     /// <summary>
     /// AppKey

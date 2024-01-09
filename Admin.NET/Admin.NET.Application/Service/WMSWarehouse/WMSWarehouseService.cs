@@ -76,7 +76,16 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     public async Task<Response> Add(AddWMSWarehouseInput input)
     {
         var entity = input.Adapt<WMSWarehouse>();
-        await _rep.InsertAsync(entity);
+        if (entity.Details != null)
+        {
+            entity.Details.ForEach(a =>
+            {
+                a.WarehouseName = entity.WarehouseName;
+                a.Creator = _userManager.Account;
+                a.CreateTime = DateTime.Now;
+            });
+        }
+        await _rep.Context.InsertNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
 
         //给自己添加仓库权限
         WarehouseUserMapping warehouseUserMapping = new WarehouseUserMapping();
@@ -124,11 +133,18 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
         //return Task.Run( () =>
         //{
         var entity = input.Adapt<WMSWarehouse>();
-        await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        if (entity.Details != null)
+        {
+            entity.Details.ForEach(a =>
+            {
+                a.WarehouseName = entity.WarehouseName;
+                a.Creator = _userManager.Account;
+                a.CreateTime = DateTime.Now;
+            });
+        }
+        await _rep.Context.UpdateNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
         //});
-
-
     }
 
     /// <summary>
@@ -140,7 +156,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSWarehouse> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable().Includes(a=>a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
 

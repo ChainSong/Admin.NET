@@ -6,7 +6,7 @@
           <el-row>
             <el-row :gutter="[12, 24]" width="50%">
               <el-row style="width: 100%;">
-                <el-button style="font-size:20px;" type="primary">清空重扫</el-button>
+                <el-button style="font-size:20px;" type="primary" @click="reset">清空重扫</el-button>
                 <!-- <el-button style="font-size:20px;" type="success" @click="printExpress">打印</el-button>-->
                 <el-button style="font-size:20px;" type="info" @click="shortagePackage">短包</el-button>
                 <!-- <el-button type="warning">换箱</el-button> -->
@@ -351,6 +351,20 @@ const scanPackage = async () => {
 
 }
 
+//重新包装
+const reset = async (row: any) => {
+  ElMessageBox.confirm(`确认是否重新扫描?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+
+      console.log(row);
+    })
+    .catch(() => { });
+
+}
 // 打印快递单
 const printExpress = async (row: any) => {
   ElMessageBox.confirm(`确定要打印吗?`, "提示", {

@@ -44,6 +44,8 @@ public class WMSExpressConfigDto
     /// Url
     /// </summary>
     public string? Url { get; set; }
+    public string? UrlToken { get; set; }
+    
 
     /// <summary>
     /// AppKey

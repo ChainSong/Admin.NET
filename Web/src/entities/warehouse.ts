@@ -1,5 +1,5 @@
 import Entity from './entity'
-import TableColumnsDetails from './tableColumnsDetails'
+import warehouseDetail from './warehouseDetail'
 // import AbpBase from "../../lib/abpbase";
 export default class warehouse extends Entity<number>{
 projectId:number;
@@ -22,4 +22,5 @@ creator:string;
 updator:string;
 updateTime:string;
 creationTime:string;
+details: Array<warehouseDetail>;
 }

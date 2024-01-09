@@ -16,6 +16,12 @@ using Admin.NET.Application.Enumerate;
 using Furion.RemoteRequest;
 using Org.BouncyCastle.Crypto;
 using Furion.DatabaseAccessor;
+using System.Linq;
+using Admin.NET.Application.Service;
+using XAct;
+using Admin.NET.Application.Service.Factory;
+using Admin.NET.Application.Service.Interface;
+using Admin.NET.Application.Dtos;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -26,21 +32,31 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPickTask> _rep;
 
+
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+
+    private readonly SqlSugarRepository<WMSPackage> _repPackage;
+    private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
+
+    //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+    //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
 
 
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
     private readonly SysCacheService _sysCacheService;
-
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser)
+    private readonly SqlSugarRepository<WMSOrder> _repOrder;
+    private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
     {
         _rep = rep;
         _userManager = userManager;
         //_db = db;
         _repWarehouseUser = repWarehouseUser;
         _repCustomerUser = repCustomerUser;
+        _repOrder = repOrder;
+        _repPickTaskDetail = repPickTaskDetail;
     }
 
     /// <summary>
@@ -202,12 +218,33 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    //[HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "Delete")]
-    public async Task Delete(DeleteWMSPickTaskInput input)
+    public async Task<Response<List<OrderStatusDto>>> Delete(DeleteWMSPickTaskInput input)
     {
-        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        await _rep.DeleteAsync(entity);
+        //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        //await _rep.DeleteAsync(entity);
         //await _rep.FakeDeleteAsync(entity);   //假删除
+
+        List<DeleteWMSPickTaskInput> request = new List<DeleteWMSPickTaskInput>();
+        request.Add(input);
+        IPickTaskReturnInterface factory = PickTaskReturnFactory.PickTaskReturn("");
+
+        factory._userManager = _userManager;
+        factory._repPickTask = _rep;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPackage = _repPackage;
+        factory._repPackageDetail = _repPackageDetail;
+
+
+          
+        //factory._repTableColumns = _repTableInventoryUsed;
+        return await factory.PickTaskReturn(request);
     }
 
     /// <summary>
@@ -246,6 +283,8 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
             a.PickQty = a.Qty;
             a.PikcTime = DateTime.Now;
         });
+
+        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b=>b.OrderId).Contains(a.Id));
         //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
         await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
 

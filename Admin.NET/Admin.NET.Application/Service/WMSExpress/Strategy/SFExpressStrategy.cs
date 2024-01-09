@@ -24,7 +24,7 @@ using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using System.Xml; 
+using System.Xml;
 using AutoMapper;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
@@ -33,6 +33,7 @@ using NewLife.Serialization;
 using Admin.NET.Application.Service.WMSExpress.Interface;
 using NPOI.SS.Formula.PTG;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
+using Admin.NET.Application.Service.WMSExpress.Enumerate;
 
 namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 
@@ -91,19 +92,36 @@ public class SFExpressStrategy : IExpressInterface
             sFCargodetails.Add(new SFCargodetail { name = a.GoodsName });
         });
 
-
+        var senderContact = "";
+        var senderMobile = "";
+        var senderTel = "";
         //获取寄件人信息
-        var sender = _repWarehouse.AsQueryable().Where(a => a.Id == package.WarehouseId).First();
+        var sender = _repWarehouse.AsQueryable().Includes(a=>a.Details).Where(a => a.Id == package.WarehouseId).First();
+        if (sender.Details!=null && sender.Details.Count>0 && sender.Details.Where(a => a.CustomerId == request.CustomerId).Count() > 0)
+        {
+                var warehouseDetail= sender.Details.Where(a => a.CustomerId == request.CustomerId).First();
+                  senderContact = warehouseDetail.Contact;
+                  senderMobile = warehouseDetail.Phone;
+                  senderTel = warehouseDetail.Tel;
+
+        }
+        else
+        {
+            senderContact = sender.Contractor;
+            senderMobile = sender.Mobile;
+            senderTel = sender.Phone;
+        }
         List<SFContactinfolist> sFContactinfolists = new List<SFContactinfolist>();
         sFContactinfolists.Add(new SFContactinfolist()
         {
             address = sender.Address,
             city = sender.City,
-            contact = sender.Contractor,
+            contact = senderContact,
             contactType = 1,
-            county = sender.Country,
-            mobile = sender.Mobile,
-            tel = sender.Phone,
+            //country = "CN",
+            county = sender.County,
+            mobile = senderMobile,
+            tel = senderTel,
             province = sender.Province,
             company = sender.Company,
         });
@@ -116,14 +134,14 @@ public class SFExpressStrategy : IExpressInterface
             city = receiver.City,
             contact = receiver.Name,
             contactType = 2,
-            county = receiver.Country,
+            county = receiver.County, 
             mobile = receiver.Phone,
             tel = receiver.Phone,
             province = receiver.Province,
             //company = receiver.Company,
         });
 
-        string monthlyCard = "";//顺丰月结卡号 月结支付时传值，现结不需传值；沙箱联调可使用测试月结卡号7551234567（非正式，无须绑定，仅支持联调使用）
+        //string monthlyCard = getExpressConfig.MonthAccount;//顺丰月结卡号 月结支付时传值，现结不需传值；沙箱联调可使用测试月结卡号7551234567（非正式，无须绑定，仅支持联调使用）
 
         //var detail = _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == detail.First().PreOrderNumber);
 
@@ -154,7 +172,6 @@ public class SFExpressStrategy : IExpressInterface
 
         Rootobject output = Express.ToJsonEntity<Rootobject>();
         Apiresultdata apiresultdata = output.apiResultData.ToJsonEntity<Apiresultdata>();
-
         if (apiresultdata.success.ToUpper() == "false".ToUpper())
         {
             response.Code = StatusCode.Error;
@@ -193,11 +210,13 @@ public class SFExpressStrategy : IExpressInterface
         packageData.SenderContact = sender.Contractor;
         packageData.SenderTel = sender.Phone;
         packageData.SenderCountry = sender.Country;
+        packageData.SenderCounty = sender.County;
         packageData.SenderAddress = sender.Address;
         packageData.SenderPostCode = "";
         packageData.RecipientsProvince = receiver.Province;
         packageData.RecipientsCity = receiver.City;
         packageData.RecipientsCountry = receiver.Country;
+        packageData.RecipientsCounty = receiver.County;
         packageData.RecipientsCompany = receiver.ExpressCompany;
         packageData.ExpressNumber = sfexpress.WaybillNo;
         packageData.RecipientsContact = receiver.Name;
@@ -210,7 +229,6 @@ public class SFExpressStrategy : IExpressInterface
         await _repExpressDelivery.InsertAsync(packageData);
         await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
-
         response.Msg = "成功";
         response.Code = StatusCode.Success;
         return response;
@@ -259,6 +277,8 @@ public class SFExpressStrategy : IExpressInterface
         {
             input.Checkword = getExpressConfig.Checkword;
             input.Url = getExpressConfig.Url;
+            input.UrlToken = getExpressConfig.UrlToken;
+            input.Env = getExpressConfig.Env;
             input.PartnerId = getExpressConfig.PartnerId;
             input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
                                                                  //input.Data = new SFRootobjectPrint()
@@ -348,7 +368,7 @@ public class SFExpressStrategy : IExpressInterface
         var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
         if (package != null && !string.IsNullOrEmpty(package.ExpressNumber))
         {
-            package.PrintNum =((package.PrintNum ?? 0) +1);
+            package.PrintNum = ((package.PrintNum ?? 0) + 1);
             package.PrintPersonnel = _userManager.Account;
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
@@ -410,4 +430,4 @@ public class SFExpressStrategy : IExpressInterface
 
 
 
-    
+

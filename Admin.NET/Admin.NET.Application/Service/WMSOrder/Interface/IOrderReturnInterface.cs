@@ -41,6 +41,8 @@ public interface IOrderReturnInterface
 
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+
+    public SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable { get; set; }
     public  Task<Response<List<OrderStatusDto>>> OrderReturn(List<DeleteWMSOrderInput> request);
 
 }

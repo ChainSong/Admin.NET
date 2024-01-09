@@ -38,6 +38,8 @@ public class WMSPickTaskBaseInput
     /// PickStatus
     /// </summary>
     public virtual int PickStatus { get; set; }
+    public string OrderNumber { get; set; }
+    public string ExternOrderNumber { get; set; }
 
     /// <summary>
     /// PickType

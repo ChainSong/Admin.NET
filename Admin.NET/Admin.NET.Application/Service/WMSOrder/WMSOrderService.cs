@@ -47,6 +47,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
+    //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
+
+
     public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder)
     {
         _rep = rep;
@@ -247,6 +250,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repInstruction = _repInstruction;
         factory._repPreOrder = _repPreOrder;
         factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._repTableInventoryUsable = _repTableInventoryUsable;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAllocation = _repOrderAllocation;
+        
+
 
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.OrderReturn(request);
@@ -306,6 +315,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
 
     [HttpPost]
+    [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> AutomatedAllocation(List<long> input)
     {
         //使用简单工厂定制化  / 

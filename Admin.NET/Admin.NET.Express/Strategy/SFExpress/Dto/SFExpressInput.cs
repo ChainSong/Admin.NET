@@ -19,6 +19,8 @@ public class SFExpressInput<T>
     public string PartnerId { get; set; }//此处替换为您在丰桥平台获取的顾客编码       
     public string Checkword { get; set; }//此处替换为您在丰桥平台获取的校验码   
     public string Url { get; set; }//请求地址   
+    public string UrlToken { get; set; }//Token 地址   
+    public string Env { get; set; }//环境   
     public string ServiceCode { get; set; }//请求地址   
 
     public T Data { get; set; }//请求数据   

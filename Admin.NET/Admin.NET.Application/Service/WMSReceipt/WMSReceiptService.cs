@@ -253,6 +253,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "Update")]
     public async Task Update(UpdateWMSReceiptInput input)
     {
@@ -335,6 +336,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
 
 
     [HttpPost]
+    [UnitOfWork]
     public ActionResult ExportReceiptReceiving(List<long> input)
     {
         //使用简单工厂定制化  /

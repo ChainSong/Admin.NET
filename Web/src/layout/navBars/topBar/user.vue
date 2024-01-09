@@ -160,6 +160,8 @@ const onHandleCommandClick = (path: string) => {
 			cancelButtonText: t('message.user.logOutCancel'),
 			buttonSize: 'default',
 			beforeClose: async (action, instance, done) => {
+				//用户使用退出按钮的时候清理所有的localStorage 缓存
+				localStorage.clear();
 				if (action === 'confirm') {
 					instance.confirmButtonLoading = true;
 					instance.confirmButtonText = t('message.user.logOutExit');
