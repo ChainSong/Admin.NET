@@ -22,6 +22,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Admin.NET.Express;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using System.IO;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -309,7 +312,8 @@ public class WMSASNService : IDynamicApiController, ITransient
         IASNExcelInterface factoryExcel = ASNExcelFactory.ASNExcel();
         factoryExcel._repTableColumns = _repTableColumns;
         factoryExcel._userManager = _userManager;
-        var data = factoryExcel.Strategy(dataExcel);
+        factoryExcel._repASN = _rep;
+        var data = factoryExcel.Import(dataExcel);
         var entityListDtos = data.Data.TableToList<AddOrUpdateWMSASNInput>();
         var entityDetailListDtos = data.Data.TableToList<WMSASNDetail>();
 
@@ -364,5 +368,43 @@ public class WMSASNService : IDynamicApiController, ITransient
         var response = factory.Strategy(input);
         return await response;
     }
+
+    
+
+
+
+
+    /// <summary>
+    /// 导出预出库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    public ActionResult ExportASN(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+
+        IASNExcelInterface factoryExcel = ASNExcelFactory.ASNExcel();
+        factoryExcel._repTableColumns = _repTableColumns;
+        factoryExcel._userManager = _userManager;
+        factoryExcel._repASN = _rep;
+        var response = factoryExcel.Export(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "预入库_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
+    }
+
+
 }
 

@@ -1,7 +1,7 @@
 ﻿
 using Admin.NET.Application.Interface;
 using Admin.NET.Core.Entity;
-using Admin.NET.Core; 
+using Admin.NET.Core;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using System.Reflection;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -17,7 +18,7 @@ namespace Admin.NET.Application.Strategy
     {
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
-        public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
+        public SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail { get; set; }
         //public ISqlSugarClient _db { get; set; }
         public UserManager _userManager { get; set; }
 
@@ -36,8 +37,13 @@ namespace Admin.NET.Application.Strategy
         {
         }
 
+        /// <summary>
+        /// 导入
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         //默认方法不做任何处理
-        public Response<DataTable> Strategy(dynamic request)
+        public Response<DataTable> Import(dynamic request)
         {
             Response<DataTable> response = new Response<DataTable>();
 
@@ -83,22 +89,162 @@ namespace Admin.NET.Application.Strategy
         }
 
 
+        /// <summary>
+        /// 导出
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //默认方法不做任何处理
+        public Response<DataTable> Export(List<long> request)
+        {
+            Response<DataTable> response = new Response<DataTable>();
+            //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
+            //receipts.WMS_Receipts = new List<WMSReceiptEditDto>();
+
+            var headerTableColumn = GetColumns("WMS_PreOrder");
+            var detailTableColumn = GetColumns("WMS_PreOrderDetail");
+            var orderAddressTableColumn = GetColumns("WMS_OrderAddress");
+
+            var PreOrderData = _repPreOrder.AsQueryable().Includes(a => a.Details).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
+
+
+            DataTable dt = new DataTable();
+            DataColumn dc = new DataColumn();
+
+            //1，构建主表需要的信息
+            headerTableColumn.ForEach(a =>
+            {
+                if (a.IsImportColumn == 1)
+                {
+                    dc = dt.Columns.Add(a.DisplayName, typeof(string));
+                }
+            });
+            //2.构建明细需要的信息
+            detailTableColumn.ForEach(a =>
+            {
+                if (a.IsImportColumn == 1 && !dt.Columns.Contains(a.DisplayName))
+                {
+                    dc = dt.Columns.Add(a.DisplayName, typeof(string));
+                }
+            });
+
+            //3.构建地址需要的信息
+            orderAddressTableColumn.ForEach(a =>
+            {
+                if (a.IsImportColumn == 1 && !dt.Columns.Contains(a.DisplayName))
+                {
+                    dc = dt.Columns.Add(a.DisplayName, typeof(string));
+                }
+            });
+            //塞数据
+            PreOrderData.ForEach(a =>
+            {
+                DataRow row = dt.NewRow();
+                Type preOrderType = a.GetType();
+                Type preOrderTypeAddress = a.OrderAddress.GetType();
+
+                a.Details.ForEach(c =>
+                {
+                    Type receiptDetailType = c.GetType();
+                    headerTableColumn.ForEach(h =>
+                    {
+                        if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+                        {
+                            PropertyInfo property = preOrderType.GetProperty(h.DbColumnName);
+                            //如果该字段有下拉选项，则值取下拉选项中的值
+                            if (h.tableColumnsDetails.Count() > 0)
+                            {
+                                var val = property.GetValue(a);
+                                TableColumnsDetail data = new TableColumnsDetail();
+                                if (val is int)
+                                {
+                                    data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val)).FirstOrDefault();
+
+                                }
+                                //var data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                                if (data != null)
+                                {
+                                    row[h.DisplayName] = data.Name;
+                                }
+                                else
+                                {
+                                    row[h.DisplayName] = "";
+                                }
+                            }
+                            else
+                            {
+                                row[h.DisplayName] = property.GetValue(a);
+                            }
+
+                        }
+                    });
+
+                    detailTableColumn.ForEach(d =>
+                    {
+                        if (d.IsImportColumn == 1 && dt.Columns.Contains(d.DisplayName))
+                        {
+                            PropertyInfo property = receiptDetailType.GetProperty(d.DbColumnName);
+                            row[d.DisplayName] = property.GetValue(c);
+
+                        }
+                    });
+
+                    orderAddressTableColumn.ForEach(d =>
+                    {
+                        if (d.IsImportColumn == 1 && dt.Columns.Contains(d.DisplayName))
+                        {
+                            PropertyInfo property = preOrderTypeAddress.GetProperty(d.DbColumnName);
+                            row[d.DisplayName] = property.GetValue(a.OrderAddress);
+                        }
+                    });
+
+                });
+                dt.Rows.Add(row);
+
+            });
+            response.Data = dt;
+            response.Code = StatusCode.Success;
+            //throw new NotImplementedException();
+            return response;
+        }
+
 
         private List<TableColumns> GetColumns(string TableName)
         {
+
             return _repTableColumns.AsQueryable()
-               .Where(a => a.TableName == TableName &&
-                 a.TenantId == _userManager.TenantId &&
-                 a.IsImportColumn == 1
-               )
-              .Select(a => new TableColumns
-              {
-                  DisplayName = a.DisplayName,
-                  //由于框架约定大于配置， 数据库的字段首字母小写
-                  //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-                  DbColumnName = a.DbColumnName,
-                  IsImportColumn = a.IsImportColumn
-              }).ToList();
+             .Where(a => a.TableName == TableName &&
+               a.TenantId == _userManager.TenantId &&
+               a.IsImportColumn == 1
+             )
+            .Select(a => new TableColumns
+            {
+                DisplayName = a.DisplayName,
+                //由于框架约定大于配置， 数据库的字段首字母小写
+                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+                DbColumnName = a.DbColumnName,
+                IsImportColumn = a.IsImportColumn,
+                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
+                //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
+                //.Select()
+            }).ToList();
+            //return _repTableColumns.AsQueryable()
+            //   .Where(a => a.TableName == TableName &&
+            //     a.TenantId == _userManager.TenantId &&
+            //     a.IsImportColumn == 1
+            //   )
+            //  .Select(a => new TableColumns
+            //  {
+            //      DisplayName = a.DisplayName,
+            //      //由于框架约定大于配置， 数据库的字段首字母小写
+            //      //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+            //      DbColumnName = a.DbColumnName,
+            //      IsImportColumn = a.IsImportColumn
+            //  }).ToList();
         }
     }
 }

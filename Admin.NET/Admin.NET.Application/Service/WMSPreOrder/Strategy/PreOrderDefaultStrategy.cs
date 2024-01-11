@@ -295,7 +295,7 @@ namespace Admin.NET.Application.Strategy
             });
 
             //开始插入数据
-            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).Include(a=>a.OrderAddress).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             return response;

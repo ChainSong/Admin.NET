@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import FlowPanel from '/@/components/workflow/panel'
+import FlowPanel from '/@/components/workflow/panel.vue'
 import VolBox from '/@/components/basic/VolBox.vue';
 export default {
   name: 'App',

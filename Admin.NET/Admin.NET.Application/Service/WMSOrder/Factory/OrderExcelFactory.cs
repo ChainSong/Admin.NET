@@ -1,5 +1,6 @@
 ﻿
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service.Strategy;
 using Admin.NET.Application.Strategy;
 using System;
 using System.Collections.Generic;
@@ -9,11 +10,14 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Factory
 {
-    public class ReceiptExportFactory
+    public class OrderExcelFactory
     {
-        public static IReceiptExcelInterface ExportReceipt()
+        public static IOrderExcelInterface Export()
         {
-            return new ReceiptExportDefaultStrategy();
+
+
+            return new OrderExportDefaultStrategy();
+
             //return new ASNDefaultStrategy();
         }
 

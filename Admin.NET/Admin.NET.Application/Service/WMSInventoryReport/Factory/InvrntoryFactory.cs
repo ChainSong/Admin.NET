@@ -20,11 +20,19 @@ using System.Threading.Tasks;
 namespace Admin.NET.Application.Service.WMSInventoryReport.Factory;
 public class InvrntoryFactory
 {
+
     //IInvrntoryInterface Interface=new
     public static IInvrntoryInterface InvrntoryData(long? CustomerId)
     {
-        return new InventoryStrategy();
+        if (CustomerId == -1)
+        {
+            return new InventoryNoUserStrategy();
+        }
+        else
+        {
+            return new InventoryStrategy();
+        }
     }
 
- 
+
 }

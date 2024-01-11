@@ -15,6 +15,9 @@ using NewLife.Net;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using System.IO;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -330,7 +333,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
 
 
-        var data = factoryExcel.Strategy(dataExcel);
+        var data = factoryExcel.Import(dataExcel);
         var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
         var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
         var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
@@ -410,6 +413,54 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         return response;
     }
 
-   
+
+    
+
+
+    /// <summary>
+    /// 导出预出库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    public ActionResult ExportPreOrder(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+     
+        //private const string FileDir = "/File/ExcelTemp";
+        //string url = await ImprotExcel.WriteFile(file);
+        //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
+
+        factoryExcel._repPreOrder = _rep;
+        factoryExcel._repWarehouseUser = _repWarehouseUser;
+        //factoryExcel._db = _db;
+        factoryExcel._userManager = _userManager;
+
+        factoryExcel._repCustomerUser = _repCustomerUser;
+        factoryExcel._repWarehouseUser = _repWarehouseUser;
+        factoryExcel._repTableColumns = _repTableColumns;
+        factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
+
+
+        var response = factoryExcel.Export(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "预出库单_"+DateTime.Now.ToString("yyyyMMddhhmmss")+".xlsx" // 配置文件下载显示名
+        };
+    }
+
 }
 

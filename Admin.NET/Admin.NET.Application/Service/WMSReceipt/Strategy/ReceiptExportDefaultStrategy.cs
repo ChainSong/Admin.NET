@@ -15,7 +15,7 @@ using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ReceiptExportDefaultStrategy : IReceiptExportInterface
+    public class ReceiptExportDefaultStrategy : IReceiptExcelInterface
     {
 
 
@@ -33,7 +33,7 @@ namespace Admin.NET.Application.Strategy
         }
 
         //默认方法不做任何处理
-        public Response<DataTable> Strategy(List<long> request)
+        public Response<DataTable> Export(List<long> request)
         {
             Response<DataTable> response = new Response<DataTable>();
             //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();

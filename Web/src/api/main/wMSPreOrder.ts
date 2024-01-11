@@ -6,6 +6,7 @@ enum Api {
   PageWMSPreOrder = '/api/wMSPreOrder/page',
   GetWMSPreOrder = '/api/wMSPreOrder/Query',
   PreOrderForOrder = '/api/wMSPreOrder/PreOrderForOrder',
+  ExportPreOrder = '/api/wMSPreOrder/ExportPreOrder',
   
   
 }
@@ -57,3 +58,15 @@ request({
 		data: params,
 	});
 
+
+
+// 导出预出库信息
+export const exportPreOrder = (params?: any) =>
+	request({
+		url: Api.ExportPreOrder,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
+
+	

@@ -376,5 +376,55 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
 
 
+    /// <summary>
+    /// 导出预出库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    public ActionResult ExportOrder(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+
+        //private const string FileDir = "/File/ExcelTemp";
+        //string url = await ImprotExcel.WriteFile(file);
+        //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IOrderExcelInterface factory = OrderExcelFactory.Export();
+
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repPreOrder = _repPreOrder;
+        factory._reppreOrderDetail = _reppreOrderDetail;
+        factory._repTableInventoryUsable = _repTableInventoryUsable;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAllocation = _repOrderAllocation;
+
+
+
+        var response = factory.Export(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "出库单_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
+    }
+
+
 }
 

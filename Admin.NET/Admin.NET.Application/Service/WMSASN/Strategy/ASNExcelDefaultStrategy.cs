@@ -10,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -22,7 +23,7 @@ namespace Admin.NET.Application.Strategy
         public UserManager _userManager { get; set; }
         ////注入ASN仓储
 
-        //public SqlSugarRepository<WMSASN> _repASN { get; set; }
+        public SqlSugarRepository<WMSASN> _repASN { get; set; }
         ////注入仓库关系仓储
 
         //public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
@@ -34,8 +35,14 @@ namespace Admin.NET.Application.Strategy
 
         }
 
+
+        /// <summary>
+        /// 导入
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         //默认方法不做任何处理
-        public Response<DataTable> Strategy(dynamic request)
+        public Response<DataTable> Import(dynamic request)
         {
             Response<DataTable> response = new Response<DataTable>();
 
@@ -78,7 +85,111 @@ namespace Admin.NET.Application.Strategy
             return response;
 
         }
-        private List<TableColumns> GetColumns(string TableName)
+
+
+        /// <summary>
+        /// 导出
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public Response<DataTable> Export(List<long> request)
+        {
+            Response<DataTable> response = new Response<DataTable>();
+            //CreateOrUpdateWMS_ReceiptInput orders = new CreateOrUpdateWMS_ReceiptInput();
+            //orders.WMS_Receipts = new List<WMSReceiptEditDto>();
+
+            var headerTableColumn = GetColumns("WMS_ASN");
+            var detailTableColumn = GetColumns("WMS_ASNDetail");
+            var orderData = _repASN.AsQueryable().Includes(a => a.Details).Where(a => request.Contains(a.Id)).ToList();
+
+
+            DataTable dt = new DataTable();
+            DataColumn dc = new DataColumn();
+
+            //1，构建主表需要的信息
+            headerTableColumn.ForEach(a =>
+            {
+                if (a.IsImportColumn == 1)
+                {
+                    dc = dt.Columns.Add(a.DisplayName, typeof(string));
+                }
+            });
+            //2.构建明细需要的信息
+            detailTableColumn.ForEach(a =>
+            {
+                if (a.IsImportColumn == 1 && !dt.Columns.Contains(a.DisplayName))
+                {
+                    dc = dt.Columns.Add(a.DisplayName, typeof(string));
+                }
+            }); 
+
+
+            //塞数据
+            orderData.ForEach(a =>
+            {
+                DataRow row = dt.NewRow();
+                Type orderType = a.GetType();
+                a.Details.ForEach(c =>
+                {
+                    Type orderDetailType = c.GetType();
+                    headerTableColumn.ForEach(h =>
+                    {
+                        if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+                        {
+                            PropertyInfo property = orderType.GetProperty(h.DbColumnName);
+                            //如果该字段有下拉选项，则值取下拉选项中的值
+                            if (h.tableColumnsDetails.Count() > 0)
+                            {
+                                var val = property.GetValue(a);
+                                TableColumnsDetail data = new TableColumnsDetail();
+                                if (val is int)
+                                {
+                                    data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val)).FirstOrDefault();
+
+                                }
+                                //var data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                                if (data != null)
+                                {
+                                    row[h.DisplayName] = data.Name;
+                                }
+                                else
+                                {
+                                    row[h.DisplayName] = "";
+                                }
+                            }
+                            else
+                            {
+                                row[h.DisplayName] = property.GetValue(a);
+                            }
+
+                        }
+                    });
+
+                    detailTableColumn.ForEach(d =>
+                    {
+                        if (d.IsImportColumn == 1 && dt.Columns.Contains(d.DisplayName))
+                        {
+                            PropertyInfo property = orderDetailType.GetProperty(d.DbColumnName);
+                            row[d.DisplayName] = property.GetValue(c);
+
+                        }
+                    });
+                });
+                dt.Rows.Add(row);
+
+            });
+            response.Data = dt;
+            response.Code = StatusCode.Success;
+            //throw new NotImplementedException();
+            return response;
+        }
+
+
+        public List<TableColumns> GetColumns(string TableName)
         {
             return _repTableColumns.AsQueryable()
                .Where(a => a.TableName == TableName &&
@@ -91,7 +202,10 @@ namespace Admin.NET.Application.Strategy
                   //由于框架约定大于配置， 数据库的字段首字母小写
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,
-                  IsImportColumn = a.IsImportColumn
+                  IsImportColumn = a.IsImportColumn,
+                  tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
+                  //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
+                  //.Select()
               }).ToList();
         }
     }

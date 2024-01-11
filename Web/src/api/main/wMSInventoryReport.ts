@@ -5,6 +5,9 @@ enum Api {
   UpdateWMSInventoryReport = '/api/wMSInventoryReport/update',
   PageWMSInventoryReport = '/api/wMSInventoryReport/page',
   GetWMSInventoryReport = '/api/wMSInventoryReport/Query',
+  InvrntoryDataPage = '/api/wMSInventoryReport/InvrntoryDataPage',
+  InvrntoryDataExport = '/api/wMSInventoryReport/InvrntoryDataExport',
+ 
 }
 
 // 增加WMSInventoryReport
@@ -43,7 +46,19 @@ export const getWMSInventoryReport = (params?: any) =>
 request({
 	url: `${Api.GetWMSInventoryReport}/${params}`,
 	method: 'get'
-});
+}); 
+// 编辑WMSInventoryReport
+export const invrntoryDataPage = (params?: any) => 
+	request({
+			url: Api.InvrntoryDataPage,
+			method: 'post',
+			data: params,
+		});
 
-
-
+// 编辑WMSInventoryReport
+export const invrntoryDataExport = (params?: any) => 
+	request({
+			url: Api.InvrntoryDataExport,
+			method: 'post',
+			data: params,
+		});

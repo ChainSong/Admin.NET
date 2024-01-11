@@ -8,7 +8,8 @@ enum Api {
 	AutomatedAllocation = '/api/wMSOrder/AutomatedAllocation',
 	CreatePickTask = '/api/wMSOrder/CreatePickTask',
 	CompleteOrder = '/api/wMSOrder/CompleteOrder',
-
+	ExportOrder = '/api/wMSOrder/ExportOrder',
+	
 }
 
 // 增加WMSOrder
@@ -75,3 +76,14 @@ export const completeOrder = (params?: any) =>
 	});
 
 
+
+// 导出出库信息
+export const exportOrder = (params?: any) =>
+	request({
+		url: Api.ExportOrder,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
+
+	

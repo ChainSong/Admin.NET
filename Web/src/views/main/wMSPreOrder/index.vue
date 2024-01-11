@@ -70,6 +70,13 @@
 
           </el-form-item>
           <el-form-item>
+            <el-button-group>
+              <el-button type="primary" icon="ele-Download" @click="exportPreOrderFun" v-auth="'wMSPreOrder:export'"> 导出
+              </el-button>
+              <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
+            </el-button-group>
+          </el-form-item>
+          <el-form-item>
             <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSPreOrder:add'"> 新增
             </el-button>
           </el-form-item>
@@ -156,7 +163,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSPreOrder/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPreOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPreOrder/component/queryDialog.vue'
-import { pageWMSPreOrder, deleteWMSPreOrder, preOrderForOrder } from '/@/api/main/wMSPreOrder';
+import { pageWMSPreOrder, deleteWMSPreOrder, preOrderForOrder,exportPreOrder } from '/@/api/main/wMSPreOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "/@/entities/preorder";
@@ -164,7 +171,7 @@ import Details from "/@/entities/preorderDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
-
+import { downloadByData, getFileName } from '/@/utils/download';
 
 const state = ref({
   vm: {
@@ -307,6 +314,23 @@ const PreOrderForOrderFun = () => {
     .catch(() => { });
 };
 
+
+//导出预出库单
+const exportPreOrderFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  let res = await exportPreOrder(ids);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 
 
 // 改变页面容量

@@ -29,7 +29,7 @@ using System.Data;
 using System.Reflection;
 
 namespace Admin.NET.Application.Service.WMSInventoryReport.Strategy;
-public class InventoryStrategy : IInvrntoryInterface
+public class InventoryNoUserStrategy : IInvrntoryInterface
 {
     public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
@@ -187,8 +187,8 @@ public class InventoryStrategy : IInvrntoryInterface
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
         //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
         //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                    //.Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
                      .GroupBy(a => new
                      {
                          a.CustomerId

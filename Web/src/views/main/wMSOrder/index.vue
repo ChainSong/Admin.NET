@@ -69,6 +69,14 @@
           </el-button-group>
 
         </el-form-item>
+
+        <el-form-item>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出 </el-button>
+            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
+          </el-button-group>
+
+        </el-form-item>
         <!-- <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSOrder:add'"> 新增
           </el-button>
@@ -167,7 +175,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask,completeOrder} from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask,completeOrder,exportOrder} from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/order";
@@ -178,6 +186,7 @@ import orderStatus from "/@/entities/orderStatus";
 import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { Local, Session } from '/@/utils/storage';
+import { downloadByData, getFileName } from '/@/utils/download';
 // import { useRoute } from 'vue-router'
 
 const state = ref({
@@ -350,6 +359,24 @@ const automatedAllocationFun = () => {
     })
     .catch(() => { });
 };
+
+
+//导出出库单
+const exportOrderFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  let res = await exportOrder(ids);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 
 
 //生成拣货任务

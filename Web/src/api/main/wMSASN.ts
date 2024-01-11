@@ -6,6 +6,7 @@ enum Api {
   PageWMSASN = '/api/wMSASN/page',
   GetWMSASN = '/api/wMSASN/Query',
   ASNForReceipt = '/api/wMSASN/ASNForReceipt',
+  ExportASN = '/api/wMSASN/ExportASN',
   
 }
 
@@ -54,4 +55,14 @@ export const asnForReceipt = (params?: any) =>
 			method: 'post',
 			data: params,
 		});
+// 导出出库信息
+export const exportASN = (params?: any) =>
+	request({
+		url: Api.ExportASN,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
 
+	
+		

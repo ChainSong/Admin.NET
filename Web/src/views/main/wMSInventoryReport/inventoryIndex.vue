@@ -131,7 +131,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSInventoryUsable/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSInventoryUsable/component/addDialog.vue'
 // import queryDialog from '/@/views/main/wMSInventoryUsable/component/queryDialog.vue'
-import selectRemote from '/@/views/tools/select-remote.vue'
+import selectRemote from '/@/views/tools/select-remote.vue';
 
 // import { pageWMSInventoryUsable, deleteWMSInventoryUsable } from '/@/api/main/wMSInventoryUsable';
 import { invrntoryDataPage,invrntoryDataExport } from '/@/api/main/wMSInventoryReport';
@@ -142,6 +142,8 @@ import Header from "/@/entities/InventoryUsable";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import { downloadByData, getFileName } from '/@/utils/download';
+import { json } from "stream/consumers";
+import { stringify } from "querystring";
 
 const state = ref({
   vm: {
@@ -199,6 +201,8 @@ const gettableColumn = async () => {
 // 查询操作
 const handleQuery = async () => {
   loading.value = true; 
+  console.log("dasdsadasd");
+  console.log(JSON.stringify(Object.assign(state.value.header, tableParams.value)));
   var res = await invrntoryDataPage(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
   tableParams.value.total = res.data.result?.total;

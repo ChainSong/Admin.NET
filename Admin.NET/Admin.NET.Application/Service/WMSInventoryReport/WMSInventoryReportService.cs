@@ -10,6 +10,7 @@ using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Data;
@@ -54,10 +55,14 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [AllowAnonymous]
     [ApiDescriptionSettings(Name = "InvrntoryDataPage")]
     public async Task<SqlSugarPagedList<WMSInventoryUsableReport>> InvrntoryDataPage(WMSInventoryUsableInput input)
     {
-
+        if (_userManager == null)
+        {
+            input.CustomerId = -1;
+        }
         //使用简单工厂定制化  / 
         IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
         //factory._db = _db;
@@ -65,6 +70,7 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repInventoryUsable = _repInventoryUsable;
         factory._repWarehouseUser = _repWarehouseUser;
+       
         var response = await factory.InvrntoryDataPage(input);
         return response;
 

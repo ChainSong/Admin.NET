@@ -316,14 +316,14 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     public ActionResult ExportReceipt(List<long> input)
     {
         //使用简单工厂定制化
-        IReceiptExportInterface factory = ReceiptExportFactory.ExportReceipt();
+        IReceiptExcelInterface factory = ReceiptExportFactory.ExportReceipt();
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
         //var receiptData = _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id));
-        var response = factory.Strategy(input);
+        var response = factory.Export(input);
         IExporter exporter = new ExcelExporter();
         var result = exporter.ExportAsByteArray<DataTable>(response.Data);
         var fs = new MemoryStream(result.Result);

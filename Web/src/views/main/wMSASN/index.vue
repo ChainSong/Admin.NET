@@ -72,6 +72,11 @@
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSASN:add'"> 新增
           </el-button>
         </el-form-item>
+       
+        <el-form-item>
+          <el-button type="primary" icon="ele-Download" @click="exportASNFun" v-auth="'wMSASN:export'"> 导出
+          </el-button>
+        </el-form-item>
 
         <el-form-item>
           <el-button type="primary" icon="ele-Fold" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单
@@ -148,7 +153,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSASN/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
-import { pageWMSASN, deleteWMSASN, asnForReceipt } from '/@/api/main/wMSASN';
+import { pageWMSASN, deleteWMSASN, asnForReceipt,exportASN } from '/@/api/main/wMSASN';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/asn";
@@ -156,7 +161,7 @@ import Details from "/@/entities/asnDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
-
+import { downloadByData, getFileName } from '/@/utils/download';
 
 const state = ref({
   vm: {
@@ -293,6 +298,23 @@ const asnForReceiptFun = () => {
     .catch(() => { });
 };
 
+
+//导出预出库单
+const exportASNFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  let res = await exportASN(ids);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 
 
 // 改变页面容量
