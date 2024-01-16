@@ -24,7 +24,7 @@ public class SysWorkFlowTableStep  //: EntityBase
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 10)]
+    [SugarColumn(ColumnDescription = "")]
     public long? WorkFlowId { get; set; }
     
     /// <summary>

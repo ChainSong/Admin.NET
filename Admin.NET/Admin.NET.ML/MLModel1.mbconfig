@@ -1,6 +1,10 @@
 ﻿{
-  "TrainingTime": 0,
   "Scenario": "Default",
   "Type": "TrainingConfig",
-  "Version": 2
+  "Version": 4,
+  "TrainingOption": {
+    "Version": 1,
+    "Type": "DefaultTrainingOption",
+    "TrainingTime": 0
+  }
 }

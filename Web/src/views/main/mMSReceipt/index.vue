@@ -14,7 +14,7 @@
               <template v-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
-                    size="small" placeholder="请选择">
+                      placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
@@ -35,7 +35,7 @@
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
-                    size="small" placeholder="请选择">
+                      placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -44,7 +44,7 @@
               </template>
               <template v-if="i.type == 'DatePicker'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-date-picker v-model="state.header[i.columnName]" type="daterange" size="small"
+                  <el-date-picker v-model="state.header[i.columnName]" type="daterange" 
                     v-if="i.isSearchCondition" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
                     style="width: 100%">
                   </el-date-picker>
@@ -52,7 +52,7 @@
               </template>
               <template v-if="i.type == 'DateTimePicker'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-date-picker v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                  <el-date-picker v-model="state.header[i.columnName]" v-if="i.isSearchCondition" 
                     type="datetimerange" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
                     style="width: 100%">
                   </el-date-picker>

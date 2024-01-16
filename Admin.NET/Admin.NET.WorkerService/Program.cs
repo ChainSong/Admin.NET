@@ -20,15 +20,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Newtonsoft.Json;
 using OnceMi.AspNetCore.OSS;
-
 using System.Net.Mail;
-
 using System.Net;
-
 using Yitter.IdGenerator;
 using Furion;
+using System;
+using Admin.NET.WorkerService.Handlers;
 
-public class Program
+ 
+public class Program 
 {
     public static void Main(string[] args)
     {
@@ -40,154 +40,17 @@ public class Program
         .Inject()
             .ConfigureServices((hostContext, services) =>
             {
-                //services.AddHostedService<Worker>();
+                //// 配置选项
+                //services.AddProjectOptions();
 
-                // 配置选项
-                services.AddProjectOptions();
+                //// 缓存注册
+                //services.AddCache();
+                //// SqlSugar
+                //services.AddSqlSugar();
 
-                // 缓存注册
-                services.AddCache();
-                // SqlSugar
-                services.AddSqlSugar();
-                // JWT
-                //services.AddJwt<JwtHandler>(enableGlobalAuthorize: true);
-                // 允许跨域
-                services.AddCorsAccessor();
-                // 远程请求
-                services.AddRemoteRequest();
-                // 任务队列
-                services.AddTaskQueue();
-                // 任务调度
-                services.AddSchedule(options =>
-                {
-                    options.AddPersistence<DbJobPersistence>(); // 添加作业持久化器
-                });
-                // 脱敏检测
-                services.AddSensitiveDetection();
-                // 控制台格式化
-                services.AddConsoleFormatter(options =>
-                {
-                    options.DateFormat = "yyyy-MM-dd HH:mm:ss(zzz) dddd";
-                });
-
-                // Json序列化设置
-                static void SetNewtonsoftJsonSetting(JsonSerializerSettings setting)
-                {
-                    setting.DateTimeZoneHandling = DateTimeZoneHandling.Local;
-                    setting.DateFormatString = "yyyy-MM-dd HH:mm:ss"; // 时间格式化
-                    setting.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    // 忽略循环引用
-                    // setting.ContractResolver = new CamelCasePropertyNamesContractResolver(); // 解决动态对象属性名大写
-                    // setting.NullValueHandling = NullValueHandling.Ignore; // 忽略空值
-                    // setting.Converters.AddLongTypeConverters(); // long转string（防止js精度溢出） 超过16位开启
-                    // setting.MetadataPropertyHandling = MetadataPropertyHandling.Ignore; // 解决DateTimeOffset异常
-                    // setting.DateParseHandling = DateParseHandling.None; // 解决DateTimeOffset异常
-                    // setting.Converters.Add(new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }); // 解决DateTimeOffset异常
-                };
-
-                services.AddControllersWithViews()
-                    .AddAppLocalization()
-                    .AddNewtonsoftJson(options => SetNewtonsoftJsonSetting(options.SerializerSettings))
-                    //.AddXmlSerializerFormatters()
-                    //.AddXmlDataContractSerializerFormatters()
-                    .AddInjectWithUnifyResult<AdminResultProvider>();
-
-                // 第三方授权登录
-                //var authOpt = App.GetOptions<OAuthOptions>();
-                //services.AddAuthentication(options =>
-                //{
-                //    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                //})
-                //    .AddCookie(options =>
-                //    {
-                //        options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                //        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
-                //    })
-                //    .AddWeixin(options =>
-                //    {
-                //        options.ClientId = authOpt.Weixin?.ClientId;
-                //        options.ClientSecret = authOpt.Weixin?.ClientSecret;
-                //    })
-                //    .AddGitee(options =>
-                //    {
-                //        options.ClientId = authOpt.Gitee?.ClientId;
-                //        options.ClientSecret = authOpt.Gitee?.ClientSecret;
-
-                //        options.ClaimActions.MapJsonKey(OAuthClaim.GiteeAvatarUrl, "avatar_url");
-                //    });
-
-                // ElasticSearch
-                //services.AddElasticSearch();
-
-                // 配置Nginx转发获取客户端真实IP
-                // 注1：如果负载均衡不是在本机通过 Loopback 地址转发请求的，一定要加上options.KnownNetworks.Clear()和options.KnownProxies.Clear()
-                // 注2：如果设置环境变量 ASPNETCORE_FORWARDEDHEADERS_ENABLED 为 True，则不需要下面的配置代码
-                services.Configure<ForwardedHeadersOptions>(options =>
-                {
-                    options.ForwardedHeaders = ForwardedHeaders.All;
-                    options.KnownNetworks.Clear();
-                    options.KnownProxies.Clear();
-                });
-
-                // 限流服务
-                services.AddInMemoryRateLimiting();
-                services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-
-                // 事件总线
-                services.AddEventBus(options =>
-                {
-                    options.UseUtcTimestamp = false;
-                    // 不启用事件日志
-                    options.LogEnabled = false;
-                    // 事件执行器（失败重试）
-                    options.AddExecutor<RetryEventHandlerExecutor>();
-                    //// 替换事件源存储器
-                    //options.ReplaceStorer(serviceProvider =>
-                    //{
-                    //    var redisCache = serviceProvider.GetService<ICache>();
-                    //    // 创建默认内存通道事件源对象，可自定义队列路由key，比如这里是 eventbus
-                    //    return new RedisEventSourceStorer(redisCache, "eventbus", 3000);
-                    //});
-                });
-
-                // OSS对象存储
-                var ossOpt = App.GetOptions<OSSProviderOptions>();
-                services.AddOSSService(Enum.GetName(ossOpt.Provider), "OSSProvider");
-
-                // 电子邮件
-                //var emailOpt = App.GetOptions<EmailOptions>();
-                //services.AddFluentEmail(emailOpt.DefaultFromEmail, emailOpt.DefaultFromName)
-                //    .AddSmtpSender(new SmtpClient(emailOpt.Host, emailOpt.Port)
-                //    {
-                //        EnableSsl = emailOpt.EnableSsl,
-                //        UseDefaultCredentials = emailOpt.UseDefaultCredentials,
-                //        Credentials = new NetworkCredential(emailOpt.UserName, emailOpt.Password)
-                //    });
-
-                // 模板引擎
-                //services.AddViewEngine();
-
-                // 即时通讯
-                //services.AddSignalR(options =>
-                //{
-                //    options.KeepAliveInterval = TimeSpan.FromSeconds(5);
-                //})
-                //    .AddNewtonsoftJsonProtocol(options => SetNewtonsoftJsonSetting(options.PayloadSerializerSettings));
-
-                // 系统日志
-                services.AddLoggingSetup();
-
-                // 雪花Id
-                YitIdHelper.SetIdGenerator(App.GetOptions<SnowIdOptions>());
-
-                // 验证码
-                //services.AddCaptcha();
-
-                // 控制台logo
-                //services.AddConsoleLogo();
-            });
-     
+                //// 注册远程请求
+                //services.AddRemoteRequest();
+            }); 
 }
 
 //IHost host = Host.CreateDefaultBuilder(args)
