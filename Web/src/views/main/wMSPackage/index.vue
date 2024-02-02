@@ -125,7 +125,7 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button class="el-icon-s-comment" type="text" @click="printExpress(scope.row)" size="small">打印
+            <el-button class="el-icon-printer" type="text" @click="printExpress(scope.row)" size="small">打印
             </el-button>
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->
@@ -167,7 +167,7 @@ import editDialog from '/@/views/main/wMSPackage/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPackage/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPackage/component/queryDialog.vue'
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-// import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
+import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { pageWMSPackage, deleteWMSPackage, printExpressData } from '/@/api/main/wMSPackage';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -309,29 +309,34 @@ ElMessageBox.confirm(`确定要打印吗?`, "提示", {
   .then(async () => {
     // console.log(row);
     if (row.expressCompany == "顺丰快递") {
-      // console.log(row);
-      let res = await printExpressData(row);
-      // alert(res.data.result.data.expressNumber);
-      // console.log(expressConfig.value);
-      // sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-      // sdkParams.partnerID = expressConfig.value.partnerId;
-      // sdkParams.callback = sdkCallback;
-      // sdkParams.notips = true;
-      // printSdk = new SCPPrint(sdkParams);
-      // let resToken = await getExpressConfig(row);
-      // // console.log("resToken")
-      // if (resToken.data.result.code == 1) {
-      //   // console.log(resToken)
-      //   expressConfig.value = resToken.data.result.data;
-      // }
-      // sfExpress.getExpress(row);
-      // print(res.data.result.data.expressNumber);
-      // print(res.data.result.data.expressNumber);
-      // console.log("res.data.result.data");
-      // console.log(res.data.result.data);
-      sfExpress.print(res.data.result.data)
-      handleQuery();
-      ElMessage.success("打印成功");
+        // let resToken = await getExpressConfig(row);
+        // // console.log("resToken")
+        // if (resToken.data.result.code == 1) {
+        //   // console.log(resToken)
+        //   expressConfig.value = resToken.data.result.data;
+        // }
+
+        // console.log(expressConfig.value);
+        let res = await printExpressData(row);
+        // alert(res.data.result.code);
+        if(res.data.result.code==-1)
+        {
+          ElMessage.error(res.data.result.msg);
+          return ;
+        }
+       
+        // alert(res.data.result.data.expressNumber);
+        // // console.log(expressConfig.value);
+        // sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+        // sdkParams.partnerID = expressConfig.value.partnerId;
+        // sdkParams.callback = sdkCallback;
+        // sdkParams.notips = true;
+        // printSdk = new SCPPrint(sdkParams);
+        // };
+        console.log(expressConfig.value);
+        //print(res.data.result.data.expressNumber, expressConfig.value.token);
+        sfExpress.print(res.data.result.data)
+        // allPackage(state.value.vm.form);
     }
   })
   .catch(() => { });
@@ -357,11 +362,63 @@ const handleCurrentChange = (val: number) => {
 handleQuery();
 
 
+// const sdkCallback = result => {};
+//     const sdkParams = {
+//       env: "pro", // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+//       partnerID: "HJSRJOEY88G9",
+//       callback: sdkCallback,
+//       notips: false
+//     };
+//     const printSdk = new SCPPrint(sdkParams);
+
+// // 鑾峰彇鎵撳嵃鏈哄垪琛�
+// const getPrintersCallback = result => {
+//       if (result.code === 1) {
+//         const printers = result.printers;
+
+//         const selectElement = document.getElementById("printers");
+
+//         // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
+//         for (let i = 0; i < printers.length; i++) {
+//           const item = printers[i];
+//           var option = document.createElement("option");
+//           option.innerHTML = item.name;
+//           option.value = item.index;
+//           selectElement.appendChild(option);
+//         }
+
+//         // 璁剧疆榛樿鎵撳嵃鏈�
+//         var printer = 0;
+//         selectElement.value = printer;
+//         printSdk.setPrinter(printer);
+//       }
+//     };
+//     printSdk.getPrinters(getPrintersCallback);
 
 
-
-
-
+//   // 鎵撳嵃
+//   function print(masterWaybillNo: string,token:string) {
+//       const data = {
+//         requestID: "HJSRJOEY88G9",
+//         accessToken: token,
+//         templateCode: "fm_150_standard_HJSRJOEY88G9",
+//         templateVersion: "",
+//         documents: [
+//           {
+//             masterWaybillNo: masterWaybillNo
+//           }
+//         ],
+//         extJson: {},
+//         customTemplateCode: ""
+//       };
+//       console.log("data");
+//       console.log(data);
+//       const callback = function(result) {};
+//       const options = {
+//         lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
+//       };
+//       printSdk.print(data, callback, options);
+//     }
 
 
 
@@ -409,7 +466,7 @@ handleQuery();
 
 // // 鎵撳嵃
 // const print = (masterWaybillNo: string) => {
-//   // console.log(result);
+//   console.log(expressConfig.value);
 //   const data = {
 //     requestID: expressConfig.value.partnerId,
 //     accessToken: expressConfig.value.token,

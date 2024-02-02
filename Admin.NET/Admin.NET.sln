@@ -28,7 +28,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Express", "Admin.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.WorkerService", "Admin.NET.WorkerService\Admin.NET.WorkerService.csproj", "{42FDA91A-5926-477B-BB15-92E1D405A71E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin.NET.ML", "Admin.NET.ML\Admin.NET.ML.csproj", "{A273EB54-28A7-4FF3-B2FF-C16380C8491A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.ML", "Admin.NET.ML\Admin.NET.ML.csproj", "{A273EB54-28A7-4FF3-B2FF-C16380C8491A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

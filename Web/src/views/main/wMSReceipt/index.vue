@@ -73,7 +73,7 @@
             </el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="ele-Download" @click="exportReceiptReceivingfun" v-auth="'wMSReceipt:receiptReceiving'"> 导出上架信息
+            <el-button type="primary" icon="ele-Upload" @click="exportReceiptReceivingfun" v-auth="'wMSReceipt:receiptReceiving'"> 导出上架信息
             </el-button>
           </el-form-item>
           <el-form-item>
@@ -122,7 +122,7 @@
             <template #default="scope">
               <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
               </el-button>
-              <el-button @click="del(scope.row)" class="el-icon-s-comment" type="text" size="small">删除
+              <el-button @click="del(scope.row)" class="el-icon-delete" type="text" size="small">删除
               </el-button>
               <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
               <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"

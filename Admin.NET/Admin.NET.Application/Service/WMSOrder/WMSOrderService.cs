@@ -33,10 +33,10 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
-    private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
+    private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
     //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
-    private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
+    private readonly SqlSugarRepository<WMSInventoryUsed> _repInventoryUsed;
 
     private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
     private readonly SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation;
@@ -45,12 +45,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
    
 
-    private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
+    private readonly SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail;
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -61,15 +61,15 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repWarehouseUser = repWarehouseUser;
         _repTableColumns = repTableColumns;
         _repTableColumnsDetail = repTableColumnsDetail;
-        _repTableInventoryUsable = repTableInventoryUsable;
+        _repInventoryUsable = repInventoryUsable;
         //_db = db;
         _userManager = userManager;
-        _repTableInventoryUsed = repTableInventoryUsed;
+        _repInventoryUsed = repInventoryUsed;
         _repInstruction = repInstruction;
         _repOrderAllocation = repOrderAllocation;
         _repPickTask = repPickTask;
         _repPickTaskDetail = repPickTaskDetail;
-        _reppreOrderDetail = reppreOrderDetail;
+        _repPreOrderDetail = repPreOrderDetail;
         _repPreOrder = repPreOrder;
     }
 
@@ -249,8 +249,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         factory._repPreOrder = _repPreOrder;
-        factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._repTableInventoryUsable = _repTableInventoryUsable;
+        factory._repPreOrderDetail = _repPreOrderDetail;
+        factory._repInventoryUsable = _repInventoryUsable;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repOrderAllocation = _repOrderAllocation;
@@ -367,8 +367,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
         factory._repOrder = _rep;
+        factory._repPreOrder = _repPreOrder;
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
+        factory._repOrderAllocation = _repOrderAllocation;
+        factory._repInventoryUsable = _repInventoryUsable;
+        
         var response = await factory.CompleteOrder(input);
         return response;
 
@@ -406,8 +410,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         factory._repPreOrder = _repPreOrder;
-        factory._reppreOrderDetail = _reppreOrderDetail;
-        factory._repTableInventoryUsable = _repTableInventoryUsable;
+        factory._reppreOrderDetail = _repPreOrderDetail;
+        factory._repInventoryUsable = _repInventoryUsable;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repOrderAllocation = _repOrderAllocation;

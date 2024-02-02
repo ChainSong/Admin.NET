@@ -83,7 +83,7 @@ public class ProductAddOrUpdateStrategy : IProductInterface
                     Type = b.GoodsType,
                     StatusCode = StatusCode.Warning,
                     //StatusMsg = StatusCode.warning.ToString(),
-                    Msg = "SKU已存在"
+                    Msg = "SKU:" + b.SKU + "已存在"
                 });
 
             });
@@ -168,7 +168,7 @@ public class ProductAddOrUpdateStrategy : IProductInterface
                 Type = b.GoodsType,
                 StatusCode = StatusCode.Success,
                 //StatusMsg = StatusCode.warning.ToString(),
-                Msg = "SKU新增成功"
+                Msg = "SKU:" + b.SKU + "新增成功"
             });
 
         });

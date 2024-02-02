@@ -25,7 +25,7 @@ public class OrderReturnStrategy : IOrderReturnInterface
 
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
-    public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
+    public SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
@@ -40,7 +40,7 @@ public class OrderReturnStrategy : IOrderReturnInterface
 
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
 
-    public SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable { get; set; }
+    public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
 
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
@@ -51,7 +51,8 @@ public class OrderReturnStrategy : IOrderReturnInterface
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
         //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
         //先判断状态是否正常 是否允许回退
-        var order = _repOrder.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.Id));
+        var ids = request.Select(b => b.Id);
+        var order = _repOrder.AsQueryable().Where(a => ids.Contains(a.Id));
         await order.ForEachAsync(a =>
         {
             if (a.OrderStatus > (int)OrderStatusEnum.拣货中)
@@ -72,24 +73,26 @@ public class OrderReturnStrategy : IOrderReturnInterface
             return response;
         }
         //得到分配信息
-        var OrderAllocation = await _repOrderAllocation.AsQueryable().Where(b => request.Select(a => a.Id).Contains(b.OrderId)).ToListAsync();
+        var OrderAllocation = await _repOrderAllocation.AsQueryable().Where(b =>ids.Contains(b.OrderId)).ToListAsync();
+
         //先回退分配信息
-        await _repTableInventoryUsable.UpdateAsync(a => new WMSInventoryUsable { InventoryStatus = (int)InventoryStatusEnum.可用 }, a => OrderAllocation.Select(b => b.InventoryId).Contains(a.Id));
+        var InventoryIds = OrderAllocation.Select(b => b.InventoryId).ToList();
+        await _repInventoryUsable.UpdateAsync(a => new WMSInventoryUsable { InventoryStatus = (int)InventoryStatusEnum.可用 }, a => InventoryIds.Contains(a.Id));
         //删除分配信息
         await _repOrderAllocation.DeleteAsync(OrderAllocation);
 
         //回退分配数量
-        await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { AllocatedQty = 0 }, a => request.Select(b => b.Id).Contains(a.OrderId));
+        await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { AllocatedQty = 0 }, a => ids.Contains(a.OrderId));
 
         //先删除明细表，再删除主表
-        await _repOrderDetail.DeleteAsync(a => request.Select(a => a.Id).Contains(a.OrderId));
-        await _repOrder.DeleteAsync(a => request.Select(a => a.Id).Contains(a.Id));
+        await _repOrderDetail.DeleteAsync(a => ids.Contains(a.OrderId));
+        await _repOrder.DeleteAsync(a => ids.Contains(a.Id));
         var PreOrderIds = await order.Select(b => b.PreOrderId).ToListAsync();
         //先更新主表，在更新明细表
         await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
-        await _reppreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
+        await _repPreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
         {
-            //OrderQty = 0,
+            ActualQty = 0,
             Updator = _userManager.Account,
             UpdateTime = DateTime.Now
         }, a => PreOrderIds.Contains(a.PreOrderId));

@@ -396,6 +396,16 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
         //获取快递信息（包含快递单号）
         var data = await factory.GetExpressData(input);
+        if (data.Code == StatusCode.Error)
+        {
+            response.Data = new OrderStatusDto() { 
+                
+            };
+            response.Code = StatusCode.Error;
+            response.Msg = data.Msg;
+            return response;
+
+        }
         //获取打印信息
         return await factory.PrintExpressData(input);
         //获取Token 

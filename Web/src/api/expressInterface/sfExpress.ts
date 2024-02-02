@@ -54,24 +54,24 @@ const getPrintersCallback = result => {
     // let res = await printExpressData(row);
     // alert(res.data.result.data.expressNumber);
     // console.log(expressConfig.value);
-    sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-    sdkParams.partnerID = expressConfig.value.partnerId;
-    sdkParams.callback = sdkCallback;
-    sdkParams.notips = true;
-    printSdk = new SCPPrint(sdkParams);
+   
     let resToken = await getExpressConfig(express);
     // console.log("resToken")
     if (resToken.data.result.code == 1) {
       // console.log(resToken)
       expressConfig.value = resToken.data.result.data;
     }
- 
+  sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+    sdkParams.partnerID = expressConfig.value.partnerId;
+    sdkParams.callback = sdkCallback;
+    sdkParams.notips = true;
+    printSdk = new SCPPrint(sdkParams);
 
   }
   // 鎵撳嵃
-  export const print = (express:any) => {
+  export const print = async (express:any) => {
     //获取token；
-    getExpress(express);
+   await  getExpress(express);
     // console.log(result);
     const data = {
       requestID: expressConfig.value.partnerId,

@@ -23,10 +23,8 @@ namespace System.Data
                 T model = new T();
                 foreach (PropertyInfo p in properties)
                 {
-                    //try
-                    //{
-
-
+                    try
+                    {
                         //判断model中的字段在datatable中存不存在
                         if (row.Table.Columns.Contains(p.Name))
                         {
@@ -84,12 +82,11 @@ namespace System.Data
                             }
                         }
 
-                    //}
-                    //catch (Exception asdas)
-                    //{
-
-                    //    throw;
-                    //}
+                    }
+                    catch (Exception asdas)
+                    {
+                        throw;
+                    }
                 }
                 list.Add(model);
             }

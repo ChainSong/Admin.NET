@@ -102,8 +102,8 @@ const dragRef: any = ref(null);
 const state = reactive({
 	isShowPassword: false,
 	ruleForm: {
-		account: 'superadmin',
-		password: '123456',
+		account: '',//superadmin
+		password: '',//123456
 		code: '',
 		codeId: 0,
 	},

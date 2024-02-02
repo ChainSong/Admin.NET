@@ -141,7 +141,7 @@ namespace Admin.NET.ApplicationCore.Strategy
 
             //开始提交出库单
             //_repOrder.GetDbContext().BulkInsert(orderData, options => options.IncludeGraph = true);
-            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
+            await _repOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
             //更新预出库单状态
             _repPreOrder.AsQueryable().Where(a => request.Contains(a.Id)).ToList().ForEach(e =>
             {
@@ -153,17 +153,25 @@ namespace Admin.NET.ApplicationCore.Strategy
             //更新转出库单数量
             _reppreOrderDetail.AsQueryable().Where(a => request.Contains(a.PreOrderId)).ToList().ForEach(e =>
             {
-                e.OrderQty = _repOrderDetail.AsQueryable().Where(b => b.PreOrderDetailId == e.Id).Sum(d => d.OrderQty);
+                e.ActualQty = _repOrderDetail.AsQueryable().Where(b => b.PreOrderDetailId == e.Id).Sum(d => d.OrderQty);
                 e.Updator = _userManager.Account;
                 e.UpdateTime = DateTime.Now;
                 _reppreOrderDetail.Update(e);
             });
             var preOrderData = _repPreOrder.AsQueryable().Includes(a => a.Details).Where(a => request.Contains(a.Id)).ToList();
+            //比较出库单数量和预出库单数量
+            //preOrderData.ToList().ForEach(b =>
+            //{
+            //    b.
+
+
+            //});
 
             if (preOrderData != null && preOrderData.ToList().Count > 0)
             {
                 preOrderData.ToList().ForEach(b =>
                 {
+                  
                     if (b.PreOrderStatus >= (int)PreOrderStatusEnum.部分转出库)
                         response.Data.Add(new OrderStatusDto()
                         {

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using System.Reflection;
+using XAct;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -43,10 +44,10 @@ namespace Admin.NET.Application.Strategy
         /// <param name="request"></param>
         /// <returns></returns>
         //默认方法不做任何处理
-        public Response<DataTable> Import(dynamic request)
+        public Response<DataTable, List<OrderStatusDto>> Import(dynamic request)
         {
-            Response<DataTable> response = new Response<DataTable>();
-
+            Response<DataTable, List<OrderStatusDto>> response = new Response<DataTable, List<OrderStatusDto>>();
+            List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
             var headerTableColumn = GetColumns("WMS_PreOrder");
             var detailTableColumn = GetColumns("WMS_PreOrderDetail");
             var orderAddressTableColumn = GetColumns("WMS_OrderAddress");
@@ -70,6 +71,28 @@ namespace Admin.NET.Application.Strategy
                 {
                     continue;
                 }
+                //验证数据
+                if (Column.Validation == "Required")
+                {
+                    int flag = 0;
+                    foreach (DataRow row in request.Rows)
+                    {
+                        flag++;
+                        if (string.IsNullOrEmpty(row[s].ToString()))
+                        {
+                            statusDtos.Add(new OrderStatusDto()
+                            {
+                                //Id = b.Id,
+                                ExternOrder = "第" + flag + "行",
+                                SystemOrder = "第" + flag + "行",
+                                //Type = b.OrderType,
+                                StatusCode = StatusCode.Warning,
+                                //StatusMsg = (string)StatusCode.warning,
+                                Msg = Column.DisplayName + "不能为空"
+                            });
+                        }
+                    }
+                }
                 //判断标头与key是否相等
                 if (s.Equals(Column.DisplayName))
                 {
@@ -78,12 +101,23 @@ namespace Admin.NET.Application.Strategy
                 }
 
             }
+            //验证数据
+
+
             //var config = new MapperConfiguration(cfg => cfg.CreateMap<DataTable, WMS_ASN>() );
             //var mapper = new Mapper(config);
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
-
+            if (statusDtos.Count > 0)
+            {
+                response.Code = StatusCode.Error;
+            }
+            else
+            {
+                response.Code = StatusCode.Success;
+            }
+            response.Result = statusDtos;
             response.Data = request;
-            response.Code = StatusCode.Success;
+
             //throw new NotImplementedException();
             return response;
         }
@@ -228,6 +262,7 @@ namespace Admin.NET.Application.Strategy
                 //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                 DbColumnName = a.DbColumnName,
                 IsImportColumn = a.IsImportColumn,
+                Validation = a.Validation,
                 tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
                 //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
                 //.Select()

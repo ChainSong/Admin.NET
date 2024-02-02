@@ -112,5 +112,14 @@ public class WMSInventoryReport : ITenantIdFilter
     [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string WarehouseName { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string OrderNumber { get; set; }
     
+
 }

@@ -11,19 +11,29 @@ namespace Admin.NET.Application.Dtos
 {
 
 
-    public   class Response
+    public class Response
     {
-        public   StatusCode Code { get; set; }
-        public   string Msg { get; set; }
+        public StatusCode Code { get; set; }
+        public string Msg { get; set; }
 
     }
 
-    public   class Response<T>
+    public class Response<T>
     {
-        public   StatusCode Code { get; set; }
+        public StatusCode Code { get; set; }
 
-        public   string Msg { get; set; }
+        public string Msg { get; set; }
 
-        public   T Data { get; set; }
-    } 
+        public T Data { get; set; }
+    }
+
+    public class Response<T, R>
+    {
+        public StatusCode Code { get; set; }
+
+        public string Msg { get; set; }
+
+        public T Data { get; set; }
+        public R Result { get; set; }
+    }
 }

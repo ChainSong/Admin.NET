@@ -59,6 +59,12 @@ namespace Admin.NET.Application.Strategy
             var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
             if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
             {
+                if (request.Where(a => string.IsNullOrEmpty(a.CustomerName)).Count() > 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "存在空行或者客户为空";
+                    return response;
+                }
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少客户操作权限";
                 return response;
@@ -193,7 +199,7 @@ namespace Admin.NET.Application.Strategy
 
             //判断是否有权限操作
             //先判断是否能操作客户
-            var customerCheck = _repCustomerUser.AsQueryable().Where(a =>a.UserId==_userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
             if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
             {
                 response.Code = StatusCode.Error;

@@ -147,7 +147,8 @@ public class SFExpressStrategy : IExpressInterface
 
 
         //SFExpressServiceStrategy strategy = new SFExpressServiceStrategy();
-        SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>();
+        SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>() {  Data=new SFRootobject()};
+
         input.Data = new SFRootobject()
         {
             orderId = package.PackageNumber,
@@ -251,7 +252,7 @@ public class SFExpressStrategy : IExpressInterface
 
         var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + request.CustomerId + "_" + request.WarehouseId);
 
-        if (expressConfig != null)
+        if (expressConfig!= null && !string.IsNullOrEmpty(expressConfig.Token))
         {
             response.Msg = "成功";
             response.Code = StatusCode.Success;

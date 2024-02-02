@@ -135,9 +135,9 @@
             </el-button>
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->
-            <el-button @click="complete(scope.row)" class="el-icon-s-comment" type="text" size="small">完成
+            <el-button @click="complete(scope.row)" class="el-icon-success" type="text" size="small">完成
             </el-button>
-            <el-button @click="pickTaskReturn(scope.row)" class="el-icon-s-comment" type="text" size="small">回退
+            <el-button @click="pickTaskReturn(scope.row)" class="el-icon-delete" type="text" size="small">回退
             </el-button>
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
             <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"

@@ -67,8 +67,8 @@
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSReceipt:add'"> 导入上架信息
+        <el-form-item><!--Plus-->
+          <el-button type="primary" icon="ele-Download" @click="openAdd" v-auth="'wMSReceipt:add'"> 导入上架信息
           </el-button>
         </el-form-item>
       </el-form>

@@ -33,7 +33,7 @@ namespace Admin.NET.Application.Interface
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Response<DataTable> Import  (dynamic request);
+        Response<DataTable, List<OrderStatusDto>> Import  (dynamic request);
 
         /// <summary>
         /// 导出

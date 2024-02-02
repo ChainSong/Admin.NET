@@ -29,9 +29,10 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
 
         public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
+        public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
 
 
-
+        //private readonly SqlSugarRepository<> ;
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
         Task<Response<List<OrderStatusDto>>> CompleteOrder(List<long> request);

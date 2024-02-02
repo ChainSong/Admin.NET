@@ -121,7 +121,6 @@
           </template>
         </template>
         <el-table-column fixed="right" label="操作" width="200">
-
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>

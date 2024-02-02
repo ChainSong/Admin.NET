@@ -22,7 +22,7 @@ public interface IOrderReturnInterface
 
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
-    public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
+    public SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
@@ -42,7 +42,7 @@ public interface IOrderReturnInterface
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
-    public SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable { get; set; }
+    public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
     public  Task<Response<List<OrderStatusDto>>> OrderReturn(List<DeleteWMSOrderInput> request);
 
 }

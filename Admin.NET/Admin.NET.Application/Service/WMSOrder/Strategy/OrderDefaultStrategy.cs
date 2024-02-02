@@ -32,6 +32,8 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
+        public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
+
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
@@ -53,11 +55,11 @@ namespace Admin.NET.Application.Strategy
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
             var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Where(a => request.Contains(a.Id)).ToList();
-            if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配).ToList().Count > 0)
+            if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
                 {
-                    if (b.OrderStatus < (int)OrderStatusEnum.已分配)
+                    if (b.OrderStatus < (int)OrderStatusEnum.已分配 || b.OrderStatus == (int)OrderStatusEnum.完成)
                         response.Data.Add(new OrderStatusDto()
                         {
                             Id = b.Id,
@@ -85,6 +87,11 @@ namespace Admin.NET.Application.Strategy
             //_repPickTask.AsQueryable().Includes(a => a.Detail).Where(a => request.Contains(a.Id)).ToList();
             //await _repOrder.Context.InsertNav(pickTasks).Include(a => a.Details).ExecuteCommandAsync();
 
+            //获取分配的库存ID
+
+            var InventoryIds = _repOrderAllocation.AsQueryable().Where(a => request.Contains(a.OrderId)).Select(a => a.InventoryId).ToList();
+
+            await _repInventoryUsable.UpdateAsync(a => new WMSInventoryUsable { InventoryStatus = (int)InventoryStatusEnum.出库, UpdateTime = DateTime.Now }, a => InventoryIds.Contains(a.Id));
 
             var orderResule = _repOrder.AsQueryable().Where(a => request.Contains(a.Id)).ToList();
 

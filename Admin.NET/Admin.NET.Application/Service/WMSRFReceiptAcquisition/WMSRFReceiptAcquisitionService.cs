@@ -7,7 +7,10 @@ using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Microsoft.AspNetCore.Identity;
+using NewLife;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -116,7 +119,25 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
         input.ReceiptDetailId = getReceipt.Id;
         input.ReceiptAcquisitionStatus = (int)ReceiptAcquisitionStatusEnum.新增;
         input.WarehouseName = getReceipt.WarehouseName;
-        input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(input.ExpirationDate.Replace("EXP", "")).ToString() : null;
+        //var dateStr = "";
+        //if (input.ExpirationDate.Contains("EXP"))
+        //{
+        //    //获取前两位是日期
+        //    var date = input.ExpirationDate.Replace("EXP", "").ToString().Substring(0, 2);
+        //    //获取后两位是年份
+        //    var year = input.ExpirationDate.Replace("EXP", "").ToString().Substring(input.ExpirationDate.Replace("EXP", "").Length - 2, 2);
+
+
+        //}
+        string pattern = @"([a-zA-Z]+)|([0-9]+)"; // 正则表达式匹配英文字符或数字
+
+        MatchCollection matches = Regex.Matches(input.ExpirationDate.Replace("EXP", ""), pattern);
+        var dateStr = matches[2].Value + matches[1].Value + matches[0].Value;
+        //foreach (Match match in matches)
+        //{
+        //    Console.WriteLine(match.Value); // 输出匹配到的连续英文字符和数字  
+        //}
+        input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(dateStr).ToString() : null;
         input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
         input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
         var entity = input.Adapt<WMSRFReceiptAcquisition>();

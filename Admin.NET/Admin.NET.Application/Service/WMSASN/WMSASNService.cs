@@ -25,6 +25,7 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetRespon
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
+using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -261,7 +262,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         //factory._userManager = _userManager;
-        return await factory.UpdateStrategy(entityListDtos); 
+        return await factory.UpdateStrategy(entityListDtos);
     }
 
 
@@ -302,7 +303,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
-    
+
         //FileDir是存储临时文件的目录，相对路径
         //private const string FileDir = "/File/ExcelTemp";
         string url = await ImprotExcel.WriteFile(file);
@@ -314,6 +315,14 @@ public class WMSASNService : IDynamicApiController, ITransient
         factoryExcel._userManager = _userManager;
         factoryExcel._repASN = _rep;
         var data = factoryExcel.Import(dataExcel);
+        if (data.Code == StatusCode.Error)
+        {
+            Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
+            result.Code = data.Code;
+            result.Msg = data.Msg;
+            result.Data = data.Result;
+            return result;
+        }
         var entityListDtos = data.Data.TableToList<AddOrUpdateWMSASNInput>();
         var entityDetailListDtos = data.Data.TableToList<WMSASNDetail>();
 
@@ -342,7 +351,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         var response = factory.AddStrategy(ASNs);
         return await response;
 
-         
+
     }
 
 
@@ -369,7 +378,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         return await response;
     }
 
-    
+
 
 
 

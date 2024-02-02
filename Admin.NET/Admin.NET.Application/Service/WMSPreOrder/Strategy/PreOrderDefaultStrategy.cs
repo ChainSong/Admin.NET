@@ -239,7 +239,7 @@ namespace Admin.NET.Application.Strategy
                    //添加库存状态为可用
                    .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
 
-                   .ForMember(a => a.Creator, opt => opt.Ignore())
+                   //.ForMember(a => a.Creator, opt => opt.Ignore())
                    .ForMember(a => a.UpdateTime, opt => opt.Ignore())
 
                    .AddTransform<string>(a => a == null ? "" : a);
@@ -270,7 +270,7 @@ namespace Admin.NET.Application.Strategy
             {
                 var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
-                var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+                //var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                 //ShortIDGen.NextID(new GenerationOptions
                 //{
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
@@ -289,7 +289,8 @@ namespace Admin.NET.Application.Strategy
                     a.ExternOrderNumber = item.ExternOrderNumber;
                     a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
                     a.Updator = _userManager.Account;
-                    a.CreationTime = DateTime.Now;
+                    //a.Creator = _userManager.Account;
+                    a.UpdateTime = DateTime.Now;
                 });
                 LineNumber++;
             });

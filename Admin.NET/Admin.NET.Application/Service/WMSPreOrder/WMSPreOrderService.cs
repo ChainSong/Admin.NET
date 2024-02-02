@@ -18,6 +18,7 @@ using System.Linq;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
+using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -334,6 +335,14 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
 
         var data = factoryExcel.Import(dataExcel);
+        if (data.Code == StatusCode.Error)
+        {
+            Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
+            result.Code = data.Code;
+            result.Msg = data.Msg;
+            result.Data = data.Result;
+            return result;
+        }
         var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
         var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
         var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
@@ -414,7 +423,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     }
 
 
-    
+
 
 
     /// <summary>
@@ -432,7 +441,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         //默认：1，按照已有库存，且库存最小推荐
         //默认：2，没有库存，以前有库存
         //默认：3，随便推荐
-     
+
         //private const string FileDir = "/File/ExcelTemp";
         //string url = await ImprotExcel.WriteFile(file);
         //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
@@ -458,7 +467,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
         return new FileStreamResult(fs, "application/octet-stream")
         {
-            FileDownloadName = "预出库单_"+DateTime.Now.ToString("yyyyMMddhhmmss")+".xlsx" // 配置文件下载显示名
+            FileDownloadName = "预出库单_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
         };
     }
 

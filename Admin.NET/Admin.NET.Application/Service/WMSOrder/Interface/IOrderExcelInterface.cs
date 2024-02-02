@@ -37,7 +37,7 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
-        public SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable { get; set; }
+        public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
 
         /// <summary>
         /// 导出
