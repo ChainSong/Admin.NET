@@ -84,9 +84,7 @@ public class OrderReturnStrategy : IOrderReturnInterface
         //回退分配数量
         await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { AllocatedQty = 0 }, a => ids.Contains(a.OrderId));
 
-        //先删除明细表，再删除主表
-        await _repOrderDetail.DeleteAsync(a => ids.Contains(a.OrderId));
-        await _repOrder.DeleteAsync(a => ids.Contains(a.Id));
+   
         var PreOrderIds = await order.Select(b => b.PreOrderId).ToListAsync();
         //先更新主表，在更新明细表
         await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
@@ -97,6 +95,9 @@ public class OrderReturnStrategy : IOrderReturnInterface
             UpdateTime = DateTime.Now
         }, a => PreOrderIds.Contains(a.PreOrderId));
 
+        //先删除明细表，再删除主表
+        await _repOrderDetail.DeleteAsync(a => ids.Contains(a.OrderId));
+        await _repOrder.DeleteAsync(a => ids.Contains(a.Id));
 
         //_wms_asndetailRepository.GetAll().Where(a => receipt.Select(b => b.ASNId).Contains(a.ASNId)).ToList().ForEach(c =>
         //{

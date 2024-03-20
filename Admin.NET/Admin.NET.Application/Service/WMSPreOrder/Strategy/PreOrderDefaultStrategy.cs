@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -58,6 +59,46 @@ namespace Admin.NET.Application.Strategy
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "用户缺少仓库操作权限";
+                return response;
+            }
+
+            //临时方法，在开会改bug (对hach 导入的电话号码做验证)
+            // 正则表达式用于匹配电话号码或手机号码
+            // 这里的正则表达式是一个示例，可能需要根据实际情况进行调整
+            string phoneStr = @"^[1]+[3,5]+\d{9}";
+            string telStr = @"^(\d{3,4}-)?\d{6,8}$";
+
+            // 检查电话号码是否符合正则表达式
+            //return ;
+
+            foreach (var item in request)
+            {
+
+                if (!string.IsNullOrEmpty(item.OrderAddress.Phone))
+                {
+
+                    if (Regex.IsMatch(item.OrderAddress.Phone, phoneStr) || Regex.IsMatch(item.OrderAddress.Phone, telStr))
+                    {
+                        continue;
+                    }
+                    response.Data.Add(new OrderStatusDto()
+                    {
+                        ExternOrder = item.ExternOrderNumber,
+                        SystemOrder = item.PreOrderNumber,
+                        Type = item.OrderType,
+                        Msg = "电话号码格式不正确"
+                    });
+                    //response.Code = StatusCode.Error;
+                    //response.Msg = "电话号码格式不正确";
+                    //return response;
+                }
+            }
+
+
+            if (response.Data.Count > 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "订单异常";
                 return response;
             }
 
@@ -159,7 +200,7 @@ namespace Admin.NET.Application.Strategy
 
             //开始插入数据
             //await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
-            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).Include(b=>b.OrderAddress).ExecuteCommandAsync();
+            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).Include(b => b.OrderAddress).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             response.Msg = "添加成功";
@@ -296,7 +337,7 @@ namespace Admin.NET.Application.Strategy
             });
 
             //开始插入数据
-            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).Include(a=>a.OrderAddress).ExecuteCommandAsync();
+            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).Include(a => a.OrderAddress).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             return response;

@@ -159,7 +159,7 @@ public class SFExpressStrategy : IExpressInterface
             totalWeight = 1,//订单货物总重量（郑州空港海关必填）， 若为子母件必填， 单位千克， 精确到小数点后3位，如果提供此值， 必须>0 (子母件需>6)
             isOneselfPickup = 1,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
             customsInfo = new SFCustomsinfo(),
-            expressTypeId = 1,
+            expressTypeId = 2, //https://open.sf-express.com/developSupport/734349?activeIndex=324604
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
             contactInfoList = sFContactinfolists
@@ -173,6 +173,12 @@ public class SFExpressStrategy : IExpressInterface
 
         Rootobject output = Express.ToJsonEntity<Rootobject>();
         Apiresultdata apiresultdata = output.apiResultData.ToJsonEntity<Apiresultdata>();
+        if (apiresultdata == null)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = output.apiErrorMsg;
+            return response;
+        }
         if (apiresultdata.success.ToUpper() == "false".ToUpper())
         {
             response.Code = StatusCode.Error;

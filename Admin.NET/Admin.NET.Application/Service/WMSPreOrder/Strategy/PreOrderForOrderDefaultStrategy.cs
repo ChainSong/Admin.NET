@@ -82,6 +82,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                 cfg.CreateMap<WMSPreOrder, WMSOrder>()
                      .AddTransform<string>(a => a == null ? "" : a)
                      .ForMember(a => a.PreOrderId, opt => opt.MapFrom(c => c.Id))
+                     .ForMember(a => a.Id, opt => opt.MapFrom(c => 0))
                      //添加创建人为当前用户
                      .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                      .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
@@ -100,6 +101,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                 cfg.CreateMap<WMSPreOrderDetail, WMSOrderDetail>()
                .AddTransform<string>(a => a == null ? "" : a)
                .ForMember(a => a.PreOrderDetailId, opt => opt.MapFrom(c => c.Id))
+               .ForMember(a => a.Id, opt => opt.MapFrom(c => 0))
                //添加创建人为当前用户
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))

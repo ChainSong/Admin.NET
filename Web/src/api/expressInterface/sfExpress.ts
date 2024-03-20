@@ -72,7 +72,9 @@ const getPrintersCallback = result => {
   export const print = async (express:any) => {
     //获取token；
    await  getExpress(express);
-    // console.log(result);
+    //  console.log("expressConfig.value");
+    //  console.log(expressConfig.value);
+    //  console.log(express);
     const data = {
       requestID: expressConfig.value.partnerId,
       accessToken: expressConfig.value.token,

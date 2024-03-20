@@ -43,7 +43,7 @@ namespace Admin.NET.Application.Strategy
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
             //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
             //先判断状态是否正常 是否允许回退
-            var receipt = _repReceipt.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.Id));
+            var receipt = _repReceipt.AsQueryable().Where(a => request.Select(b => b.Id).Contains(a.Id));
             await receipt.ForEachAsync(a =>
             {
                 if (a.ReceiptStatus != (int)ReceiptStatusEnum.新增)
@@ -66,9 +66,7 @@ namespace Admin.NET.Application.Strategy
                 return response;
             }
 
-            //先删除明细表，再删除主表
-            _repReceiptDetail.Delete(a => request.Select(a => a.Id).Contains(a.ReceiptId));
-            _repReceipt.Delete(a => request.Select(a => a.Id).Contains(a.Id));
+
             var ASNIds = await receipt.Select(b => b.ASNId).ToListAsync();
             //先更新主表，在更新明细表
             await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.新增 }, (a => ASNIds.Contains(a.Id)));
@@ -78,6 +76,11 @@ namespace Admin.NET.Application.Strategy
                 Updator = _userManager.Account,
                 UpdateTime = DateTime.Now
             }, a => ASNIds.Contains(a.ASNId));
+
+
+            //先删除明细表，再删除主表
+            _repReceiptDetail.Delete(a => request.Select(a => a.Id).Contains(a.ReceiptId));
+            _repReceipt.Delete(a => request.Select(a => a.Id).Contains(a.Id));
 
             //_wms_asndetailRepository.GetAll().Where(a => receipt.Select(b => b.ASNId).Contains(a.ASNId)).ToList().ForEach(c =>
             //{

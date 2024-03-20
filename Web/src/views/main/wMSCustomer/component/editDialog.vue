@@ -68,20 +68,20 @@
 										<template v-if="v.type == 'DropDownList'">
 											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
 												placeholder="请选择" style="width: 100%">
-												<el-option v-for="item in v.tableColumnsDetails" :disabled="v.isUpdate"
+												<el-option v-for="item in v.tableColumnsDetails" :disabled="!v.isUpdate"
 													:key="item.code" :label="item.name" :value="item.code">
 												</el-option>
 											</el-select>
 										</template>
 										<template v-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-if="v.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="datetime"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="datetime"
 												start-placeholder="选择日期时间" style="width: 100%">
 											</el-date-picker>
 										</template>

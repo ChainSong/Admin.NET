@@ -66,7 +66,7 @@
 										:rules="detailRule[v.columnName]">
 										
 										<template v-if="v.type == 'DropDownListInt'">
-											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="v.update"
+											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="!v.isUpdate"
 												placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails"  
 													:key="item.codeInt" :label="item.name" :value="item.codeInt">
@@ -74,7 +74,7 @@
 											</el-select>
 										</template>
 										<template v-else-if="v.type == 'DropDownListStr'">
-											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="v.update"
+											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="!v.isUpdate"
 												placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
 													:label="item.name" :value="item.codeStr">
@@ -88,24 +88,24 @@
 										</template>
 										<template v-else-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-else-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-else-if="v.type == 'InputNumber'">
 													<el-input-number placeholder="请输入内容" 
 														v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" :disabled="v.update" ></el-input-number>
+														v-if="v.isCreate" :disabled="!v.isUpdate" ></el-input-number>
 												</template>
 										<template v-else>
 											<el-input placeholder="请输入内容"
-												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="v.update">
+												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="!v.isUpdate">
 											</el-input>
 										</template>
 									</el-form-item>

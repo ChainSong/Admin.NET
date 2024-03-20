@@ -64,13 +64,38 @@ namespace System.Data
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
                                 {
-                                    p.SetValue(model, Convert.ToInt64(value), null);
+                                    if (value.ToString() == "")
+                                    {
+                                        p.SetValue(model, Convert.ToInt32(0), null);
+                                    }
+                                    else
+                                    {
+                                        p.SetValue(model, Convert.ToInt64(value), null);
+                                    }
                                 }
 
                                 else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name.Contains("Int")).Count() > 0 || p.PropertyType.Name.Contains("Int"))
                                 {
-                                    p.SetValue(model, Convert.ToInt32(value), null);
+                                    if (value.ToString() == "")
+                                    {
+                                        p.SetValue(model, Convert.ToInt32(0), null);
+                                    }
+                                    else
+                                    {
+                                        if (p.PropertyType.GenericTypeArguments.Where(a => a.Name.Contains("Int64")).Count() > 0)
+                                        {
+                                            p.SetValue(model, Convert.ToInt64(value), null);
+                                        }
+                                        else
+                                        {
+                                            p.SetValue(model, Convert.ToInt32(value), null);
+                                        }
+                                    }
                                 }
+                                //else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name.Contains("Int64")).Count() > 0 || p.PropertyType.Name.Contains("Int"))
+                                //{
+                                //    p.SetValue(model, Convert.ToInt64(value), null);
+                                //}
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name.ToUpper() == ("Decimal").ToUpper()).Count() > 0 || p.PropertyType.Name.ToUpper() == "Decimal".ToUpper()))
                                 {
                                     p.SetValue(model, Convert.ToDecimal(value), null);

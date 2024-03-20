@@ -8,9 +8,10 @@
 						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
-									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
-										:prop="i.columnName">
+									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)"
+									v-bind:key="i.id">
+									<el-form-item :label="i.displayName" v-if="i.isCreate"
+										style="width: 90%;height: 45px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input placeholder="请输入内容" size="small" style="width:90%"
 												v-model="state.header[i.columnName]" v-if="i.isCreate">
@@ -25,8 +26,8 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
-												:defaultvValue="state.header[i.columnName]"
+											<select-Remote :whereData="state.header" :isDisabled="i.isCreate"
+												:columnData="i" :defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
@@ -44,7 +45,8 @@
 										</template>
 										<template v-if="i.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
+												type="datetime" start-placeholder="选择日期时间" size="small"
+												style="width:90%">
 											</el-date-picker>
 										</template>
 									</el-form-item>
@@ -71,22 +73,25 @@
 												<template v-if="v.type == 'DropDownListInt'">
 													<el-select v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeInt"
-															:label="item.name" :value="item.codeInt">
+														<el-option v-for="item in v.tableColumnsDetails"
+															:key="item.codeInt" :label="item.name"
+															:value="item.codeInt">
 														</el-option>
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStr'">
 													<el-select v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
-															:label="item.name" :value="item.codeStr">
+														<el-option v-for="item in v.tableColumnsDetails"
+															:key="item.codeStr" :label="item.name"
+															:value="item.codeStr">
 														</el-option>
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
 													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v"
+														:key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
@@ -103,7 +108,7 @@
 													</el-date-picker>
 												</template>
 												<template v-if="v.type == 'InputNumber'">
-													<el-input-number placeholder="请输入内容"  
+													<el-input-number placeholder="请输入内容"
 														v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate"></el-input-number>
 												</template>
@@ -148,7 +153,8 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
 	</div>
@@ -230,6 +236,7 @@ const handleAdd = (row: any) => {
 }
 //删除一行明细
 const handleDelete = (index: any) => {
+	console.log(state.value.details);
 	state.value.details.splice(index, 1);
 }
 // 打开弹窗
@@ -262,6 +269,9 @@ const submit = async () => {
 					let result = await addWMSASN(state.value.header);
 					if (result.data.result.code == "1") {
 						ElMessage.success("保存成功");
+						state.value.header = new Header();
+						state.value.headers = new Array<Header>();
+						state.value.details = [new Detail()];
 						closeDialog();
 					} else {
 						state.value.orderStatus = result.data.result;
@@ -321,6 +331,8 @@ const gettableColumn = async () => {
 		}
 	});
 
+
+
 };
 
 // -------------------------------非可公用部分----------------------------------------
@@ -368,7 +380,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

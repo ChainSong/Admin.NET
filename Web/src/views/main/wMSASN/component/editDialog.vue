@@ -65,12 +65,12 @@
 										:prop="'details.' + scope.$index + '.' + v.columnName"
 										:rules="detailRule[v.columnName]">
 										<template v-if="v.type == 'TextBox'">
-											<el-input placeholder="请输入内容" :disabled="v.isUpdate=1"
+											<el-input placeholder="请输入内容" :disabled="!v.isUpdate"
 												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate">
 											</el-input>
 										</template>
 										<template v-if="v.type == 'DropDownListInt'">
-											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="v.update"
+											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="!v.isUpdate"
 												placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails"  
 													:key="item.codeInt" :label="item.name" :value="item.codeInt">
@@ -78,7 +78,7 @@
 											</el-select>
 										</template>
 										<template v-if="v.type == 'DropDownListStr'">
-											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="v.update"
+											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate" :disabled="!v.isUpdate"
 												placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
 													:label="item.name" :value="item.codeStr">
@@ -86,19 +86,19 @@
 											</el-select>
 										</template>
 										<template v-if="v.type == 'DropDownListStrRemote'">
-											<select-Remote :whereData="state.header" :isDisabled="v.update"  :columnData="v"
+											<select-Remote :whereData="state.header" :key="state.details[scope.$index]" :isDisabled="v.update"  :columnData="v"
 												:defaultvValue="state.details[scope.$index][v.columnName]"
 												@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 										</template>
 										<template v-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-if="v.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="datetime"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="datetime"
 												start-placeholder="选择日期时间" style="width: 100%">
 											</el-date-picker>
 										</template>
@@ -106,7 +106,6 @@
 													<el-input-number placeholder="请输入内容" size="small"
 														v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate"></el-input-number>
-
 												</template>
 									</el-form-item>
 								</template>
@@ -141,8 +140,8 @@ import type { FormRules } from "element-plus";
 import { addWMSASN, updateWMSASN, getWMSASN } from "/@/api/main/wMSASN";
 
 import { getByTableNameList } from "/@/api/main/tableColumns";
-import Header from "/@/entities/customer";
-import Detail from "/@/entities/customerDetail";
+import Header from "/@/entities/asn";
+import Detail from "/@/entities/asnDetail";
 import TableColumns from "/@/entities/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 //父级传递来的参数
@@ -200,13 +199,19 @@ const handleAdd = (row: any) => {
 }
 //删除一行明细
 const handleDelete = (index: any) => {
+	console.log(index);
+	console.log(state.value.details);
 	state.value.details.splice(index, 1);
+	console.log(state.value.details);
+
 }
 // 打开弹窗
 const openDialog = (row: any) => {
 	// ruleForm.value = JSON.parse(JSON.stringify(row));
 	state.value.header = JSON.parse(JSON.stringify(row));
 	isShowDialog.value = true;
+
+
 	get();
 };
 
@@ -260,9 +265,25 @@ const submit = async () => {
 };
 
 const get = async () => {
-	let result = await getWMSASN(state.value.header.id);
+
+	// state.value.header=new Header();
+	state.value.details=new Array<Detail>();
+ 
+	let result = await  getWMSASN(state.value.header.id);
+	console.log("result");
+	console.log(result);
+	console.log(result.data);
+
+	console.log(state.value.header );
+	console.log(state.value.details );
+	console.log(result.data.result);
+	console.log(result.data.result.detail);
 	state.value.header = result.data.result;
 	state.value.details = result.data.result.details;
+	console.log("赋值");
+	console.log(state.value.header );
+	console.log(state.value.details );
+
 }
 
 const gettableColumn = async () => {

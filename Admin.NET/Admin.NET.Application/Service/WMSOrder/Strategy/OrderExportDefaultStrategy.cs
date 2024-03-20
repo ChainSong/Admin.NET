@@ -105,10 +105,11 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
         //塞数据
         orderData.ForEach(a =>
         {
-            DataRow row = dt.NewRow();
+         
             Type orderType = a.GetType();
             a.Details.ForEach(c =>
             {
+                DataRow row = dt.NewRow();
                 Type orderDetailType = c.GetType();
                 headerTableColumn.ForEach(h =>
                 {
@@ -156,8 +157,9 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
 
                     }
                 });
+                dt.Rows.Add(row);
             });
-            dt.Rows.Add(row);
+         
 
         });
         response.Data = dt;

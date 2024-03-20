@@ -285,7 +285,7 @@ const del = (row: any) => {
 
 // 转入库单
 const PreOrderForOrderFun = () => {
-  resultTitle.value="转入库单结果";
+  resultTitle.value="转出库单结果";
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {
     if (a.preOrderStatus == 1) {
@@ -296,7 +296,7 @@ const PreOrderForOrderFun = () => {
     ElMessage.warning("请勾选新增订单");
     return;
   }
-  ElMessageBox.confirm(`确定要转入库单吗?`, "提示", {
+  ElMessageBox.confirm(`确定要转出库单吗?`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

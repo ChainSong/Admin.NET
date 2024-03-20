@@ -63,7 +63,8 @@
 					<template #default="scope">
 						<el-select v-model="scope.row.validation" size="small" placeholder="请选择">
 							<el-option label="无" value=""> </el-option>
-							<el-option label="Required" value="Required"> </el-option>
+							<el-option label="必填" value="Required"> </el-option>
+							<!-- <el-option label="必填&电话号码" value="Required"> </el-option> -->
 						</el-select>
 						<!-- <el-input
                 v-model="scope.row.validation"

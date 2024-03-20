@@ -5,7 +5,7 @@
             <el-option v-for="item in options" :key="item.value" @change="getChildrenVal" :label="item.label" :value="item">
             </el-option>
         </el-select> -->
-    <el-select v-model="modelValue" style="width: 90%;" clearable remote filterable v-bind:disabled="props.isDisabled == 0"
+    <el-select v-model="modelValue" style="width: 90%;" :key="modelValue"  clearable remote filterable v-bind:disabled="props.isDisabled == 0"
         handleChange :placeholder="props.placeholder" allowClear show-search @change="valueChange"
         :remote-method="getDropDownListRemoteData">
         <el-option v-for="item in list" :key="item" :value="item.value" :label="item.text">{{ item.text }}</el-option>
@@ -24,6 +24,7 @@ interface Props {
     isDisabled: number;
     selectData: any;
     columnData: any;
+    // idValue:any;
 }
 const props = withDefaults(defineProps<Props>(), {
     //占位符
@@ -39,10 +40,15 @@ const props = withDefaults(defineProps<Props>(), {
     //该字段的描述信息
     columnData: [],
     selectData: [],
+    // keyValue:'',
 });
 const modelValue = ref<any>();
+// const idValue = ref<any>();
 const list = ref<any>();
-watch(() => props.value, (newVal) => {
+watch(() => props.value, (newVal,oldVal) => {
+    // console.log("newVal")
+    // console.log(newVal)
+    // console.log(oldVal)
     modelValue.value = newVal;
 });
 

@@ -261,13 +261,21 @@ namespace Admin.NET.Application.Strategy
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
                 //item.ASNNumber = ASNNumber;
+
                 item.CustomerId = CustomerId;
                 item.WarehouseId = WarehouseId;
                 item.Updator = _userManager.Account;
                 item.UpdateTime = DateTime.Now;
                 item.ASNStatus = (int)ASNStatusEnum.新增;
+
                 item.Details.ForEach(a =>
                 {
+                    //判断该行是新增的
+                    if (a.Id == 0)
+                    {
+                        a.Creator= _userManager.Account;
+                        a.CreationTime= DateTime.Now;
+                    }
                     a.ASNNumber = item.ASNNumber;
                     a.CustomerId = CustomerId;
                     a.CustomerName = item.CustomerName;

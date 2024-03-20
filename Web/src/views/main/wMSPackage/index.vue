@@ -125,7 +125,7 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button class="el-icon-printer" type="text" @click="printExpress(scope.row)" size="small">打印
+            <el-button class="el-icon-printer" v-auth="'wMSPackage:print'" type="text" @click="printExpress(scope.row)" size="small">打印
             </el-button>
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->

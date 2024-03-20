@@ -86,6 +86,7 @@
 												<template v-if="v.type == 'DropDownListStrRemote'">
 													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v"
+														:key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
@@ -124,7 +125,7 @@
 				</el-tab-pane>
 				<el-tab-pane label="地址信息" name="AddressInfo">
 					<el-card>
-						<el-form ref="headerRuleRef" label-position="top" :model="state.orderAddress">
+						<el-form ref="addressRuleRef"  :rules="addressRule" label-position="top" :model="state.orderAddress">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
 									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isCreate == 1)"
@@ -146,6 +147,7 @@
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
 											<select-Remote :whereData="state.orderAddress" :isDisabled="i.isCreate"
+										
 												:columnData="i" :defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.orderAddress[i.columnName] = data.text; state.orderAddress[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
@@ -303,6 +305,7 @@ let headerRuleRef = ref<any>({});
 let headerRule = ref({});
 let detailRuleRef = ref<any>({});
 let detailRule = ref({});
+let addressRule = ref({});
 
 
 //父级传递来的函数，用于回调
@@ -348,12 +351,17 @@ const submit = async () => {
 					// closeDialog();
 
 					let result = await addWMSPreOrder(state.value.header);
+					console.log(result);
 					if (result.data.result.code == "1") {
 						ElMessage.success("添加成功");
+						state.value.header = new Header();
+						state.value.orderAddress= new OrderAddress();
+						state.value.headers = new Array<Header>();
+						state.value.details = [new Detail()];
 						closeDialog();
 					} else {
-						// ElMessage.error(result.data.result.msg);
-						state.value.orderStatus = result.data.result;
+						//  ElMessage.error(result.data.result.msg);
+						state.value.orderStatus = result.data.result.data;
 						// console.log(state.value.orderStatus);
 						//导入弹框提醒
 						resultPopupShow.value = true;
@@ -407,10 +415,22 @@ const gettableColumn = async () => {
 			];
 		}
 	});
-
+	// addressRule
 	// console.log("dasdasdasdsa");
 	let resorderAddress = await getByTableNameList("WMS_OrderAddress");
 	state.value.tableColumnOrderAddresss = resorderAddress.data.result;
+	// addressRule.value = {};
+	// state.value.tableColumnOrderAddresss.forEach((a) => {
+	// 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+	// 		addressRule.value[a.columnName] = [
+	// 			{
+	// 				required: true,
+	// 				message: a.displayName,
+	// 				trigger: "blur",
+	// 			},
+	// 		];
+	// 	}
+	// });
 	// console.log(state.value.tableColumnOrderAddresss);
 };
 

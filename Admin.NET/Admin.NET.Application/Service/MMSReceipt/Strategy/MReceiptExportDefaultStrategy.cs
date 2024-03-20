@@ -96,10 +96,11 @@ namespace Admin.NET.Application.Strategy
             //塞数据
             receiptData.ForEach(a =>
             {
-                DataRow row = dt.NewRow();
+             
                 Type receiptType = a.GetType();
                 a.Details.ForEach(c =>
                 {
+                    DataRow row = dt.NewRow();
                     Type receiptDetailType = c.GetType();
                     headerTableColumn.ForEach(h =>
                     {
@@ -137,8 +138,9 @@ namespace Admin.NET.Application.Strategy
 
                           }
                       });
+                    dt.Rows.Add(row);
                 });
-                dt.Rows.Add(row);
+              
 
             });
             response.Data = dt;

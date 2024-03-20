@@ -285,6 +285,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSPreOrder> Get(long id)
     {
+        var asd = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
         var entity = await _rep.AsQueryable().Includes(a => a.Details).Includes(a => a.OrderAddress).Where(u => u.Id == id).FirstAsync();
         //var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;

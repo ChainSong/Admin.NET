@@ -38,6 +38,7 @@
 										<template v-if="i.type == 'DropDownListStrRemote'">
 
 											<select-Remote :whereData="state.header" :isDisabled="i.isCreate"
+											:key="state.header[i.columnName]"
 												:columnData="i" :defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
@@ -127,7 +128,7 @@
 										:rules="detailRule[v.columnName]">
 										<template v-if="v.type == 'DropDownListInt'">
 											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
-												:disabled="v.update" placeholder="请选择" style="width: 100%">
+												:disabled="!v.isUpdate" placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeInt"
 													:label="item.name" :value="item.codeInt">
 												</el-option>
@@ -135,38 +136,39 @@
 										</template>
 										<template v-else-if="v.type == 'DropDownListStr'">
 											<el-select v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
-												:disabled="v.update" placeholder="请选择" style="width: 100%">
+												:disabled="!v.isUpdate" placeholder="请选择" style="width: 100%">
 												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
 													:label="item.name" :value="item.codeStr">
 												</el-option>
 											</el-select>
 										</template>
 										<template v-else-if="v.type == 'DropDownListStrRemote'">
-											<select-Remote :whereData="state.header" :isDisabled="v.update" :columnData="v"
+											<select-Remote :whereData="state.header" :isDisabled="v.update"   :key="state.details[scope.$index]" :columnData="v"
 												:defaultvValue="state.details[scope.$index][v.columnName]"
+
 												@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 										</template>
 										<template v-else-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-else-if="v.type == 'DatePicker'">
 											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-												v-if="v.isCreate" :disabled="v.isUpdate" type="date" placeholder="选择日期"
+												v-if="v.isCreate" :disabled="!v.isUpdate" type="date" placeholder="选择日期"
 												style="width: 100%">
 											</el-date-picker>
 										</template>
 										<template v-else-if="v.type == 'InputNumber'">
 											<el-input-number placeholder="请输入内容"
 												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
-												:disabled="v.update"></el-input-number>
+												:disabled="!v.isUpdate"></el-input-number>
 										</template>
 										<template v-else>
 											<el-input placeholder="请输入内容"
 												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
-												:disabled="v.update">
+												:disabled="!v.isUpdate">
 											</el-input>
 										</template>
 
@@ -322,6 +324,8 @@ const submit = async () => {
 };
 
 const get = async () => {
+	state.value.details=new Array<Detail>();
+	state.value.orderAddress= new OrderAddress();
 	let result = await getWMSPreOrder(state.value.header.id);
 	state.value.header = result.data.result;
 	state.value.details = result.data.result.details;

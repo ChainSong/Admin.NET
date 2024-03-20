@@ -166,10 +166,11 @@ namespace Admin.NET.Application.Strategy
             //塞数据
             orderData.ForEach(a =>
             {
-                DataRow row = dt.NewRow();
+            
                 Type orderType = a.GetType();
                 a.Details.ForEach(c =>
                 {
+                    DataRow row = dt.NewRow();
                     Type orderDetailType = c.GetType();
                     headerTableColumn.ForEach(h =>
                     {
@@ -217,8 +218,9 @@ namespace Admin.NET.Application.Strategy
 
                         }
                     });
+
+                    dt.Rows.Add(row);
                 });
-                dt.Rows.Add(row);
 
             });
             response.Data = dt;

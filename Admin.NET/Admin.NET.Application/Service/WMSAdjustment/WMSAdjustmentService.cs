@@ -22,13 +22,15 @@ namespace Admin.NET.Application;
 public class WMSAdjustmentService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSAdjustment> _rep;
+
     private readonly SqlSugarRepository<WMSAdjustmentDetail> _repAdjustmentDetail;
 
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
 
-
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+
     private readonly UserManager _userManager;
+
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
 
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
