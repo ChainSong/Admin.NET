@@ -441,6 +441,8 @@ export default {
             top -= 16
             var nodeId = this.getUUID()
             // 动态生成名字
+            console.log("nodeMenu.name")
+            console.log(nodeMenu.name)
             var origName = nodeMenu.name
             var nodeName = origName
             var index = 1

@@ -35,6 +35,10 @@ public interface IExpressInterface
 
     public SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery { get; set; }
     public SqlSugarRepository<WMSExpressConfig> _repExpressConfig { get; set; }
+    public SqlSugarRepository<WMSExpressFee> _repWMSExpressFee { get; set; }
+
+
+    //private readonly SqlSugarRepository<WMSExpressFee> _repWMSExpressFee;
 
     //获取快递信息 包括快递单号 三段码等信息
     Task<Response> GetExpressData(ScanPackageInput request);

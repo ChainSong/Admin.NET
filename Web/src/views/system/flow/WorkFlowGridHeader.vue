@@ -165,7 +165,7 @@ export default {
           item.userId = item.userId.join(',');
         }
       })
-      mainData.NodeConfig = JSON.stringify(nodeListOptions)
+      mainData.nodeConfig = JSON.stringify(nodeListOptions)
       let lineList = this.$refs.flow.data.lineList;
       lineList = JSON.parse(JSON.stringify(lineList));
       lineList.forEach(item => {
@@ -177,7 +177,7 @@ export default {
           })
         }
       })
-      mainData.LineConfig = JSON.stringify(lineList);
+      mainData.lineConfig = JSON.stringify(lineList);
 
 
       let rootNode = nodeList.filter(c => { return c.type == 'start' }).

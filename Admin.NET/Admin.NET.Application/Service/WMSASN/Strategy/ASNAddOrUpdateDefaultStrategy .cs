@@ -137,9 +137,10 @@ namespace Admin.NET.Application.Strategy
             //});
 
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
-            int LineNumber = 1;
+    
             asnData.ForEach(item =>
             {
+                int LineNumber = 1;
                 var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
 
@@ -165,8 +166,9 @@ namespace Admin.NET.Application.Strategy
                     a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
+                    LineNumber++;
                 });
-                LineNumber++;
+             
             });
 
 

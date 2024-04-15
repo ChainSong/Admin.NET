@@ -34,6 +34,7 @@ using Admin.NET.Application.Service.WMSExpress.Interface;
 using NPOI.SS.Formula.PTG;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 using Admin.NET.Application.Service.WMSExpress.Enumerate;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaGetWxaGameFrameResponse.Types.Data.Types.Frame.Types;
 
 namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 
@@ -54,6 +55,7 @@ public class SFExpressStrategy : IExpressInterface
     public UserManager _userManager { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
+    public SqlSugarRepository<WMSExpressFee> _repWMSExpressFee { get; set; }
 
 
     public SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery { get; set; }
@@ -83,26 +85,31 @@ public class SFExpressStrategy : IExpressInterface
 
         //获取快递信息
         var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
-
+        if (getExpressConfig == null)
+        {
+            response.Msg = "请配置该客户的快递公司信息";
+            response.Code = StatusCode.Error;
+            return response;
+        }
 
 
         List<SFCargodetail> sFCargodetails = new List<SFCargodetail>();
         packageDetail.ForEach(a =>
         {
-            sFCargodetails.Add(new SFCargodetail { name = a.GoodsName });
+            sFCargodetails.Add(new SFCargodetail { name = a.GoodsName.Replace('(',' ').Replace(')', ' ') });
         });
 
         var senderContact = "";
         var senderMobile = "";
         var senderTel = "";
         //获取寄件人信息
-        var sender = _repWarehouse.AsQueryable().Includes(a=>a.Details).Where(a => a.Id == package.WarehouseId).First();
-        if (sender.Details!=null && sender.Details.Count>0 && sender.Details.Where(a => a.CustomerId == request.CustomerId).Count() > 0)
+        var sender = _repWarehouse.AsQueryable().Includes(a => a.Details).Where(a => a.Id == package.WarehouseId).First();
+        if (sender.Details != null && sender.Details.Count > 0 && sender.Details.Where(a => a.CustomerId == request.CustomerId).Count() > 0)
         {
-                var warehouseDetail= sender.Details.Where(a => a.CustomerId == request.CustomerId).First();
-                  senderContact = warehouseDetail.Contact;
-                  senderMobile = warehouseDetail.Phone;
-                  senderTel = warehouseDetail.Tel;
+            var warehouseDetail = sender.Details.Where(a => a.CustomerId == request.CustomerId).First();
+            senderContact = warehouseDetail.Contact;
+            senderMobile = warehouseDetail.Phone;
+            senderTel = warehouseDetail.Tel;
 
         }
         else
@@ -134,7 +141,7 @@ public class SFExpressStrategy : IExpressInterface
             city = receiver.City,
             contact = receiver.Name,
             contactType = 2,
-            county = receiver.County, 
+            county = receiver.County,
             mobile = receiver.Phone,
             tel = receiver.Phone,
             province = receiver.Province,
@@ -147,7 +154,7 @@ public class SFExpressStrategy : IExpressInterface
 
 
         //SFExpressServiceStrategy strategy = new SFExpressServiceStrategy();
-        SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>() {  Data=new SFRootobject()};
+        SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>() { Data = new SFRootobject() };
 
         input.Data = new SFRootobject()
         {
@@ -169,6 +176,7 @@ public class SFExpressStrategy : IExpressInterface
         input.Url = getExpressConfig.Url;
         input.PartnerId = getExpressConfig.PartnerId;
         input.ServiceCode = "EXP_RECE_CREATE_ORDER"; //下单方法
+        //input.Data.contactInfoList[1].company = "_";
         string Express = ExpressApplication.GetExpress(input);
 
         Rootobject output = Express.ToJsonEntity<Rootobject>();
@@ -232,6 +240,11 @@ public class SFExpressStrategy : IExpressInterface
         packageData.RecipientsPostCode = "";
         packageData.PrintTime = DateTime.Now;
         packageData.PrintPersonnel = _userManager.Account;
+
+        ///计算预计的价格
+        packageData.EstimatedPrice = GetExpressFee(packageData, package);
+
+
         //packageData.Details = sfexpress;
         await _repExpressDelivery.InsertAsync(packageData);
         await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
@@ -240,6 +253,38 @@ public class SFExpressStrategy : IExpressInterface
         response.Code = StatusCode.Success;
         return response;
 
+    }
+
+
+    private double GetExpressFee(WMSExpressDelivery packageData, WMSPackage package)
+    {
+        double Fee = 0;
+        try
+        {
+            //获取首重
+            double FirstWeight = package.GrossWeight.Value;
+
+            //获取费用配置
+            WMSExpressFee wMSExpressFee = _repWMSExpressFee.AsQueryable().Where(a => a.ExpressCompany == packageData.ExpressCompany && a.Origin == packageData.SenderProvince && a.Destination == packageData.RecipientsProvince).First();
+            if (wMSExpressFee != null)
+            {
+                if (FirstWeight > 1)
+                {
+                    Fee = wMSExpressFee.FirstWeight.Value + (FirstWeight - 1) * wMSExpressFee.AdditionalWeight.Value;
+                }
+                else
+                {
+                    Fee = wMSExpressFee.FirstWeight.Value;
+                }
+
+
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+        return Fee;
     }
 
     /// <summary>
@@ -258,7 +303,7 @@ public class SFExpressStrategy : IExpressInterface
 
         var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + request.CustomerId + "_" + request.WarehouseId);
 
-        if (expressConfig!= null && !string.IsNullOrEmpty(expressConfig.Token))
+        if (expressConfig != null && !string.IsNullOrEmpty(expressConfig.Token))
         {
             response.Msg = "成功";
             response.Code = StatusCode.Success;

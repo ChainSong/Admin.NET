@@ -97,7 +97,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         Response response = new Response();
         //List < SysWorkFlow >
         var MainData = saveDataModel.MainData.Adapt<SysWorkFlow>();
-        MainData.SysWorkFlowSteps=new List<SysWorkFlowStep>();
+        MainData.SysWorkFlowSteps = new List<SysWorkFlowStep>();
         saveDataModel.DetailData.ForEach(a =>
         {
             MainData.SysWorkFlowSteps.Add(a.Adapt<SysWorkFlowStep>());
@@ -109,7 +109,16 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         //|| saveDataModel.MainData == null
         //|| saveDataModel.MainData.Count == 0)
         //return;
-        await _rep.Context.InsertNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+        //如果存在，就先删除在插入
+        if (MainData.Id != 0)
+        {
+            await _rep.Context.UpdateNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+        }
+        else
+        {
+            await _rep.Context.InsertNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+
+        }
         response.Code = StatusCode.Success;
         response.Msg = "成功";
         return response;
@@ -242,7 +251,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     {
         //var entity = await _rep.GetFirstAsync(u => u.WorkFlowId == input.WorkFlowId) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
         var entity = input.Adapt<SysWorkFlow>();
-        await _rep.Context.DeleteNav(entity).Include(a=>a.SysWorkFlowSteps).ExecuteCommandAsync();   //删除
+        await _rep.Context.DeleteNav(entity).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();   //删除
     }
 
     /// <summary>
@@ -268,7 +277,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<SysWorkFlow> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Includes(a=>a.SysWorkFlowSteps).Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable().Includes(a => a.SysWorkFlowSteps).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
 

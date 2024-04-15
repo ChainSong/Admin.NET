@@ -65,7 +65,7 @@ namespace Admin.NET.Application.Strategy
             //临时方法，在开会改bug (对hach 导入的电话号码做验证)
             // 正则表达式用于匹配电话号码或手机号码
             // 这里的正则表达式是一个示例，可能需要根据实际情况进行调整
-            string phoneStr = @"^[1]+[3,5]+\d{9}";
+            string phoneStr = @"^[1]+[2,3,4,5,6,7,8,9]+\d{9}";
             string telStr = @"^(\d{3,4}-)?\d{6,8}$";
 
             // 检查电话号码是否符合正则表达式
@@ -74,6 +74,16 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in request)
             {
 
+                //if (string.IsNullOrEmpty(item.OrderType))
+                //{
+                //    response.Data.Add(new OrderStatusDto()
+                //    {
+                //        ExternOrder = item.ExternOrderNumber,
+                //        SystemOrder = item.PreOrderNumber,
+                //        Type = item.OrderType,
+                //        Msg = "缺少订单类型"
+                //    });
+                //}
                 if (!string.IsNullOrEmpty(item.OrderAddress.Phone))
                 {
 
@@ -163,9 +173,10 @@ namespace Admin.NET.Application.Strategy
             var mapper = new Mapper(config);
 
             var orderData = mapper.Map<List<WMSPreOrder>>(request);
-            int LineNumber = 1;
+           
             orderData.ForEach(item =>
             {
+                int LineNumber = 1;
                 var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
                 var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -188,6 +199,7 @@ namespace Admin.NET.Application.Strategy
                     a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
+                    LineNumber++;
                 });
 
                 item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
@@ -195,7 +207,7 @@ namespace Admin.NET.Application.Strategy
                 item.OrderAddress.Creator = _userManager.Account;
                 item.OrderAddress.CreationTime = DateTime.Now;
                 item.OrderAddress.UpdateTime = DateTime.Now;
-                LineNumber++;
+           
             });
 
             //开始插入数据

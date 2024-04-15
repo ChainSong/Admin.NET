@@ -148,6 +148,7 @@ namespace Admin.NET.Application.Strategy
               .Select(a => new TableColumns
               {
                   DisplayName = a.DisplayName,
+                  Type = a.Type,
                   //由于框架约定大于配置， 数据库的字段首字母小写
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,

@@ -94,6 +94,7 @@ const openAddSysWorkFlow = () => {
 const openEditSysWorkFlow = (row: any) => {
   editSysWorkFlowTitle.value = '编辑SysWorkFlow';
   console.log(row);
+  console.log("row");
   workFlowGridHeaderRef.value.open(row);
   // editSysWorkFlowTitle.value = '编辑SysWorkFlow';
   // editDialogRef.value.openDialog(row);

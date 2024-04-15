@@ -40,6 +40,7 @@ public class Program
         .Inject()
             .ConfigureServices((hostContext, services) =>
             {
+                
                 //// 配置选项
                 //services.AddProjectOptions();
 

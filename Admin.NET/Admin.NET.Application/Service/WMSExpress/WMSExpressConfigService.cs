@@ -63,7 +63,9 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
 
-    public WMSExpressConfigService(SqlSugarRepository<WMSExpressConfig> rep, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder)
+    private readonly SqlSugarRepository<WMSExpressFee> _repWMSExpressFee;
+
+    public WMSExpressConfigService(SqlSugarRepository<WMSExpressConfig> rep, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSExpressFee> repWMSExpressFee)
     {
         _rep = rep;
         _repPackage = repPackage;
@@ -81,6 +83,7 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
         //_repExpressConfig = repExpressConfig;
         _repOrderDetail = repOrderDetail;
         _repOrder = repOrder;
+        _repWMSExpressFee = repWMSExpressFee;
     }
 
 
@@ -317,7 +320,8 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
         factory._sysCacheService = _sysCacheService;
         factory._repWarehouse = _repWarehouse;
         factory._repExpressDelivery = _repExpressDelivery;
-
+        factory._repWMSExpressFee = _repWMSExpressFee;
+        
         //获取快递信息（包含快递单号）
         //var data = await factory.GetExpressData(input);
         //获取打印信息

@@ -70,13 +70,14 @@ namespace Admin.NET.Application.Strategy
                 //验证数据
                 if (Column.Validation == "Required")
                 {
-                    int flag = 0;
+                    int flag = 1;
 
 
                     foreach (DataRow row in request.Rows)
                     {
 
                         flag++;
+                        // 如果该值是下拉的，那么必须使用下拉列表中的数据
                         if (string.IsNullOrEmpty(row[s].ToString()))
                         {
                             statusDtos.Add(new OrderStatusDto()
@@ -87,8 +88,39 @@ namespace Admin.NET.Application.Strategy
                                 //Type = b.OrderType,
                                 StatusCode = StatusCode.Warning,
                                 //StatusMsg = (string)StatusCode.warning,
-                                Msg = Column.DisplayName + "不能为空"
+                                Msg = Column.DisplayName + ":数据不能为空"
                             });
+
+                        }
+                        else
+                        {
+                            if (Column.Type == "DropDownListInt" && Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).Count() == 0)
+                            {
+                                //mag = "数据错误,内容不能为空，或者不在系统提供范围内";
+                                statusDtos.Add(new OrderStatusDto()
+                                {
+                                    //Id = b.Id,
+                                    ExternOrder = "第" + flag + "行",
+                                    SystemOrder = "第" + flag + "行",
+                                    //Type = b.OrderType,
+                                    StatusCode = StatusCode.Warning,
+                                    //StatusMsg = (string)StatusCode.warning,
+                                    Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不在系统提供范围内"
+                                });
+                            }
+                            else if (Column.Type == "DropDownListStr" && Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).Count() == 0)
+                            {
+                                statusDtos.Add(new OrderStatusDto()
+                                {
+                                    //Id = b.Id,
+                                    ExternOrder = "第" + flag + "行",
+                                    SystemOrder = "第" + flag + "行",
+                                    //Type = b.OrderType,
+                                    StatusCode = StatusCode.Warning,
+                                    //StatusMsg = (string)StatusCode.warning,
+                                    Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不在系统提供范围内"
+                                });
+                            }
                         }
 
                     }
@@ -166,7 +198,7 @@ namespace Admin.NET.Application.Strategy
             //塞数据
             orderData.ForEach(a =>
             {
-            
+
                 Type orderType = a.GetType();
                 a.Details.ForEach(c =>
                 {
@@ -240,6 +272,7 @@ namespace Admin.NET.Application.Strategy
               .Select(a => new TableColumns
               {
                   DisplayName = a.DisplayName,
+                  Type = a.Type,
                   //由于框架约定大于配置， 数据库的字段首字母小写
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,

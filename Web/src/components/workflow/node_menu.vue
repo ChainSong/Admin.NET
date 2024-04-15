@@ -33,7 +33,7 @@ export default {
                 // 不使用H5原生的配置
                 forceFallback: true,
                 // 拖拽的时候样式
-                // fallbackClass: 'flow-node-draggable'
+                 fallbackClass: 'flow-node-draggable'
             },
             // 默认打开的左侧菜单的id
             defaultOpeneds: ['1', '2'],
