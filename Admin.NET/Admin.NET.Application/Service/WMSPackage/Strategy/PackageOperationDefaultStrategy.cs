@@ -473,22 +473,25 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             foreach (var item in pickData)
             {
                 var PackageAcquisition = item.ScanPackageInput.Adapt<List<WMSRFPackageAcquisition>>();
-                foreach (var p in PackageAcquisition)
+                if (PackageAcquisition != null)
                 {
-                    p.Qty = 1;
-                    p.CustomerId = packageData.CustomerId;
-                    p.CustomerName = packageData.CustomerName;
-                    p.WarehouseId = packageData.WarehouseId;
-                    p.WarehouseName = packageData.WarehouseName;
-                    p.OrderId = packageData.OrderId.Value;
-                    p.ExternOrderNumber = packageData.ExternOrderNumber;
-                    p.PreOrderNumber = packageData.PreOrderNumber;
-                    p.OrderNumber = packageData.OrderNumber;
-                    p.PickTaskId = packageData.PickTaskId;
-                    p.Creator = _userManager.Account;
-                    p.CreationTime = DateTime.Now;
+                    foreach (var p in PackageAcquisition)
+                    {
+                        p.Qty = 1;
+                        p.CustomerId = packageData.CustomerId;
+                        p.CustomerName = packageData.CustomerName;
+                        p.WarehouseId = packageData.WarehouseId;
+                        p.WarehouseName = packageData.WarehouseName;
+                        p.OrderId = packageData.OrderId.Value;
+                        p.ExternOrderNumber = packageData.ExternOrderNumber;
+                        p.PreOrderNumber = packageData.PreOrderNumber;
+                        p.OrderNumber = packageData.OrderNumber;
+                        p.PickTaskId = packageData.PickTaskId;
+                        p.Creator = _userManager.Account;
+                        p.CreationTime = DateTime.Now;
+                    }
+                    PackageAcquisitions.AddRange(PackageAcquisition);
                 }
-                PackageAcquisitions.AddRange(PackageAcquisition);
             }
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
@@ -513,7 +516,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             });
             _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
             //判断是否包装完成
-            var CheckPackageData =   _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
+            var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
             var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).ToListAsync();
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {

@@ -4,8 +4,24 @@
 /// 快递价格
 /// </summary>
 [SugarTable("WMS_ExpressFee","快递价格")]
-public class WMSExpressFee  : EntityBase
+public class WMSExpressFee : ITenantIdFilter
 {
+
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
+
+
+    /// <summary>
+    /// Id
+    /// </summary>
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public virtual long Id { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -77,11 +93,17 @@ public class WMSExpressFee  : EntityBase
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Updator { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? UpdateTime { get; set; }
+
     /// <summary>
     /// 租户Id
-    /// </summary>
-    [SugarColumn(ColumnDescription = "租户Id")]
-    public long? TenantId { get; set; }
-    
+    ///// </summary>
+    //[SugarColumn(ColumnDescription = "租户Id")]
+    //public long? TenantId { get; set; }
+
 }

@@ -94,7 +94,7 @@ public class WMSOrderAddress : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 100)]
+    [SugarColumn(ColumnDescription = "", Length = 200)]
     public string? Address { get; set; }
     
     /// <summary>

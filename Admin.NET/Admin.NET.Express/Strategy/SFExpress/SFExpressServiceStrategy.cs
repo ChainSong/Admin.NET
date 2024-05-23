@@ -40,7 +40,7 @@ public class SFExpressServiceStrategy: IExpressServiceInterface
         //request.Data.contactInfoList[0].tel = "13647294728";
         //request.Data.contactInfoList[1].tel = "13647294728";
         //request.Data.orderId = request.Data.orderId+"2";
-
+        //request.Env = "sbox";
         string timestamp = GetTimeStamp(); //获取时间戳       
 
         string requestID = Guid.NewGuid().ToString(); //获取uuid

@@ -323,6 +323,8 @@ public class WMSPackageInput : BasePageInput
     /// </summary>
     public string PackageNumber { get; set; }
 
+    public string PreOrderNumber { get; set; }
+
     /// <summary>
     /// 出库单号
     /// </summary>

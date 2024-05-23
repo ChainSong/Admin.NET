@@ -7,9 +7,10 @@
 						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
-									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
-										:prop="i.columnName">
+									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)"
+									v-bind:key="i.id">
+									<el-form-item :label="i.displayName" v-if="i.isCreate"
+										style="width: 90%;height: 45px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input :placeholder=i.displayName size="small" style="width:90%"
 												v-model="state.header[i.columnName]" v-if="i.isCreate">
@@ -43,7 +44,8 @@
 										</template>
 										<template v-if="i.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
+												type="datetime" start-placeholder="选择日期时间" size="small"
+												style="width:90%">
 											</el-date-picker>
 										</template>
 									</el-form-item>
@@ -70,23 +72,24 @@
 												<template v-if="v.type == 'DropDownListInt'">
 													<el-select v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeInt"
-															:label="item.name" :value="item.codeInt">
+														<el-option v-for="item in v.tableColumnsDetails"
+															:key="item.codeInt" :label="item.name"
+															:value="item.codeInt">
 														</el-option>
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStr'">
 													<el-select v-model="state.details[scope.$index][v.columnName]"
 														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
-															:label="item.name" :value="item.codeStr">
+														<el-option v-for="item in v.tableColumnsDetails"
+															:key="item.codeStr" :label="item.name"
+															:value="item.codeStr">
 														</el-option>
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
 													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
-														:columnData="v"
-														:key="state.details[scope.$index]"
+														:columnData="v" :key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
@@ -108,7 +111,7 @@
 														v-if="v.isCreate"></el-input-number>
 
 												</template>
-												
+
 											</el-form-item>
 										</template>
 									</el-table-column>
@@ -125,13 +128,14 @@
 				</el-tab-pane>
 				<el-tab-pane label="地址信息" name="AddressInfo">
 					<el-card>
-						<el-form ref="addressRuleRef"  :rules="addressRule" label-position="top" :model="state.orderAddress">
+						<el-form ref="addressRuleRef" :rules="addressRule" label-position="top"
+							:model="state.orderAddress">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
 									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isCreate == 1)"
 									v-bind:key="i.id">
-									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
-										:prop="i.columnName">
+									<el-form-item :label="i.displayName" v-if="i.isCreate"
+										style="width: 90%;height: 45px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input :placeholder=i.displayName size="small" style="width:90%"
 												v-model="state.orderAddress[i.columnName]" v-if="i.isCreate">
@@ -147,7 +151,6 @@
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
 											<select-Remote :whereData="state.orderAddress" :isDisabled="i.isCreate"
-										
 												:columnData="i" :defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.orderAddress[i.columnName] = data.text; state.orderAddress[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
@@ -166,10 +169,11 @@
 										</template>
 										<template v-if="i.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
-												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
+												type="datetime" start-placeholder="选择日期时间" size="small"
+												style="width:90%">
 											</el-date-picker>
-										</template> 
-										
+										</template>
+
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -230,7 +234,8 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
 	</div>
@@ -347,35 +352,46 @@ const submit = async () => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
 				if (isValidDetail) {
-					// await addWMSPreOrder(state.value.header);
-					// closeDialog();
+					addressRule.value.validate(async (isValidAddress: boolean, fieldsDetail?: any) => {
+						if (isValidAddress) {
 
-					let result = await addWMSPreOrder(state.value.header);
-					console.log(result);
-					if (result.data.result.code == "1") {
-						ElMessage.success("添加成功");
-						state.value.header = new Header();
-						state.value.orderAddress= new OrderAddress();
-						state.value.headers = new Array<Header>();
-						state.value.details = [new Detail()];
-						closeDialog();
-					} else {
-						//  ElMessage.error(result.data.result.msg);
-						state.value.orderStatus = result.data.result.data;
-						// console.log(state.value.orderStatus);
-						//导入弹框提醒
-						resultPopupShow.value = true;
-					}
+
+							// await addWMSPreOrder(state.value.header);
+							// closeDialog();
+
+							let result = await addWMSPreOrder(state.value.header);
+							console.log(result);
+							if (result.data.result.code == "1") {
+								ElMessage.success("添加成功");
+								state.value.header = new Header();
+								state.value.orderAddress = new OrderAddress();
+								state.value.headers = new Array<Header>();
+								state.value.details = [new Detail()];
+								closeDialog();
+							} else {
+								//  ElMessage.error(result.data.result.msg);
+								state.value.orderStatus = result.data.result.data;
+								// console.log(state.value.orderStatus);
+								//导入弹框提醒
+								resultPopupShow.value = true;
+							}
+						} else {
+							ElMessage({
+								message: `地址表单有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
+								type: "error",
+							});
+						}
+					})
 				} else {
 					ElMessage({
-						message: `表单有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
+						message: `明细表单有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
 						type: "error",
 					});
 				}
 			})
 		} else {
 			ElMessage({
-				message: `表单有${Object.keys(fields).length}处验证失败，请修改后再提交`,
+				message: `主信息表单有${Object.keys(fields).length}处验证失败，请修改后再提交`,
 				type: "error",
 			});
 		}
@@ -419,18 +435,18 @@ const gettableColumn = async () => {
 	// console.log("dasdasdasdsa");
 	let resorderAddress = await getByTableNameList("WMS_OrderAddress");
 	state.value.tableColumnOrderAddresss = resorderAddress.data.result;
-	// addressRule.value = {};
-	// state.value.tableColumnOrderAddresss.forEach((a) => {
-	// 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
-	// 		addressRule.value[a.columnName] = [
-	// 			{
-	// 				required: true,
-	// 				message: a.displayName,
-	// 				trigger: "blur",
-	// 			},
-	// 		];
-	// 	}
-	// });
+	addressRule.value = {};
+	state.value.tableColumnOrderAddresss.forEach((a) => {
+		if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+			addressRule.value[a.columnName] = [
+				{
+					required: true,
+					message: a.displayName,
+					trigger: "blur",
+				},
+			];
+		}
+	});
 	// console.log(state.value.tableColumnOrderAddresss);
 };
 
@@ -468,7 +484,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

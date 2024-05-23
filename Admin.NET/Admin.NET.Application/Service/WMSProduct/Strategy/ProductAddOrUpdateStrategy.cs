@@ -68,33 +68,48 @@ public class ProductAddOrUpdateStrategy : IProductInterface
         //    response.Msg = "用户缺少仓库操作权限";
         //    return response;
         //}
-
-        //1判断PreOrder 是否已经存在已有的订单
-
-        var productCheck = _repProduct.AsQueryable().Where(a => request.Select(r => r.SKU + r.CustomerName.ToString()).ToList().Contains(a.SKU + a.CustomerName.ToString()));
-        if (productCheck != null && productCheck.ToList().Count > 0)
+        if (request.Select(a => a.CustomerName).Distinct().Count() > 1)
         {
-            productCheck.ToList().ForEach(b =>
-            {
-                response.Data.Add(new OrderStatusDto()
-                {
-                    ExternOrder = b.CustomerName,
-                    SystemOrder = b.SKU,
-                    Type = b.GoodsType,
-                    StatusCode = StatusCode.Warning,
-                    //StatusMsg = StatusCode.warning.ToString(),
-                    Msg = "SKU:" + b.SKU + "已存在"
-                });
-
-            });
-            if (response.Data.Count > 0)
-            {
-                response.Code = StatusCode.Error;
-                response.Msg = "SKU已存在";
-                return response;
-            }
+            response.Code = StatusCode.Error;
+            response.Msg = "一次只能导入一家客户";
+            return response;
         }
 
+        //1判断主档是不是存在SKU
+
+        var productCheck = _repProduct.AsQueryable().Where(a => request.Select(r => r.SKU).ToList().Contains(a.SKU) && a.CustomerName == request.First().CustomerName);
+        try
+        {
+            if (productCheck != null && productCheck.ToList().Count > 0)
+            {
+                productCheck.ToList().ForEach(b =>
+                {
+                    //if (b.CustomerName == request.First().CustomerName)
+                    //{
+                    response.Data.Add(new OrderStatusDto()
+                    {
+                        ExternOrder = b.CustomerName,
+                        SystemOrder = b.SKU,
+                        Type = b.GoodsType,
+                        StatusCode = StatusCode.Warning,
+                        //StatusMsg = StatusCode.warning.ToString(),
+                        Msg = "SKU:" + b.SKU + "已存在"
+                    });
+                    //}
+                });
+                if (response.Data.Count > 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "SKU已存在";
+                    return response;
+                }
+            }
+        }
+        catch (Exception adas)
+        {
+
+            throw;
+        }
         //var productData = request.Adapt<List<WMSProduct>>();
 
         var config = new MapperConfiguration(cfg =>

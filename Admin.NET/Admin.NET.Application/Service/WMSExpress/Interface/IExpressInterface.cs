@@ -43,6 +43,9 @@ public interface IExpressInterface
     //获取快递信息 包括快递单号 三段码等信息
     Task<Response> GetExpressData(ScanPackageInput request);
 
+    //获取快递信息 包括快递单号 三段码等信息(子母单)
+    Task<Response> GetExpressDataList(ScanPackageInput request);
+
     //云打印需要的方法
     Task<Response<dynamic>> PrintExpressData(ScanPackageInput request);
 

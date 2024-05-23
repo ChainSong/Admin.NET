@@ -168,6 +168,13 @@ namespace Admin.NET.Application.Strategy
             Response<DataTable> response = new Response<DataTable>();
             //CreateOrUpdateWMS_ReceiptInput orders = new CreateOrUpdateWMS_ReceiptInput();
             //orders.WMS_Receipts = new List<WMSReceiptEditDto>();
+            //var orderDatas = _repASN.AsQueryable()
+            //    //.LeftJoin<WMSASNDetail>（）
+            //    .LeftJoin<WMSASNDetail>((a,b)=>a.Id==b.ASNId).Where(a => request.Contains(a.Id)).Select((a,b) => new
+            //    {
+            //        a,
+            //        b
+            //    }).ToList();
 
             var headerTableColumn = GetColumns("WMS_ASN");
             var detailTableColumn = GetColumns("WMS_ASNDetail");

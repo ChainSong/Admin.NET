@@ -56,7 +56,7 @@ public class SFRootobject
     public string orderId { get; set; }
     public int parcelQty { get; set; }
     public int payMethod { get; set; }
-    public int totalWeight { get; set; }
+    public double totalWeight { get; set; }
 }
 
 public class SFCustomsinfo

@@ -79,9 +79,16 @@ namespace Admin.NET.Application.Strategy
                 return response;
             }
 
-            //1判断PreOrder 是否已经存在已有的订单
+            if (request.Select(a => a.CustomerName).Distinct().Count() > 1)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "一次只能导入一家客户";
+                return response;
+            }
 
-            var asnCheck = _repASN.AsQueryable().Where(a => request.Select(r => r.ExternReceiptNumber + r.CustomerName.ToString()).ToList().Contains(a.ExternReceiptNumber + a.CustomerName.ToString()));
+            //1判断ASN 是否已经存在已有的订单
+
+            var asnCheck = _repASN.AsQueryable().Where(a => request.Select(r => r.ExternReceiptNumber).ToList().Contains(a.ExternReceiptNumber) && a.CustomerName == request.First().CustomerName);
             if (asnCheck != null && asnCheck.ToList().Count > 0)
             {
                 asnCheck.ToList().ForEach(b =>
@@ -137,7 +144,7 @@ namespace Admin.NET.Application.Strategy
             //});
 
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
-    
+
             asnData.ForEach(item =>
             {
                 int LineNumber = 1;
@@ -168,7 +175,7 @@ namespace Admin.NET.Application.Strategy
                     a.CreationTime = DateTime.Now;
                     LineNumber++;
                 });
-             
+
             });
 
 
@@ -253,9 +260,10 @@ namespace Admin.NET.Application.Strategy
 
 
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
-            int LineNumber = 1;
+         
             asnData.ForEach(item =>
             {
+                int LineNumber = 1;
                 var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
                 //var ASNNumber = ShortIDGen.NextID(new GenerationOptions
@@ -275,8 +283,8 @@ namespace Admin.NET.Application.Strategy
                     //判断该行是新增的
                     if (a.Id == 0)
                     {
-                        a.Creator= _userManager.Account;
-                        a.CreationTime= DateTime.Now;
+                        a.Creator = _userManager.Account;
+                        a.CreationTime = DateTime.Now;
                     }
                     a.ASNNumber = item.ASNNumber;
                     a.CustomerId = CustomerId;
@@ -287,8 +295,9 @@ namespace Admin.NET.Application.Strategy
                     a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
                     a.Updator = _userManager.Account;
                     a.UpdateTime = DateTime.Now;
+                    LineNumber++;
                 });
-                LineNumber++;
+             
             });
 
 

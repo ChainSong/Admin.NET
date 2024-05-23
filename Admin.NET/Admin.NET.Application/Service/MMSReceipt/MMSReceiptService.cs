@@ -200,7 +200,7 @@ public class MMSReceiptService : IDynamicApiController, ITransient
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateMMSReceiptInput input)
     {
         //Response<List<OrderStatusDto>> response= new Response<List<OrderStatusDto>>();
-        //var entity = input.Adapt<WMSASN>();
+        var entity = input.Adapt<WMSASN>();
         List<AddOrUpdateMMSReceiptInput> entityListDtos = new List<AddOrUpdateMMSReceiptInput>();
         entityListDtos.Add(input);
         //使用简单工厂定制化修改和新增的方法

@@ -125,7 +125,7 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button class="el-icon-printer" v-auth="'wMSPackage:print'" type="text" @click="printExpress(scope.row)" size="small">打印
+            <el-button class="el-icon-printer"   type="text" @click="printExpress(scope.row)" size="small">打印
             </el-button>
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->
@@ -147,7 +147,6 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
       <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="handleQuery" />
-
     </el-card>
 
     <!-- <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
@@ -248,6 +247,10 @@ const gettableColumn = async () => {
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
+ 
+  console.log("row");
+  console.log(state.value.header);
+  
   var res = await pageWMSPackage(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
   tableParams.value.total = res.data.result?.total;

@@ -339,7 +339,6 @@ const exportExcel = async () => {
 	// state.loading = true;
 	var res = await getImportExcelTemplate({ CustomerId: state.value.header.customerId, TableName: "WMS_Package" });
 	// state.loading = false;
-
 	var fileName = getFileName(res.headers);
 	downloadByData(res.data as any, fileName);
 };

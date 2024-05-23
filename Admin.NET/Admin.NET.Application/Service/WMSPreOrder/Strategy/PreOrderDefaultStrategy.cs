@@ -112,7 +112,13 @@ namespace Admin.NET.Application.Strategy
                 return response;
             }
 
-            var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber + r.CustomerName).ToList().Contains(a.ExternOrderNumber + a.CustomerName));
+            if (request.Select(a => a.CustomerName).Distinct().Count() > 1)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "一次只能导入一家客户";
+                return response;
+            }
+            var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber) && a.CustomerName == request.First().CustomerName);
             if (asnCheck != null && asnCheck.ToList().Count > 0)
             {
                 asnCheck.ToList().ForEach(b =>
@@ -173,7 +179,7 @@ namespace Admin.NET.Application.Strategy
             var mapper = new Mapper(config);
 
             var orderData = mapper.Map<List<WMSPreOrder>>(request);
-           
+
             orderData.ForEach(item =>
             {
                 int LineNumber = 1;
@@ -207,7 +213,7 @@ namespace Admin.NET.Application.Strategy
                 item.OrderAddress.Creator = _userManager.Account;
                 item.OrderAddress.CreationTime = DateTime.Now;
                 item.OrderAddress.UpdateTime = DateTime.Now;
-           
+
             });
 
             //开始插入数据

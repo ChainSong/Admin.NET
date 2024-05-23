@@ -81,7 +81,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
             }
 
             //获取同订单下的数据作为校验
-            var checkData = _repReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
+            var checkData = _repReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).ToList().Contains(a.ReceiptNumber)).ToList();
 
             foreach (var item in request)
             {
