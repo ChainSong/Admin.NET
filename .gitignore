@@ -33,3 +33,5 @@ dist/
 node_modules/
 /Web/package-lock.json
 .DS_Store
+/Admin.NET/Admin.NET.Web.Entry/File/ExcelTemp
+/Admin.NET/Admin.NET.Web.Entry/wwwroot/File
