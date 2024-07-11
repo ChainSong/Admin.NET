@@ -1,5 +1,6 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
@@ -11,6 +12,7 @@ using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using Microsoft.AspNetCore.Identity;
+using Nest;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -43,14 +45,15 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSPickTask> _repPickTask;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
-   
+    private readonly SqlSugarRepository<WMSWarehouse> _repWarehouse;
+
 
     private readonly SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail;
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -71,6 +74,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repPickTaskDetail = repPickTaskDetail;
         _repPreOrderDetail = repPreOrderDetail;
         _repPreOrder = repPreOrder;
+        _repWarehouse = repWarehouse;
     }
 
     /// <summary>
@@ -430,5 +434,43 @@ public class WMSOrderService : IDynamicApiController, ITransient
     }
 
 
+
+    /// <summary>
+    /// 打印发货单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost] 
+    public async Task<List<WMSOrderPrintDto>> PrintShippingList(List<long> input)
+    {
+        //使用PrintShippingList类种的打印方法  
+
+        IPrintOrderInterface factory = PrintOrderFactory.PrintOrder();
+
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repPreOrder = _repPreOrder;
+        factory._reppreOrderDetail = _repPreOrderDetail; 
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAllocation = _repOrderAllocation;
+        factory._repWarehouse = _repWarehouse;
+        factory._repCustomer = _repCustomer;
+
+
+
+        var response =await factory.PrintShippingList(input);
+        if (response.Code == StatusCode.Success)
+        {
+            return response.Data;
+        }
+        //return response;
+        return response.Data;
+    }
 }
 

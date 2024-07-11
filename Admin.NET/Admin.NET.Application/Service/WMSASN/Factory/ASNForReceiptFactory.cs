@@ -12,12 +12,21 @@ namespace Admin.NET.Application.Factory
 {
     public class ASNForReceiptFactory
     {
-        public static IASNForReceiptInterface ASNForReceipt(long CustomerId)
+        public static IASNForReceiptInterface ASNForReceipt(long CustomerId, string ReceiptType)
         {
             //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
-            switch (CustomerId)
+            Enum.TryParse(typeof(ReceiptTypeEnum), ReceiptType, out object _ReceiptType);
+            switch (_ReceiptType)
             {
-                case (long)ASNEnum.ASNForReceiptDefault:
+                case ReceiptTypeEnum.虚拟上架:
+                    return new ASNForReceiptDefaultStrategy();
+                case ReceiptTypeEnum.收货入库:
+                    return new ASNForReceiptDefaultStrategy();
+                case ReceiptTypeEnum.通用入库:
+                    return new ASNForReceiptDefaultStrategy();
+                case ReceiptTypeEnum.其它入库:
+                    return new ASNForReceiptDefaultStrategy();
+                case ReceiptTypeEnum.采购入库:
                     return new ASNForReceiptDefaultStrategy();
                 default:
                     return new ASNForReceiptDefaultStrategy();

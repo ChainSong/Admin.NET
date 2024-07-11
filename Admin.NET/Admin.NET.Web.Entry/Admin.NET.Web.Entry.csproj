@@ -11,12 +11,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="File\ExcelTemp\**" />
 		<Compile Remove="logs\**" />
 		<Compile Remove="publish\**" />
+		<Content Remove="File\ExcelTemp\**" />
 		<Content Remove="logs\**" />
 		<Content Remove="publish\**" />
+		<EmbeddedResource Remove="File\ExcelTemp\**" />
 		<EmbeddedResource Remove="logs\**" />
 		<EmbeddedResource Remove="publish\**" />
+		<None Remove="File\ExcelTemp\**" />
 		<None Remove="logs\**" />
 		<None Remove="publish\**" />
 	</ItemGroup>

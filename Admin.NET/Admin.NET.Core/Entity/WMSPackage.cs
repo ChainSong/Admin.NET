@@ -31,7 +31,7 @@ public class WMSPackage : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public long? OrderId { get; set; }
+    public long OrderId { get; set; }
     
     /// <summary>
     /// 包装单号

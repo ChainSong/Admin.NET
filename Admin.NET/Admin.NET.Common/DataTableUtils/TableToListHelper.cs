@@ -60,7 +60,15 @@ namespace System.Data
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name == "DateTime").Count() > 0)
                                 {
-                                    p.SetValue(model, Convert.ToDateTime(value), null);
+                                    if (value==null)
+                                    {
+                                        p.SetValue(model, Convert.ToDateTime(value), null);
+                                       
+                                    }
+                                    else
+                                    {
+                                        p.SetValue(model, null, null);
+                                    }
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
                                 {

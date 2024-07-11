@@ -7,6 +7,7 @@ enum Api {
   GetWMSPreOrder = '/api/wMSPreOrder/Query',
   PreOrderForOrder = '/api/wMSPreOrder/PreOrderForOrder',
   ExportPreOrder = '/api/wMSPreOrder/ExportPreOrder',
+  UpdateWMSOrderAddress = '/api/wMSPreOrder/UpdateOrderAddress',
   
   
 }
@@ -57,8 +58,14 @@ request({
 		method: 'post',
 		data: params,
 	});
-
-
+ //修改地址
+ export const updateWMSOrderAddress = (params?: any) => 
+	request({
+			url: Api.UpdateWMSOrderAddress,
+			method: 'post',
+			data: params,
+		});
+	
 
 // 导出预出库信息
 export const exportPreOrder = (params?: any) =>

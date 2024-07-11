@@ -482,7 +482,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         p.CustomerName = packageData.CustomerName;
                         p.WarehouseId = packageData.WarehouseId;
                         p.WarehouseName = packageData.WarehouseName;
-                        p.OrderId = packageData.OrderId.Value;
+                        p.OrderId = packageData.OrderId;
                         p.ExternOrderNumber = packageData.ExternOrderNumber;
                         p.PreOrderNumber = packageData.PreOrderNumber;
                         p.OrderNumber = packageData.OrderNumber;

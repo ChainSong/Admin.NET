@@ -207,4 +207,11 @@ public class WMSCustomer : IDeletedFilter, ITenantIdFilter
     [Navigate(NavigateType.OneToMany, nameof(WMSCustomerDetail.CustomerId))]
 
     public virtual List<WMSCustomerDetail> Details { get; set; }
+
+
+    [Navigate(NavigateType.OneToOne, nameof(Id), nameof(WMSCustomerConfig.CustomerId))]
+    public WMSCustomerConfig  CustomerConfig { get; set; }
+
+    //[Navigate(NavigateType.OneToOne, nameof(Id), nameof(WMSOrderAddress.PreOrderId))]
+    //public WMSOrderAddress OrderAddress { get; set; }
 }

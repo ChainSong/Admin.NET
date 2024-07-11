@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Admin.NET
- * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/Admin.NET/'>https://gitee.com/zuohuaijun/Admin.NET</a>
+ * HiGenious 通用权限开发平台
+ * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/HiGenious/'>https://gitee.com/zuohuaijun/HiGenious</a>
  *
  * OpenAPI spec version: 1.0.0
  * Contact: 515096995@qq.com
@@ -11,6 +11,7 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+
 import globalAxios, { AxiosResponse, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Configuration } from '../configuration';
 // Some imports not used depending on template conditions
@@ -129,11 +130,11 @@ export const SysOrgApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {number} id 主键Id
          * @param {string} [name] 名称
          * @param {string} [code] 编码
-         * @param {string} [orgType] 机构类型
+         * @param {string} [type] 机构类型
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiSysOrgListGet: async (id: number, name?: string, code?: string, orgType?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiSysOrgListGet: async (id: number, name?: string, code?: string, type?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             if (id === null || id === undefined) {
                 throw new RequiredError('id','Required parameter id was null or undefined when calling apiSysOrgListGet.');
@@ -166,8 +167,8 @@ export const SysOrgApiAxiosParamCreator = function (configuration?: Configuratio
                 localVarQueryParameter['Code'] = code;
             }
 
-            if (orgType !== undefined) {
-                localVarQueryParameter['OrgType'] = orgType;
+            if (type !== undefined) {
+                localVarQueryParameter['Type'] = type;
             }
 
             if (id !== undefined) {
@@ -281,12 +282,12 @@ export const SysOrgApiFp = function(configuration?: Configuration) {
          * @param {number} id 主键Id
          * @param {string} [name] 名称
          * @param {string} [code] 编码
-         * @param {string} [orgType] 机构类型
+         * @param {string} [type] 机构类型
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiSysOrgListGet(id: number, name?: string, code?: string, orgType?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultListSysOrg>>> {
-            const localVarAxiosArgs = await SysOrgApiAxiosParamCreator(configuration).apiSysOrgListGet(id, name, code, orgType, options);
+        async apiSysOrgListGet(id: number, name?: string, code?: string, type?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultListSysOrg>>> {
+            const localVarAxiosArgs = await SysOrgApiAxiosParamCreator(configuration).apiSysOrgListGet(id, name, code, type, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs :AxiosRequestConfig = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
                 return axios.request(axiosRequestArgs);
@@ -341,12 +342,12 @@ export const SysOrgApiFactory = function (configuration?: Configuration, basePat
          * @param {number} id 主键Id
          * @param {string} [name] 名称
          * @param {string} [code] 编码
-         * @param {string} [orgType] 机构类型
+         * @param {string} [type] 机构类型
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiSysOrgListGet(id: number, name?: string, code?: string, orgType?: string, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultListSysOrg>> {
-            return SysOrgApiFp(configuration).apiSysOrgListGet(id, name, code, orgType, options).then((request) => request(axios, basePath));
+        async apiSysOrgListGet(id: number, name?: string, code?: string, type?: string, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultListSysOrg>> {
+            return SysOrgApiFp(configuration).apiSysOrgListGet(id, name, code, type, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -396,13 +397,13 @@ export class SysOrgApi extends BaseAPI {
      * @param {number} id 主键Id
      * @param {string} [name] 名称
      * @param {string} [code] 编码
-     * @param {string} [orgType] 机构类型
+     * @param {string} [type] 机构类型
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SysOrgApi
      */
-    public async apiSysOrgListGet(id: number, name?: string, code?: string, orgType?: string, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultListSysOrg>> {
-        return SysOrgApiFp(this.configuration).apiSysOrgListGet(id, name, code, orgType, options).then((request) => request(this.axios, this.basePath));
+    public async apiSysOrgListGet(id: number, name?: string, code?: string, type?: string, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultListSysOrg>> {
+        return SysOrgApiFp(this.configuration).apiSysOrgListGet(id, name, code, type, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * 

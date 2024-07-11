@@ -7,6 +7,8 @@ using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using Admin.NET.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -20,12 +22,15 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
-    public WMSCustomerService(SqlSugarRepository<WMSCustomer> rep, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager)
+    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping;
+
+    public WMSCustomerService(SqlSugarRepository<WMSCustomer> rep, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<UploadMappingLog> repUploadMapping)
     {
         _rep = rep;
         _db = db;
         _repCustomerUser = repCustomerUser;
         _userManager = userManager;
+        _repUploadMapping = repUploadMapping;
     }
 
     /// <summary>
@@ -90,9 +95,33 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Add")]
     public async Task<Response> Add(WMSCustomer input)
     {
-        var entity = input.Adapt<WMSCustomer>();
+     
+
+        //验证客户编码是否存在
+        if (await _rep.AsQueryable().AnyAsync(u => u.CustomerCode == input.CustomerCode))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "客户编码已存在" };
+        }
         //await _db.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
-        await _rep.Context.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+
+        input.Details.ForEach(a =>
+        {
+            a.CustomerCode = input.CustomerCode;
+            a.CustomerName = input.CustomerName;
+
+        });
+
+        input.CustomerConfig.CustomerCode = input.CustomerCode;
+        input.CustomerConfig.CustomerName = input.CustomerName;
+
+        input.CustomerStatus=1;
+        input.Creator = _userManager.Account;
+        input.CreateTime = DateTime.Now;
+        var entity = input.Adapt<WMSCustomer>();
+        await _rep.Context.InsertNav(entity)
+            .Include(a => a.Details)
+            .Include(a => a.CustomerConfig)
+            .ExecuteCommandAsync();
 
         //给自己添加客户权限
         CustomerUserMapping customerUserMapping = new CustomerUserMapping();
@@ -131,8 +160,28 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response> Updata(UpdateWMSCustomerInput input)
     {
+
+
+        input.Details.ForEach(a =>
+        {
+            a.CustomerCode = input.CustomerCode;
+            a.CustomerName = input.CustomerName;
+
+        });
+
+        input.CustomerConfig.CustomerCode = input.CustomerCode;
+        input.CustomerConfig.CustomerName = input.CustomerName;
+
+        //input.CustomerStatus = 1;
+        //input.Creator = _userManager.Account;
+        //input.CreateTime = DateTime.Now;
+        //var entity = input.Adapt<WMSCustomer>();
+
         var entity = input.Adapt<WMSCustomer>();
-        await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+        await _rep.Context.UpdateNav(entity)
+            .Include(a => a.Details)
+            .Include(a => a.CustomerConfig)
+            .ExecuteCommandAsync();
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
     }
 
@@ -145,10 +194,34 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSCustomer> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable()
+            .Includes(a => a.Details)
+            .Includes(a => a.CustomerConfig)
+            .Where(u => u.Id == id).FirstAsync();
 
         return entity;
     }
+
+
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "UploadLogoFile")]
+    public async Task<string> UploadLogoFile(IFormFile file)
+    {
+
+
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        var uploadInfo = await ImageUploadUtils.WriteFile(file, "LogoFile");
+        UploadMappingLog uploadMappingLog = uploadInfo.Adapt<UploadMappingLog>();
+        uploadMappingLog.Creator = _userManager.Account;
+        uploadMappingLog.CreationTime = DateTime.Now;
+        uploadMappingLog.FileType = "Logo";
+        //uploadMappingLog.Url = uploadInfo.Url;
+        _repUploadMapping.Insert(uploadMappingLog);
+        return uploadInfo.Url + "/" + uploadInfo.FileName;
+    }
+
 
     /// <summary>
     /// 获取Customer列表
@@ -185,9 +258,11 @@ public class WMSCustomerService : IDynamicApiController, ITransient
     public async Task<List<SelectListItem>> SelectCustomer(dynamic input)
     {
         //获取可以使用的仓库权限
-        var warehouse = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerName).ToList();
-        return await _rep.AsQueryable().Where(a => warehouse.Contains(a.CustomerName)).Select(a => new SelectListItem { Text = a.CustomerName, Value = a.Id.ToString() }).ToListAsync();
+        var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerName).ToList();
+        return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerName)).Select(a => new SelectListItem { Text = a.CustomerName, Value = a.Id.ToString() }).ToListAsync();
     }
+
+
 
 }
 

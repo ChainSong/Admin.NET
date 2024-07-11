@@ -70,7 +70,7 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repInventoryUsable = _repInventoryUsable;
         factory._repWarehouseUser = _repWarehouseUser;
-       
+
         var response = await factory.InvrntoryDataPage(input);
         return response;
 
@@ -142,14 +142,14 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
     /// <summary>
     /// InvrntoryData
     /// </summary>
-    /// <param name="input"></param>
+    ///// <param name="input"></param>
     /// <returns></returns>
-    [HttpPost]
-    [ApiDescriptionSettings(Name = "InvrntoryDataExport")]
-    public async Task<List<WMSInventoryUsable>>   InvrntoryDataReport(WMSInventoryUsableInput input)
-    {
+    //[HttpPost]
+    //[ApiDescriptionSettings(Name = "InvrntoryDataExport")]
+    //public async Task<List<WMSInventoryUsable>> InvrntoryDataReport(WMSInventoryUsableInput input)
+    //{
 
-        return null;
+        //return null;
         //return Json(new { Code = "" });
         //使用简单工厂定制化  / 
         //IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
@@ -172,6 +172,42 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         //};
 
         //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
+    //}
+
+
+
+    /// <summary>
+    /// 可用库存汇总报表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "AvailableInventorySummaryReport")]
+    public async Task<SqlSugarPagedList<WMSInventoryUsable>> AvailableInventorySummaryReport(WMSInventoryUsableInput input)
+    {
+        var query = _repInventoryUsable.AsQueryable()
+                   .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
+                   .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.Area), u => u.Area.Contains(input.Area.Trim()))
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.Location), u => u.Location.Contains(input.Location.Trim()))
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.SKU), u => u.SKU.Contains(input.SKU.Trim()))
+                   .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsType), u => u.GoodsType.Contains(input.GoodsType.Trim()))
+                   .WhereIF(input.InventoryStatus > 0, u => u.InventoryStatus == input.InventoryStatus)
+                   .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                   .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                   .GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.SKU,a.GoodsName })
+                   .Select(a => new WMSInventoryUsable
+                   {
+                       CustomerName = a.CustomerName,
+                       WarehouseName = a.WarehouseName,
+                       GoodsName = a.GoodsName,
+                       SKU = a.SKU, 
+                       Qty = SqlFunc.AggregateSum(a.Qty) 
+                   });
+        query = query.OrderBuilder(input,"", "SKU");
+        return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
 
 }

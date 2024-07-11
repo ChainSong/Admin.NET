@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application.Interface
 {
@@ -27,10 +28,12 @@ namespace Admin.NET.Application.Interface
         //仓库用户关系仓储
         SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
-        //private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
-        //private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
+        SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
+
+        SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail { get; set; }
 
         Task<Response<List<OrderStatusDto>>> Strategy(List<long> request);
+        Task<Response<List<OrderStatusDto>>> StrategyPart(List<WMSASNForReceiptDetailDto> request);
 
     }
 }

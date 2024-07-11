@@ -125,6 +125,7 @@
 							</el-table>
 						</el-form>
 					</el-card>
+					
 				</el-tab-pane>
 				<el-tab-pane label="地址信息" name="AddressInfo">
 					<el-card>
@@ -206,7 +207,31 @@
 						</template>
 					</el-descriptions> -->
 				</el-tab-pane>
-
+				<el-tab-pane label="扩展配置" name="extends">
+						<el-form ref="extendsRuleRef" label-position="top" :rules="extendsRule"
+							:model="state.extend">
+							<el-row :gutter="35">
+								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
+									v-for="q in state.tableColumnExtends" v-bind:key="q.id">
+									<el-form-item :label="q.displayName" v-if="q.isCreate"
+										style="width: 90%;height: 100px;" :prop="q.columnName">
+										<template v-if="q.type == 'UploadFile'">
+											<el-upload class="upload-demo" :action="uploadFileURL" :headers="httpheaders"
+												:on-success="uploadFile">
+												<el-button type="primary">点击上传</el-button>
+												<div class="el-upload__tip">只能上传文件，且不超过500kb</div>
+											</el-upload>
+										</template>
+										<template v-if="q.type == 'TextBox'">
+											<el-input placeholder="请输入内容" size="small" style="width:90%"
+												v-model="state.extend[q.columnName]" v-if="q.isCreate">
+											</el-input>
+										</template>
+									</el-form-item>
+								</el-col>
+							</el-row>
+						</el-form>
+					</el-tab-pane>
 				<el-tab-pane label="Excel导入" name="ExcelCreate">
 					<el-row>
 						<el-col>
@@ -250,8 +275,9 @@ import { addWMSPreOrder, updateWMSPreOrder } from "/@/api/main/wMSPreOrder";
 import { getByTableNameList, getImportExcelTemplate } from "/@/api/main/tableColumns";
 import Header from "/@/entities/preOrder";
 import Detail from "/@/entities/preOrderDetail";
-import orderStatus from "/@/entities/orderStatus";
+import OrderStatus from "/@/entities/orderStatus";
 import OrderAddress from "/@/entities/orderAddress";
+import Extend from "/@/entities/preOrderExtend";
 import TableColumns from "/@/entities/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import { Local, Session } from '/@/utils/storage';
@@ -276,6 +302,8 @@ const state = ref({
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
 	orderAddress: new OrderAddress(),
+	extend: new Extend(),
+
 	//通用的表字段
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
@@ -286,8 +314,11 @@ const state = ref({
 	tableColumnOrderAddress: new TableColumns(),
 	tableColumnOrderAddresss: new Array<TableColumns>(),
 
+	tableColumnExtend: new TableColumns(),
+	tableColumnExtends: new Array<TableColumns>(),
+
 	//导入提示
-	orderStatus: new Array<orderStatus>(),
+	orderStatus: new Array<OrderStatus>(),
 	// header: new Array<Details>(),
 })
 //
@@ -297,6 +328,8 @@ let activeName: string = 'PageCreate';
 let baseURL = import.meta.env.VITE_API_URL;
 //给上传组件赋值url
 let uploadURL = baseURL + '/api/wMSPreOrder/UploadExcelFile';
+//上传附件路由
+let uploadFileURL = baseURL + '/api/wMSPreOrder/UploadPreOrderFile';
 //给上传组件赋值token
 // 获取本地的 token
 const accessTokenKey = 'access-token';
@@ -310,7 +343,9 @@ let headerRuleRef = ref<any>({});
 let headerRule = ref({});
 let detailRuleRef = ref<any>({});
 let detailRule = ref({});
+let addressRuleRef = ref<any>({});
 let addressRule = ref({});
+let extendsRule = ref({});
 
 
 //父级传递来的函数，用于回调
@@ -348,11 +383,12 @@ const cancel = () => {
 const submit = async () => {
 	state.value.header.details = state.value.details;
 	state.value.header.orderAddress = state.value.orderAddress;
+	state.value.header.extend = state.value.extend;
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
 				if (isValidDetail) {
-					addressRule.value.validate(async (isValidAddress: boolean, fieldsDetail?: any) => {
+					addressRuleRef.value.validate(async (isValidAddress: boolean, fieldsAddress?: any) => {
 						if (isValidAddress) {
 
 
@@ -377,7 +413,7 @@ const submit = async () => {
 							}
 						} else {
 							ElMessage({
-								message: `地址表单有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
+								message: `地址表单有${Object.keys(fieldsAddress).length}处验证失败，请修改后再提交`,
 								type: "error",
 							});
 						}
@@ -447,14 +483,21 @@ const gettableColumn = async () => {
 			];
 		}
 	});
-	// console.log(state.value.tableColumnOrderAddresss);
+	console.log(addressRule);
+
+	let resExtend = await getByTableNameList("WMS_PreOrderExtend");
+	state.value.tableColumnExtends = resExtend.data.result;
+
+	console.log("state.value.tableColumnExtends");
+	console.log(state.value.tableColumnExtends);
+	
 };
 
 // -------------------------------非可公用部分----------------------------------------
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
-	if (response.result.data.length > 0) {
+	if (response.result.data!=null && response.result.data.length > 0) {
 		state.value.orderStatus = response.result.data;
 		// console.log(state.value.orderStatus);
 		//导入弹框提醒
@@ -463,6 +506,12 @@ const ImportExcel = (response, file, fileList) => {
 		ElMessage.error(response.result.msg);
 	}
 
+}
+
+// 上传结果uploadImg
+const uploadFile = (response, file, fileList) => {
+	// closeDialog();
+	state.value.extend.shippingAttachmentsUrl=response.result;
 }
 //获取导入的模板
 // 导出日志
@@ -484,3 +533,4 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
+../../../../entities/preOrder../../../../entities/preOrderDetail

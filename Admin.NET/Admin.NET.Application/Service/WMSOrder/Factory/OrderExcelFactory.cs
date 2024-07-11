@@ -1,6 +1,6 @@
 ﻿
 using Admin.NET.Application.Interface;
-using Admin.NET.Application.Service.Strategy;
+using Admin.NET.Application.Service;
 using Admin.NET.Application.Strategy;
 using System;
 using System.Collections.Generic;

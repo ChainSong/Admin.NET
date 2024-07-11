@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using XAct.Library.Settings;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Service.WMSExpress.Enumerate;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -108,100 +109,9 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CompanyCode), u => u.CompanyCode.Contains(input.CompanyCode.Trim()))
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.Sign), u => u.Sign.Contains(input.Sign.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerCode), u => u.CustomerCode.Contains(input.CustomerCode.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.PartnerId), u => u.PartnerId.Contains(input.PartnerId.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Checkword), u => u.Checkword.Contains(input.Checkword.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ClientId), u => u.ClientId.Contains(input.ClientId.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Version), u => u.Version.Contains(input.Version.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Password), u => u.Password.Contains(input.Password.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.MonthAccount), u => u.MonthAccount.Contains(input.MonthAccount.Trim()))
-                    //.WhereIF(input.Status != 0, u => u.Status == input.Status)
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str1), u => u.Str1.Contains(input.Str1.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str2), u => u.Str2.Contains(input.Str2.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str3), u => u.Str3.Contains(input.Str3.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str4), u => u.Str4.Contains(input.Str4.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str5), u => u.Str5.Contains(input.Str5.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str6), u => u.Str6.Contains(input.Str6.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str7), u => u.Str7.Contains(input.Str7.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str8), u => u.Str8.Contains(input.Str8.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str9), u => u.Str9.Contains(input.Str9.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str10), u => u.Str10.Contains(input.Str10.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str11), u => u.Str11.Contains(input.Str11.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str12), u => u.Str12.Contains(input.Str12.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str13), u => u.Str13.Contains(input.Str13.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str14), u => u.Str14.Contains(input.Str14.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str15), u => u.Str15.Contains(input.Str15.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str16), u => u.Str16.Contains(input.Str16.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str17), u => u.Str17.Contains(input.Str17.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str18), u => u.Str18.Contains(input.Str18.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str19), u => u.Str19.Contains(input.Str19.Trim()))
-                    //.WhereIF(!string.IsNullOrWhiteSpace(input.Str20), u => u.Str20.Contains(input.Str20.Trim()))
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-
-                    .Select<WMSExpressConfigOutput>()
-;
-        //if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
-        //{
-        //    DateTime? start = input.CreationTimeRange[0];
-        //    query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-        //    if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
-        //    {
-        //        var end = input.CreationTimeRange[1].Value.AddDays(1);
-        //        query = query.Where(u => u.CreationTime < end);
-        //    }
-        //}
-        //if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
-        //{
-        //    DateTime? start = input.DateTime1Range[0];
-        //    query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
-        //    if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
-        //    {
-        //        var end = input.DateTime1Range[1].Value.AddDays(1);
-        //        query = query.Where(u => u.DateTime1 < end);
-        //    }
-        //}
-        //if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
-        //{
-        //    DateTime? start = input.DateTime2Range[0];
-        //    query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
-        //    if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
-        //    {
-        //        var end = input.DateTime2Range[1].Value.AddDays(1);
-        //        query = query.Where(u => u.DateTime2 < end);
-        //    }
-        //}
-        //if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
-        //{
-        //    DateTime? start = input.DateTime3Range[0];
-        //    query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
-        //    if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
-        //    {
-        //        var end = input.DateTime3Range[1].Value.AddDays(1);
-        //        query = query.Where(u => u.DateTime3 < end);
-        //    }
-        //}
-        //if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
-        //{
-        //    DateTime? start = input.DateTime4Range[0];
-        //    query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
-        //    if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
-        //    {
-        //        var end = input.DateTime4Range[1].Value.AddDays(1);
-        //        query = query.Where(u => u.DateTime4 < end);
-        //    }
-        //}
-        //if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
-        //{
-        //    DateTime? start = input.DateTime5Range[0];
-        //    query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
-        //    if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
-        //    {
-        //        var end = input.DateTime5Range[1].Value.AddDays(1);
-        //        query = query.Where(u => u.DateTime5 < end);
-        //    }
-        //}
+                    .Select<WMSExpressConfigOutput>();
         query = query.OrderBuilder(input);
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
@@ -215,7 +125,21 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Add")]
     public async Task Add(AddWMSExpressConfigInput input)
     {
+
+        //判断是否存在同名配置
+        var checkEntity = await _rep.GetFirstAsync(u => u.ExpressCompany == input.ExpressCompany && u.CustomerName == input.CustomerName && u.WarehouseName == input.WarehouseName);
+        if (checkEntity != null)
+        {
+            throw Oops.Oh(ErrorCodeExpressConfigEnum.E0001);
+        }
         var entity = input.Adapt<WMSExpressConfig>();
+
+        //判断是否存在同名配置
+
+
+        entity.Status = 1;
+        entity.Creator = _userManager.Account;
+        entity.CreationTime = DateTime.Now;
         await _rep.InsertAsync(entity);
     }
 
@@ -230,7 +154,7 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
     {
         var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
         //await _rep.FakeDeleteAsync(entity);   //假删除
-        await _rep.DeleteAsync(entity);   //假删除
+        await _rep.DeleteAsync(entity);   //删除
     }
 
     /// <summary>
@@ -321,7 +245,7 @@ public class WMSExpressConfigService : IDynamicApiController, ITransient
         factory._repWarehouse = _repWarehouse;
         factory._repExpressDelivery = _repExpressDelivery;
         factory._repWMSExpressFee = _repWMSExpressFee;
-        
+
         //获取快递信息（包含快递单号）
         //var data = await factory.GetExpressData(input);
         //获取打印信息

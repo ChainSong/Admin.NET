@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Admin.NET
- * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/Admin.NET/'>https://gitee.com/zuohuaijun/Admin.NET</a>
+ * HiGenious 通用权限开发平台
+ * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/HiGenious/'>https://gitee.com/zuohuaijun/HiGenious</a>
  *
  * OpenAPI spec version: 1.0.0
  * Contact: 515096995@qq.com
@@ -11,81 +11,105 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+
 import { JobCreateTypeEnum } from './job-create-type-enum';
-/**
+ /**
  * 
+ *
  * @export
  * @interface UpdateJobDetailInput
  */
 export interface UpdateJobDetailInput {
+
     /**
      * 雪花Id
+     *
      * @type {number}
      * @memberof UpdateJobDetailInput
      */
     id?: number;
+
     /**
      * 组名称
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     groupName?: string | null;
+
     /**
      * 作业类型FullName
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     jobType?: string | null;
+
     /**
      * 程序集Name
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     assemblyName?: string | null;
+
     /**
      * 描述信息
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     description?: string | null;
+
     /**
      * 是否并行执行
+     *
      * @type {boolean}
      * @memberof UpdateJobDetailInput
      */
     concurrent?: boolean;
+
     /**
      * 是否扫描特性触发器
+     *
      * @type {boolean}
      * @memberof UpdateJobDetailInput
      */
     includeAnnotations?: boolean;
+
     /**
      * 额外数据
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     properties?: string | null;
+
     /**
      * 更新时间
+     *
      * @type {Date}
      * @memberof UpdateJobDetailInput
      */
     updatedTime?: Date | null;
+
     /**
-     * 
      * @type {JobCreateTypeEnum}
      * @memberof UpdateJobDetailInput
      */
     createType?: JobCreateTypeEnum;
+
     /**
      * 脚本代码
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */
     scriptCode?: string | null;
+
     /**
      * 作业Id
+     *
      * @type {string}
      * @memberof UpdateJobDetailInput
      */

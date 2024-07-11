@@ -73,21 +73,34 @@ public class OrderReturnStrategy : IOrderReturnInterface
             return response;
         }
         //得到分配信息
-        var OrderAllocation = await _repOrderAllocation.AsQueryable().Where(b =>ids.Contains(b.OrderId)).ToListAsync();
+        var OrderAllocation = await _repOrderAllocation.AsQueryable().Where(b => ids.Contains(b.OrderId)).ToListAsync();
 
         //先回退分配信息
         var InventoryIds = OrderAllocation.Select(b => b.InventoryId).ToList();
-        await _repInventoryUsable.UpdateAsync(a => new WMSInventoryUsable { InventoryStatus = (int)InventoryStatusEnum.可用 }, a => InventoryIds.Contains(a.Id));
+
+        await _repInventoryUsable.Context.Updateable<WMSInventoryUsable>()
+        .SetColumns(p => p.InventoryStatus == (int)InventoryStatusEnum.可用)
+        .Where(p => InventoryIds.Contains(p.Id))
+        .ExecuteCommandAsync();
+        //await _repInventoryUsable.UpdateAsync(a => new WMSInventoryUsable { InventoryStatus = (int)InventoryStatusEnum.可用 }, a => InventoryIds.Contains(a.Id));
         //删除分配信息
         await _repOrderAllocation.DeleteAsync(OrderAllocation);
 
         //回退分配数量
-        await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { AllocatedQty = 0 }, a => ids.Contains(a.OrderId));
+        //await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { AllocatedQty = 0 }, a => ids.Contains(a.OrderId));
+        await _repOrderDetail.Context.Updateable<WMSOrderDetail>()
+        .SetColumns(p => p.AllocatedQty == 0)
+        .Where(p => ids.Contains(p.OrderId))
+        .ExecuteCommandAsync();
 
-   
         var PreOrderIds = await order.Select(b => b.PreOrderId).ToListAsync();
         //先更新主表，在更新明细表
-        await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
+        //await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
+
+        await _repPreOrder.Context.Updateable<WMSPreOrder>()
+      .SetColumns(p => p.PreOrderStatus == (int)PreOrderStatusEnum.新增)
+      .Where(p => PreOrderIds.Contains(p.Id))
+      .ExecuteCommandAsync();
         await _repPreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
         {
             ActualQty = 0,

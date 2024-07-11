@@ -91,9 +91,11 @@
     <Folder Include="Service\WMSASN\Abstract\" />
     <Folder Include="Service\WMSASN\Exporting\" />
     <Folder Include="Service\WMSASN\Mapper\" />
+    <Folder Include="Service\WMSCustomer\Enumerate\" />
     <Folder Include="Service\WMSInventoryReport\Enumerate\" />
     <Folder Include="Service\WMSOrder\Abstract\" />
     <Folder Include="Service\WMSReceiptReceiving\Dto\" />
+    <Folder Include="Service\WMSReport\Dto\" />
   </ItemGroup>
 
 </Project>

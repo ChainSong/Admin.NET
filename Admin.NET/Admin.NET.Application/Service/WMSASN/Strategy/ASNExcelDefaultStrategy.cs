@@ -29,8 +29,11 @@ namespace Admin.NET.Application.Strategy
         //public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         //注入客户关系仓储
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
-        public ASNExcelDefaultStrategy(
-        )
+
+        static List<string> _tableNames = new List<string>() { "WMS_ASN", "WMS_ASNDetail" };
+
+
+        public ASNExcelDefaultStrategy()
         {
 
         }
@@ -47,21 +50,50 @@ namespace Admin.NET.Application.Strategy
             Response<DataTable, List<OrderStatusDto>> response = new Response<DataTable, List<OrderStatusDto>>();
             List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
 
-            var headerTableColumn = GetColumns("WMS_ASN");
-            var detailTableColumn = GetColumns("WMS_ASNDetail");
+            //var headerTableColumn = GetColumns("WMS_ASN");
+            //var detailTableColumn = GetColumns("WMS_ASNDetail");
 
-
+            List<TableColumns> tableColumnList = new List<TableColumns>();
+            foreach (var item in _tableNames)
+            {
+                //var  tableColumns = GetColumns(item);
+                tableColumnList.AddRange(GetColumns(item));
+            }
+            //判断模板是不是最新的
+            //判断方法直接比较字段数量，如果数量不一致，则提示需要更新模板
+            //主信息需要导入的字段数量
+            //int headerCount = headerTableColumn.Count(a => a.IsImportColumn == 1);
+            //明细信息需要导入的字段数量
+            //int detailCount = detailTableColumn.Count(a => a.IsImportColumn == 1);
+            if (tableColumnList.Count != request.Columns.Count)
+            {
+                statusDtos.Add(new OrderStatusDto()
+                {
+                    //Id = b.Id,
+                    ExternOrder = "第1行",
+                    SystemOrder = "第1行",
+                    //Type = b.OrderType,
+                    StatusCode = StatusCode.Warning,
+                    //StatusMsg = (string)StatusCode.warning,
+                    Msg = "模板更新，请重新下载模板"
+                });
+                response.Result = statusDtos;
+                response.Data = request;
+                //response.Code = StatusCode.Success;
+                //throw new NotImplementedException();
+                return response;
+            }
 
             //循环datatable
             for (int i = 0; i < request.Columns.Count; i++)
             {
                 //获取datatable的标头
                 var s = request.Columns[i].ColumnName;
-                var Column = headerTableColumn.Where(a => a.DisplayName == s).FirstOrDefault();
-                if (Column == null)
-                {
-                    Column = detailTableColumn.Where(a => a.DisplayName == s).FirstOrDefault();
-                }
+                var Column = tableColumnList.Where(a => a.DisplayName == s).FirstOrDefault();
+                //if (Column == null)
+                //{
+                //    Column = detailTableColumn.Where(a => a.DisplayName == s).FirstOrDefault();
+                //}
 
                 if (Column == null)
                 {
@@ -120,6 +152,24 @@ namespace Admin.NET.Application.Strategy
                                     //StatusMsg = (string)StatusCode.warning,
                                     Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不在系统提供范围内"
                                 });
+                            }
+                            else if (Column.Type == "DatePicker" || Column.Type == "DateTimePicker")
+                            {
+                                //var date = new DateTime();
+                                var isDate = DateTime.TryParse(row[s].ToString(), out DateTime date);
+                                if (!isDate && date.Year < 2000)
+                                {
+                                    statusDtos.Add(new OrderStatusDto()
+                                    {
+                                        //Id = b.Id,
+                                        ExternOrder = "第" + flag + "行",
+                                        SystemOrder = "第" + flag + "行",
+                                        //Type = b.OrderType,
+                                        StatusCode = StatusCode.Warning,
+                                        //StatusMsg = (string)StatusCode.warning,
+                                        Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不是有效的日期格式"
+                                    });
+                                }
                             }
                         }
 

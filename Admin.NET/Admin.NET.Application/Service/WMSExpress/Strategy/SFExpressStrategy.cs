@@ -337,7 +337,7 @@ public class SFExpressStrategy : IExpressInterface
         var receiver = _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == packageOrder.PreOrderNumber).First();
         sFContactinfolists.Add(new SFContactinfolist()
         {
-            address = receiver.Address,
+            address = receiver.Address?.Replace('(', ' ').Replace(')', ' ').Replace('/', ' '),
             city = receiver.City,
             contact = receiver.Name,
             contactType = 2,
@@ -364,14 +364,15 @@ public class SFExpressStrategy : IExpressInterface
             payMethod = 1, //付款方式，支持以下值： 1:寄方付 2:收方付 3:第三方付
             parcelQty = package.Count(),//包裹数，一个包裹对应一个运单号；若包裹数大于1，则返回一个母运单号和N-1个子运单号
             totalWeight = package.Sum(a => a.GrossWeight).Value,//订单货物总重量（郑州空港海关必填）， 若为子母件必填， 单位千克， 精确到小数点后3位，如果提供此值， 必须>0 (子母件需>6)
-            isOneselfPickup = 1,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
+            isOneselfPickup = 0,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
             customsInfo = new SFCustomsinfo(),
-            expressTypeId = 2, //https://open.sf-express.com/developSupport/734349?activeIndex=324604
+            //isSignBack = receiver.IsSignBack == 1 ? 1 : 0,// 是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
+            expressTypeId = 2, //快件产品类别表 https://open.sf-express.com/developSupport/734349?activeIndex=324604
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
-            contactInfoList = sFContactinfolists
-
+            contactInfoList = sFContactinfolists 
         };
+
         input.Checkword = getExpressConfig.Checkword;
         input.Url = getExpressConfig.Url;
         input.PartnerId = getExpressConfig.PartnerId;

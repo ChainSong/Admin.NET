@@ -1,301 +1,59 @@
 ﻿<template>
 	<div class="wMSExpressConfig-container">
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="700" draggable="">
-			<el-form :model="ruleForm" ref="ruleFormRef" size="default" label-width="100px" :rules="rules">
-				<el-row :gutter="35">
-					<el-form-item v-show="false">
-						<el-input v-model="ruleForm.id" />
-					</el-form-item>
-					<!-- <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="CustomerId" prop="customerId">
-							<el-input v-model="ruleForm.customerId" placeholder="请输入CustomerId" clearable />
-						</el-form-item>
-					</el-col> -->
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="客户名称" prop="customerName">
-							<el-input v-model="ruleForm.customerName" :readonly="true" placeholder="请输入客户名称" clearable />
-						</el-form-item>
-					</el-col>
-					<!-- <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="WarehouseId" prop="warehouseId">
-							<el-input v-model="ruleForm.warehouseId" placeholder="请输入WarehouseId" clearable />
-						</el-form-item>
-					</el-col> -->
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="仓库名称" prop="warehouseName">
-							<el-input v-model="ruleForm.warehouseName" :readonly="true"  placeholder="请输入仓库名称" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="快递代码" prop="expressCode">
-							<el-input v-model="ruleForm.expressCode" :readonly="true"  placeholder="请输入快递代码" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="快递公司" prop="expressCompany">
-							<el-input v-model="ruleForm.expressCompany" :readonly="true"  placeholder="请输入快递公司" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Url" prop="url">
-							<el-input v-model="ruleForm.url" placeholder="请输入Url" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="AppKey" prop="appKey">
-							<el-input v-model="ruleForm.appKey" placeholder="请输入AppKey" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="CompanyCode" prop="companyCode">
-							<el-input v-model="ruleForm.companyCode" placeholder="请输入CompanyCode" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Sign" prop="sign">
-							<el-input v-model="ruleForm.sign" placeholder="请输入Sign" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="CustomerCode" prop="customerCode">
-							<el-input v-model="ruleForm.customerCode" placeholder="请输入CustomerCode" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="PartnerId" prop="partnerId">
-							<el-input v-model="ruleForm.partnerId" placeholder="请输入PartnerId" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Checkword" prop="checkword">
-							<el-input v-model="ruleForm.checkword" placeholder="请输入Checkword" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="ClientId" prop="clientId">
-							<el-input v-model="ruleForm.clientId" placeholder="请输入ClientId" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Version" prop="version">
-							<el-input v-model="ruleForm.version" placeholder="请输入Version" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Password" prop="password">
-							<el-input v-model="ruleForm.password" placeholder="请输入Password" clearable />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="MonthAccount" prop="monthAccount">
-							<el-input v-model="ruleForm.monthAccount" placeholder="请输入MonthAccount" clearable />
-						</el-form-item>
-					</el-col>
-					<!-- <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Status" prop="status">
-							<el-input-number v-model="ruleForm.status" placeholder="请输入Status" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Creator" prop="creator">
-							<el-input v-model="ruleForm.creator" placeholder="请输入Creator" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="CreationTime" prop="creationTime">
-							<el-date-picker v-model="ruleForm.creationTime" type="date" placeholder="CreationTime" />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Updator" prop="updator">
-							<el-input v-model="ruleForm.updator" placeholder="请输入Updator" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str1" prop="str1">
-							<el-input v-model="ruleForm.str1" placeholder="请输入Str1" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str2" prop="str2">
-							<el-input v-model="ruleForm.str2" placeholder="请输入Str2" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str3" prop="str3">
-							<el-input v-model="ruleForm.str3" placeholder="请输入Str3" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str4" prop="str4">
-							<el-input v-model="ruleForm.str4" placeholder="请输入Str4" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str5" prop="str5">
-							<el-input v-model="ruleForm.str5" placeholder="请输入Str5" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str6" prop="str6">
-							<el-input v-model="ruleForm.str6" placeholder="请输入Str6" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str7" prop="str7">
-							<el-input v-model="ruleForm.str7" placeholder="请输入Str7" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str8" prop="str8">
-							<el-input v-model="ruleForm.str8" placeholder="请输入Str8" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str9" prop="str9">
-							<el-input v-model="ruleForm.str9" placeholder="请输入Str9" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str10" prop="str10">
-							<el-input v-model="ruleForm.str10" placeholder="请输入Str10" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str11" prop="str11">
-							<el-input v-model="ruleForm.str11" placeholder="请输入Str11" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str12" prop="str12">
-							<el-input v-model="ruleForm.str12" placeholder="请输入Str12" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str13" prop="str13">
-							<el-input v-model="ruleForm.str13" placeholder="请输入Str13" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str14" prop="str14">
-							<el-input v-model="ruleForm.str14" placeholder="请输入Str14" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str15" prop="str15">
-							<el-input v-model="ruleForm.str15" placeholder="请输入Str15" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str16" prop="str16">
-							<el-input v-model="ruleForm.str16" placeholder="请输入Str16" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str17" prop="str17">
-							<el-input v-model="ruleForm.str17" placeholder="请输入Str17" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str18" prop="str18">
-							<el-input v-model="ruleForm.str18" placeholder="请输入Str18" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str19" prop="str19">
-							<el-input v-model="ruleForm.str19" placeholder="请输入Str19" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="Str20" prop="str20">
-							<el-input v-model="ruleForm.str20" placeholder="请输入Str20" clearable />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="DateTime1" prop="dateTime1">
-							<el-date-picker v-model="ruleForm.dateTime1" type="date" placeholder="DateTime1" />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="DateTime2" prop="dateTime2">
-							<el-date-picker v-model="ruleForm.dateTime2" type="date" placeholder="DateTime2" />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="DateTime3" prop="dateTime3">
-							<el-date-picker v-model="ruleForm.dateTime3" type="date" placeholder="DateTime3" />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="DateTime4" prop="dateTime4">
-							<el-date-picker v-model="ruleForm.dateTime4" type="date" placeholder="DateTime4" />
-							
-						</el-form-item>
-						
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="DateTime5" prop="dateTime5">
-							<el-date-picker v-model="ruleForm.dateTime5" type="date" placeholder="DateTime5" />
-							
-						</el-form-item>
-						
-					</el-col> -->
-				</el-row>
-			</el-form>
+			<el-card>
+				<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
+					<el-row :gutter="35">
+						<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" v-for="i in state.tableColumnHeaders.filter(a=>a.isCreate==1)"
+							v-bind:key="i.id">
+							<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
+								:prop="i.columnName">
+								<template v-if="i.type == 'TextBox'">
+									<el-input placeholder="请输入内容" size="small" style="width:90%"
+										v-model="state.header[i.columnName]" v-if="i.isCreate">
+									</el-input>
+								</template>
+								<template v-if="i.type == 'DropDownListInt'">
+									<el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+										size="small" style="width:90%" filterable>
+										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
+											:label="item.name" :value="item.codeInt">
+										</el-option>
+									</el-select>
+								</template>
+								<template v-if="i.type == 'DropDownListStrRemote'">
+									<select-Remote :whereData="state.header" :isDisabled="i.isUpdate" :columnData="i" :defaultvValue="state.header[i.columnName]"
+										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
+
+								</template>
+								<template v-if="i.type == 'DropDownListStr'">
+
+									<el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+										size="small" style="width:90%" filterable>
+										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
+											:label="item.name" :value="item.codeStr">
+										</el-option>
+									</el-select>
+								</template>
+								<template v-if="i.type == 'DatePicker'">
+									<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate" type="date"
+										placeholder="选择日期" size="small" style="width:90%">
+									</el-date-picker>
+								</template>
+								<template v-if="i.type == 'DateTimePicker'">
+									<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate" type="datetime"
+										start-placeholder="选择日期时间" size="small" style="width:90%">
+									</el-date-picker>
+								</template>
+							</el-form-item>
+						</el-col>
+					</el-row>
+				</el-form>
+			</el-card>
+
+			<div>
+
+			</div>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel" size="default">取 消</el-button>
@@ -307,70 +65,122 @@
 </template>
 
 <script lang="ts" setup>
-	import { ref,onMounted } from "vue";
-	import { ElMessage } from "element-plus";
-	import type { FormRules } from "element-plus";
-	import { addWMSExpressConfig, updateWMSExpressConfig } from "/@/api/main/wMSExpressConfig";
-	//父级传递来的参数
-	var props = defineProps({
+import { ref, onMounted } from "vue";
+import { ElMessage } from "element-plus";
+import type { FormRules } from "element-plus";
+import { pageWMSExpressConfig, deleteWMSExpressConfig,updateWMSExpressConfig,getWMSExpressConfig } from '/@/api/main/wMSExpressConfig';
+import { getByTableNameList } from "/@/api/main/tableColumns";
+import selectRemote from '/@/views/tools/select-remote.vue'
+import Header from "/@/entities/wxpressConfig";
+import TableColumns from "/@/entities/tableColumns";
+
+
+//父级传递来的参数
+var props = defineProps({
 	title: {
-	type: String,
-	default: "",
+		type: String,
+		default: "",
 	},
-	});
-	//父级传递来的函数，用于回调
-	const emit = defineEmits(["reloadTable"]);
-	const ruleFormRef = ref();
-	const isShowDialog = ref(false);
- 
-	const ruleForm = ref<any>({});
-		//自行添加其他规则
-		const rules = ref<FormRules>({
 });
+
+
+const state = ref({
+
+	visible: false,
+	loading: false,
+	header: new Header(),
+	headers: new Array<Header>(),
+	tableColumnHeader: new TableColumns(),
+	tableColumnHeaders: new Array<TableColumns>(),
+	tableColumnDetail: new TableColumns(),
+	tableColumnDetails: new Array<TableColumns>()
+})
+
+let headerRuleRef = ref<any>({});
+let headerRule = ref({});
+let detailRuleRef = ref<any>({});
+let detailRule = ref({});
+
+
+//父级传递来的函数，用于回调
+const emit = defineEmits(["reloadTable"]);
+
+// headerRule : {},
+//     detailRule :{},
+
+const isShowDialog = ref(false);
 
 // 打开弹窗
 const openDialog = (row: any) => {
-  ruleForm.value = JSON.parse(JSON.stringify(row));
-  isShowDialog.value = true;
+
+	state.value.header = JSON.parse(JSON.stringify(row));
+	isShowDialog.value = true;
+	gettableColumn();
+	get();
 };
 
 // 关闭弹窗
 const closeDialog = () => {
-  emit("reloadTable");
-  isShowDialog.value = false;
+	emit("reloadTable");
+	isShowDialog.value = false;
 };
 
 // 取消
 const cancel = () => {
-  isShowDialog.value = false;
+	isShowDialog.value = false;
 };
 
 // 提交
 const submit = async () => {
-  ruleFormRef.value.validate(async (isValid: boolean, fields?: any) => {
-    if (isValid) {
-      let values = ruleForm.value;
-      if (ruleForm.value.id != undefined && ruleForm.value.id > 0) {
-        await updateWMSExpressConfig(values);
-      } else {
-        await addWMSExpressConfig(values);
-      }
-      closeDialog();
-    } else {
-      ElMessage({
-        message: `表单有${Object.keys(fields).length}处验证失败，请修改后再提交`,
-        type: "error",
-      });
-    }
-  });
+
+	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
+		if (isValid) {
+
+			await updateWMSExpressConfig(state.value.header);
+			closeDialog();
+
+		} else {
+			ElMessage({
+				message: `表单有${Object.keys(fields).length}处验证失败，请修改后再提交`,
+				type: "error",
+			});
+		}
+
+	});
 };
 
+const get = async () => {
+	let result = await getWMSExpressConfig(state.value.header.id);
+	state.value.header = result.data.result;
+	// state.value.details = result.data.result.details;
+}
 
+const gettableColumn = async () => {
+	let res = await getByTableNameList("WMS_ExpressConfig");
+	state.value.tableColumnHeaders = res.data.result;
+	headerRule.value = {};
+	//验证
+	state.value.tableColumnHeaders.forEach((a) => {
+		if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+			//  console.log("添加验证"+a.columnName)
+			headerRule.value[a.columnName] = [
+				{
+					required: true,
+					message: a.displayName,
+					trigger: "blur",
+				},
+			];
+		}
+	});
+	// let resDetail = await getByTableNameList("CustomerDetail");
+	// state.value.tableColumnDetails = resDetail.data.result;
+	// detailRule.value = {};
 
-
+};
 
 // 页面加载时
 onMounted(async () => {
+	gettableColumn();
 });
 
 //将属性或者函数暴露给父组件

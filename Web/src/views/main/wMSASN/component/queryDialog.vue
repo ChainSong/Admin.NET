@@ -4,7 +4,7 @@
 			<el-container>
 				<el-main>
 					<el-descriptions class="margin-top" :column="2" size="small" border>
-						<template v-for="i in state.tableColumnHeaders.filter(a=>a.isCreate==1 || a.isKey==1)">
+						<template v-for="i in state.tableColumnHeaders.filter(a=>a.isCreate || a.isKey)">
 						 
 							<el-descriptions-item  :prop="i.displayName" :label="i.displayName">
 								<template>
@@ -45,7 +45,7 @@
 					<el-form>
 						<el-table :data="state.details" style="width: 100%" height="250">
 							<template v-for="(v, index) in state.tableColumnDetails">
-								<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
+								<el-table-column v-if="v.isCreate ||v.isKey" :key="index" :fixed="false" :label="v.displayName"
 									width="150">
 									<template #default="scope">
 										<label v-text="scope.row[v.columnName]"></label>

@@ -1,7 +1,8 @@
 import Entity from './entity'
-import preorderDetail from './preorderDetail'
+import PreOrderDetail from './preOrderDetail'
+import PreOrderExtend from './preOrderExtend'
 
-export default class preorder extends Entity<number>{
+export default class preOrder extends Entity<number>{
     preOrderNumber: string;
     externOrderNumber: string;
     customerId: number;
@@ -47,5 +48,7 @@ export default class preorder extends Entity<number>{
     int3: number;
     int4: number;
     int5: number;
-    preorderDetails: Array<preorderDetail>;
+    preOrderDetails: Array<PreOrderDetail>;
+    preOrderExtend: Array<PreOrderExtend>;
+    
 }

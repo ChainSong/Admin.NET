@@ -56,60 +56,19 @@
             </el-col>
           </template>
         </el-row>
-
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSCustomer:page'"> 查询 </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSCustomer:add'"> 新增
           </el-button>
-
         </el-form-item>
-
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-      <!-- <el-table :data="tableData" style="width: 100%" v-loading="loading" tooltip-effect="light" row-key="id" border="">
-        <el-table-column type="index" label="序号" width="55" align="center" />
-        <el-table-column prop="projectId" label="ProjectId" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="customerCode" label="客户代码" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="customerName" label="客户名称" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="description" label="Description" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="customerType" label="CustomerType" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="customerStatus" label="CustomerStatus" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="creditLine" label="CreditLine" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="province" label="Province" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="city" label="City" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="address" label="Address" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="remark" label="Remark" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="email" label="Email" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="phone" label="Phone" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="lawPerson" label="LawPerson" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="postCode" label="PostCode" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="bank" label="Bank" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="account" label="Account" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="taxId" label="TaxId" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="invoiceTitle" label="InvoiceTitle" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="fax" label="Fax" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="webSite" label="WebSite" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="creator" label="Creator" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="creationTime" label="CreationTime" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="updator" label="Updator" fixed="" show-overflow-tooltip="" />
-        <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip=""
-          v-if="auth('wMSCustomer:edit') || auth('wMSCustomer:delete')">
-          <template #default="scope">
-            <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openEditWMSCustomer(scope.row)"
-              v-auth="'wMSCustomer:edit'"> 编辑 </el-button>
-            <el-button icon="ele-Delete" size="small" text="" type="primary" @click="delWMSCustomer(scope.row)"
-              v-auth="'wMSCustomer:delete'"> 删除 </el-button>
-          </template>
-        </el-table-column>
-      </el-table> -->
-
       <el-table :data="state.headers" show-overflow-tooltip tooltip-effect="light" row-key="id" style="width: 100%">
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
@@ -117,7 +76,7 @@
               :prop="v.columnName" :label="v.displayName" width="150" max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
-                  <el-tag  v-if="item.codeInt ==  state.headers[scope.$index][v.columnName]" v-bind:key="item.codeInt" show-icon
+                  <el-tag  v-if="item.codeInt.toString() ==  state.headers[scope.$index][v.columnName]" v-bind:key="item.codeInt" show-icon
                     :type="item.color">
                     {{ item.name }}
                   </el-tag>

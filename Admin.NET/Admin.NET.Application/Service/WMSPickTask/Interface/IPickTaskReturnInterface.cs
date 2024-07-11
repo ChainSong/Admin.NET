@@ -17,7 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 
-namespace Admin.NET.Application.Service.Interface;
+namespace Admin.NET.Application;
 public interface IPickTaskReturnInterface
 {
 

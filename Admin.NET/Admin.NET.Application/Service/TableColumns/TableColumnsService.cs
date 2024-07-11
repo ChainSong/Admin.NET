@@ -469,24 +469,24 @@ public class TableColumnsService : IDynamicApiController, ITransient
     public ActionResult ImportExcelTemplate(TableColumnsInput input)
     {
         // TODO:批量删除前的逻辑判断，是否允许删除
-        var query = _rep.AsQueryable()
-       //模糊搜索TableName
-       .WhereIF(!input.TableName.IsNullOrEmpty(), a => a.TableName == input.TableName)
-       //.WhereIF(input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-       .Where(a => a.TenantId == _userManager.TenantId && a.IsImportColumn == 1)
-       //.WhereIF(a => a.IsImportColumn == 1)
-       //.WhereIf(1 == 1, a => a.TenantId == input.TenantId)
-       .Select(a => new TableColumns
-       {
-           DisplayName = a.DisplayName,
-           //由于框架约定大于配置， 数据库的字段首字母小写
-           //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-           DbColumnName = a.DbColumnName,
-           IsImportColumn = a.IsImportColumn
-       });
+       // var query = _rep.AsQueryable()
+       ////模糊搜索TableName
+       //.WhereIF(!input.TableName.IsNullOrEmpty(), a => a.TableName == input.TableName)
+       ////.WhereIF(input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+       //.Where(a => a.TenantId == _userManager.TenantId && a.IsImportColumn == 1)
+       ////.WhereIF(a => a.IsImportColumn == 1)
+       ////.WhereIf(1 == 1, a => a.TenantId == input.TenantId)
+       //.Select(a => new TableColumns
+       //{
+       //    DisplayName = a.DisplayName,
+       //    //由于框架约定大于配置， 数据库的字段首字母小写
+       //    //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+       //    DbColumnName = a.DbColumnName,
+       //    IsImportColumn = a.IsImportColumn
+       //});
 
         //使用简单工厂定制化
-        IImportExcelTemplate factory = ImportExcelFactory.ImportExcelTemplate(input.CustomerId, input.TableName);
+        IImportExcelTemplateInterface factory = ImportExcelTemplateFactory.ImportExcelTemplate(input.CustomerId, input.TableName);
         factory._repTableColumns = _rep;
         factory._userManager = _userManager;
         var response = factory.Strategy(input.CustomerId, _userManager.TenantId);

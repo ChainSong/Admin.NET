@@ -122,18 +122,18 @@
               </el-table-column>
             </template>
           </template>
-          <el-table-column fixed="right" label="操作" width="200">
+          <el-table-column fixed="right" label="操作" width="220">
 
             <template #default="scope">
               <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
               </el-button>
-              <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
+              <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" v-auth="'wMSPreOrder:edit'" size="small">编辑</el-button>
+              <el-button @click="openEditAddres(scope.row)" class="el-icon-edit" v-auth="'wMSPreOrder:editAddress'" type="text" size="small">编辑地址</el-button>
               <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
                 <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
                   size="small">删除</el-button>
               </el-popconfirm> -->
-
             </template>
           </el-table-column>
         </el-table>
@@ -145,8 +145,9 @@
         <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
         <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
         <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+        <editAddresDialog ref="editAddresDialogRef" :title="addresTitle" @reloadTable="handleQuery" />
       </el-card>
-     
+      
     <el-dialog v-model="resultPopupShow" :title="resultTitle" :append-to-body="true">
       <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
       </el-alert>
@@ -160,14 +161,15 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 //import { formatDate } from '/@/utils/formatTime';
 
+import editAddresDialog from '/@/views/main/wMSPreOrder/component/editAddresDialog.vue'
 import editDialog from '/@/views/main/wMSPreOrder/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPreOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPreOrder/component/queryDialog.vue'
 import { pageWMSPreOrder, deleteWMSPreOrder, preOrderForOrder,exportPreOrder } from '/@/api/main/wMSPreOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
-import Header from "/@/entities/preorder";
-import Details from "/@/entities/preorderDetail";
+import Header from "../../../entities/preOrder";
+import Details from "../../../entities/preOrderDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
@@ -201,6 +203,7 @@ const state = ref({
   //   tableColumnsDetail = ref();
 });
 
+const editAddresDialogRef = ref();
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
@@ -224,6 +227,7 @@ const tableParams = ref({
 const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
+const addresTitle = ref("");
 
 // 页面加载时
 onMounted(async () => {
@@ -249,6 +253,13 @@ const openAdd = () => {
   addTitle.value = '添加';
   addDialogRef.value.openDialog({});
 };
+
+// 打开编辑地址页面
+const openEditAddres = (row: any) => {
+  addresTitle.value = '查看';
+  editAddresDialogRef.value.openDialog(row);
+};
+ 
 
 // 打开编辑页面
 const openEdit = (row: any) => {

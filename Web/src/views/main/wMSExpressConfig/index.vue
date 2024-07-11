@@ -3,53 +3,47 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
         <el-form-item label="客户名称">
-          <el-input v-model="queryParams.customerName" clearable="" placeholder="请输入客户名称"/>
-          
+          <el-input v-model="queryParams.customerName" clearable="" placeholder="请输入客户名称" />
+
         </el-form-item>
         <el-form-item label="仓库名称">
-          <el-input v-model="queryParams.warehouseName" clearable="" placeholder="请输入仓库名称"/>
-          
+          <el-input v-model="queryParams.warehouseName" clearable="" placeholder="请输入仓库名称" />
+
         </el-form-item>
         <el-form-item label="快递代码">
-          <el-input v-model="queryParams.expressCode" clearable="" placeholder="请输入快递代码"/>
-          
+          <el-input v-model="queryParams.expressCode" clearable="" placeholder="请输入快递代码" />
+
         </el-form-item>
         <el-form-item label="快递公司">
-          <el-input v-model="queryParams.expressCompany" clearable="" placeholder="请输入快递公司"/>
-          
+          <el-input v-model="queryParams.expressCompany" clearable="" placeholder="请输入快递公司" />
+
         </el-form-item>
-     
+
         <el-form-item>
           <el-button-group>
-            <el-button type="primary"  icon="ele-Search" @click="handleQuery" v-auth="'wMSExpressConfig:page'"> 查询 </el-button>
+            <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSExpressConfig:page'"> 查询
+            </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
-            
+
           </el-button-group>
-          
+
         </el-form-item>
-        <!-- <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAddWMSExpressConfig" v-auth="'wMSExpressConfig:add'"> 新增 </el-button>
-          
+        <el-form-item>
+          <el-button type="primary" icon="ele-Plus" @click="openAddWMSExpressConfig" v-auth="'wMSExpressConfig:add'">新增</el-button>
         </el-form-item>
-         -->
+       
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-      <el-table
-				:data="tableData"
-				style="width: 100%"
-				v-loading="loading"
-				tooltip-effect="light"
-				row-key="id"
-				border="">
+      <el-table :data="tableData" style="width: 100%" v-loading="loading" tooltip-effect="light" row-key="id" border="">
         <!-- <el-table-column type="index" label="序号" width="55" align="center"/> -->
-         <!-- <el-table-column prop="customerId" label="CustomerId" fixed="" show-overflow-tooltip="" /> -->
-         <el-table-column prop="customerName" label="客户名称" fixed="" show-overflow-tooltip="" />
-         <!-- <el-table-column prop="warehouseId" label="WarehouseId" fixed="" show-overflow-tooltip="" /> -->
-         <el-table-column prop="warehouseName" label="仓库名称" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="expressCode" label="快递代码" fixed="" show-overflow-tooltip="" />
-         <el-table-column prop="expressCompany" label="快递公司" fixed="" show-overflow-tooltip="" />
-         <!-- <el-table-column prop="url" label="Url" fixed="" show-overflow-tooltip="" />
+        <!-- <el-table-column prop="customerId" label="CustomerId" fixed="" show-overflow-tooltip="" /> -->
+        <el-table-column prop="customerName" label="客户名称" fixed="" show-overflow-tooltip="" />
+        <!-- <el-table-column prop="warehouseId" label="WarehouseId" fixed="" show-overflow-tooltip="" /> -->
+        <el-table-column prop="warehouseName" label="仓库名称" fixed="" show-overflow-tooltip="" />
+        <el-table-column prop="expressCode" label="快递代码" fixed="" show-overflow-tooltip="" />
+        <el-table-column prop="expressCompany" label="快递公司" fixed="" show-overflow-tooltip="" />
+        <!-- <el-table-column prop="url" label="Url" fixed="" show-overflow-tooltip="" />
          <el-table-column prop="appKey" label="AppKey" fixed="" show-overflow-tooltip="" />
          <el-table-column prop="companyCode" label="CompanyCode" fixed="" show-overflow-tooltip="" />
          <el-table-column prop="sign" label="Sign" fixed="" show-overflow-tooltip="" />
@@ -89,107 +83,114 @@
          <el-table-column prop="dateTime3" label="DateTime3" fixed="" show-overflow-tooltip="" />
          <el-table-column prop="dateTime4" label="DateTime4" fixed="" show-overflow-tooltip="" />
          <el-table-column prop="dateTime5" label="DateTime5" fixed="" show-overflow-tooltip="" /> -->
-        <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip="" v-if="auth('wMSExpressConfig:edit') || auth('wMSExpressConfig:delete')">
+        <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip=""
+          v-if="auth('wMSExpressConfig:edit') || auth('wMSExpressConfig:delete')">
           <template #default="scope">
-            <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openEditWMSExpressConfig(scope.row)" v-auth="'wMSExpressConfig:edit'"> 编辑 </el-button>
+            <el-button @click="openQueryWMSExpressConfig(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
+            </el-button>
+              <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openEditWMSExpressConfig(scope.row)"
+              v-auth="'wMSExpressConfig:edit'"> 编辑 </el-button>
             <!-- <el-button icon="ele-Delete" size="small" text="" type="primary" @click="delWMSExpressConfig(scope.row)" v-auth="'wMSExpressConfig:delete'"> 删除 </el-button> -->
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-				v-model:currentPage="tableParams.page"
-				v-model:page-size="tableParams.pageSize"
-				:total="tableParams.total"
-				:page-sizes="[10, 20, 50, 100]"
-				small=""
-				background=""
-				@size-change="handleSizeChange"
-				@current-change="handleCurrentChange"
-				layout="total, sizes, prev, pager, next, jumper"
-	/>
-      <editDialog
-			    ref="editDialogRef"
-			    :title="editWMSExpressConfigTitle"
-			    @reloadTable="handleQuery"
-      />
+      <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
+      <addDialog ref="addDialogRef" :title="addWMSExpressConfigTitle" @reloadTable="handleQuery" />
+      <editDialog ref="editDialogRef" :title="editWMSExpressConfigTitle" @reloadTable="handleQuery" />
+      <queryDialog ref="queryDialogRef" :title="queryWMSExpressConfigTitle" @reloadTable="handleQuery" />
     </el-card>
   </div>
 </template>
 
 <script lang="ts" setup="" name="wMSExpressConfig">
-  import { ref } from "vue";
-  import { ElMessageBox, ElMessage } from "element-plus";
-  import { auth } from '/@/utils/authFunction';
-  //import { formatDate } from '/@/utils/formatTime';
-
-  import editDialog from '/@/views/main/wMSExpressConfig/component/editDialog.vue'
-  import { pageWMSExpressConfig, deleteWMSExpressConfig } from '/@/api/main/wMSExpressConfig';
-
-
-    const editDialogRef = ref();
-    const loading = ref(false);
-    const tableData = ref<any>
-      ([]);
-      const queryParams = ref<any>
-        ({});
-        const tableParams = ref({
-        page: 1,
-        pageSize: 10,
-        total: 0,
-        });
-        const editWMSExpressConfigTitle = ref("");
+import { ref } from "vue";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { auth } from '/@/utils/authFunction';
+//import { formatDate } from '/@/utils/formatTime';
+import Header from "/@/entities/wxpressConfig";
+import addDialog from '/@/views/main/wMSExpressConfig/component/addDialog.vue'
+import editDialog from '/@/views/main/wMSExpressConfig/component/editDialog.vue'
+import queryDialog from '/@/views/main/wMSExpressConfig/component/queryDialog.vue'
+import { pageWMSExpressConfig, deleteWMSExpressConfig } from '/@/api/main/wMSExpressConfig';
 
 
-        // 查询操作
-        const handleQuery = async () => {
-        loading.value = true;
-        var res = await pageWMSExpressConfig(Object.assign(queryParams.value, tableParams.value));
-        tableData.value = res.data.result?.items ?? [];
-        tableParams.value.total = res.data.result?.total;
-        loading.value = false;
-        };
+const addDialogRef = ref();
+const editDialogRef = ref();
+const queryDialogRef = ref();
+const loading = ref(false);
+const tableData = ref<any>
+  ([]);
+const queryParams = ref<any>
+  ({});
+const tableParams = ref({
+  page: 1,
+  pageSize: 10,
+  total: 0,
+});
+const addWMSExpressConfigTitle = ref("");
+const editWMSExpressConfigTitle = ref("");
+const queryWMSExpressConfigTitle = ref("");
 
-        // 打开新增页面
-        const openAddWMSExpressConfig = () => {
-        editWMSExpressConfigTitle.value = '添加WMSExpressConfig';
-        editDialogRef.value.openDialog({});
-        };
+// 查询操作
+const handleQuery = async () => {
+  loading.value = true;
+  var res = await pageWMSExpressConfig(Object.assign(queryParams.value, tableParams.value));
+  tableData.value = res.data.result?.items ?? [];
+  tableParams.value.total = res.data.result?.total;
+  loading.value = false;
+};
 
-        // 打开编辑页面
-        const openEditWMSExpressConfig = (row: any) => {
-        editWMSExpressConfigTitle.value = '编辑WMSExpressConfig';
-        editDialogRef.value.openDialog(row);
-        };
+// 打开编辑页面
+const openEditWMSExpressConfig = (row: any) => {
+  editWMSExpressConfigTitle.value = '编辑';
+  editDialogRef.value.openDialog(row);
+};
 
-        // 删除
-        const delWMSExpressConfig = (row: any) => {
-        ElMessageBox.confirm(`确定要删除吗?`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        })
-        .then(async () => {
-        await deleteWMSExpressConfig(row);
-        handleQuery();
-        ElMessage.success("删除成功");
-        })
-        .catch(() => {});
-        };
+// 打开新增页面
+const openAddWMSExpressConfig = (row: any) => {
+  addWMSExpressConfigTitle.value = '新增';
+  addDialogRef.value.openDialog({});
+};
+// 打开查询页面 
+const openQueryWMSExpressConfig  = (row: any) => {
+  queryWMSExpressConfigTitle.value = '查询';
+  queryDialogRef.value.openDialog(row);
+};
+// 打开新增页面
+// const openEditWMSExpressConfig = (row: any) => {
+//   editWMSExpressConfigTitle.value = '编辑';
+//   editDialogRef.value.openDialog(row);
+// };
+// 删除
+const delWMSExpressConfig = (row: any) => {
+  ElMessageBox.confirm(`确定要删除吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      await deleteWMSExpressConfig(row);
+      handleQuery();
+      ElMessage.success("删除成功");
+    })
+    .catch(() => { });
+};
 
-        // 改变页面容量
-        const handleSizeChange = (val: number) => {
-        tableParams.value.pageSize = val;
-        handleQuery();
-        };
+// 改变页面容量
+const handleSizeChange = (val: number) => {
+  tableParams.value.pageSize = val;
+  handleQuery();
+};
 
-        // 改变页码序号
-        const handleCurrentChange = (val: number) => {
-        tableParams.value.page = val;
-        handleQuery();
-        };
+// 改变页码序号
+const handleCurrentChange = (val: number) => {
+  tableParams.value.page = val;
+  handleQuery();
+};
 
 
 handleQuery();
 </script>
-
-

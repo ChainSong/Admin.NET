@@ -4,25 +4,19 @@
 /// 出库地址信息
 /// </summary>
 [SugarTable("WMS_OrderAddress","出库地址信息")]
-[IncreTableAttribute]
 public class WMSOrderAddress : ITenantIdFilter
 {
-    /// <summary>
-    /// 租户Id
-    /// </summary>
-    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
-    public virtual long? TenantId { get; set; }
-
+  
 
     /// <summary>
     /// Id
     /// </summary>
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public virtual long Id { get; set; }
-
     /// <summary>
     /// 
     /// </summary>
+    [Required]
     [SugarColumn(ColumnDescription = "")]
     public long PreOrderId { get; set; }
     
@@ -43,18 +37,19 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "联系人", Length = 50)]
     public string? Name { get; set; }
-
+    
     /// <summary>
-    /// 联系人
+    /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "单位名称", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? CompanyName { get; set; }
+    
     /// <summary>
-    /// 联系人
+    /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "地址标签", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? AddressTag { get; set; }
-
+    
     /// <summary>
     /// 联系电话
     /// </summary>
@@ -66,13 +61,7 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "邮编", Length = 50)]
     public string? ZipCode { get; set; }
-
-
-    /// <summary>
-    /// 国家
-    /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 20)]
-    public string? Country { get; set; }
+    
     /// <summary>
     /// 
     /// </summary>
@@ -84,9 +73,15 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 20)]
     public string? City { get; set; }
-
+    
     /// <summary>
-    /// 区县
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 20)]
+    public string? Country { get; set; }
+    
+    /// <summary>
+    /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 20)]
     public string? County { get; set; }
@@ -94,8 +89,14 @@ public class WMSOrderAddress : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 200)]
+    [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? Address { get; set; }
+    
+    /// <summary>
+    /// 是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
+    /// </summary>
+    [SugarColumn(ColumnDescription = "是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求")]
+    public int? IsSignBack { get; set; }
     
     /// <summary>
     /// 
@@ -108,12 +109,31 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? ExpressNumber { get; set; }
-
-     /// <summary>
+    
+    /// <summary>
+    /// 付款方式，支持以下值： 1:寄方付 2:收方付 3:第三方付
+    /// </summary>
+    [SugarColumn(ColumnDescription = "付款方式，支持以下值： 1:寄方付 2:收方付 3:第三方付", Length = 50)]
+    public string? payMethod { get; set; }
+    
+    /// <summary>
+    /// 快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
+    /// </summary>
+    [SugarColumn(ColumnDescription = "快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取", Length = 50)]
+    public string? isOneselfPickup { get; set; }
+    
+    /// <summary>
+    /// 快件产品类别表 https://open.sf-express.com/developSupport/734349?activeIndex=324604
+    /// </summary>
+    [SugarColumn(ColumnDescription = "快件产品类别表 https://open.sf-express.com/developSupport/734349?activeIndex=324604", Length = 50)]
+    public string? expressTypeId { get; set; }
+    
+    /// <summary>
     /// 
     /// </summary>
+    [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Creator { get; set; } = "";
+    public string Creator { get; set; }
     
     /// <summary>
     /// 
@@ -124,13 +144,22 @@ public class WMSOrderAddress : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
+    [Required]
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Updator { get; set; } = "";
+    public string Updator { get; set; }
+
 
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "")]
+    [Required]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
     public DateTime? UpdateTime { get; set; }
+
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id")]
+    public long? TenantId { get; set; }
     
 }

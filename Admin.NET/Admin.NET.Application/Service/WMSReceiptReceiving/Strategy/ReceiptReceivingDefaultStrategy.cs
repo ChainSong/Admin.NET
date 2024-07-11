@@ -82,57 +82,16 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
 
             //获取同订单下的数据作为校验
             var checkData = _repReceipt.AsQueryable().Includes(a => a.Details).Where(a => request.Select(b => b.ReceiptNumber).ToList().Contains(a.ReceiptNumber)).ToList();
-
-            foreach (var item in request)
+            try
             {
-                var receiptOrderTemp = checkData.Where(a => a.ReceiptNumber == item.ReceiptNumber).First();
-                if (receiptOrderTemp == null || receiptOrderTemp.ReceiptNumber != item.ReceiptNumber)
+                foreach (var item in request)
                 {
-
-                }
-                if (receiptOrderTemp == null || string.IsNullOrEmpty(receiptOrderTemp.ReceiptNumber))
-                {
-                    response.Data.Add(new OrderStatusDto()
+                    var receiptOrderTemp = checkData.Where(a => a.ReceiptNumber == item.ReceiptNumber).FirstOrDefault();
+                    if (receiptOrderTemp == null || receiptOrderTemp.ReceiptNumber != item.ReceiptNumber)
                     {
-                        Id = item.Id,
-                        ExternOrder = item.ExternReceiptNumber,
-                        SystemOrder = item.ReceiptNumber,
-                        StatusCode = StatusCode.Error,
-                        //StatusMsg = StatusCode.success.ToString(),
-                        Msg = "订单:" + item.ReceiptNumber + "不存在"
-                    });
-                    continue;
-                    //response.Code = StatusCode.Error;
-                    //response.Msg = "订单:" + item.ReceiptNumber + "不存在";
-                    //return response;
-                }
-                if (receiptOrderTemp.ReceiptStatus == (int)ReceiptStatusEnum.完成)
-                {
-                    response.Data.Add(new OrderStatusDto()
-                    {
-                        Id = item.Id,
-                        ExternOrder = item.ExternReceiptNumber,
-                        SystemOrder = item.ReceiptNumber,
-                        StatusCode = StatusCode.Error,
-                        //StatusMsg = StatusCode.success.ToString(),
-                        Msg = "订单:" + item.ReceiptNumber + "已完成"
-                    });
-                    continue;
-                    //response.Code = StatusCode.Error;
-                    //response.Msg = "订单:" + item.ReceiptNumber + "已完成";
-                    //return response;
-                }
 
-                var receiptOrderLineData = receiptOrderTemp.Details.Where(a => a.SKU == item.SKU && a.LineNumber == item.LineNumber).FirstOrDefault();
-
-                if (receiptOrderLineData != null)
-                {
-
-                    var dto = mapper.Map<WMSReceiptReceiving>(receiptOrderLineData);
-
-                    var area = _repLocation.AsQueryable().Where(a => a.WarehouseId == receiptOrderLineData.WarehouseId && a.Location == item.Location).First();
-
-                    if (area == null)
+                    }
+                    if (receiptOrderTemp == null || string.IsNullOrEmpty(receiptOrderTemp.ReceiptNumber))
                     {
                         response.Data.Add(new OrderStatusDto()
                         {
@@ -141,69 +100,122 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
                             SystemOrder = item.ReceiptNumber,
                             StatusCode = StatusCode.Error,
                             //StatusMsg = StatusCode.success.ToString(),
-                            Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在"
+                            Msg = "订单:" + item.ReceiptNumber + "不存在"
                         });
+                        continue;
                         //response.Code = StatusCode.Error;
-                        //response.Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在";
+                        //response.Msg = "订单:" + item.ReceiptNumber + "不存在";
                         //return response;
+                    }
+                    if (receiptOrderTemp.ReceiptStatus == (int)ReceiptStatusEnum.完成)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            Id = item.Id,
+                            ExternOrder = item.ExternReceiptNumber,
+                            SystemOrder = item.ReceiptNumber,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.success.ToString(),
+                            Msg = "订单:" + item.ReceiptNumber + "已完成"
+                        });
+                        continue;
+                        //response.Code = StatusCode.Error;
+                        //response.Msg = "订单:" + item.ReceiptNumber + "已完成";
+                        //return response;
+                    }
+
+                    var receiptOrderLineData = receiptOrderTemp.Details.Where(a => a.SKU == item.SKU && a.LineNumber == item.LineNumber).FirstOrDefault();
+
+                    if (receiptOrderLineData != null)
+                    {
+
+                        var dto = mapper.Map<WMSReceiptReceiving>(receiptOrderLineData);
+
+                        var area = _repLocation.AsQueryable().Where(a => a.WarehouseId == receiptOrderLineData.WarehouseId && a.Location == item.Location).First();
+
+                        if (area == null)
+                        {
+                            response.Data.Add(new OrderStatusDto()
+                            {
+                                Id = item.Id,
+                                ExternOrder = item.ExternReceiptNumber,
+                                SystemOrder = item.ReceiptNumber,
+                                StatusCode = StatusCode.Error,
+                                //StatusMsg = StatusCode.success.ToString(),
+                                Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在"
+                            });
+                            //response.Code = StatusCode.Error;
+                            //response.Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在";
+                            //return response;
+                            continue;
+                        }
+
+                        dto.Area = area.AreaName;
+                        dto.Location = item.Location;
+                        dto.ExpirationDate = item.ExpirationDate;
+                        dto.ProductionDate = item.ProductionDate;
+                        dto.GoodsStatus = (int)GoodsStatusEnum.正常;
+                        dto.ReceivedQty = item.ReceivedQty;
+                        dto.ReceiptDetailId = receiptOrderLineData.Id;
+                        dto.ReceiptReceivingStatus = (int)ReceiptReceivingStatusEnum.上架;
+                        if (dto.ReceivedQty > 0)
+                        {
+                            receiptReceivings.Add(dto);
+                        }
+                    }
+                    else
+                    {
                         continue;
                     }
 
-                    dto.Area = area.AreaName;
-                    dto.Location = item.Location;
-                    dto.GoodsStatus= (int)GoodsStatusEnum.正常;
-                    dto.ReceivedQty = item.ReceivedQty;
-                    dto.ReceiptDetailId = receiptOrderLineData.Id;
-                    dto.ReceiptReceivingStatus = (int)ReceiptReceivingStatusEnum.上架;
-                    receiptReceivings.Add(dto);
                 }
-                else
+                if (response.Data.Count > 0)
                 {
-                    continue;
+                    response.Code = StatusCode.Error;
+                    response.Msg = "失败";
+                    //throw new NotImplementedException();
+                    return response;
                 }
-            }
-            if (response.Data.Count > 0)
-            {
-                response.Code = StatusCode.Error;
-                response.Msg = "失败";
-                //throw new NotImplementedException();
-                return response;
-            }
-            //删除已经上架的明细
-            _repReceiptReceiving.Delete(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
-            //上架明细添加到上架表
-            await _repReceiptReceiving.InsertRangeAsync(receiptReceivings.ToList());
+                //删除已经上架的明细
+                _repReceiptReceiving.Delete(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
+                //上架明细添加到上架表
+                await _repReceiptReceiving.InsertRangeAsync(receiptReceivings.ToList());
 
-            //await _repReceiptReceiving.AsInsertable(receiptReceivings).ExecuteCommandAsync();
-            //修改入库单的状态
-            //_wms_receiptManager.Query().Where(a => (request as List<WMS_ReceiptReceivingEditDto>).Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
-            var receiptData = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToList();
+                //await _repReceiptReceiving.AsInsertable(receiptReceivings).ExecuteCommandAsync();
+                //修改入库单的状态
+                //_wms_receiptManager.Query().Where(a => (request as List<WMS_ReceiptReceivingEditDto>).Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
+                var receiptData = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToList();
 
-            receiptData.ForEach(c =>
-            {
-                c.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
-            });
-            await _repReceipt.UpdateRangeAsync(receiptData);
-            //await _repReceipt.AsUpdateable(receiptData).ExecuteCommandAsync();
-
-            //.BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
-            //修改入库单的上架数量
-            //_wms_receiptdetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(a => new WMS_ReceiptDetail { ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ReceiptDetailId == a.Id).Sum(c => c.ReceivedQty) });
-            var checkDataTemp = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
-
-            checkDataTemp.ToList().ForEach(b =>
-            {
-                response.Data.Add(new OrderStatusDto()
+                receiptData.ForEach(c =>
                 {
-                    ExternOrder = b.ExternReceiptNumber,
-                    SystemOrder = b.ReceiptNumber,
-                    Type = b.ReceiptType,
-                    StatusCode = StatusCode.Success,
-                    //StatusMsg = StatusCode.warning.ToString(),
-                    Msg = "订单上架成功"
+                    c.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
                 });
+                await _repReceipt.UpdateRangeAsync(receiptData);
+                //await _repReceipt.AsUpdateable(receiptData).ExecuteCommandAsync();
 
-            });
+                //.BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
+                //修改入库单的上架数量
+                //_wms_receiptdetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(a => new WMS_ReceiptDetail { ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ReceiptDetailId == a.Id).Sum(c => c.ReceivedQty) });
+                var checkDataTemp = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
+
+                checkDataTemp.ToList().ForEach(b =>
+                {
+                    response.Data.Add(new OrderStatusDto()
+                    {
+                        ExternOrder = b.ExternReceiptNumber,
+                        SystemOrder = b.ReceiptNumber,
+                        Type = b.ReceiptType,
+                        StatusCode = StatusCode.Success,
+                        //StatusMsg = StatusCode.warning.ToString(),
+                        Msg = "订单上架成功"
+                    });
+
+                });
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
             response.Code = StatusCode.Success;
             response.Msg = "成功";
             //throw new NotImplementedException();

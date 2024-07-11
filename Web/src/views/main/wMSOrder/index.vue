@@ -72,7 +72,8 @@
 
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出 </el-button>
+            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出
+            </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
 
@@ -83,7 +84,8 @@
         </el-form-item> -->
 
         <el-form-item>
-          <el-button type="primary" icon="ele-Share" @click="automatedAllocationFun" v-auth="'wMSOrder:allocation'"> 分配库存
+          <el-button type="primary" icon="ele-Share" @click="automatedAllocationFun" v-auth="'wMSOrder:allocation'">
+            分配库存
           </el-button>
         </el-form-item>
         <el-form-item>
@@ -92,6 +94,10 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="completeOrderFun" v-auth="'wMSOrder:completeOrder'"> 完成
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="openPrint" v-auth="'wMSOrder:page'"> 打印
           </el-button>
         </el-form-item>
       </el-form>
@@ -138,7 +144,7 @@
             </el-button>
             <el-button @click="del(scope.row)" class="el-icon-delete" type="text" size="small">删除
             </el-button>
-            
+
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
             <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
@@ -151,11 +157,13 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="printOrder" />
     </el-card>
 
 
@@ -175,9 +183,10 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation ,createPickTask,completeOrder,exportOrder} from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder } from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
-import selectRemote from '/@/views/tools/select-remote.vue'
+import selectRemote from '/@/views/tools/select-remote.vue';
+import printDialog from '/@/views/tools/printDialog.vue';
 import Header from "/@/entities/order";
 import Details from "/@/entities/orderDetail";
 import TableColumns from "/@/entities/tableColumns";
@@ -187,6 +196,7 @@ import { useUserInfo } from '/@/stores/userInfo';
 import { storeToRefs } from 'pinia';
 import { Local, Session } from '/@/utils/storage';
 import { downloadByData, getFileName } from '/@/utils/download';
+import { classNameToArray } from "element-plus/es/utils";
 // import { useRoute } from 'vue-router'
 
 const state = ref({
@@ -223,6 +233,9 @@ const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
 const multipleTableRef = ref();
+const printDialogRef = ref();
+// 主体路径
+let baseURL = import.meta.env.VITE_API_URL;
 // const select_order_number = ref('') //表格select选中的条数
 // const multipleSelection = ref([])
 //自定义提示
@@ -239,7 +252,7 @@ const tableParams = ref({
 const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
-
+const ptintTitle = ref("");
 // 页面加载时
 onMounted(async () => {
   gettableColumn();
@@ -249,17 +262,10 @@ const gettableColumn = async () => {
 
   let res = await getByTableNameList("WMS_Order");
   state.value.tableColumnHeaders = res.data.result;
- 
+
 };
 // 查询操作
 const handleQuery = async () => {
-  // console.log("user");
-  // console.log(stores);
-  // console.log(userInfos);
-  // console.log("Session.get('userInfo')")
-  // console.log(Session.get('userInfo'))
-  // Storage.prototype.setCanExpireLocal('userJson', JSON.stringify(state.value.tableColumnHeaders ), 1) 
-  // console.log(Storage.prototype.getCanExpireLocal('userJson') );
   loading.value = true;
   var res = await pageWMSOrder(Object.assign(state.value.header, tableParams.value));
   state.value.headers = res.data.result?.items ?? [];
@@ -284,7 +290,6 @@ const openQuery = (row: any) => {
   queryDialogRef.value.openDialog(row);
 };
 
-// 删除
 
 // 删除
 const del = (row: any) => {
@@ -294,12 +299,15 @@ const del = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      let res =   await deleteWMSOrder(row);
-      if (res.data.result.code == "1") {
-        ElMessage.success(res.data.result.msg);
-      } else {
-        ElMessage.error(res.data.result.msg);
-      }
+      let res = await deleteWMSOrder(row);
+      resultPopupShow.value = true;
+      state.value.orderStatus = res.data.result.data;
+      // if (res.data.result.code == "1") {
+      //   ElMessage.success(res.data.result.msg);
+
+      // } else {
+      //   ElMessage.error(res.data.result.msg);
+      // }
       handleQuery();
       // ElMessage.success("删除成功");
     })
@@ -397,7 +405,6 @@ const createPickTaskFun = () => {
     type: "warning",
   })
     .then(async () => {
-
       let result = await createPickTask(ids);
       handleQuery();
       if (result.data.result.data.length > 0) {
@@ -426,7 +433,7 @@ const createPickTaskFun = () => {
 const completeOrderFun = () => {
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {
-    if (a.orderStatus >=20) {
+    if (a.orderStatus >= 20) {
       ids.push(a.id);
     }
   });
@@ -439,7 +446,7 @@ const completeOrderFun = () => {
     cancelButtonText: "取消",
     type: "warning",
   })
-    .then(async () => { 
+    .then(async () => {
       let result = await completeOrder(ids);
       if (result.data.result.data.length > 0) {
         state.value.orderStatus = result.data.result.data;
@@ -452,6 +459,54 @@ const completeOrderFun = () => {
     })
     .catch(() => { });
 };
+
+
+// ======================================发运单打印=======================================
+
+// 打开打印询页面
+const openPrint = async () => {
+  ptintTitle.value = '发运单打印';
+  // let ids = ref(Array<Number>);
+  let ids = new Array<Number>();
+
+  console.log("ids");
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+
+  console.log("ids");
+  console.log(ids);
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  let printData = new Array<Header>();
+  let result = await printShippingList(ids);
+  console.log("result");
+  console.log(result);
+  if (result.data.result != null) {
+    printData = result.data.result;
+    printData.forEach(a => {
+      if (a.customerConfig != null) {
+        a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+      }
+    });
+    // state.value.details = result.data.result.details;
+  }
+  console.log("printData");
+  console.log(printData);
+
+  // 判断有没有配置客户自定义打印模板
+  if (result.data.result[0].customerConfig != null && result.data.result[0].customerConfig.printShippingTemplate != null) {
+    printDialogRef.value.openDialog({ "printData": printData, "templateName": result.data.result[0].customerConfig.printShippingTemplate });
+  } else {
+    printDialogRef.value.openDialog({ "printData": printData, "templateName": "发运单模板" });
+    // printDialogRef.value.openDialog({ "printData": printData, "templateName": "四联发货单模板"
+  }
+  // printDialogRef.value.openDialog({ "printData": printData, "templateName": "四联发货单模板" });
+};
+
+
 
 // 改变页面容量
 const handleSizeChange = (val: number) => {
@@ -468,5 +523,3 @@ const handleCurrentChange = (val: number) => {
 
 handleQuery();
 </script>
-
-

@@ -39,6 +39,7 @@ export default {
   },
   methods: {
     open(row) {
+      this.row={};
       this.row = row;
       this.model = true;
       this.isAdd = Object.keys(this.row).length == 0;
@@ -112,6 +113,7 @@ export default {
           this.$refs.flow.formFields.WorkTableName="";
           this.$refs.flow.formFields.Remark="";
           this.$refs.flow.formFields.Weight=1;
+          this.$refs.flow.formFields.Id=0;
         }
         if (this.$refs.flow) {
           this.$refs.flow.$refs.nodeForm.$refs.filter.getOptions(row.WorkTable);

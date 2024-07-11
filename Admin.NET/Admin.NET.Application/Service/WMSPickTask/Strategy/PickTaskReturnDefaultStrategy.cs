@@ -8,7 +8,7 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.Interface;
+using Admin.NET.Application.Service;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using Admin.NET.Core;
@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 
-namespace Admin.NET.Application.Service.Strategy;
+namespace Admin.NET.Application.Service;
 public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
 {
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
@@ -43,10 +43,10 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
         //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
         var pickTaskDetailData = await _repPickTaskDetail.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.Id)).ToListAsync();
         //先判断状态是否正常 是否允许回退
-        var receipt = _repOrder.AsQueryable().Where(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id));
-        await receipt.ForEachAsync(a =>
+        var repOrder = await _repOrder.AsQueryable().Where(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id)).ToListAsync();
+        repOrder.ForEach(a =>
         {
-            if (a.OrderStatus < (int)OrderStatusEnum.交接)
+            if (a.OrderStatus >= (int)OrderStatusEnum.交接)
             {
                 response.Data.Add(new OrderStatusDto()
                 {
@@ -64,13 +64,18 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
             return response;
         }
         //先删除包装信息，再删除拣货信息
-        await _repPackageDetail.DeleteAsync(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id));
-        await _repPackage.DeleteAsync(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id));
+        var orderIds = pickTaskDetailData.Select(a => a.OrderId).Distinct().ToList();
+        await _repPackageDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
+        await _repPackage.DeleteAsync(a => orderIds.Contains(a.OrderId));
 
-        await _repPickTaskDetail.DeleteAsync(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id));
-        await _repPickTask.DeleteAsync(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id));
+        await _repPickTaskDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
+        await _repPickTask.DeleteAsync(a => request.Select(b => b.Id).Contains(a.Id));
 
-        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已分配 }, a => pickTaskDetailData.Select(b => b.OrderId).Contains(a.Id));
+        repOrder.ForEach(a =>
+        {
+            a.OrderStatus = (int)OrderStatusEnum.已分配;
+        });
+        await _repOrder.UpdateRangeAsync(repOrder);
 
 
         //先删除明细表，再删除主表
@@ -93,17 +98,17 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
         //}); 
         //先处理上架=>入库单
 
-        await receipt.ForEachAsync(a =>
-        {
-            response.Data.Add(new OrderStatusDto()
-            {
-                ExternOrder = a.ExternOrderNumber,
-                SystemOrder = a.OrderNumber,
-                Type = a.OrderType,
-                StatusCode = StatusCode.Success,
-                Msg = "操作成功"
-            });
-        });
+        repOrder.ForEach(a =>
+       {
+           response.Data.Add(new OrderStatusDto()
+           {
+               ExternOrder = a.ExternOrderNumber,
+               SystemOrder = a.OrderNumber,
+               Type = a.OrderType,
+               StatusCode = StatusCode.Success,
+               Msg = "操作成功"
+           });
+       });
         response.Code = StatusCode.Success;
         response.Msg = "操作成功";
         //throw new NotImplementedException();

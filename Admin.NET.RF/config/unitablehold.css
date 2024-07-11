@@ -1,0 +1,22 @@
+//冻结表头第一列
+
+/deep/ .uni-table-tr .uni-table-td:last-child {
+	position: sticky;
+	right: 0;
+	top: 0;
+	background-color: #fff;
+	z-index: 9999;
+}
+
+/deep/ .uni-table-tr {
+	overflow: visible;
+	background-color: #fff;
+}
+
+/deep/ .uni-table-tr .uni-table-th:last-child {
+	position: sticky;
+	right: 0;
+	top: 0;
+	background-color: #fff;
+	z-index: 9999;
+}

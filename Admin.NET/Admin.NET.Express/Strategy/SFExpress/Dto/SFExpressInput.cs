@@ -22,6 +22,7 @@ public class SFExpressInput<T>
     public string UrlToken { get; set; }//Token 地址   
     public string Env { get; set; }//环境   
     public string ServiceCode { get; set; }//请求地址   
+    //public int IsSignBack { get; set; }//是否返回签回单路由标签： 默认0， 1：返回路由标签， 0：不返回   
 
     public T Data { get; set; }//请求数据   
 
@@ -52,6 +53,8 @@ public class SFRootobject
     //public [] extraInfoList { get; set; }
     public int isOneselfPickup { get; set; }
     public string language { get; set; }
+    public int isSignBack { get; set; }  //是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
+
     public string monthlyCard { get; set; }
     public string orderId { get; set; }
     public int parcelQty { get; set; }

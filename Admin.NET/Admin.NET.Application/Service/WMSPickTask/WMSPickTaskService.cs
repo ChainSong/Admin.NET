@@ -20,10 +20,10 @@ using System.Linq;
 using Admin.NET.Application.Service;
 using XAct;
 using Admin.NET.Application.Service.Factory;
-using Admin.NET.Application.Service.Interface;
+using Admin.NET.Application.Service;
 using Admin.NET.Application.Dtos;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service;
 /// <summary>
 /// WMSPickTask服务
 /// </summary>
@@ -48,7 +48,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SysCacheService _sysCacheService;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService)
     {
         _rep = rep;
         _userManager = userManager;
@@ -57,6 +57,10 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repCustomerUser = repCustomerUser;
         _repOrder = repOrder;
         _repPickTaskDetail = repPickTaskDetail;
+        _repPackage = repPackage;
+        _repPackageDetail = repPackageDetail;
+        _sysCacheService = sysCacheService;
+    
     }
 
     /// <summary>
@@ -74,6 +78,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickTaskNumber), u => u.PickTaskNumber.Contains(input.PickTaskNumber.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
                     .WhereIF(input.PickStatus > 0, u => u.PickStatus == input.PickStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickType), u => u.PickType.Contains(input.PickType.Trim()))
                     .WhereIF(input.PrintNum > 0, u => u.PrintNum == input.PrintNum)

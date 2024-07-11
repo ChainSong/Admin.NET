@@ -92,12 +92,12 @@ namespace Admin.NET.Application.Strategy
             //判断receipts  是否可以转入库单
             List<WMSInventoryUsable> inventory = new List<WMSInventoryUsable>();
 
-            foreach (var a in request)
+            foreach (var id in request)
             {
                 //判断上架单和入库单数量是否一致，一致就加入库存
                 WMSInventoryUsable aa = new WMSInventoryUsable();
 
-                var receipt = _repReceipt.AsQueryable().Includes(b => b.Details).Includes(c => c.ReceiptReceivings).Where(b => b.Id == a).First();
+                var receipt = _repReceipt.AsQueryable().Includes(b => b.Details).Includes(c => c.ReceiptReceivings).Where(b => b.Id == id).First();
                 if (receipt != null && receipt.ReceiptStatus == (int)ReceiptStatusEnum.上架)
                 {
                     //var receiptreceiving = _wms_receiptreceivingRepository.GetAll().Where(b => b.ReceiptId == a).ToList();
@@ -110,13 +110,18 @@ namespace Admin.NET.Application.Strategy
                         await _repTableInventoryUsable.InsertRangeAsync(inventoryData);
 
                         //修改入库单状态
-                        await _repReceipt.UpdateAsync(a => new WMSReceipt { ReceiptStatus = (int)ReceiptStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.Id));
+                        await _repReceipt.Context.Updateable<WMSReceipt>()
+                          .SetColumns(p => p.ReceiptStatus == (int)ReceiptStatusEnum.完成)
+                          .SetColumns(p => p.CompleteTime == DateTime.Now)
+                          .Where(p => receipt.Id == p.Id)
+                          .ExecuteCommandAsync();
+                        //await _repReceipt.UpdateAsync(a => new WMSReceipt { ReceiptStatus = (int)ReceiptStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.Id));
                         //修改入库单明细中的入库数量
                         //_wms_receiptdetailRepository.GetDbContext().BulkUpdate();
                         var receiptDetailData = _repReceiptDetail.AsQueryable().Where(a => a.ReceiptId == receipt.Id).ToList();
                         receiptDetailData.ForEach(e =>
                         {
-                            e.ReceivedQty = _repReceiptReceiving.AsQueryable().Where(re => re.ReceiptDetailId == e.Id).Sum(c => c.ReceivedQty);
+                            e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ReceiptDetailId == e.Id).Sum(c => c.ReceivedQty);
                             e.Updator = _userManager.Account;
                             e.UpdateTime = DateTime.Now;
 
@@ -127,35 +132,53 @@ namespace Admin.NET.Application.Strategy
 
                         //修改上架表中的状态
                         await _repReceiptReceiving.UpdateAsync(a => new WMSReceiptReceiving { ReceiptReceivingStatus = (int)ReceiptStatusEnum.完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => request.Contains(a.ReceiptId)));
-                        //修改ASN 状态
-                        await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.ASNId));
+
                         //修改ASN 明细中的实际入库数量
                         //_wms_asndetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(v =>new WMS_ASNDetail{ ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ASNDetailId == v.Id).Sum(c => c.ReceivedQty)});
                         var asnDetailData = _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToList();
                         asnDetailData.ForEach(e =>
                         {
-                            e.ReceivedQty = _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == e.Id).Sum(c => c.ReceivedQty);
+                            e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == e.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);
                             e.Updator = _userManager.Account;
                             e.UpdateTime = DateTime.Now;
 
                         });
                         await _repASNDetail.UpdateRangeAsync(asnDetailData);
 
+                        //修改ASN 状态
+                        //需要判断是否全部入库完成，如果完成，则修改ASN状态为完成
+                        var asn = await _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId && a.ExpectedQty > a.ReceiptQty).ToListAsync();
+                        if (asn != null && asn.Count == 0)
+                        {
+                            await _repASN.Context.Updateable<WMSASN>()
+                            .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.完成)
+                            .SetColumns(p => p.CompleteTime == DateTime.Now)
+                            .Where(p => receipt.ASNId == p.Id)
+                            .ExecuteCommandAsync();
+                        }
+                        else
+                        {
+
+                        }
+
+                        //await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.完成, CompleteTime = DateTime.Now }, (a => a.Id == receipt.ASNId));
+
+
                         orderStatuses.Add(new OrderStatusDto()
                         {
-                            Id = a,
+                            Id = id,
                             ExternOrder = receipt.ExternReceiptNumber,
                             SystemOrder = receipt.ReceiptNumber,
                             StatusCode = StatusCode.Success,
                             //StatusMsg = StatusCode.success.ToString(),
-                            Msg = "订单添加成功"
+                            Msg = "加入库存成功"
                         });
                     }
                     else
                     {
                         orderStatuses.Add(new OrderStatusDto()
                         {
-                            Id = a,
+                            Id = id,
                             ExternOrder = receipt.ExternReceiptNumber,
                             SystemOrder = receipt.ReceiptNumber,
                             StatusCode = StatusCode.Error,
@@ -168,7 +191,7 @@ namespace Admin.NET.Application.Strategy
                 {
                     orderStatuses.Add(new OrderStatusDto()
                     {
-                        Id = a,
+                        Id = id,
                         ExternOrder = receipt.ExternReceiptNumber,
                         SystemOrder = receipt.ReceiptNumber,
                         StatusCode = StatusCode.Error,

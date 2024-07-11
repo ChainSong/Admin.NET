@@ -9,22 +9,23 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application
 {
-    public class ImportExcelTemplatePreOrderDefault : IImportExcelTemplate
+    public class ImportExcelTemplatePreOrderDefault : ImportExcelTemplateStrategy
     {
 
 
-        public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+        //public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         //public readonly SqlSugarRepository<TableColumnsDetail> _repDetail { get; set; }
-        public UserManager _userManager { get; set; }
+        //public UserManager _userManager { get; set; }
 
-
+        static List<string> _tableNames = new List<string>() { "WMS_PreOrder", "WMS_PreOrderDetail", "WMS_OrderAddress" };
         public ImportExcelTemplatePreOrderDefault(
             //ITable_ColumnsManager table_ColumnsManager,
             //      ITable_ColumnsDetailManager table_ColumnsDetailManager
-            )
+            ):base(_tableNames)
         {
             //_table_ColumnsManager = table_ColumnsManager;
             //_table_ColumnsDetailManager = table_ColumnsDetailManager;

@@ -1,0 +1,92 @@
+
+@font-face {
+  font-family: "iconfont"; /* Project id 3706574 */
+  src: url('//at.alicdn.com/t/c/font_3706574_y3cd40y7qfr.woff2?t=1670318500785') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3706574_y3cd40y7qfr.woff?t=1670318500785') format('woff'),
+       url('//at.alicdn.com/t/c/font_3706574_y3cd40y7qfr.ttf?t=1670318500785') format('truetype');
+}
+
+/* 菜单那边用法是：动态读取数据库的图标，然后在griditem 加上前缀 icon-prefix="wlq" 实际的icon就填写后半段，比如：wlq-shangjia 就写成:shangjia */
+
+[class^="wlq"],
+[class*="wlq"] {
+  font-family: "iconfont" !important;
+  /* font-size: 40px; */
+  /* color: #DC241F; */
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+.wlq-zhigongxianbian:before {
+  content: "\f4f1";
+}
+
+.wlq-huowu-copy:before {
+  content: "\f4f0";
+}
+
+.wlq-packingstatus:before {
+  content: "\f4ef";
+}
+
+.wlq-jinduchaxun:before {
+  content: "\f4ee";
+}
+
+.wlq-yonghuguanli:before {
+  content: "\e627";
+}
+
+.wlq-bangding:before {
+  content: "\e641";
+}
+
+.wlq-fenjian2:before {
+  content: "\e60c";
+}
+
+.wlq-zhixinagbangding:before {
+  content: "\e603";
+}
+
+.wlq-chaifen:before {
+  content: "\f4e9";
+}
+
+.wlq-pandianmingxi:before {
+  content: "\e61a";
+}
+
+.wlq-zhuangxiang:before {
+  content: "\e601";
+}
+
+.wlq-xiajia:before {
+  content: "\eebe";
+}
+
+.wlq-scanout:before {
+  content: "\e695";
+}
+
+.wlq-kucunyidong:before {
+  content: "\f4e7";
+}
+
+.wlq-kucunchaxun1:before {
+  content: "\e619";
+}
+
+.wlq-asnchaxun:before {
+  content: "\f4e4";
+}
+
+.wlq-shangjia:before {
+  content: "\f4e1";
+}
+
+.wlq-zhijian:before {
+  content: "\f4e2";
+}

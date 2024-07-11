@@ -309,4 +309,7 @@ public class WMSPreOrder : ITenantIdFilter
     [Navigate(NavigateType.OneToOne,nameof(Id), nameof(WMSOrderAddress.PreOrderId))]
     public WMSOrderAddress OrderAddress { get; set; }
 
+    [Navigate(NavigateType.OneToOne, nameof(Id), nameof(WMSPreOrderExtend.PreOrderId))]
+    public WMSPreOrderExtend Extend { get; set; }
+
 }

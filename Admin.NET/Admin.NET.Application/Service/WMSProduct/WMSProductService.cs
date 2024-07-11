@@ -11,11 +11,12 @@ using System.Collections.Generic;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Common.ExcelCommon;
-using Microsoft.AspNetCore.Http; 
+using Microsoft.AspNetCore.Http;
 using System.Data;
 using System.Linq;
 using Admin.NET.Application.Service;
 using XAct;
+using Furion.DatabaseAccessor;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -130,6 +131,7 @@ public class WMSProductService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
+    [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateProductInput input)
     {
 
@@ -197,6 +199,7 @@ public class WMSProductService : IDynamicApiController, ITransient
 
 
 
+
     /// <summary>
     /// 获取WMSProduct 
     /// </summary>
@@ -233,20 +236,27 @@ public class WMSProductService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "SelectSKU")]
     public async Task<List<SelectListItem>> SelectSKU(dynamic input)
     {
+        try
+        {
+            string sku = input.inputData;
+            if (!string.IsNullOrEmpty(sku) && sku.Length > 3)
+            {
+                long customerId = input.whereData.customerId;
 
-        string sku = input.inputData;
-        if (!string.IsNullOrEmpty(sku) && sku.Length > 3)
-        {
-            long customerId = input.whereData.customerId;
-            //获取可以使用的仓库权限
-            var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerId).ToList();
-            //string sku = objData.inputData;
-            //long customerId = objData.objData.CustomerId;
-            return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().ToListAsync();
+                //获取可以使用的仓库权限
+                var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerId).ToList();
+                //string sku = objData.inputData;
+                //long customerId = objData.objData.CustomerId;
+                return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().ToListAsync();
+            }
+            else
+            {
+                return new List<SelectListItem>();
+            }
         }
-        else
+        catch (Exception)
         {
-            return new List<SelectListItem>();
+            throw Oops.Oh("请选择客户");
         }
 
     }

@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Admin.NET
- * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/Admin.NET/'>https://gitee.com/zuohuaijun/Admin.NET</a>
+ * HiGenious 通用权限开发平台
+ * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/HiGenious/'>https://gitee.com/zuohuaijun/HiGenious</a>
  *
  * OpenAPI spec version: 1.0.0
  * Contact: 515096995@qq.com
@@ -11,6 +11,7 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+
 import globalAxios, { AxiosResponse, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Configuration } from '../configuration';
 // Some imports not used depending on template conditions
@@ -21,7 +22,7 @@ import { AdminResultInt32 } from '../models';
 import { AdminResultInt64 } from '../models';
 import { AdminResultListInt64 } from '../models';
 import { AdminResultListSysUserExtOrg } from '../models';
-import { AdminResultSqlSugarPagedListSysUser } from '../models';
+import { AdminResultSqlSugarPagedListUserOutput } from '../models';
 import { AdminResultString } from '../models';
 import { AdminResultSysUser } from '../models';
 import { ChangePwdInput } from '../models';
@@ -738,7 +739,7 @@ export const SysUserApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultSqlSugarPagedListSysUser>>> {
+        async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultSqlSugarPagedListUserOutput>>> {
             const localVarAxiosArgs = await SysUserApiAxiosParamCreator(configuration).apiSysUserPagePost(body, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs :AxiosRequestConfig = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
@@ -882,7 +883,7 @@ export const SysUserApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultSqlSugarPagedListSysUser>> {
+        async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultSqlSugarPagedListUserOutput>> {
             return SysUserApiFp(configuration).apiSysUserPagePost(body, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1020,7 +1021,7 @@ export class SysUserApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof SysUserApi
      */
-    public async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultSqlSugarPagedListSysUser>> {
+    public async apiSysUserPagePost(body?: PageUserInput, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultSqlSugarPagedListUserOutput>> {
         return SysUserApiFp(this.configuration).apiSysUserPagePost(body, options).then((request) => request(this.axios, this.basePath));
     }
     /**

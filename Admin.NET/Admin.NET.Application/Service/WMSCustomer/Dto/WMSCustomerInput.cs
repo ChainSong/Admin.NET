@@ -404,6 +404,7 @@ public class UpdateWMSCustomerInput
 
 
     public virtual List<WMSCustomerDetail> Details { get; set; }
+    public WMSCustomerConfig CustomerConfig { get; set; }
 }
 
 /// <summary>

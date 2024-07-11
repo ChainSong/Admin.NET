@@ -68,7 +68,15 @@ namespace MyProAdmin.NET.Applicationject.ReceiptReceivingCore.Strategy
             //先处理上架=>入库单
             //先处理上架表的数据，然后修改入库单中的数据 
             await _repReceiptReceiving.DeleteAsync(a => request.Contains(a.ReceiptId));
-            await _repReceipt.UpdateAsync(a => new WMSReceipt { ReceiptStatus = (int)ReceiptStatusEnum.新增 }, (a => request.Contains(a.Id)));
+            await _repReceipt.Context.Updateable<WMSReceipt>()
+                           .SetColumns(p => p.ReceiptStatus == (int)ReceiptStatusEnum.新增)
+                           .Where(p => request.Contains(p.Id))
+                           .ExecuteCommandAsync();
+            await _repReceiptDetail.Context.Updateable<WMSReceiptDetail>()
+                        .SetColumns(p => p.ReceiptQty == 0)
+                        .Where(p => request.Contains(p.ReceiptId))
+                        .ExecuteCommandAsync();
+            //await _repReceipt.UpdateAsync(a => new WMSReceipt { ReceiptStatus = (int)ReceiptStatusEnum.新增 }, (a => request.Contains(a.Id)));
             //_wms_receiptRepository.GetAll().Where(a => request.Contains(a.Id)).ToList().ForEach(c =>
             //{
             //    c.ReceiptStatus = (int)ReceiptStatusEnum.新增;

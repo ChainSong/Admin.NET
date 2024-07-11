@@ -9,6 +9,7 @@ enum Api {
 	CreatePickTask = '/api/wMSOrder/CreatePickTask',
 	CompleteOrder = '/api/wMSOrder/CompleteOrder',
 	ExportOrder = '/api/wMSOrder/ExportOrder',
+	PrintShippingList = '/api/wMSOrder/PrintShippingList',
 	
 }
 
@@ -76,7 +77,15 @@ export const completeOrder = (params?: any) =>
 	});
 
 
+//打印拣货任务
+export const printShippingList = (params?: any) =>
+	request({
+		url: Api.PrintShippingList,
+		method: 'post',
+		data: params,
+	});
 
+	
 // 导出出库信息
 export const exportOrder = (params?: any) =>
 	request({

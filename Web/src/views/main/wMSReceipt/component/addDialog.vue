@@ -325,7 +325,7 @@ const gettableColumn = async () => {
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
 	console.log(response);
-	if (response.result.data.length > 0) {
+	if (response.result.data!=null && response.result.data.length > 0) {
 		state.value.orderStatus = response.result.data;
 		// console.log(state.value.orderStatus);
 		//导入弹框提醒

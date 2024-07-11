@@ -76,6 +76,14 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     public async Task<Response> Add(AddWMSWarehouseInput input)
     {
         var entity = input.Adapt<WMSWarehouse>();
+
+
+        //验证仓库编码是否存在
+        if (await _rep.AsQueryable().AnyAsync(u => u.WarehouseName == input.WarehouseName))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "仓库编码已存在" };
+        }
+
         if (entity.Details != null)
         {
             entity.Details.ForEach(a =>

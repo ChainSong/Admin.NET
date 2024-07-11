@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Admin.NET
- * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/Admin.NET/'>https://gitee.com/zuohuaijun/Admin.NET</a>
+ * HiGenious 通用权限开发平台
+ * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/HiGenious/'>https://gitee.com/zuohuaijun/HiGenious</a>
  *
  * OpenAPI spec version: 1.0.0
  * Contact: 515096995@qq.com
@@ -11,6 +11,7 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+
 import globalAxios, { AxiosResponse, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Configuration } from '../configuration';
 // Some imports not used depending on template conditions
@@ -217,7 +218,7 @@ export const SysCacheApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * 
-         * @summary 获取缓存值
+         * @summary 获取缓存值 注意：调用的地方要做null处理
          * @param {string} key 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -330,7 +331,7 @@ export const SysCacheApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary 获取缓存值
+         * @summary 获取缓存值 注意：调用的地方要做null处理
          * @param {string} key 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -392,7 +393,7 @@ export const SysCacheApiFactory = function (configuration?: Configuration, baseP
         },
         /**
          * 
-         * @summary 获取缓存值
+         * @summary 获取缓存值 注意：调用的地方要做null处理
          * @param {string} key 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -455,7 +456,7 @@ export class SysCacheApi extends BaseAPI {
     }
     /**
      * 
-     * @summary 获取缓存值
+     * @summary 获取缓存值 注意：调用的地方要做null处理
      * @param {string} key 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

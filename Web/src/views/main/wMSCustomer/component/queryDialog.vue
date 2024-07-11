@@ -1,64 +1,91 @@
 ﻿<template>
 	<div class="wMSCustomer-container">
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="700" draggable="">
-			<el-container>
-				<el-main>
-					<el-descriptions class="margin-top" :column="2" size="small" border>
-						<template v-for="i in state.tableColumnHeaders">
-							<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
-								v-if="i.isCreate">
-								<template>
-									<!-- <i></i>
+
+			<el-tabs v-model="activeName">
+				<el-tab-pane label="基本信息" name="first">
+					<el-main>
+						<el-descriptions class="margin-top" :column="2" size="small" border>
+							<template v-for="i in state.tableColumnHeaders">
+								<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
+									v-if="i.isCreate">
+									<template>
+										<!-- <i></i>
 									{{ i.displayName }} -->
-								</template>
-								<template v-if="i.type == 'TextBox'">
-									<label font-family="Helvetica Neue" v-text="state.header[i.columnName]"></label>
-								</template>
-								<template v-if="i.type == 'DropDownListStr'">
-									<template v-for="item in i.tableColumnsDetails">
-										<el-tag   v-if="item.codeStr == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
-										<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
-											show-icon :type="item.color" :key="item.codeStr"></label> -->
 									</template>
-								</template>
-								<template v-if="i.type == 'DropDownListInt'">
-									<template v-for="item in i.tableColumnsDetails">
-										<template v-if="item.codeStr == state.header[i.columnName]">
-											<el-tag   v-if="item.codeInt == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
-											<!-- <label show-icon :type="item.color" v-text="item.name"
-												:key="item.codeInt"></label> -->
+									<template v-if="i.type == 'TextBox'">
+										<label font-family="Helvetica Neue" v-text="state.header[i.columnName]"></label>
+									</template>
+									<template v-if="i.type == 'DropDownListStr'">
+										<template v-for="item in i.tableColumnsDetails">
+											<el-tag v-if="item.codeStr == state.header[i.columnName]"
+												v-bind:key="item.color" show-icon :type="item.color">
+												{{ item.name }}
+											</el-tag>
+											<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
+											show-icon :type="item.color" :key="item.codeStr"></label> -->
 										</template>
 									</template>
-								</template>
-							</el-descriptions-item>
-						</template>
-					</el-descriptions>
-				</el-main>
-			</el-container>
-			<el-container title="明细信息">
-				<el-main>
-					<el-form>
-						<el-table :data="state.details" style="width: 100%" height="250">
-							<template v-for="(v, index) in state.tableColumnDetails">
-								<el-table-column v-if="v.isCreate" :key="index" :fixed="false" :label="v.displayName"
-									width="150">
-									<template #default="scope">
-										<label v-text="scope.row[v.columnName]"></label>
+									<template v-if="i.type == 'DropDownListInt'">
+										<template v-for="item in i.tableColumnsDetails">
+											<template v-if="item.codeStr == state.header[i.columnName]">
+												<el-tag v-if="item.codeInt == state.header[i.columnName]"
+													v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+												<!-- <label show-icon :type="item.color" v-text="item.name"
+												:key="item.codeInt"></label> -->
+											</template>
+										</template>
 									</template>
-								</el-table-column>
+								</el-descriptions-item>
 							</template>
-						</el-table>
-					</el-form>
-				</el-main>
-			</el-container>
+						</el-descriptions>
+					</el-main>
+
+
+
+					<el-container title="明细信息">
+						<el-main>
+							<el-form>
+								<el-table :data="state.details" style="width: 100%" height="250">
+									<template v-for="(v, index) in state.tableColumnDetails">
+										<el-table-column v-if="v.isCreate" :key="index" :fixed="false"
+											:label="v.displayName" width="150">
+											<template #default="scope">
+												<label v-text="scope.row[v.columnName]"></label>
+											</template>
+										</el-table-column>
+									</template>
+								</el-table>
+							</el-form>
+						</el-main>
+					</el-container>
+				</el-tab-pane>
+				<el-tab-pane label="配置附件" name="fourth">
+					<el-row :gutter="35">
+						<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-for="q in state.tableColumnConfigs"
+							v-bind:key="q.id">
+							<el-form-item :label="q.displayName" v-if="q.isCreate" style="width: 90%;height: 150px;"
+								:prop="q.columnName">
+								<template v-if="q.type == 'UploadImg'">
+									<el-image style="width: 100px; height: 100px"
+										:src="baseURL + state.customerConfig[q.columnName]"></el-image>
+								</template>
+								<template v-if="q.type == 'TextBox'">
+									<label font-family="Helvetica Neue"
+										v-text="state.customerConfig[q.columnName]"></label>
+								</template>
+							</el-form-item>
+						</el-col>
+					</el-row>
+
+				</el-tab-pane>
+			</el-tabs>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel" size="default">取 消</el-button>
-					<el-button type="primary" @click="cancel" size="default">确 定</el-button>
+					<!-- <el-button type="primary" @click="cancel" size="default">确 定</el-button> -->
 				</span>
 			</template>
 		</el-dialog>
@@ -74,6 +101,8 @@ import { getByTableNameList } from "/@/api/main/tableColumns";
 import Header from "/@/entities/customer";
 import Detail from "/@/entities/customerDetail";
 import TableColumns from "/@/entities/tableColumns";
+import CustomerConfig from "/@/entities/customerConfig";
+import { Local, Session } from '/@/utils/storage';
 
 const state = ref({
 	vm: {
@@ -90,10 +119,16 @@ const state = ref({
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
 
+
+
+	customerConfig: new CustomerConfig(),
+
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
 	tableColumnDetail: new TableColumns(),
-	tableColumnDetails: new Array<TableColumns>()
+	tableColumnDetails: new Array<TableColumns>(),
+	tableColumnConfig: new TableColumns(),
+	tableColumnConfigs: new Array<TableColumns>(),
 	// header: new Array<Details>(),
 })
 
@@ -103,6 +138,10 @@ let detailRuleRef = ref<any>({});
 let detailRule = ref({});
 
 
+// 主体路径
+let baseURL = import.meta.env.VITE_API_URL;
+
+let activeName: string = 'first';
 //父级传递来的参数
 var props = defineProps({
 	title: {
@@ -137,6 +176,7 @@ const closeDialog = () => {
 
 // 取消
 const cancel = () => {
+	console.log("取消");
 	isShowDialog.value = false;
 };
 
@@ -182,6 +222,10 @@ const gettableColumn = async () => {
 	// console.log("asdasdasdasdasdasddasdas")
 	// console.log(resDetail);
 	state.value.tableColumnDetails = resDetail.data.result;
+
+	let restableColumnConfig = await getByTableNameList("CustomerConfig");
+
+	state.value.tableColumnConfigs = restableColumnConfig.data.result;
 	// detailRule.value = {};
 	// // state.value.tableColumnDetails.forEach((a) => {
 	// // 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
@@ -205,12 +249,20 @@ const gettableColumn = async () => {
 
 const get = async () => {
 	console.log("dasdasd");
+	state.value.customerConfig = [];
+	state.value.details = [];
 	console.log(state.value.header);
 	let result = await getWMSCustomer(state.value.header.id);
 	console.log(result);
 	if (result.data.result != null) {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
+		// state.value.customerConfig = result.data.result.customerConfig;
+		if (result.data.result.customerConfig == null) {
+			state.value.customerConfig = new CustomerConfig();
+		} else {
+			state.value.customerConfig = result.data.result.customerConfig;
+		}
 	}
 	// console.log(state.value.header);
 	// console.log(state.value.details);
@@ -226,7 +278,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

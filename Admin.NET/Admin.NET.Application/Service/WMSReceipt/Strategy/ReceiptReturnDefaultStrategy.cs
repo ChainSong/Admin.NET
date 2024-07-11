@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Admin.NET.Application.Dtos.Enum;
 using XAct;
 using Admin.NET.Application.Enumerate;
+using Nest;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -65,18 +66,87 @@ namespace Admin.NET.Application.Strategy
                 response.Msg = "状态异常";
                 return response;
             }
-
-
-            var ASNIds = await receipt.Select(b => b.ASNId).ToListAsync();
-            //先更新主表，在更新明细表
-            await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.新增 }, (a => ASNIds.Contains(a.Id)));
-            await _repASNDetail.UpdateAsync(a => new WMSASNDetail
+            receipt.ForEach(r =>
             {
-                ReceivedQty = 0,
-                Updator = _userManager.Account,
-                UpdateTime = DateTime.Now
-            }, a => ASNIds.Contains(a.ASNId));
+                var repASNDetailData = _repASNDetail.AsQueryable().Where(a => a.ASNId == r.ASNId).ToList();
+                repASNDetailData.ForEach(a =>
+                {
+                    a.ReceivedQty = a.ReceivedQty - (_repReceiptDetail.AsQueryable().Where(b => a.Id == b.ASNDetailId && b.ReceiptId == r.Id).Sum(c => c.ReceivedQty));
+                    a.Updator = _userManager.Account;
+                    a.UpdateTime = DateTime.Now;
+                });
+                _repASNDetail.UpdateRange(repASNDetailData);
 
+
+                var asnDetail = _repASNDetail.AsQueryable().Where(b => b.ReceivedQty > 0 && b.ASNId == r.ASNId).ToList();
+                if (asnDetail.Count > 0)
+                {
+                    //await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.部分转入库单 }, (a => ASNIds.Contains(a.Id)));
+                    _repASN.Context.Updateable<WMSASN>()
+                      .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.部分转入库单)
+                      .Where(p => (p.Id) == r.ASNId)
+                      .ExecuteCommand();
+                }
+                else
+                {
+                    //await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.新增 }, (a => ASNIds.Contains(a.Id)));
+                    _repASN.Context.Updateable<WMSASN>()
+                    .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.新增)
+                    .Where(p => (p.Id) == r.ASNId)
+                    .ExecuteCommand();
+                }
+
+
+            });
+
+            //var ASNIds = await receipt.Select(b => b.ASNId).Distinct().ToListAsync();
+            //先更新主表，在更新明细表
+            //await _repASN.Context.Updateable<WMSASN>()
+            //.SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.新增, p => p.CompleteTime == DateTime.Now)
+            //.Where(p => receipt.ASNId == p.Id)
+            //.ExecuteCommandAsync();
+
+
+            //await _repASNDetail.UpdateAsync(a => new WMSASNDetail
+            //{
+            //    ReceivedQty = a.ReceivedQty - (SqlFunc.Subqueryable<WMSReceiptDetail>().Where(b => a.Id == b.ASNDetailId).Sum(c => c.ReceivedQty)),
+            //    //_repReceiptDetail.AsQueryable().Where(b => a.Id == b.ASNDetailId).Sum(c => c.ReceivedQty),
+            //    Updator = _userManager.Account,
+            //    UpdateTime = DateTime.Now
+            //}, a => ASNIds.Contains(a.ASNId));
+
+            //判断ASN明细是否全部回退
+            //ASNIds.ForEach(id =>
+            //{
+
+            //    var repASNDetailData = _repASNDetail.AsQueryable().Where(a => ASNIds.Contains(a.ASNId)).ToList();
+            //    repASNDetailData.ForEach(a =>
+            //    {
+            //        a.ReceivedQty = a.ReceivedQty - (_repReceiptDetail.AsQueryable().Where(b => a.Id == b.ASNDetailId).Sum(c => c.ReceivedQty));
+            //        a.Updator = _userManager.Account;
+            //        a.UpdateTime = DateTime.Now;
+            //    });
+            //    _repASNDetail.UpdateRangeAsync(repASNDetailData);
+
+
+            //    var asnDetail = _repASNDetail.AsQueryable().Where(b => b.ReceivedQty > 0 && b.ASNId == id).ToList();
+            //    if (asnDetail.Count > 0)
+            //    {
+            //        //await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.部分转入库单 }, (a => ASNIds.Contains(a.Id)));
+            //        _repASN.Context.Updateable<WMSASN>()
+            //          .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.部分转入库单)
+            //          .Where(p => (p.Id) == id)
+            //          .ExecuteCommandAsync();
+            //    }
+            //    else
+            //    {
+            //        //await _repASN.UpdateAsync(a => new WMSASN { ASNStatus = (int)ASNStatusEnum.新增 }, (a => ASNIds.Contains(a.Id)));
+            //        _repASN.Context.Updateable<WMSASN>()
+            //        .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.新增)
+            //        .Where(p => (p.Id) == id)
+            //        .ExecuteCommandAsync();
+            //    }
+            //});
 
             //先删除明细表，再删除主表
             _repReceiptDetail.Delete(a => request.Select(a => a.Id).Contains(a.ReceiptId));

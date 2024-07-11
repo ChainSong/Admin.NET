@@ -1,0 +1,336 @@
+﻿<template>
+	<div class="wMSASN-container">
+		<el-dialog v-model="isShowDialog" :title="props.title" :width="1000" draggable="">
+
+			<el-card>
+				<el-descriptions class="margin-top" :column="2" size="small" border>
+					<template v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1 || a.isKey == 1)">
+
+						<el-descriptions-item :prop="i.displayName" :label="i.displayName">
+							<template>
+								<!-- <i></i>
+									{{ i.displayName }} -->
+							</template>
+
+							<template v-if="i.type == 'DropDownListStr'">
+								<template v-for="item in i.tableColumnsDetails">
+									<el-tag v-if="item.codeStr == state.header[i.columnName]" v-bind:key="item.color"
+										show-icon :type="item.color">
+										{{ item.name }}
+									</el-tag>
+									<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
+											show-icon :type="item.color" :key="item.codeStr"></label> -->
+								</template>
+							</template>
+							<template v-else-if="i.type == 'DropDownListInt'">
+								<template v-for="item in i.tableColumnsDetails">
+									<el-tag v-if="item.codeInt == state.header[i.columnName]" v-bind:key="item.color"
+										show-icon :type="item.color">
+										{{ item.name }}
+									</el-tag>
+									<!-- <template v-if="item.codeInt == state.header[i.columnName]">
+											<label show-icon :type="item.color" v-text="item.name"
+												:key="item.codeInt"></label>
+										</template> -->
+								</template>
+							</template>
+							<template v-else>
+								<label font-family="Helvetica Neue" v-text="state.header[i.columnName]"></label>
+							</template>
+						</el-descriptions-item>
+					</template>
+				</el-descriptions>
+			</el-card>
+			<!-- <el-button @click="handleAdd" type="primary" size="large" class="toolbar-btn">添加一条</el-button> -->
+			<el-card>
+				<el-form label-position="top" :model="state" ref="detailRuleRef" :rules="detailRule">
+					<el-table :data="state.details" height="250">
+						<template v-for="(v, index) in state.tableColumnDetails">
+							<el-table-column v-if="v.isCreate" :key="index" style="margin:0;padding:0;" :fixed="false"
+								:prop="v.columnName" :label="v.displayName" width="150">
+								<template #default="scope">
+									<el-form-item :key="scope.row.key" style="margin:0;padding:0;"
+										:prop="'details.' + scope.$index + '.' + v.columnName"
+										:rules="detailRule[v.columnName]">
+										<template v-if="v.type == 'TextBox'">
+											<el-input placeholder="请输入内容" :disabled="!v.isUpdate"
+												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate">
+											</el-input>
+										</template>
+										<template v-if="v.type == 'DropDownListInt'">
+											<el-select v-model="state.details[scope.$index][v.columnName]"
+												v-if="v.isCreate" :disabled="!v.isUpdate" placeholder="请选择"
+												style="width: 100%">
+												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeInt"
+													:label="item.name" :value="item.codeInt">
+												</el-option>
+											</el-select>
+										</template>
+										<template v-if="v.type == 'DropDownListStr'">
+											<el-select v-model="state.details[scope.$index][v.columnName]"
+												v-if="v.isCreate" :disabled="!v.isUpdate" placeholder="请选择"
+												style="width: 100%">
+												<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
+													:label="item.name" :value="item.codeStr">
+												</el-option>
+											</el-select>
+										</template>
+										<template v-if="v.type == 'DropDownListStrRemote'">
+											<select-Remote :whereData="state.header" :key="state.details[scope.$index]"
+												:isDisabled="v.isUpdate" :columnData="v"
+												:defaultvValue="state.details[scope.$index][v.columnName]"
+												@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
+										</template>
+										<template v-if="v.type == 'DatePicker'">
+											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
+												v-if="v.isCreate" :disabled="v.isUpdate == 0" type="date"
+												placeholder="选择日期" style="width: 100%">
+											</el-date-picker>
+										</template>
+										<template v-if="v.type == 'DateTimePicker'">
+											<el-date-picker v-model="state.details[scope.$index][v.columnName]"
+												v-if="v.isCreate" :disabled="v.isUpdate == 0" type="datetime"
+												start-placeholder="选择日期时间" style="width: 100%">
+											</el-date-picker>
+										</template>
+										<template v-if="v.type == 'InputNumber'">
+											<el-input-number placeholder="请输入内容" size="small"
+												v-model="state.details[scope.$index][v.columnName]" v-if="v.isCreate"
+												:disabled="v.isUpdate == 0"></el-input-number>
+										</template>
+									</el-form-item>
+								</template>
+							</el-table-column>
+						</template>
+						<!-- <el-table-column>
+							<template #default="scope">
+								<el-button size="mini" type="primary" @click="handleDelete(scope.$index)">删除</el-button>
+							</template>
+						</el-table-column> -->
+					</el-table>
+				</el-form>
+			</el-card>
+			<div>
+				<!-- <Button @click="cancel">{{ L("Cancel") }}</Button>
+				<Button @click="save" type="primary">{{ L("OK") }}</Button> -->
+			</div>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="cancel" size="default">取 消</el-button>
+					<el-button type="primary" @click="submit" size="default">确 定</el-button>
+				</span>
+			</template>
+		</el-dialog>
+	</div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from "vue";
+import { ElMessage } from "element-plus";
+import type { FormRules } from "element-plus";
+import { addWMSASN, updateWMSASN, getWMSASN, asnForReceiptPart } from "/@/api/main/wMSASN";
+
+import { getByTableNameList } from "/@/api/main/tableColumns";
+import Header from "/@/entities/asn";
+import Detail from "/@/entities/asnForReceiptDetail";
+import TableColumns from "/@/entities/tableColumns";
+import selectRemote from '/@/views/tools/select-remote.vue'
+//父级传递来的参数
+var props = defineProps({
+	title: {
+		type: String,
+		default: "",
+	},
+});
+
+
+const state = ref({
+	// vm: {
+	// 	id: "",
+	// 	form: {
+	// 		details: []
+	// 	} as any,
+	// 	header: new Header(),
+	// 	details: new Array<Detail>(),
+	// },
+	visible: false,
+	loading: false,
+	header: new Header(),
+	headers: new Array<Header>(),
+	details: new Array<Detail>(),
+
+
+	tableColumnHeader: new TableColumns(),
+	tableColumnHeaders: new Array<TableColumns>(),
+	tableColumnDetail: new TableColumns(),
+	tableColumnDetails: new Array<TableColumns>()
+	// header: new Array<Details>(),
+})
+
+let headerRuleRef = ref<any>({});
+let headerRule = ref({});
+let detailRuleRef = ref<any>({});
+let detailRule = ref({});
+
+
+//父级传递来的函数，用于回调
+const emit = defineEmits(["reloadTable"]);
+
+// headerRule : {},
+//     detailRule :{},
+
+const isShowDialog = ref(false);
+// const ruleForm = ref<any>({});
+//自行添加其他规则
+// const rules = ref<FormRules>({});
+
+//添加一行明细
+// const handleAdd = (row: any) => {
+// 	state.value.details.push(new Detail());
+// }
+//删除一行明细
+// const handleDelete = (index: any) => {
+// 	console.log(index);
+// 	console.log(state.value.details);
+// 	state.value.details.splice(index, 1);
+// 	console.log(state.value.details);
+
+// }
+// 打开弹窗
+const openDialog = (row: any) => {
+	// ruleForm.value = JSON.parse(JSON.stringify(row));
+	state.value.header = JSON.parse(JSON.stringify(row));
+	isShowDialog.value = true;
+	get();
+};
+
+// 关闭弹窗
+const closeDialog = () => {
+	emit("reloadTable");
+	isShowDialog.value = false;
+};
+
+// 取消
+const cancel = () => {
+	isShowDialog.value = false;
+};
+
+// 提交
+const submit = async () => {
+	// console.log("state.value.details");
+	// console.log(state.value.details);
+	// console.log(state.value.header);
+	// state.value.header.details = state.value.details
+	// headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
+	// 	if (isValid) {
+	console.log("state.value.details");
+	console.log(state.value.details);
+	// console.log(state.value.header);
+	// console.log(state.value.details);
+	// console.log(state.value.header.details);
+	// console.log(state.value.details);
+	// console.log(state.value.header.details);
+	// detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
+	// 	if (isValidDetail) {
+
+	let result = await asnForReceiptPart(state.value.details);
+	if (result.data.result.code == "1") {
+		ElMessage.success("转入库单成功");
+		closeDialog();
+	} else {
+		ElMessage.error("转入库单失败:" + result.data.result.msg);
+	}
+
+	// 		closeDialog();
+	// 	} else {
+	// 		console.log(Object.keys(fieldsDetail))
+	// 		ElMessage({
+	// 			message: `表单明细有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,
+	// 			type: "error",
+	// 		});
+	// 	}
+	// })
+	// } else {
+	// 	ElMessage({
+	// 		message: `表单有${Object.keys(fields).length}处验证失败，请修改后再提交`,
+	// 		type: "error",
+	// 	});
+	// }
+
+	// });
+};
+
+const get = async () => {
+
+	// state.value.header=new Header();
+	state.value.details = new Array<Detail>();
+
+	let result = await getWMSASN(state.value.header.id);
+	// console.log("result");
+	// console.log(result);
+	// console.log(result.data);
+
+	// console.log(state.value.header);
+	// console.log(state.value.details);
+	// console.log(result.data.result);
+	// console.log(result.data.result.detail);
+	state.value.header = result.data.result;
+	state.value.details = result.data.result.details;
+	// console.log("赋值");
+	// console.log(state.value.header);
+	// console.log(state.value.details);
+
+}
+
+const gettableColumn = async () => {
+	let res = await getByTableNameList("WMS_ASN");
+	state.value.tableColumnHeaders = res.data.result;
+	// headerRule.value = {};
+	//验证
+	// state.value.tableColumnHeaders.forEach((a) => {
+	// 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+	// 		//  console.log("添加验证"+a.columnName)
+	// 		headerRule.value[a.columnName] = [
+	// 			{
+	// 				required: true,
+	// 				message: a.displayName,
+	// 				trigger: "blur",
+	// 			},
+	// 		];
+	// 	}
+	// });
+	let resDetail = await getByTableNameList("WMS_ASNForReceiptDetail");
+	// console.log("asdasdasdasdasdasddasdas")
+	// console.log(resDetail);
+	state.value.tableColumnDetails = resDetail.data.result;
+	// detailRule.value = {};
+	// state.value.tableColumnDetails.forEach((a) => {
+	// 	if (a.validation.toUpperCase() == "Required".toUpperCase()) {
+	// 		//  console.log("添加验证"+a.columnName)
+	// 		detailRule.value[a.columnName] = [
+	// 			{
+	// 				required: true,
+	// 				message: a.displayName,
+	// 				trigger: "blur",
+	// 			},
+	// 		];
+	// 	}
+	// });
+	// console.log(" state.value.tableColumnDetails")
+	// console.log(state.value.tableColumnDetails)
+	// console.log(state.value.header)
+	// let resDetail = await getByTableNameList("CustomerDetail");
+	// state.value.tableColumnHeaders = res.data.result;
+
+};
+
+// 页面加载时
+onMounted(async () => {
+	gettableColumn();
+	// get();
+	// state.value.vm.details = [new Detail()];
+});
+
+//将属性或者函数暴露给父组件
+defineExpose({ openDialog });
+</script>

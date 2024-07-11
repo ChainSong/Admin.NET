@@ -231,9 +231,14 @@ public class WMSPickTaskInput : BasePageInput
     /// </summary>
     public string WarehouseName { get; set; }
 
+
+    public string ExternOrderNumber { get; set; }
     /// <summary>
     /// PickTaskNumber
     /// </summary>
+    /// 
+
+
     public string PickTaskNumber { get; set; }
 
     /// <summary>

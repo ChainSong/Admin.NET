@@ -15,7 +15,7 @@ export default class pickTaskDetail extends Entity<number>{
     pickTaskNumber: string;
     pickStatus: number;
     pikcTime: string;
-    pickBoxNumber
+    pickBoxNumber: string;
     pickQty: number;
     area: string;
     location: string;

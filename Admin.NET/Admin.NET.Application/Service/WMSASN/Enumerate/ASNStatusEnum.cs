@@ -19,11 +19,15 @@ namespace Admin.NET.Application.Enumerate
         新增 = 1,
 
         /// <summary>
+        /// ASN 部分转入库单 5
+        /// </summary>
+        部分转入库单 = 5,
+
+        /// <summary>
         /// ASN 转入库单 10
         /// </summary>
         转入库单 = 10,
 
-    
 
         /// <summary>
         /// ASN 完成 99

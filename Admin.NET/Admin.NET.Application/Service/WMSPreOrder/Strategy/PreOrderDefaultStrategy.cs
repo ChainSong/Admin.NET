@@ -86,7 +86,7 @@ namespace Admin.NET.Application.Strategy
                 //}
                 if (!string.IsNullOrEmpty(item.OrderAddress.Phone))
                 {
-
+                    item.OrderAddress.Phone = item.OrderAddress.Phone.Trim();
                     if (Regex.IsMatch(item.OrderAddress.Phone, phoneStr) || Regex.IsMatch(item.OrderAddress.Phone, telStr))
                     {
                         continue;
@@ -151,6 +151,7 @@ namespace Admin.NET.Application.Strategy
                    .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                    .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
                    .ForMember(a => a.OrderAddress, opt => opt.MapFrom(c => c.OrderAddress))
+                   .ForMember(a => a.Extend, opt => opt.MapFrom(c => c.Extend))
                    //添加库存状态为可用
                    .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
 
@@ -207,18 +208,30 @@ namespace Admin.NET.Application.Strategy
                     a.CreationTime = DateTime.Now;
                     LineNumber++;
                 });
-
-                item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
-                item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
-                item.OrderAddress.Creator = _userManager.Account;
-                item.OrderAddress.CreationTime = DateTime.Now;
-                item.OrderAddress.UpdateTime = DateTime.Now;
-
+                if (item.OrderAddress != null)
+                {
+                    item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
+                    item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
+                    item.OrderAddress.Creator = _userManager.Account;
+                    item.OrderAddress.CreationTime = DateTime.Now;
+                }
+                if (item.Extend != null)
+                {
+                    item.Extend.PreOrderNumber = item.PreOrderNumber;
+                    item.Extend.ExternOrderNumber = item.ExternOrderNumber;
+                    item.Extend.Creator = _userManager.Account;
+                    item.Extend.CreationTime = DateTime.Now;
+                }
+                //item.OrderAddress.UpdateTime = DateTime.Now;
             });
 
             //开始插入数据
             //await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
-            await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).Include(b => b.OrderAddress).ExecuteCommandAsync();
+            await _repPreOrder.Context.InsertNav(orderData)
+                .Include(a => a.Details)
+                .Include(b => b.OrderAddress)
+                .Include(b => b.Extend)
+                .ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             response.Msg = "添加成功";
@@ -351,11 +364,31 @@ namespace Admin.NET.Application.Strategy
                     //a.Creator = _userManager.Account;
                     a.UpdateTime = DateTime.Now;
                 });
+
+                if (item.OrderAddress != null)
+                {
+                    item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
+                    item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
+                    item.OrderAddress.Updator = _userManager.Account;
+                    item.OrderAddress.UpdateTime = DateTime.Now;
+                }
+                if (item.Extend != null)
+                {
+                    item.Extend.PreOrderNumber = item.PreOrderNumber;
+                    item.Extend.ExternOrderNumber = item.ExternOrderNumber;
+                    item.Extend.Updator = _userManager.Account;
+                    item.Extend.UpdateTime = DateTime.Now;
+                }
                 LineNumber++;
             });
 
             //开始插入数据
-            await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).Include(a => a.OrderAddress).ExecuteCommandAsync();
+            //await _repPreOrder.Context.UpdateNav(orderData).Include(a => a.Details).Include(a => a.OrderAddress).ExecuteCommandAsync();
+            await _repPreOrder.Context.UpdateNav(orderData)
+              .Include(a => a.Details)
+              .Include(b => b.OrderAddress)
+              .Include(b => b.Extend)
+              .ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             return response;

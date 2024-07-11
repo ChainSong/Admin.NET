@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Admin.NET
- * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/Admin.NET/'>https://gitee.com/zuohuaijun/Admin.NET</a>
+ * HiGenious 通用权限开发平台
+ * 让 .NET 开发更简单、更通用、更流行。前后端分离架构(.NET6/Vue3)，开箱即用紧随前沿技术。<br/><a href='https://gitee.com/zuohuaijun/HiGenious/'>https://gitee.com/zuohuaijun/HiGenious</a>
  *
  * OpenAPI spec version: 1.0.0
  * Contact: 515096995@qq.com
@@ -11,6 +11,7 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+
 import globalAxios, { AxiosResponse, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Configuration } from '../configuration';
 // Some imports not used depending on template conditions
@@ -22,6 +23,7 @@ import { AdminResultObject } from '../models';
 import { AdminResultString } from '../models';
 import { LoginInput } from '../models';
 import { LoginPhoneInput } from '../models';
+import { LoginSsoInput } from '../models';
 /**
  * SysAuthApi - axios parameter creator
  * @export
@@ -167,7 +169,7 @@ export const SysAuthApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * 用户名/密码：superadmin/123456
+         * 用户名/密码：superadmin/123456  外库用户才走账号登录
          * @summary 账号密码登录
          * @param {LoginInput} body 
          * @param {*} [options] Override http request option.
@@ -303,6 +305,58 @@ export const SysAuthApiAxiosParamCreator = function (configuration?: Configurati
             localVarUrlObj.search = (new URLSearchParams(query)).toString();
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 前端传入临时令牌；后端通过临时令牌拿到token，并通过token 拿到登录账号，再判断账号是否存在 不存在则创建
+         * @summary SSO单点登录
+         * @param {LoginSsoInput} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiSysAuthSsoLoginPost: async (body: LoginSsoInput, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling apiSysAuthSsoLoginPost.');
+            }
+            const localVarPath = `/api/sysAuth/ssoLogin`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, 'https://example.com');
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+            const localVarRequestOptions :AxiosRequestConfig = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            // http bearer authentication required
+            if (configuration && configuration.accessToken) {
+                const accessToken = typeof configuration.accessToken === 'function'
+                    ? await configuration.accessToken()
+                    : await configuration.accessToken;
+                localVarHeaderParameter["Authorization"] = "Bearer " + accessToken;
+            }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json-patch+json';
+
+            const query = new URLSearchParams(localVarUrlObj.search);
+            for (const key in localVarQueryParameter) {
+                query.set(key, localVarQueryParameter[key]);
+            }
+            for (const key in options.params) {
+                query.set(key, options.params[key]);
+            }
+            localVarUrlObj.search = (new URLSearchParams(query)).toString();
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            const needsSerialization = (typeof body !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.data =  needsSerialization ? JSON.stringify(body !== undefined ? body : {}) : (body || "");
 
             return {
                 url: localVarUrlObj.pathname + localVarUrlObj.search + localVarUrlObj.hash,
@@ -545,7 +599,7 @@ export const SysAuthApiFp = function(configuration?: Configuration) {
             };
         },
         /**
-         * 用户名/密码：superadmin/123456
+         * 用户名/密码：superadmin/123456  外库用户才走账号登录
          * @summary 账号密码登录
          * @param {LoginInput} body 
          * @param {*} [options] Override http request option.
@@ -580,6 +634,20 @@ export const SysAuthApiFp = function(configuration?: Configuration) {
          */
         async apiSysAuthRefreshTokenGet(accessToken?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultString>>> {
             const localVarAxiosArgs = await SysAuthApiAxiosParamCreator(configuration).apiSysAuthRefreshTokenGet(accessToken, options);
+            return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+                const axiosRequestArgs :AxiosRequestConfig = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
+                return axios.request(axiosRequestArgs);
+            };
+        },
+        /**
+         * 前端传入临时令牌；后端通过临时令牌拿到token，并通过token 拿到登录账号，再判断账号是否存在 不存在则创建
+         * @summary SSO单点登录
+         * @param {LoginSsoInput} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSysAuthSsoLoginPost(body: LoginSsoInput, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => Promise<AxiosResponse<AdminResultLoginOutput>>> {
+            const localVarAxiosArgs = await SysAuthApiAxiosParamCreator(configuration).apiSysAuthSsoLoginPost(body, options);
             return (axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
                 const axiosRequestArgs :AxiosRequestConfig = {...localVarAxiosArgs.options, url: basePath + localVarAxiosArgs.url};
                 return axios.request(axiosRequestArgs);
@@ -677,7 +745,7 @@ export const SysAuthApiFactory = function (configuration?: Configuration, basePa
             return SysAuthApiFp(configuration).apiSysAuthLoginPhonePost(body, options).then((request) => request(axios, basePath));
         },
         /**
-         * 用户名/密码：superadmin/123456
+         * 用户名/密码：superadmin/123456  外库用户才走账号登录
          * @summary 账号密码登录
          * @param {LoginInput} body 
          * @param {*} [options] Override http request option.
@@ -704,6 +772,16 @@ export const SysAuthApiFactory = function (configuration?: Configuration, basePa
          */
         async apiSysAuthRefreshTokenGet(accessToken?: string, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultString>> {
             return SysAuthApiFp(configuration).apiSysAuthRefreshTokenGet(accessToken, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 前端传入临时令牌；后端通过临时令牌拿到token，并通过token 拿到登录账号，再判断账号是否存在 不存在则创建
+         * @summary SSO单点登录
+         * @param {LoginSsoInput} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiSysAuthSsoLoginPost(body: LoginSsoInput, options?: AxiosRequestConfig): Promise<AxiosResponse<AdminResultLoginOutput>> {
+            return SysAuthApiFp(configuration).apiSysAuthSsoLoginPost(body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -785,7 +863,7 @@ export class SysAuthApi extends BaseAPI {
         return SysAuthApiFp(this.configuration).apiSysAuthLoginPhonePost(body, options).then((request) => request(this.axios, this.basePath));
     }
     /**
-     * 用户名/密码：superadmin/123456
+     * 用户名/密码：superadmin/123456  外库用户才走账号登录
      * @summary 账号密码登录
      * @param {LoginInput} body 
      * @param {*} [options] Override http request option.
@@ -815,6 +893,17 @@ export class SysAuthApi extends BaseAPI {
      */
     public async apiSysAuthRefreshTokenGet(accessToken?: string, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultString>> {
         return SysAuthApiFp(this.configuration).apiSysAuthRefreshTokenGet(accessToken, options).then((request) => request(this.axios, this.basePath));
+    }
+    /**
+     * 前端传入临时令牌；后端通过临时令牌拿到token，并通过token 拿到登录账号，再判断账号是否存在 不存在则创建
+     * @summary SSO单点登录
+     * @param {LoginSsoInput} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SysAuthApi
+     */
+    public async apiSysAuthSsoLoginPost(body: LoginSsoInput, options?: AxiosRequestConfig) : Promise<AxiosResponse<AdminResultLoginOutput>> {
+        return SysAuthApiFp(this.configuration).apiSysAuthSsoLoginPost(body, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * 

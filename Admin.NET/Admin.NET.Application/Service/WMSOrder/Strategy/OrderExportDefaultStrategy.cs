@@ -21,7 +21,7 @@ using Admin.NET.Application.Dtos.Enum;
 using System.Reflection;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
-namespace Admin.NET.Application.Service.Strategy;
+namespace Admin.NET.Application;
 public class OrderExportDefaultStrategy : IOrderExcelInterface
 {
 

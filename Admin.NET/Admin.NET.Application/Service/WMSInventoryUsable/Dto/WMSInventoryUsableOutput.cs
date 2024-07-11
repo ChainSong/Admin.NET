@@ -8,27 +8,27 @@ public class WMSInventoryUsableOutput
     /// <summary>
     /// Id
     /// </summary>
-    public long Id { get; set; }
+    //public long Id { get; set; }
 
     /// <summary>
     /// ASNDetailId
     /// </summary>
-    public long ASNDetailId { get; set; }
+    //public long ASNDetailId { get; set; }
 
     /// <summary>
     /// ReceiptDetailId
     /// </summary>
-    public long ReceiptDetailId { get; set; }
+    //public long ReceiptDetailId { get; set; }
 
     /// <summary>
     /// ReceiptReceivingId
     /// </summary>
-    public long ReceiptReceivingId { get; set; }
+    //public long ReceiptReceivingId { get; set; }
 
     /// <summary>
     /// CustomerId
     /// </summary>
-    public long CustomerId { get; set; }
+    //public long CustomerId { get; set; }
 
     /// <summary>
     /// CustomerName
@@ -78,12 +78,12 @@ public class WMSInventoryUsableOutput
     /// <summary>
     /// SuperId
     /// </summary>
-    public long SuperId { get; set; }
+    //public long SuperId { get; set; }
 
     /// <summary>
     /// RelatedId
     /// </summary>
-    public long RelatedId { get; set; }
+    //public long RelatedId { get; set; }
 
     /// <summary>
     /// GoodsName

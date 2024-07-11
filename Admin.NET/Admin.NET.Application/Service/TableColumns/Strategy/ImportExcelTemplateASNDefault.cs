@@ -9,22 +9,24 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application
 {
-    public class ImportExcelTemplateASNDefault :IImportExcelTemplate
+    public class ImportExcelTemplateASNDefault : ImportExcelTemplateStrategy
     {
 
 
-        public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+        //public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         //public readonly SqlSugarRepository<TableColumnsDetail> _repDetail { get; set; }
-        public UserManager _userManager { get; set; }
+        //public UserManager _userManager { get; set; }
 
+        static List<string> _tableNames = new List<string>() { "WMS_ASN", "WMS_ASNDetail" };
 
         public ImportExcelTemplateASNDefault(
-               //ITable_ColumnsManager table_ColumnsManager,
-               //      ITable_ColumnsDetailManager table_ColumnsDetailManager
-            )
+            //ITable_ColumnsManager table_ColumnsManager,
+            //      ITable_ColumnsDetailManager table_ColumnsDetailManager
+            ) : base(_tableNames)
         {
             //_table_ColumnsManager = table_ColumnsManager;
             //_table_ColumnsDetailManager = table_ColumnsDetailManager;
@@ -49,7 +51,7 @@ namespace Admin.NET.Application
                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                DbColumnName = a.DbColumnName,
                IsImportColumn = a.IsImportColumn
-           }).OrderBy(a=>a.Order);
+           }).OrderBy(a => a.Order);
             var detail = _repTableColumns.AsQueryable().Where(a => a.TableName == "WMS_ASNDetail" &&
               a.TenantId == TenantId &&
               a.IsImportColumn == 1
@@ -61,7 +63,7 @@ namespace Admin.NET.Application
                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                DbColumnName = a.DbColumnName,
                IsImportColumn = a.IsImportColumn
-           }).OrderBy(a=>a.Order);
+           }).OrderBy(a => a.Order);
             DataTable dt = new DataTable();
             DataColumn dc = new DataColumn();
 

@@ -6,23 +6,17 @@
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="Id" prop="id">
 							<el-input v-model="ruleForm.id" placeholder="请输入Id" clearable />
-							
 						</el-form-item>
-						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="ReceiptReceivingId" prop="receiptReceivingId">
 							<el-input v-model="ruleForm.receiptReceivingId" placeholder="请输入ReceiptReceivingId" clearable />
-							
 						</el-form-item>
-						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="ReceiptReceivingDetailId" prop="receiptReceivingDetailId">
 							<el-input v-model="ruleForm.receiptReceivingDetailId" placeholder="请输入ReceiptReceivingDetailId" clearable />
-							
 						</el-form-item>
-						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="SupplierId" prop="supplierId">
@@ -62,9 +56,7 @@
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="Location" prop="location">
 							<el-input v-model="ruleForm.location" placeholder="请输入Location" clearable />
-							
 						</el-form-item>
-						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="SKU" prop="sKU">

@@ -6,7 +6,7 @@ using Admin.NET.Application.Interface;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using AngleSharp.Dom;
-using COSXML.Network;
+//using COSXML.Network;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
@@ -19,6 +19,7 @@ using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Common;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -28,6 +29,7 @@ namespace Admin.NET.Application;
 public class WMSPreOrderService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPreOrder> _rep;
+    private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
 
     private readonly SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail;
     //private readonly ISqlSugarClient _db;
@@ -41,7 +43,9 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
-    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder)
+    private readonly SqlSugarRepository<WMSPreOrderExtend> _repPreOrderExtend;
+    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping;
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress)
     {
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
@@ -53,8 +57,12 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _repTableColumnsDetail = repTableColumnsDetail;
         _repOrderDetail = repOrderDetail;
         _repOrder = repOrder;
-
+        _repPreOrderExtend = repPreOrderExtend;
+        _repUploadMapping = repUploadMapping;
+        _repOrderAddress = repOrderAddress;
     }
+
+
 
     /// <summary>
     /// 分页查询WMS_PreOrder
@@ -62,6 +70,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [DisplayName("分页查询WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Page")]
     public async Task<SqlSugarPagedList<WMSPreOrderOutput>> Page(WMSPreOrderInput input)
     {
@@ -200,6 +209,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
+    [DisplayName("增加WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Add")]
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateWMSPreOrderInput input)
     {
@@ -236,6 +246,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [DisplayName("删除WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Delete")]
     public async Task Delete(DeleteWMSPreOrderInput input)
     {
@@ -250,6 +261,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
+    [DisplayName("更新WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSPreOrderInput input)
     {
@@ -274,6 +286,24 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     }
 
 
+    [HttpPost]
+    [DisplayName("导入PreOrder")]
+    [ApiDescriptionSettings(Name = "UploadPreOrderFile")]
+    public async Task<string> UploadPreOrderFile(IFormFile file)
+    {
+
+
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        var uploadInfo = await ImageUploadUtils.WriteFile(file, "UploadPreOrderFile");
+        UploadMappingLog uploadMappingLog = uploadInfo.Adapt<UploadMappingLog>();
+        uploadMappingLog.Creator = _userManager.Account;
+        uploadMappingLog.CreationTime = DateTime.Now;
+        uploadMappingLog.FileType = "PreOrderFile";
+        //uploadMappingLog.Url = uploadInfo.Url;
+        _repUploadMapping.Insert(uploadMappingLog);
+        return uploadInfo.Url + "/" + uploadInfo.FileName;
+    }
 
 
     /// <summary>
@@ -282,11 +312,16 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [DisplayName("获取WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSPreOrder> Get(long id)
     {
-        var asd = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
-        var entity = await _rep.AsQueryable().Includes(a => a.Details).Includes(a => a.OrderAddress).Where(u => u.Id == id).FirstAsync();
+        //var asd = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable()
+            .Includes(a => a.Details)
+            .Includes(a => a.OrderAddress)
+            .Includes(a => a.Extend)
+            .Where(u => u.Id == id).FirstAsync();
         //var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
@@ -297,6 +332,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [DisplayName("获取WMS_PreOrder列表")]
     [ApiDescriptionSettings(Name = "List")]
     public async Task<List<WMSPreOrderOutput>> List([FromQuery] WMSPreOrderInput input)
     {
@@ -312,6 +348,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="Status">提交状态，第一次提交，可能存在校验提示， 用户选择忽略提示可以使用</param>
     /// <returns>文件名称</returns>
     [UnitOfWork]
+    [DisplayName("接收上传文件方法")]
     [ApiDescriptionSettings(Name = "UploadExcelFile")]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
@@ -394,6 +431,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [ApiDescriptionSettings(Name = "PreOrderForOrder")]
+    [DisplayName("预出库单转出库单")]
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> PreOrderForOrder(List<long> input)
     {
@@ -426,6 +464,21 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
 
 
+    /// <summary>
+    /// 更新UpdateOrderAddress
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "UpdateOrderAddress")]
+    public async Task<Response> UpdateOrderAddress(WMSOrderAddressIntput input)
+    {
+        var entity = input.Adapt<WMSOrderAddress>();
+        await _repOrderAddress.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "更新成功" };
+    }
+
+
 
     /// <summary>
     /// 导出预出库单
@@ -435,6 +488,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
     [HttpPost]
     [UnitOfWork]
+    [DisplayName("导出预出库单")]
     public ActionResult ExportPreOrder(List<long> input)
     {
         //使用简单工厂定制化  /

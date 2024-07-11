@@ -26,6 +26,7 @@ using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -45,11 +46,11 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     private readonly UserManager _userManager;
-
+    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
     private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep,SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow)
     {
         _rep = rep;
         //_db = db;
@@ -62,6 +63,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repReceiptDetail = repReceiptDetail;
         _repReceipt = repReceipt;
         _repASNDetail = repASNDetail;
+        _repWorkFlow = repWorkFlow;
     }
 
     /// <summary>
@@ -70,6 +72,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [DisplayName("分页查询WMSASN")]
     [ApiDescriptionSettings(Name = "Page")]
     public async Task<SqlSugarPagedList<WMSASNOutput>> Page(WMSASNInput input)
     {
@@ -210,6 +213,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
+    [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateWMSASNInput input)
     {
         //Response<List<OrderStatusDto>> response= new Response<List<OrderStatusDto>>();
@@ -236,11 +240,12 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [DisplayName("删除WMSASN")]
     [ApiDescriptionSettings(Name = "Delete")]
     public async Task Delete(DeleteWMSASNInput input)
     {
         var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        await _rep.DeleteAsync(entity);   //假删除
+        await _rep.DeleteAsync(entity);   //删除
     }
 
     /// <summary>
@@ -249,6 +254,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [DisplayName("更新WMSASN")]
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSASNInput input)
     {
@@ -274,6 +280,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [DisplayName("获取WMSASN")]
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSASN> Get(long id)
     {
@@ -288,6 +295,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [DisplayName("获取WMSASN列表")]
     [ApiDescriptionSettings(Name = "List")]
     public async Task<List<WMSASNOutput>> List([FromQuery] WMSASNInput input)
     {
@@ -301,6 +309,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <param name="file">文件内容</param>
     /// <returns>文件名称</returns>
     [UnitOfWork]
+    [DisplayName("接收上传文件方法")]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
 
@@ -334,51 +343,124 @@ public class WMSASNService : IDynamicApiController, ITransient
         });
 
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var CustomerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
-        long CustomerId = 0;
-        if (CustomerData != null)
+        var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+        long customerId = 0;
+        if (customerData != null)
         {
-            CustomerId = CustomerData.CustomerId;
+            customerId = customerData.CustomerId; 
         }
         //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
         //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(CustomerId);
+        IASNInterface factory = ASNFactory.AddOrUpdate(customerId);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         var response = factory.AddStrategy(ASNs);
-        return await response;
-
-
+        return await response; 
     }
-
-
+    [DisplayName("ASN 转入库单")]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "ASNForReceipt")]
     public async Task<Response<List<OrderStatusDto>>> ASNForReceipt(List<long> input)
     {
-        var customerData = _rep.AsQueryable().Where(a => a.Id == input.First()).First();
-        long customerId = 0;
-        if (customerData != null)
+        var asnData =await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+
+        if (asnData == null || asnData.Count == 0)
         {
-            customerId = customerData.CustomerId;
+            throw Oops.Oh("订单不存在");
         }
+
+        //验证客户和订单类型，一次只能选择一种订单类型
+        if (asnData.Select(a => new { a.ReceiptType, a.CustomerName }).Distinct().Count() > 1)
+        {
+            throw Oops.Oh("只能操作同一种订单类型和客户");
+        }
+
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == asnData.First().ReceiptType).FirstAsync();
+
+        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "全部转入库单").Count() == 0)
+        {
+            throw Oops.Oh("该订单类型不支持部分转入库单");
+        }
+
+        //long customerId = 0;
+        //if (asnData != null)
+        //{
+        //    customerId = asnData.First().CustomerId;
+        //}
+
         //使用简单工厂定制化修改和新增的方法
-        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(customerId);
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(asnData.First().CustomerId, asnData.First().ReceiptType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
         factory._repASNDetail = _repASNDetail;
         factory._repCustomerUser = _repCustomerUser;
-        factory._repCustomerUser = _repCustomerUser;
-
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repReceipt = _repReceipt;
+        factory._repReceiptDetail = _repReceiptDetail;
         var response = factory.Strategy(input);
         return await response;
     }
 
 
+
+    /// <summary>
+    /// ASN 转入库单(部分)
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [DisplayName("ASN 转入库单(部分)")]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ASNForReceiptPart")]
+    public async Task<Response<List<OrderStatusDto>>> ASNForReceiptPart(List<WMSASNForReceiptDetailDto> input)
+    {
+        var asnData = _rep.AsQueryable().Where(a => a.Id == input.First().ASNId).First();
+         //根据订单类型判断是否存在该流程
+         var workflow =await _repWorkFlow.AsQueryable()
+            .Includes(a => a.SysWorkFlowSteps)
+            .Where(a => a.WorkName==asnData.ReceiptType).FirstAsync();
+
+        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "部分转入库单").Count() == 0)
+        {
+            throw Oops.Oh("该订单类型不支持部分转入库单");
+        }
+
+        //if (input == null || input.Count == 0)asnData
+        //{
+        //    throw Oops.Oh("订单不存在");
+        //}
+
+        ////验证客户和订单类型，一次只能选择一种订单类型
+        //if (input.Select(a => new { a.ReceiptType, a.CustomerName }).Distinct().Count() > 1)
+        //{
+        //    throw Oops.Oh("只能操作同一种订单类型和客户");
+        //}
+
+        //long customerId = 0;
+        //if (input != null)
+        //{
+        //    customerId = input.First().CustomerId;
+        //}
+        //使用简单工厂定制化修改和新增的方法
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(asnData.CustomerId, asnData.ReceiptType);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repASN = _rep;
+        factory._repASNDetail = _repASNDetail;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repReceipt = _repReceipt;
+        factory._repReceiptDetail = _repReceiptDetail;
+
+        var response = factory.StrategyPart(input);
+        return await response;
+    }
 
 
 
@@ -390,6 +472,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <returns></returns>
 
     [HttpPost]
+    [DisplayName("导出预出库单")]
     [UnitOfWork]
     public ActionResult ExportASN(List<long> input)
     {

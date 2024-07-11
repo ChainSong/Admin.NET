@@ -120,11 +120,12 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="250">
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
+            <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text" size="small">转入库单</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -135,6 +136,7 @@
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+      <asnforReceiptDialog ref="openAsnforReceiptRef" :title="asnforReceiptTitle" @reloadTable="handleQuery" />
     </el-card>
     <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
       <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
@@ -152,6 +154,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSASN/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
+import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDialog.vue'
 import { pageWMSASN, deleteWMSASN, asnForReceipt,exportASN } from '/@/api/main/wMSASN';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
@@ -190,6 +193,7 @@ const state = ref({
 });
 
 const editDialogRef = ref();
+const openAsnforReceiptRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
@@ -210,6 +214,7 @@ const tableParams = ref({
 const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
+const asnforReceiptTitle = ref("");
 
 // 页面加载时
 onMounted(async () => {
@@ -237,6 +242,19 @@ const openAdd = () => {
   addTitle.value = '添加';
   addDialogRef.value.openDialog({});
 };
+
+// 打开转入库单页面
+const  openAsnforReceipt= (row: any) => {
+
+  if (row.asnStatus == 99 || row.asnStatus == 10 || row.asnStatus==-1) {
+    ElMessage.warning("订单状态不允许转入库单");
+    return;
+  }
+  asnforReceiptTitle.value = '转入库单';
+  openAsnforReceiptRef.value.openDialog(row);
+};
+
+
 
 // 打开编辑页面
 const openEdit = (row: any) => {

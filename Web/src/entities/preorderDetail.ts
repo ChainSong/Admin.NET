@@ -1,7 +1,7 @@
 import Entity from './entity'
 
 
-export default class preorderDetail extends Entity<number>{
+export default class preOrderDetail extends Entity<number>{
     preOrderNumber: string;
     externOrderNumber: string;
     customerId: number;

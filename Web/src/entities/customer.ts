@@ -1,5 +1,6 @@
 import Entity from './entity'
 import CustomerDetail from './customerDetail'
+import CustomerConfig from './customerConfig'
 
 export default class customer extends Entity<number>{
     customerId: number;
@@ -30,4 +31,5 @@ export default class customer extends Entity<number>{
     creationTime: string="";
     endCreationTime: string="";
     details: Array<CustomerDetail>;
+    customerConfig: Array<CustomerConfig>; 
 }

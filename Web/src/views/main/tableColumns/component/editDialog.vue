@@ -81,8 +81,9 @@
 							<el-option label="DropDownListStr" value="DropDownListStr"></el-option>
 							<el-option label="DropDownListStrRemote" value="DropDownListStrRemote"></el-option>
 							<el-option label="DatePicker" value="DatePicker"> </el-option>
-							<el-option label="DateTimePicker" value="DateTimePicker">
-							</el-option>
+							<el-option label="DateTimePicker" value="DateTimePicker"> </el-option>
+							<el-option label="UploadImg" value="UploadImg"> </el-option>
+							<el-option label="UploadFile" value="UploadFile"> </el-option>
 						</el-select>
 					</template>
 				</el-table-column>
@@ -102,7 +103,8 @@
 				</el-table-column>
 				<el-table-column prop="relationColumn" width="120px" label="操作">
 					<template #default="scope">
-						<el-button @click="addDetailShow(scope.row, scope.$index)" type="text" size="small">添加明细</el-button>
+						<el-button @click="addDetailShow(scope.row, scope.$index)" type="text"
+							size="small">添加明细</el-button>
 					</template>
 				</el-table-column>
 				<!-- <el-table-column prop="associated" label="下拉"> </el-table-column> -->
@@ -296,7 +298,7 @@ const addDetailShow = async (row: any, indexDetail: number) => {
 }
 
 const addDetail = async () => {
-  	await updateTableColumnsDetail(state.value.tableColumnsDetails);
+	await updateTableColumnsDetail(state.value.tableColumnsDetails);
 	state.value.tableColumns[index].tableColumnsDetails = state.value.tableColumnsDetails;
 	dialogDetail.value = false;
 }
@@ -326,7 +328,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

@@ -73,7 +73,6 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.UIType), u => u.UIType.Contains(input.UIType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.DataSource), u => u.DataSource.Contains(input.DataSource.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
-
                     .Select<WMSLowCodeOutput>()
 ;
         if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
