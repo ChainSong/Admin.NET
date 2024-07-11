@@ -44,8 +44,9 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPreOrderExtend> _repPreOrderExtend;
-    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping;
-    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress)
+    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping; 
+    private readonly SqlSugarRepository<WMSProduct> _repProduct; 
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
@@ -60,6 +61,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _repPreOrderExtend = repPreOrderExtend;
         _repUploadMapping = repUploadMapping;
         _repOrderAddress = repOrderAddress;
+        _repProduct = repProduct;
     }
 
 
@@ -228,6 +230,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repProduct = _repProduct;
         var response = await factory.AddStrategy(entityListDtos);
         return response;
         //var entity = ObjectMapper.Map<WMS_PreOrder>(input);
@@ -279,6 +282,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repProduct = _repProduct;
         var response = await factory.UpdateStrategy(entityListDtos);
         return response;
         //var entity = input.Adapt<WMSPreOrder>();
@@ -418,6 +422,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repProduct = _repProduct;
         var response = await factory.AddStrategy(preOrders);
         return response;
 

@@ -49,8 +49,9 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
     private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep,SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep,SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
         //_db = db;
@@ -64,6 +65,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repReceipt = repReceipt;
         _repASNDetail = repASNDetail;
         _repWorkFlow = repWorkFlow;
+        _repProduct = repProduct;
     }
 
     /// <summary>

@@ -23,6 +23,9 @@ namespace Admin.NET.Application.Interface
          
         //客户用户关系仓储
         SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+        //产品仓储
+        SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+
         //仓库用户关系仓储
         SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser{ get; set; } 
         Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateWMSASNInput> request);

@@ -35,6 +35,10 @@ namespace Admin.NET.Application.Strategy
         //注入客户关系仓储
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
 
+        //注入产品仓储
+        public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+
+
         public ASNAddOrUpdateDefaultStrategy()
         {
         }
@@ -148,8 +152,8 @@ namespace Admin.NET.Application.Strategy
             asnData.ForEach(item =>
             {
                 int LineNumber = 1;
-                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var warehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
 
                 var ASNNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                 //ShortIDGen.NextID(new GenerationOptions
@@ -157,22 +161,41 @@ namespace Admin.NET.Application.Strategy
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
                 item.ASNNumber = ASNNumber;
-                item.CustomerId = CustomerId;
-                item.WarehouseId = WarehouseId;
+                item.CustomerId = customerId;
+                item.WarehouseId = warehouseId;
                 item.Creator = _userManager.Account;
                 item.CreationTime = DateTime.Now;
                 item.ASNStatus = (int)ASNStatusEnum.新增;
                 item.Details.ForEach(a =>
                 {
+                    //获取产品信息
+                    var productInfo = _repProduct.AsQueryable()
+                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .First();
+                    //校验产品信息
+                    if (productInfo == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            ExternOrder = item.ExternReceiptNumber,
+                            SystemOrder = item.ASNNumber,
+                            Type = item.ReceiptType,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.warning.ToString(),
+                            Msg = "产品信息不存在"
+                        });
+                        return;
+                    }
                     a.ASNNumber = ASNNumber;
-                    a.CustomerId = CustomerId;
+                    a.CustomerId = customerId;
                     a.CustomerName = item.CustomerName;
-                    a.WarehouseId = WarehouseId;
+                    a.WarehouseId = warehouseId;
                     a.WarehouseName = item.WarehouseName;
                     a.ExternReceiptNumber = item.ExternReceiptNumber;
                     a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
+                    a.GoodsName = productInfo.GoodsName;
                     LineNumber++;
                 });
 
@@ -260,26 +283,46 @@ namespace Admin.NET.Application.Strategy
 
 
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
-         
+
             asnData.ForEach(item =>
             {
-                int LineNumber = 1;
-                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                int lineNumber = 1;
+                var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var warehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
                 //var ASNNumber = ShortIDGen.NextID(new GenerationOptions
                 //{
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
                 //item.ASNNumber = ASNNumber;
 
-                item.CustomerId = CustomerId;
-                item.WarehouseId = WarehouseId;
+                item.CustomerId = customerId;
+                item.WarehouseId = warehouseId;
                 item.Updator = _userManager.Account;
                 item.UpdateTime = DateTime.Now;
                 item.ASNStatus = (int)ASNStatusEnum.新增;
 
                 item.Details.ForEach(a =>
                 {
+
+                    //获取产品信息
+                    var productInfo = _repProduct.AsQueryable()
+                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .First();
+                    //校验产品信息
+                    if (productInfo == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            ExternOrder = item.ExternReceiptNumber,
+                            SystemOrder = item.ASNNumber,
+                            Type = item.ReceiptType,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.warning.ToString(),
+                            Msg = "产品信息不存在"
+                        });
+                        return;
+                    }
+
                     //判断该行是新增的
                     if (a.Id == 0)
                     {
@@ -287,17 +330,18 @@ namespace Admin.NET.Application.Strategy
                         a.CreationTime = DateTime.Now;
                     }
                     a.ASNNumber = item.ASNNumber;
-                    a.CustomerId = CustomerId;
+                    a.CustomerId = customerId;
                     a.CustomerName = item.CustomerName;
-                    a.WarehouseId = WarehouseId;
+                    a.WarehouseId = warehouseId;
                     a.WarehouseName = item.WarehouseName;
                     a.ExternReceiptNumber = item.ExternReceiptNumber;
-                    a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
+                    a.GoodsName = productInfo.GoodsName;
+                    a.LineNumber = lineNumber.ToString().PadLeft(5, '0');
                     a.Updator = _userManager.Account;
                     a.UpdateTime = DateTime.Now;
-                    LineNumber++;
+                    lineNumber++;
                 });
-             
+
             });
 
 

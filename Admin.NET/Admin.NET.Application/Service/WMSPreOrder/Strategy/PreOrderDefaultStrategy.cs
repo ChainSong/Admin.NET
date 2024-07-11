@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using Furion.FriendlyException;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -30,6 +31,9 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
+        //注入产品仓储
+        public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+
         public PreOrderDefaultStrategy(
             )
         {
@@ -39,10 +43,9 @@ namespace Admin.NET.Application.Strategy
         //处理预出库单业务
         public async Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateWMSPreOrderInput> request)
         {
-
+            //try
+            //{
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
-
-
             //判断是否有权限操作
             //先判断是否能操作客户
             var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
@@ -183,30 +186,50 @@ namespace Admin.NET.Application.Strategy
 
             orderData.ForEach(item =>
             {
-                int LineNumber = 1;
-                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
-                var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+                int lineNumber = 1;
+                var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var warehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                var preOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                 //ShortIDGen.NextID(new GenerationOptions
                 //{
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
-                item.PreOrderNumber = PreOrderNumber;
-                item.CustomerId = CustomerId;
-                item.WarehouseId = WarehouseId;
+                item.PreOrderNumber = preOrderNumber;
+                item.CustomerId = customerId;
+                item.WarehouseId = warehouseId;
                 item.DetailCount = item.Details.Sum(pd => pd.OrderQty);
                 item.Details.ForEach(a =>
                 {
-                    a.PreOrderNumber = PreOrderNumber;
-                    a.CustomerId = CustomerId;
+                    //获取产品信息
+                    var productInfo = _repProduct.AsQueryable()
+                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .First();
+                    //校验产品信息
+                    if (productInfo == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            ExternOrder = item.ExternOrderNumber,
+                            SystemOrder = item.PreOrderNumber,
+                            Type = item.OrderType,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.warning.ToString(),
+                            Msg = "产品信息不存在"
+                        });
+                        return;
+                    }
+
+                    a.PreOrderNumber = preOrderNumber;
+                    a.CustomerId = customerId;
                     a.CustomerName = item.CustomerName;
-                    a.WarehouseId = WarehouseId;
+                    a.WarehouseId = warehouseId;
                     a.WarehouseName = item.WarehouseName;
+                    a.GoodsName = productInfo.GoodsName;
                     a.ExternOrderNumber = item.ExternOrderNumber;
-                    a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
+                    a.LineNumber = lineNumber.ToString().PadLeft(5, '0');
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
-                    LineNumber++;
+                    lineNumber++;
                 });
                 if (item.OrderAddress != null)
                 {
@@ -233,9 +256,30 @@ namespace Admin.NET.Application.Strategy
                 .Include(b => b.Extend)
                 .ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
+
+
+            orderData.ToList().ForEach(b =>
+            {
+                response.Data.Add(new OrderStatusDto()
+                {
+                    ExternOrder = b.ExternOrderNumber,
+                    SystemOrder = b.PreOrderNumber,
+                    Type = b.OrderType,
+                    StatusCode = StatusCode.Success,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = "订单新增成功"
+                });
+
+            });
             response.Code = StatusCode.Success;
             response.Msg = "添加成功";
             return response;
+            //}
+            //catch (Exception er)
+            //{
+
+            //    throw Oops.Oh(er, "添加预出库单失败");
+            //}
 
         }
 
@@ -337,32 +381,55 @@ namespace Admin.NET.Application.Strategy
             var mapper = new Mapper(config);
 
             var orderData = mapper.Map<List<WMSPreOrder>>(request);
-            int LineNumber = 1;
+
             orderData.ForEach(item =>
             {
-                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                int lineNumber = 1;
+                var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var warehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
                 //var PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                 //ShortIDGen.NextID(new GenerationOptions
                 //{
                 //    Length = 10// 设置长度，注意：不设置次长度是随机长度！！！！！！！
                 //});// 生成一个包含数字，字母，不包含特殊符号的 8 位短id
                 //item.PreOrderNumber = PreOrderNumber;
-                item.CustomerId = CustomerId;
-                item.WarehouseId = WarehouseId;
+                item.CustomerId = customerId;
+                item.WarehouseId = warehouseId;
                 item.DetailCount = item.Details.Sum(pd => pd.OrderQty);
                 item.Details.ForEach(a =>
                 {
+
+                    //获取产品信息
+                    var productInfo = _repProduct.AsQueryable()
+                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .First();
+                    //校验产品信息
+                    if (productInfo == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            ExternOrder = item.ExternOrderNumber,
+                            SystemOrder = item.PreOrderNumber,
+                            Type = item.OrderType,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.warning.ToString(),
+                            Msg = "产品信息不存在"
+                        });
+                        return;
+                    }
+
                     a.PreOrderNumber = item.PreOrderNumber;
-                    a.CustomerId = CustomerId;
+                    a.CustomerId = customerId;
                     a.CustomerName = item.CustomerName;
-                    a.WarehouseId = WarehouseId;
+                    a.WarehouseId = warehouseId;
                     a.WarehouseName = item.WarehouseName;
+                    a.GoodsName = productInfo.GoodsName;
                     a.ExternOrderNumber = item.ExternOrderNumber;
-                    a.LineNumber = LineNumber.ToString().PadLeft(5, '0');
+                    a.LineNumber = lineNumber.ToString().PadLeft(5, '0');
                     a.Updator = _userManager.Account;
                     //a.Creator = _userManager.Account;
                     a.UpdateTime = DateTime.Now;
+                    lineNumber++;
                 });
 
                 if (item.OrderAddress != null)
@@ -379,7 +446,7 @@ namespace Admin.NET.Application.Strategy
                     item.Extend.Updator = _userManager.Account;
                     item.Extend.UpdateTime = DateTime.Now;
                 }
-                LineNumber++;
+
             });
 
             //开始插入数据
@@ -389,6 +456,20 @@ namespace Admin.NET.Application.Strategy
               .Include(b => b.OrderAddress)
               .Include(b => b.Extend)
               .ExecuteCommandAsync();
+
+            orderData.ToList().ForEach(b =>
+            {
+                response.Data.Add(new OrderStatusDto()
+                {
+                    ExternOrder = b.ExternOrderNumber,
+                    SystemOrder = b.PreOrderNumber,
+                    Type = b.OrderType,
+                    StatusCode = StatusCode.Success,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = "订单新增成功"
+                });
+
+            });
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
             response.Code = StatusCode.Success;
             return response;

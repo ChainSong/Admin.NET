@@ -25,6 +25,9 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
+        //产品仓储
+        SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+
 
         Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateWMSPreOrderInput> request);
         Task<Response<List<OrderStatusDto>>> UpdateStrategy(List<AddOrUpdateWMSPreOrderInput> request);
