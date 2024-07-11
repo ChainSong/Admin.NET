@@ -73,7 +73,7 @@ namespace Admin.NET.Application.Strategy
                     ExternOrder = "第1行",
                     SystemOrder = "第1行",
                     //Type = b.OrderType,
-                    StatusCode = StatusCode.Warning,
+                    StatusCode = StatusCode.Error,
                     //StatusMsg = (string)StatusCode.warning,
                     Msg = "模板更新，请重新下载模板"
                 });
