@@ -230,6 +230,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repASNDetail = _repASNDetail;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repProduct = _repProduct;
         //factory._userManager = _userManager;
         return await factory.AddStrategy(entityListDtos);
         //string asdasd = response.Result.Msg;
@@ -269,6 +270,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repProduct = _repProduct;
         //factory._userManager = _userManager;
         return await factory.UpdateStrategy(entityListDtos);
     }
@@ -359,6 +361,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repASN = _rep;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repProduct = _repProduct;
         var response = factory.AddStrategy(ASNs);
         return await response; 
     }

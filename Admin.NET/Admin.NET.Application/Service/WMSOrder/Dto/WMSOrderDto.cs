@@ -69,11 +69,23 @@
         /// CompleteTime
         /// </summary>
         public DateTime? CompleteTime { get; set; }
-        
-        /// <summary>
-        /// DetailCount
-        /// </summary>
-        public double? DetailCount { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
+    /// DetailCount
+    /// </summary>
+    public double? DetailCount { get; set; }
         
         /// <summary>
         /// Creator

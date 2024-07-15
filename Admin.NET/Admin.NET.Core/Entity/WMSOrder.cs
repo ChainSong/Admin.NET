@@ -106,7 +106,19 @@ public class WMSOrder : ITenantIdFilter
        /// </summary>
        [SugarColumn(ColumnDescription = "")]
     public double DetailCount { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? So { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

@@ -73,11 +73,23 @@ namespace Admin.NET.Application;
         /// DetailCount
         /// </summary>
         public virtual double? DetailCount { get; set; }
-        
-        /// <summary>
-        /// Creator
-        /// </summary>
-        public virtual string? Creator { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
+    /// Creator
+    /// </summary>
+    public virtual string? Creator { get; set; }
         
         /// <summary>
         /// CreationTime

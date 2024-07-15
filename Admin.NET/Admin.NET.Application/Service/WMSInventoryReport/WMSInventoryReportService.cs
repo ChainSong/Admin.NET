@@ -129,11 +129,14 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         var result = exporter.ExportAsByteArray<DataTable>(response.Data);
         var fs = new MemoryStream(result.Result);
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        //return new FileStreamResult(fs, "application/octet-stream")
+        //{
+        //    FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
+        //};
         return new FileStreamResult(fs, "application/octet-stream")
         {
-            FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
+            FileDownloadName = "库存报表.xlsx" // 配置文件下载显示名
         };
-
         //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
     }
 

@@ -74,11 +74,23 @@
        /// DetailCount
        /// </summary>
        public double? DetailCount { get; set; }
-    
-       /// <summary>
-       /// Creator
-       /// </summary>
-       public string? Creator { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
+    /// Creator
+    /// </summary>
+    public string? Creator { get; set; }
     
        /// <summary>
        /// CreationTime

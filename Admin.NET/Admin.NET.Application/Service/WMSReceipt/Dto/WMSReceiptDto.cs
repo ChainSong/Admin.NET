@@ -79,11 +79,23 @@
         /// 收货完成日期
         /// </summary>
         public DateTime? CompleteTime { get; set; }
-        
-        /// <summary>
-        /// Remark
-        /// </summary>
-        public string? Remark { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
+    /// Remark
+    /// </summary>
+    public string? Remark { get; set; }
         
         /// <summary>
         /// Creator

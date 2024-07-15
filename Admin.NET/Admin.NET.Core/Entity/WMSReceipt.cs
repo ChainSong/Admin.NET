@@ -108,7 +108,19 @@ public class WMSReceipt : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "收货完成日期")]
     public DateTime? CompleteTime { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? So { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

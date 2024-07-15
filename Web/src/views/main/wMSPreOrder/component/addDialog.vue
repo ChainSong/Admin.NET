@@ -533,4 +533,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-../../../../entities/preOrder../../../../entities/preOrderDetail

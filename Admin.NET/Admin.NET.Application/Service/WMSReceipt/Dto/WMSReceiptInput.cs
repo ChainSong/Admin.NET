@@ -80,6 +80,18 @@ public class WMSReceiptBaseInput
     public virtual DateTime? CompleteTime { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
     /// Remark
     /// </summary>
     public virtual string? Remark { get; set; }

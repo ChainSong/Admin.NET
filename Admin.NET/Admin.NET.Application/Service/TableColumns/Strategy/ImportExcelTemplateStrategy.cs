@@ -63,7 +63,7 @@ public class ImportExcelTemplateStrategy : IImportExcelTemplateInterface
                  //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                  DbColumnName = a.DbColumnName,
                  IsImportColumn = a.IsImportColumn
-             }).OrderBy(a => a.Order);
+             }).OrderBy(a => new { a.TableName, a.Order});
 
             foreach (var field in data.ToList())
             {

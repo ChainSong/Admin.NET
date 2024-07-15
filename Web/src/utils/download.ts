@@ -1,5 +1,32 @@
 import { AxiosResponseHeaders, RawAxiosResponseHeaders } from 'axios';
 import { dataURLtoBlob, urlToBase64 } from './base64Conver';
+import { getToken } from '/@/utils/axios-utils';
+
+
+/**
+ * Download interface files 社会你清哥 人狠话也多 
+ * @param url
+ */
+export function downloadByInterface(url: string, data?: {}) {
+	axios({
+		url: import.meta.env.VITE_API_URL as any + url,
+		method: 'POST', // 将请求方法改为POST
+		headers: { 'Authorization': `Bearer ${getToken()}` },
+		responseType: 'blob',
+		data: data, // 如果需要传递数据给后端，请根据接口要求设置请求体中的数据
+	})
+		.then((response) => {
+			const url = window.URL.createObjectURL(new Blob([response.data]));
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', getFileName(response.headers));
+			document.body.appendChild(link);
+			link.click();
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+}
 
 /**
  * Download online pictures

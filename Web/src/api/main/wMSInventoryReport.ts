@@ -57,12 +57,13 @@ export const invrntoryDataPage = (params?: any) =>
 		});
 
 // 编辑WMSInventoryReport
-export const invrntoryDataExport = (params?: any) => 
-	request({
-			url: Api.InvrntoryDataExport,
-			method: 'post',
-			data: params,
-		});
+export const  invrntoryDataExport=Api.InvrntoryDataExport;
+// invrntoryDataExport = (params?: any) => 
+// 	request({
+// 			url: Api.InvrntoryDataExport,
+// 			method: 'post',
+// 			data: params,
+// 		});
 
 
 // 编辑WMSInventoryReport

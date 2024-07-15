@@ -66,6 +66,18 @@ public class WMSPreOrderBaseInput
     public virtual double? DetailCount { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
     /// Creator
     /// </summary>
     public virtual string? Creator { get; set; }

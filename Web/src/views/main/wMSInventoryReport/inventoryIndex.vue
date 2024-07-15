@@ -141,7 +141,7 @@ import Header from "/@/entities/InventoryUsable";
 // import Details from "/@/entities/InventoryUsableDetail";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
-import { downloadByData, getFileName } from '/@/utils/download';
+import { downloadByData, getFileName,downloadByInterface } from '/@/utils/download';
 import { json } from "stream/consumers";
 import { stringify } from "querystring";
 
@@ -216,11 +216,14 @@ const handleSizeChange = (val: number) => {
   handleQuery();
 };
 
-// 改变页面容量
+//  下载
 const invrntoryExport =async (val: number) => {
-  let res = await invrntoryDataExport(state.value.header);
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
+    // let res = await invrntoryDataExport(state.value.header);
+  // var fileName = getFileName(res.headers);
+   downloadByInterface(invrntoryDataExport,state.value.header)
+  // let res = await invrntoryDataExport(state.value.header);
+  // var fileName = getFileName(res.headers);
+  // downloadByData(res.data as any, fileName);
 };
 
 

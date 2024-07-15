@@ -101,6 +101,18 @@ public class WMSOrderPrintDto
     public DateTime? CreationTime { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+    /// <summary>
     /// Updator
     /// </summary>
     public string? Updator { get; set; }

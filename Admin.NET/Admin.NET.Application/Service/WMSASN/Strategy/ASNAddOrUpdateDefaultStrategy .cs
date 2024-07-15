@@ -53,6 +53,7 @@ namespace Admin.NET.Application.Strategy
         public async Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateWMSASNInput> request)
         {
 
+            //var abpSession = _abpSession;
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
             //开始校验数据
