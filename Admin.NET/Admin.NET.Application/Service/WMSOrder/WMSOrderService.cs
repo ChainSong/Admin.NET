@@ -97,6 +97,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
                     .WhereIF(input.OrderStatus > 0, u => u.OrderStatus == input.OrderStatus)
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
@@ -258,7 +260,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repOrderAllocation = _repOrderAllocation;
-        
+
 
 
         //factory._repTableColumns = _repTableInventoryUsed;
@@ -376,7 +378,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repInstruction = _repInstruction;
         factory._repOrderAllocation = _repOrderAllocation;
         factory._repInventoryUsable = _repInventoryUsable;
-        
+
         var response = await factory.CompleteOrder(input);
         return response;
 
@@ -441,7 +443,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
 
-    [HttpPost] 
+    [HttpPost]
     public async Task<List<WMSOrderPrintDto>> PrintShippingList(List<long> input)
     {
         //使用PrintShippingList类种的打印方法  
@@ -455,7 +457,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         factory._repPreOrder = _repPreOrder;
-        factory._reppreOrderDetail = _repPreOrderDetail; 
+        factory._reppreOrderDetail = _repPreOrderDetail;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repOrderAllocation = _repOrderAllocation;
@@ -464,7 +466,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
 
 
-        var response =await factory.PrintShippingList(input);
+        var response = await factory.PrintShippingList(input);
         if (response.Code == StatusCode.Success)
         {
             return response.Data;

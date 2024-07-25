@@ -88,6 +88,8 @@ public class WMSASNService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(input.ASNStatus > 0, u => u.ASNStatus == input.ASNStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptType), u => u.ReceiptType.Contains(input.ReceiptType.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Contact), u => u.Contact.Contains(input.Contact.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ContactInfo), u => u.ContactInfo.Contains(input.ContactInfo.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
@@ -222,6 +224,15 @@ public class WMSASNService : IDynamicApiController, ITransient
         //var entity = input.Adapt<WMSASN>();
         List<AddOrUpdateWMSASNInput> entityListDtos = new List<AddOrUpdateWMSASNInput>();
         entityListDtos.Add(input);
+
+        ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+        checkColumnsDefault._repTableColumns = _repTableColumns;
+        checkColumnsDefault._userManager = _userManager;
+        var result = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSASNInput>(entityListDtos, "WMS_ASN");
+        if (result.Code == StatusCode.Error)
+        {
+            return result;
+        }
         //使用简单工厂定制化修改和新增的方法
         IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
         //factory._db = _db;
@@ -279,6 +290,16 @@ public class WMSASNService : IDynamicApiController, ITransient
     {
         List<AddOrUpdateWMSASNInput> entityListDtos = new List<AddOrUpdateWMSASNInput>();
         entityListDtos.Add(input);
+
+        ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+        checkColumnsDefault._repTableColumns = _repTableColumns;
+        checkColumnsDefault._userManager = _userManager;
+        var result = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSASNInput>(entityListDtos, "WMS_ASN");
+        if (result.Code == StatusCode.Error)
+        {
+            return result;
+        }
+
         //使用简单工厂定制化修改和新增的方法
         IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
         //factory._db = _db;

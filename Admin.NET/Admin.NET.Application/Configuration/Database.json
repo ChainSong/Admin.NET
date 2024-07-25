@@ -6,8 +6,8 @@
     "ConnectionConfigs": [
       {
         "DbType": "SqlServer", // MySql、SqlServer、Sqlite、Oracle、PostgreSQL、Dm、Kdbndp、Oscar、MySqlConnector、Access、OpenGauss、QuestDB、HG、ClickHouse、GBase、Odbc、Custom
-        "ConnectionString": "server=192.168.10.233;uid=sa;pwd=M5l4d4s3;database=AdminNetWMS", // 库连接字符串
-        //"ConnectionString": "server=192.168.10.208,12000;uid=sysdb;pwd=SYSdb;database=AdminNetWMS", // 库连接字符串
+        //"ConnectionString": "server=192.168.10.233;uid=sa;pwd=M5l4d4s3;database=AdminNetWMS", // 库连接字符串
+        "ConnectionString": "server=192.168.10.208,12000;uid=sysdb;pwd=SYSdb;database=AdminNetWMS", // 库连接字符串
         "DbSettings": {
           "EnableInitDb": false, // 启用库初始化
           "EnableDiffLog": false, // 启用库表差异日志

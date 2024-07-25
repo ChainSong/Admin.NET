@@ -13,10 +13,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ASNAddOrUpdateDefaultStrategy : IASNInterface
+    public class ASNAddOrUpdateDefaultStrategy :IASNInterface
     {
 
         //注入数据库实例

@@ -323,6 +323,16 @@ public class WMSASNInput : BasePageInput
     //public DateTime? CompleteTime { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary> 
+    public string? So { get; set; }
+
+    /// <summary>
     /// CompleteTime范围
     /// </summary>
     public List<DateTime?> CompleteTime { get; set; }

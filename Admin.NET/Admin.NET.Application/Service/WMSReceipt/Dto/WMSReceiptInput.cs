@@ -312,6 +312,17 @@ public class WMSReceiptInput : BasePageInput
     /// 预计收货日期
     /// </summary>
     //public DateTime? ReceiptTime { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
 
     /// <summary>
     /// 预计收货日期范围

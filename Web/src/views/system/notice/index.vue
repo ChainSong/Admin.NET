@@ -131,7 +131,7 @@ const openEditNotice = (row: any) => {
 	editNoticeRef.value?.openDialog(row);
 };
 
-// 删除
+// 全部已读
 const openAllRead = (row: any) => {
 	ElMessageBox.confirm(`确定已读通知公告：【${row.title}】?`, '提示', {
 		confirmButtonText: '确定',

@@ -321,16 +321,26 @@ namespace Admin.NET.Application;
         /// <summary>
          /// OrderTime范围
          /// </summary>
-         public List<DateTime?> OrderTime { get; set; } 
-        /// <summary>
-        /// CompleteTime
-        /// </summary>
-        //public DateTime? CompleteTime { get; set; }
-        
-        /// <summary>
-         /// CompleteTime范围
-         /// </summary>
-         public List<DateTime?> CompleteTime { get; set; } 
+         public List<DateTime?> OrderTime { get; set; }
+    /// <summary>
+    /// CompleteTime
+    /// </summary>
+    //public DateTime? CompleteTime { get; set; }
+
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
+
+
+    /// <summary>
+    /// CompleteTime范围
+    /// </summary>
+    public List<DateTime?> CompleteTime { get; set; } 
         /// <summary>
         /// DetailCount
         /// </summary>

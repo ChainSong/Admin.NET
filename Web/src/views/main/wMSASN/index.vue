@@ -275,6 +275,12 @@ const openQuery = (row: any) => {
 
 // 删除
 const del = (row: any) => {
+
+  if (row.asnStatus != 1) {
+    ElMessage.warning("订单状态不允许删除");
+    return;
+  }
+
   ElMessageBox.confirm(`确定要删除吗?`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -292,6 +298,12 @@ const del = (row: any) => {
 
 // 取消
 const openCancel = (row: any) => {
+
+  if (row.asnStatus != 1) {
+    ElMessage.warning("订单状态不允许取消");
+    return;
+  }
+
   ElMessageBox.confirm(`确定要取消吗?`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",

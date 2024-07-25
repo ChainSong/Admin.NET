@@ -21,6 +21,7 @@ using System.IO;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Common;
 using Admin.NET.Application.Enumerate;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -86,6 +87,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
                     .WhereIF(input.PreOrderStatus > 0, u => u.PreOrderStatus == input.PreOrderStatus)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
@@ -221,6 +224,16 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         //构造传入集合
         List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
         entityListDtos.Add(input);
+
+        ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+        checkColumnsDefault._repTableColumns = _repTableColumns;
+        checkColumnsDefault._userManager = _userManager;
+        var result = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSPreOrderInput>(entityListDtos, "WMS_PreOrder");
+        if (result.Code == StatusCode.Error)
+        {
+            return result;
+        }
+
         //使用简单工厂定制化修改和新增的方法
         IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
         factory._repPreOrder = _rep;
@@ -289,6 +302,16 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
         List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
         entityListDtos.Add(input);
+
+        ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+        checkColumnsDefault._repTableColumns = _repTableColumns;
+        checkColumnsDefault._userManager = _userManager;
+        var result = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSPreOrderInput>(entityListDtos, "WMS_PreOrder");
+        if (result.Code == StatusCode.Error)
+        {
+            return result;
+        }
+
         //使用简单工厂定制化修改和新增的方法
         IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
         factory._repPreOrder = _rep;

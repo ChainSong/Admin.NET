@@ -38,9 +38,10 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
 
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
+    private readonly SqlSugarRepository<WMSLocation> _repLocation;
 
     //private readonly ISqlSugarClient _db;
-    public WMSAdjustmentService(SqlSugarRepository<WMSAdjustment> rep, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, ISqlSugarClient db, SqlSugarRepository<WMSAdjustmentDetail> repAdjustmentDetail)
+    public WMSAdjustmentService(SqlSugarRepository<WMSAdjustment> rep, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, ISqlSugarClient db, SqlSugarRepository<WMSAdjustmentDetail> repAdjustmentDetail, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSLocation> repLocation)
     {
         _rep = rep;
         _repTableColumns = repTableColumns;
@@ -50,6 +51,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         _repCustomerUser = repCustomerUser;
         //_db = db;
         _repAdjustmentDetail = repAdjustmentDetail;
+        _repLocation = repLocation;
     }
 
     /// <summary>
@@ -330,8 +332,9 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
     /// <param name="Status">提交状态，第一次提交，可能存在校验提示， 用户选择忽略提示可以使用</param>
     /// <returns>文件名称</returns>
     [UnitOfWork]
-    public async Task<List<OrderStatusDto>> UploadExcelFile(IFormFile file)
+    public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
+        Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>();
         try
         {
 
@@ -376,22 +379,31 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
                 factory._userManager = _userManager;
                 factory._repCustomerUser = _repCustomerUser;
                 factory._repWarehouseUser = _repWarehouseUser;
+                factory._repLocation = _repLocation;
                 //factory._repTableColumns = _repTableColumns;
                 //factory._repTableColumnsDetail = _repTableColumnsDetail;
-                var response = factory.AddStrategy(Adjustment);
+                response = await factory.AddStrategy(Adjustment);
 
-                return response.Result.Data;
+                return response;
             }
             else
             {
-                //return new List<OrderStatusDto>();
-                return new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = "上传失败，请检查文件格式或内容" } };
 
+                //return new List<OrderStatusDto>();
+                response.Data = new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = "上传失败，请检查文件格式或内容" } };
+                response.Code = StatusCode.Error;
+                response.Msg = "上传失败，请检查文件格式或内容";
+                return response;
             }
         }
         catch (Exception ex)
         {
-            return new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = ex.Message } };
+            response.Data = new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = ex.Message } };
+            //return new List<OrderStatusDto>();
+            //response.Data = new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = "上传失败，请检查文件格式或内容" } };
+            response.Code = StatusCode.Error;
+            response.Msg = "上传失败，请检查文件格式或内容";
+            return response;
         }
     }
 

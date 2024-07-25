@@ -186,7 +186,7 @@ namespace Admin.NET.Application.Strategy
                         //return response;
                         continue;
                     }
-                    a.AdjustmentNumber = AdjustmentNumber;
+                    a.AdjustmentNumber = item.AdjustmentNumber; 
                     item.ExternNumber = item.ExternNumber;
                     a.CustomerId = CustomerId;
                     a.CustomerName = item.CustomerName;

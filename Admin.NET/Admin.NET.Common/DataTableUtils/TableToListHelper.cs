@@ -24,10 +24,11 @@ namespace System.Data
                 T model = new T();
                 foreach (PropertyInfo p in properties)
                 {
-                    try
+
+                    //判断model中的字段在datatable中存不存在
+                    if (row.Table.Columns.Contains(p.Name))
                     {
-                        //判断model中的字段在datatable中存不存在
-                        if (row.Table.Columns.Contains(p.Name))
+                        try
                         {
                             object value = row[p.Name];
                             if (value == DBNull.Value && string.IsNullOrEmpty(value.ToString()))
@@ -61,10 +62,10 @@ namespace System.Data
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name == "DateTime").Count() > 0)
                                 {
-                                    if (value==null)
+                                    if (value == null || value.ToString() == "")
                                     {
                                         p.SetValue(model, null, null);
-                                       
+
                                     }
                                     else
                                     {
@@ -73,7 +74,7 @@ namespace System.Data
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
                                 {
-                                    if (value.ToString() == "")
+                                    if (value== null || value.ToString() == "")
                                     {
                                         p.SetValue(model, Convert.ToInt32(0), null);
                                     }
@@ -85,7 +86,7 @@ namespace System.Data
 
                                 else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name.Contains("Int")).Count() > 0 || p.PropertyType.Name.Contains("Int"))
                                 {
-                                    if (value.ToString() == "")
+                                    if (value==null || value.ToString() == "")
                                     {
                                         p.SetValue(model, Convert.ToInt32(0), null);
                                     }
@@ -115,12 +116,13 @@ namespace System.Data
                                 }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            throw Oops.Oh(ex, $"TableToListHelper.TableToList<{type.Name}>");
+                        }
+                    }
 
-                    }
-                    catch (Exception ex)
-                    {
-                        throw Oops.Oh(ex, $"TableToListHelper.TableToList<{type.Name}>");
-                    }
+
                 }
                 list.Add(model);
             }

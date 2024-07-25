@@ -83,6 +83,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                      .AddTransform<string>(a => a == null ? "" : a)
                      .ForMember(a => a.PreOrderId, opt => opt.MapFrom(c => c.Id))
                      .ForMember(a => a.Id, opt => opt.MapFrom(c => 0))
+                     .ForMember(a => a.OrderTime, opt => opt.MapFrom(c => c.OrderTime))
                      //添加创建人为当前用户
                      .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                      .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
@@ -124,7 +125,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                 //var CustomerId = _customerusermappingManager.Query().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 //var WarehouseId = _warehouseusermappingManager.Query().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
                 var OrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
-                item.OrderNumber = OrderNumber;
+                item.OrderNumber = OrderNumber; 
                 //item.CustomerId = CustomerId;
                 //item.WarehouseId = WarehouseId;
                 //item.DetailCount = item.OrderDetails.Sum(pd => pd.OriginalQty);

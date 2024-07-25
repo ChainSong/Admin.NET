@@ -54,6 +54,16 @@ public class WMSASNForReceiptDetailDto
     /// <summary>
     /// 
     /// </summary>
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary> 
+    public string? So { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     //[Required]
     public string CustomerName { get; set; }
 

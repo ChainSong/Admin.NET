@@ -307,6 +307,17 @@ public class WMSPreOrderInput : BasePageInput
     /// CompleteTime
     /// </summary>
     //public DateTime? CompleteTime { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Po { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public string? So { get; set; }
 
     /// <summary>
     /// CompleteTime范围
