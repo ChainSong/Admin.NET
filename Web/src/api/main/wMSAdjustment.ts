@@ -6,6 +6,7 @@ enum Api {
 	PageWMSAdjustment = '/api/wMSAdjustment/page',
 	GetWMSAdjustment = '/api/wMSAdjustment/Query',
 	ConfirmWMSAdjustment = '/api/wMSAdjustment/Confirm',
+	CancelWMSAdjustment = '/api/wMSAdjustment/Cancel',
 }
 
 // 增加WMSAdjustment
@@ -55,7 +56,14 @@ export const confirmWMSAdjustment = (params?: any) =>
 		data: params,
 	});
 
+//取下库存调整单
+export const cancelWMSAdjustment = (params?: any) =>
+	request({
+		url: `${Api.CancelWMSAdjustment}/${params}`,
+		method: 'get'
+	});
 
+	
 
 
 

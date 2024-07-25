@@ -42,7 +42,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
- 
+
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
 
     private readonly SysCacheService _sysCacheService;
@@ -388,9 +388,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repCustomerUser = _repCustomerUser;
         factory._userManager = _userManager;
-    
+
         //factory._db = _db;
-        
+
         factory._repPackageDetail = _repPackageDetail;
         factory._sysCacheService = _sysCacheService;
         factory._repWarehouse = _repWarehouse;
@@ -402,8 +402,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         var data = await factory.GetExpressDataList(input);
         if (data.Code == StatusCode.Error)
         {
-            response.Data = new OrderStatusDto() { 
-                
+            response.Data = new OrderStatusDto()
+            {
+
             };
             response.Code = StatusCode.Error;
             response.Msg = data.Msg;
@@ -422,6 +423,64 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
 
+    /// <summary>
+    /// 包装回退，清空重新扫描包装
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ResetPackageData")]
+    public async Task<Response> ResetPackageData(ScanPackageInput input)
+    {
+        //1， 根据任务号删除包装信息
+        //2， 修改任务号明细信息
+        if (string.IsNullOrEmpty(input.PickTaskNumber))
+        {
+            input.PickTaskNumber = input.Input;
+        }
+        //判断任务号是否为空
+        if (string.IsNullOrEmpty(input.PickTaskNumber))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "任务号不能为空" };
+        }
+        //获取任务号明细信息
+        var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        if (pickTaskDetailList.Count > 1)
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "找到多条任务号信息" };
+        }
+        //根据任务号获取包装信息
+        var packageList = await _rep.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        if (packageList.Count > 1)
+        {
+            //删除包装信息
+            await _rep.DeleteAsync(packageList);
+            //return new Response() { Code = StatusCode.Error, Msg = "找到多条包裹信息" };
+        }
 
+        //根据任务号获取包装明细信息
+        var packageDetailList = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        if (packageDetailList.Count > 1)
+        {
+            //删除包装信息
+            await _repPackageDetail.DeleteAsync(packageDetailList);
+            //return new Response() { Code = StatusCode.Error, Msg = "未找到包装信息" };
+        }
+
+
+
+        //修改任务号明细信息
+        //var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        foreach (var item in pickTaskDetailList)
+        {
+            item.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+            //item.pa = 0;
+        }
+        _sysCacheService.Set(_userManager.Account + "_Package_" + input.PickTaskNumber, null);
+
+        return new Response() { Code = StatusCode.Success, Msg = "清理成功" };
+        //_sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+    }
 }
 

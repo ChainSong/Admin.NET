@@ -1,4 +1,5 @@
 ﻿
+using Furion.FriendlyException;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -62,12 +63,12 @@ namespace System.Data
                                 {
                                     if (value==null)
                                     {
-                                        p.SetValue(model, Convert.ToDateTime(value), null);
+                                        p.SetValue(model, null, null);
                                        
                                     }
                                     else
                                     {
-                                        p.SetValue(model, null, null);
+                                        p.SetValue(model, Convert.ToDateTime(value), null);
                                     }
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
@@ -116,9 +117,9 @@ namespace System.Data
                         }
 
                     }
-                    catch (Exception asdas)
+                    catch (Exception ex)
                     {
-                        throw;
+                        throw Oops.Oh(ex, $"TableToListHelper.TableToList<{type.Name}>");
                     }
                 }
                 list.Add(model);

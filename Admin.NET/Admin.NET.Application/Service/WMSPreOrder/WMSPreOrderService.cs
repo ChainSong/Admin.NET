@@ -20,6 +20,7 @@ using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Common;
+using Admin.NET.Application.Enumerate;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -44,8 +45,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPreOrderExtend> _repPreOrderExtend;
-    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping; 
-    private readonly SqlSugarRepository<WMSProduct> _repProduct; 
+    private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
     public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
@@ -258,6 +259,22 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     }
 
     /// <summary>
+    /// 删除WMS_PreOrder
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [DisplayName("删除WMS_PreOrder")]
+    [ApiDescriptionSettings(Name = "Cancel")]
+    public async Task Cancel(DeleteWMSPreOrderInput input)
+    {
+        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        entity.PreOrderStatus = (int)PreOrderStatusEnum.取消;
+        await _rep.UpdateAsync(entity);   //
+        //await _rep.DeleteAsync(entity);   //假删除
+    }
+
+    /// <summary>
     /// 更新WMS_PreOrder
     /// </summary>
     /// <param name="input"></param>
@@ -356,75 +373,92 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "UploadExcelFile")]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
-
-        //FileDir是存储临时文件的目录，相对路径
-        //private const string FileDir = "/File/ExcelTemp";
-        string url = await ImprotExcel.WriteFile(file);
-        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
-        //var aaaaa = ExcelData.GetData<DataSet>(url);
-        //1根据用户的角色 解析出Excel
-        IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
-
-        factoryExcel._repPreOrder = _rep;
-        factoryExcel._repWarehouseUser = _repWarehouseUser;
-        //factoryExcel._db = _db;
-        factoryExcel._userManager = _userManager;
-
-        factoryExcel._repCustomerUser = _repCustomerUser;
-        factoryExcel._repWarehouseUser = _repWarehouseUser;
-        factoryExcel._repTableColumns = _repTableColumns;
-        factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
-
-
-        var data = factoryExcel.Import(dataExcel);
-        if (data.Code == StatusCode.Error)
+        try
         {
-            Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
-            result.Code = data.Code;
-            result.Msg = data.Msg;
-            result.Data = data.Result;
-            return result;
+            //FileDir是存储临时文件的目录，相对路径
+            //private const string FileDir = "/File/ExcelTemp";
+            string url = await ImprotExcel.WriteFile(file);
+            var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+            //var aaaaa = ExcelData.GetData<DataSet>(url);
+            //1根据用户的角色 解析出Excel
+            IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
+
+            factoryExcel._repPreOrder = _rep;
+            factoryExcel._repWarehouseUser = _repWarehouseUser;
+            //factoryExcel._db = _db;
+            factoryExcel._userManager = _userManager;
+
+            factoryExcel._repCustomerUser = _repCustomerUser;
+            factoryExcel._repWarehouseUser = _repWarehouseUser;
+            factoryExcel._repTableColumns = _repTableColumns;
+            factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
+
+
+            var data = factoryExcel.Import(dataExcel);
+            if (data.Code == StatusCode.Error)
+            {
+                Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
+                result.Code = data.Code;
+                result.Msg = data.Msg;
+                result.Data = data.Result;
+                return result;
+            }
+            var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
+            var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
+            var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
+
+            //将散装的主表和明细表 组合到一起 
+            List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
+            foreach (var item in preOrders)
+            {
+                item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
+            }
+            //preOrders.ForEach(item =>
+            //{
+            //    item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
+            //});
+
+
+            //将散装的地址表和主表组合到一起 
+            //List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
+            foreach (var item in preOrders)
+            {
+                item.OrderAddress = entityAddressListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).First();
+            }
+            //preOrders.ForEach(item =>
+            //{
+            //    item.OrderAddress = entityAddressListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).First();
+            //});
+
+            //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+            var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+            long customerId = 0;
+            if (customerData != null)
+            {
+                customerId = customerData.CustomerId;
+            }
+            //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
+            //使用简单工厂定制化修改和新增的方法
+            IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(customerId);
+            factory._repPreOrder = _rep;
+            factory._reppreOrderDetail = _reppreOrderDetail;
+            //factory._db = _db;
+            factory._userManager = _userManager;
+            factory._repCustomerUser = _repCustomerUser;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._repTableColumns = _repTableColumns;
+            factory._repTableColumnsDetail = _repTableColumnsDetail;
+            factory._repProduct = _repProduct;
+            var response = await factory.AddStrategy(preOrders);
+            return response;
+
         }
-        var entityListDtos = data.Data.TableToList<AddOrUpdateWMSPreOrderInput>();
-        var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
-        var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
-
-        //将散装的主表和明细表 组合到一起 
-        List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
-        preOrders.ForEach(item =>
+        catch (Exception ex)
         {
-            item.Details = entityDetailListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).ToList();
-        });
-
-
-        //将散装的地址表和主表组合到一起 
-        //List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
-        preOrders.ForEach(item =>
-        {
-            item.OrderAddress = entityAddressListDtos.Where(a => a.ExternOrderNumber == item.ExternOrderNumber).First();
-        });
-
-        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
-        long customerId = 0;
-        if (customerData != null)
-        {
-            customerId = customerData.CustomerId;
+            return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = ex.Message };
+            //throw Oops.Oh(ex.Message);
+            //throw Oops.Oh("该订单类型不支持部分转入库单");
         }
-        //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
-        //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(customerId);
-        factory._repPreOrder = _rep;
-        factory._reppreOrderDetail = _reppreOrderDetail;
-        //factory._db = _db;
-        factory._userManager = _userManager;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._repWarehouseUser = _repWarehouseUser;
-        factory._repTableColumns = _repTableColumns;
-        factory._repTableColumnsDetail = _repTableColumnsDetail;
-        factory._repProduct = _repProduct;
-        var response = await factory.AddStrategy(preOrders);
-        return response;
 
     }
 
@@ -440,8 +474,6 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> PreOrderForOrder(List<long> input)
     {
-
-
         //获取勾选的订单的客户
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
         var customerData = _repCustomerUser.AsQueryable().Where(a => a.Id == input.First()).First();
@@ -462,7 +494,6 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repOrder = _repOrder;
         factory._repOrderDetail = _repOrderDetail;
         var response = await factory.Strategy(input);
-
         return response;
     }
 

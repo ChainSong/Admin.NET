@@ -24,6 +24,8 @@ using System.Threading.Tasks;
 using FluentEmail.Core;
 using Admin.NET.Application.Service;
 using XAct;
+using Furion.FriendlyException;
+using SqlSugar;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
@@ -175,8 +177,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             pickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                   .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                   .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-              .GroupBy(a => new { a.SKU, a.PickTaskNumber, a.GoodsName, a.GoodsType })
-              .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = a.GoodsName, GoodsType = a.GoodsType })
+              .GroupBy(a => new { a.SKU, a.PickTaskNumber })
+              .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
               .ToList();
 
             if (pickData.Count > 0)
@@ -253,6 +255,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     public async Task<Response<ScanPackageOutput>> AddPackage(ScanPackageInput request)
     {
 
+
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
@@ -280,6 +283,13 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 response.Msg = PackingCompleteCheck.Msg;
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
+            }
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(request.PickTaskNumber) || string.IsNullOrEmpty(request.Input) || string.IsNullOrEmpty(request.SKU))
+            {
+                throw Oops.Oh("请先扫描数据");
             }
         }
 

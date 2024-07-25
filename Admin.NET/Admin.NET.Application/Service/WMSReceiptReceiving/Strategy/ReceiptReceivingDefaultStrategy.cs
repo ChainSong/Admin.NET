@@ -185,18 +185,21 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
                 //修改入库单的状态
                 //_wms_receiptManager.Query().Where(a => (request as List<WMS_ReceiptReceivingEditDto>).Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
                 var receiptData = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToList();
-
-                receiptData.ForEach(c =>
+                foreach (var item in receiptData)
                 {
-                    c.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
-                });
+                    item.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
+                }
+                //receiptData.ForEach(c =>
+                //{
+                //    c.ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架;
+                //});
                 await _repReceipt.UpdateRangeAsync(receiptData);
                 //await _repReceipt.AsUpdateable(receiptData).ExecuteCommandAsync();
 
                 //.BatchUpdate(new WMS_Receipt { ReceiptStatus = (int)ReceiptReceivingStatusEnum.上架 });
                 //修改入库单的上架数量
                 //_wms_receiptdetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(a => new WMS_ReceiptDetail { ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ReceiptDetailId == a.Id).Sum(c => c.ReceivedQty) });
-                var checkDataTemp = _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber));
+                var checkDataTemp = await _repReceipt.AsQueryable().Where(a => request.Select(b => b.ReceiptNumber).Contains(a.ReceiptNumber)).ToListAsync();
 
                 checkDataTemp.ToList().ForEach(b =>
                 {

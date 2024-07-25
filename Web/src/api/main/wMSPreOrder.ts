@@ -8,6 +8,8 @@ enum Api {
   PreOrderForOrder = '/api/wMSPreOrder/PreOrderForOrder',
   ExportPreOrder = '/api/wMSPreOrder/ExportPreOrder',
   UpdateWMSOrderAddress = '/api/wMSPreOrder/UpdateOrderAddress',
+  CancelPreOrder = '/api/wMSPreOrder/Cancel',
+
   
   
 }
@@ -27,7 +29,14 @@ export const deleteWMSPreOrder = (params?: any) =>
 			method: 'post',
 			data: params,
 		});
-
+// 取消WMS_PreOrder
+export const cancelWMSPreOrder = (params?: any) => 
+	request({
+			url: Api.CancelPreOrder,
+			method: 'post',
+			data: params,
+		});
+		
 // 编辑WMS_PreOrder
 export const updateWMSPreOrder = (params?: any) => 
 	request({

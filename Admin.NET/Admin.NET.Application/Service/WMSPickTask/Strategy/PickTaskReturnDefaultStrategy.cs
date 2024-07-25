@@ -41,7 +41,7 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
 
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
         //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
-        var pickTaskDetailData = await _repPickTaskDetail.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.Id)).ToListAsync();
+        var pickTaskDetailData = await _repPickTaskDetail.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.PickTaskId)).ToListAsync();
         //先判断状态是否正常 是否允许回退
         var repOrder = await _repOrder.AsQueryable().Where(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id)).ToListAsync();
         repOrder.ForEach(a =>

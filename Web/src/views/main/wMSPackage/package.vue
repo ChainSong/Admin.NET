@@ -43,14 +43,14 @@
               <tr>
                 <th style="padding-left:5px;font-size:20px">拣货任务号:</th>
                 <td>
-                  <el-input v-model="state.vm.form.pickTaskNumber" :readonly="true" style="font-size:20px"
+                  <el-input v-model="state.vm.form.pickTaskNumber" :disabled="true" style="font-size:20px"
                     placeholder="拣货任务号" />
                 </td>
               </tr>
               <tr>
                 <th style="padding-left:5px;font-size:20px">SKU:</th>
                 <td>
-                  <el-input v-model="state.vm.form.sku" :readonly="true" style="font-size:20px" placeholder="SKU" />
+                  <el-input v-model="state.vm.form.sku" :disabled="true" style="font-size:20px" placeholder="SKU" />
                   <!-- <label style="font-size:20px;">{{ state.vm.form.sku }}</label> -->
                 </td>
               </tr>
@@ -121,7 +121,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData,resetPackageData } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -145,10 +145,10 @@ const state = ref({
       sku: "",
       pickTaskNumber: "",
       weight: 0,
-      expirationDate:"", 
-      expressCompany:"",
-      lot:"",
-      sn:"",
+      expirationDate: "",
+      expressCompany: "",
+      lot: "",
+      sn: "",
     },
     tableData: [],
     packageData: [],
@@ -236,7 +236,7 @@ const shortagePackage = async () => {
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
   } else {
@@ -282,7 +282,7 @@ const addPackage = async (data: any) => {
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.success(res.data.result.msg);
   } else {
     state.value.vm.form = res.data.result.data;
@@ -302,17 +302,17 @@ const addPackage = async (data: any) => {
 const scanPackage = async () => {
 
   // let acquisitionData = state.value.vm.form.scanInput.split('|');
- 
-	// if (acquisitionData.length == 3) {
-	// 	state.value.vm.form.sku = acquisitionData[1];
-	// 	state.value.vm.form.sn = acquisitionData[2] ?? "";
-	// } else {
-		 
-	// 	state.value.vm.form.sku = acquisitionData[1];
-	// 	state.value.vm.form.lot = acquisitionData[2] ?? "";
-	// 	state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
-	// 	state.value.vm.form.sn = acquisitionData[4] ?? "";
-	// }
+
+  // if (acquisitionData.length == 3) {
+  // 	state.value.vm.form.sku = acquisitionData[1];
+  // 	state.value.vm.form.sn = acquisitionData[2] ?? "";
+  // } else {
+
+  // 	state.value.vm.form.sku = acquisitionData[1];
+  // 	state.value.vm.form.lot = acquisitionData[2] ?? "";
+  // 	state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
+  // 	state.value.vm.form.sn = acquisitionData[4] ?? "";
+  // }
 
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
@@ -359,11 +359,10 @@ const reset = async (row: any) => {
     type: "warning",
   })
     .then(async () => {
-
+      let res = await resetPackageData(state.value.vm.form);
       console.log(row);
     })
     .catch(() => { });
-
 }
 // 打印快递单
 const printExpress = async (row: any) => {

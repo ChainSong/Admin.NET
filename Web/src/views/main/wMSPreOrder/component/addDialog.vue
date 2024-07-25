@@ -88,7 +88,7 @@
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate" 
 														:columnData="v" :key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>

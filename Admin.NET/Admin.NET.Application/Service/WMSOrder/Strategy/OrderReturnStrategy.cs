@@ -101,12 +101,21 @@ public class OrderReturnStrategy : IOrderReturnInterface
       .SetColumns(p => p.PreOrderStatus == (int)PreOrderStatusEnum.新增)
       .Where(p => PreOrderIds.Contains(p.Id))
       .ExecuteCommandAsync();
-        await _repPreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
-        {
-            ActualQty = 0,
-            Updator = _userManager.Account,
-            UpdateTime = DateTime.Now
-        }, a => PreOrderIds.Contains(a.PreOrderId));
+
+        await _repPreOrderDetail.AsUpdateable()
+       .SetColumns(p => p.ActualQty == 0)
+       .SetColumns(p => p.Updator == _userManager.Account)
+       .SetColumns(p => p.UpdateTime == DateTime.Now)
+       .Where(p => PreOrderIds.Contains(p.PreOrderId))
+       .ExecuteCommandAsync();
+
+
+        //await _repPreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
+        //{
+        //    ActualQty = 0,
+        //    Updator = _userManager.Account,
+        //    UpdateTime = DateTime.Now
+        //}, a => PreOrderIds.Contains(a.PreOrderId));
 
         //先删除明细表，再删除主表
         await _repOrderDetail.DeleteAsync(a => ids.Contains(a.OrderId));

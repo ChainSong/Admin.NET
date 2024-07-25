@@ -10,7 +10,7 @@
 								:prop="i.columnName">
 								<template v-if="i.type == 'TextBox'">
 									<el-input placeholder="请输入内容" size="small" style="width:90%"
-										v-model="state.header[i.columnName]" v-if="i.isCreate">
+										v-model="state.header[i.columnName]" v-if="i.isCreate" >
 									</el-input>
 								</template>
 								<template v-if="i.type == 'DropDownListInt'">
@@ -22,7 +22,7 @@
 									</el-select>
 								</template>
 								<template v-if="i.type == 'DropDownListStrRemote'">
-									<select-Remote :whereData="state.header" :isDisabled="i.isUpdate" :columnData="i"
+									<select-Remote :whereData="state.header" v-if="i.isCreate" :isDisabled="i.isUpdate" :columnData="i" 
 										:defaultvValue="state.header[i.columnName]"
 										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 

@@ -34,6 +34,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         //注入客户关系仓储
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+        public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 
         public AdjustmentAddOrUpdateDefaultStrategy()
         {
@@ -76,6 +77,25 @@ namespace Admin.NET.Application.Strategy
                 return response;
             }
 
+            //判断是否有权限操作
+            //先判断是否能操作客户
+            var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+            if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少客户操作权限";
+                return response;
+            }
+
+            //先判断是否能操作仓库
+            var warehouseCheck = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.WarehouseName).ToList().Contains(a.WarehouseName)).ToList();
+            if (warehouseCheck.GroupBy(a => a.WarehouseName).Count() != request.GroupBy(a => a.WarehouseName).Count())
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "用户缺少仓库操作权限";
+                return response;
+            }
+
             var AdjustmentData = request.Adapt<List<WMSAdjustment>>();
 
             //var config = new MapperConfiguration(cfg =>
@@ -108,11 +128,13 @@ namespace Admin.NET.Application.Strategy
             //});
 
             //var AdjustmentData = mapper.Map<List<WMS_Adjustment>>(request);
+            
+
             int LineNumber = 1;
-            AdjustmentData.ForEach(item =>
+            foreach (var item in AdjustmentData)
             {
-                var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
-                var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
+                var CustomerId = customerCheck.Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
+                var WarehouseId = warehouseCheck.Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
 
                 var AdjustmentNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                 //ShortIDGen.NextID(new GenerationOptions
@@ -126,8 +148,44 @@ namespace Admin.NET.Application.Strategy
                 item.Creator = _userManager.Account;
                 item.CreationTime = DateTime.Now;
                 item.AdjustmentStatus = (int)AdjustmentStatusEnum.新增;
-                item.Details.ForEach(a =>
+                foreach (var a in item.Details)
                 {
+
+                    var fromLocation = _repLocation.AsQueryable().Where(l => l.WarehouseId == a.WarehouseId && l.Location == a.FromLocation).First();
+                    var toLocation = _repLocation.AsQueryable().Where(l => l.WarehouseId == a.WarehouseId && l.Location == a.ToLocation).First();
+
+                    if (fromLocation == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            Id = item.Id,
+                            ExternOrder = item.ExternNumber,
+                            SystemOrder = item.ExternNumber,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.success.ToString(),
+                            Msg = "库位:" + a.FromLocation + "在仓库：" + item.WarehouseName + "中不存在"
+                        });
+                        //response.Code = StatusCode.Error;
+                        //response.Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在";
+                        //return response;
+                        continue;
+                    }
+                    if (toLocation == null)
+                    {
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            Id = item.Id,
+                            ExternOrder = item.ExternNumber,
+                            SystemOrder = item.ExternNumber,
+                            StatusCode = StatusCode.Error,
+                            //StatusMsg = StatusCode.success.ToString(),
+                            Msg = "库位:" + a.ToLocation + "在仓库：" + item.WarehouseName + "中不存在"
+                        });
+                        //response.Code = StatusCode.Error;
+                        //response.Msg = "库位:" + item.Location + "在仓库：" + item.WarehouseName + "中不存在";
+                        //return response;
+                        continue;
+                    }
                     a.AdjustmentNumber = AdjustmentNumber;
                     item.ExternNumber = item.ExternNumber;
                     a.CustomerId = CustomerId;
@@ -137,9 +195,16 @@ namespace Admin.NET.Application.Strategy
                     a.AdjustmentNumber = item.AdjustmentNumber;
                     a.Creator = _userManager.Account;
                     a.CreationTime = DateTime.Now;
-                });
+                }
+                //item.Details.ForEach(a =>
+                //{
+                //});
                 LineNumber++;
-            });
+            }
+            //AdjustmentData.ForEach(item =>
+            //{
+
+            //});
 
             ////开始插入订单
             await _repAdjustment.Context.InsertNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();
@@ -199,11 +264,9 @@ namespace Admin.NET.Application.Strategy
 
             var AdjustmentData = request.Adapt<List<WMSAdjustment>>();
 
-
-
             //var AdjustmentData = mapper.Map<List<WMS_Adjustment>>(request);
             int LineNumber = 1;
-            AdjustmentData.ForEach(item =>
+            foreach (var item in AdjustmentData)
             {
                 var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
                 var WarehouseId = _repWarehouseUser.AsQueryable().Where(b => b.WarehouseName == item.WarehouseName).First().WarehouseId;
@@ -217,7 +280,7 @@ namespace Admin.NET.Application.Strategy
                 item.Updator = _userManager.Account;
                 item.UpdateTime = DateTime.Now;
                 item.AdjustmentStatus = (int)AdjustmentStatusEnum.新增;
-                item.Details.ForEach(a =>
+                foreach (var a in item.Details)
                 {
                     a.AdjustmentNumber = item.AdjustmentNumber;
                     a.ExternNumber = item.ExternNumber;
@@ -228,10 +291,9 @@ namespace Admin.NET.Application.Strategy
                     a.AdjustmentNumber = item.AdjustmentNumber;
                     a.Updator = _userManager.Account;
                     a.UpdateTime = DateTime.Now;
-                });
+                }
                 LineNumber++;
-            });
-
+            }
 
             ////开始插入订单
             await _repAdjustment.Context.UpdateNav(AdjustmentData).Include(a => a.Details).ExecuteCommandAsync();

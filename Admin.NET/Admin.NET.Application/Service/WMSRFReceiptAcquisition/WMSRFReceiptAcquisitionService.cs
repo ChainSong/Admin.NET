@@ -93,7 +93,10 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "All")]
     public async Task<List<WMSReceipt>> All(AddWMSRFReceiptAcquisitionInput input)
     {
-        return await _repReceipt.AsQueryable().Where(a => a.ReceiptStatus == (int)ReceiptStatusEnum.新增)
+        return await _repReceipt.AsQueryable()
+               .WhereIF(!string.IsNullOrEmpty(input.ExternReceiptNumber), u => u.ExternReceiptNumber == input.ExternReceiptNumber)
+               .WhereIF(!string.IsNullOrEmpty(input.ReceiptNumber), u => u.ReceiptNumber == input.ReceiptNumber)
+               .Where(a => a.ReceiptStatus == (int)ReceiptStatusEnum.新增)
                .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
             .ToListAsync();
@@ -108,55 +111,65 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "SaveAcquisitionData")]
     public async Task<Response> SaveAcquisitionData(AddWMSRFReceiptAcquisitionInput input)
     {
-        Response response = new Response();
-        var getReceipt = await _repReceipt.AsQueryable().Where(a => a.ReceiptNumber == input.ReceiptNumber).FirstAsync();
-        input.ASNId = getReceipt.ASNId;
-        input.ASNNumber = getReceipt.ASNNumber;
-        input.ReceiptNumber = getReceipt.ReceiptNumber;
-        input.CustomerId = getReceipt.CustomerId;
-        input.CustomerName = getReceipt.CustomerName;
-        input.WarehouseId = getReceipt.WarehouseId;
-        input.ReceiptDetailId = getReceipt.Id;
-        input.ReceiptAcquisitionStatus = (int)ReceiptAcquisitionStatusEnum.新增;
-        input.WarehouseName = getReceipt.WarehouseName;
-        //var dateStr = "";
-        //if (input.ExpirationDate.Contains("EXP"))
-        //{
-        //    //获取前两位是日期
-        //    var date = input.ExpirationDate.Replace("EXP", "").ToString().Substring(0, 2);
-        //    //获取后两位是年份
-        //    var year = input.ExpirationDate.Replace("EXP", "").ToString().Substring(input.ExpirationDate.Replace("EXP", "").Length - 2, 2);
-
-
-        //}
-        string pattern = @"([a-zA-Z]+)|([0-9]+)"; // 正则表达式匹配英文字符或数字
-
-        MatchCollection matches = Regex.Matches(input.ExpirationDate.Replace("EXP", ""), pattern);
-        var dateStr = matches[2].Value + matches[1].Value + matches[0].Value;
-        //foreach (Match match in matches)
-        //{
-        //    Console.WriteLine(match.Value); // 输出匹配到的连续英文字符和数字  
-        //}
-        input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(dateStr).ToString() : null;
-        input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
-        input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
-        var entity = input.Adapt<WMSRFReceiptAcquisition>();
-        if (string.IsNullOrEmpty(entity.SN))
+        try
         {
-            entity.Qty = 1;
+
+
+            Response response = new Response();
+            var getReceipt = await _repReceipt.AsQueryable().Where(a => a.ReceiptNumber == input.ReceiptNumber).FirstAsync();
+            input.ASNId = getReceipt.ASNId;
+            input.ASNNumber = getReceipt.ASNNumber;
+            input.ReceiptNumber = getReceipt.ReceiptNumber;
+            input.CustomerId = getReceipt.CustomerId;
+            input.CustomerName = getReceipt.CustomerName;
+            input.WarehouseId = getReceipt.WarehouseId;
+            input.ReceiptDetailId = getReceipt.Id;
+            input.ReceiptAcquisitionStatus = (int)ReceiptAcquisitionStatusEnum.新增;
+            input.WarehouseName = getReceipt.WarehouseName;
+            //var dateStr = "";
+            //if (input.ExpirationDate.Contains("EXP"))
+            //{
+            //    //获取前两位是日期
+            //    var date = input.ExpirationDate.Replace("EXP", "").ToString().Substring(0, 2);
+            //    //获取后两位是年份
+            //    var year = input.ExpirationDate.Replace("EXP", "").ToString().Substring(input.ExpirationDate.Replace("EXP", "").Length - 2, 2);
+
+
+            //}
+            string pattern = @"([a-zA-Z]+)|([0-9]+)"; // 正则表达式匹配英文字符或数字
+
+            MatchCollection matches = Regex.Matches(input.ExpirationDate.Replace("EXP", ""), pattern);
+            var dateStr = matches[2].Value + matches[1].Value + matches[0].Value;
+            //foreach (Match match in matches)
+            //{
+            //    Console.WriteLine(match.Value); // 输出匹配到的连续英文字符和数字  
+            //}
+            input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(dateStr).ToString() : null;
+            input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
+            input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
+            var entity = input.Adapt<WMSRFReceiptAcquisition>();
+            if (string.IsNullOrEmpty(entity.SN))
+            {
+                entity.Qty = 1;
+            }
+            else
+            {
+                entity.Qty = 0;
+            }
+            //var dasd=input.ExpirationDate.re
+            //先删除已经存在的SN 
+            await _rep.DeleteAsync(a => a.SKU == entity.SKU && a.SN == entity.SN && a.CustomerId == entity.CustomerId && !string.IsNullOrEmpty(a.SN));
+            await _rep.InsertAsync(entity);
+            await _repReceiptDetail.UpdateAsync(a => new WMSReceiptDetail { ExpirationDate = input.ExpirationDate.ToDateTime(), Remark = input.Lot }, (a => a.SKU == input.SKU && a.ReceiptNumber == input.ReceiptNumber));
+            response.Code = StatusCode.Success;
+            response.Msg = "成功";
+            return response;
         }
-        else
+        catch (Exception ex)
         {
-            entity.Qty = 0;
+
+            throw Oops.Oh(ex.Message);
         }
-        //var dasd=input.ExpirationDate.re
-        //先删除已经存在的SN 
-        await _rep.DeleteAsync(a => a.SKU == entity.SKU && a.SN == entity.SN && a.CustomerId == entity.CustomerId && !string.IsNullOrEmpty(a.SN));
-        await _rep.InsertAsync(entity);
-        await _repReceiptDetail.UpdateAsync(a => new WMSReceiptDetail { ExpirationDate = input.ExpirationDate.ToDateTime(), Remark = input.Lot }, (a => a.SKU == input.SKU && a.ReceiptNumber == input.ReceiptNumber));
-        response.Code = StatusCode.Success;
-        response.Msg = "成功";
-        return response;
     }
 
 

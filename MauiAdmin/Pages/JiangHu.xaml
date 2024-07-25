@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
+             xmlns:vm="clr-namespace:MauiAdmin.ViewModels.InputFields"
+             x:DataType="vm:EditorFieldViewModel"
+             BindingContext="{uranium:Inject {x:Type vm:EditorFieldViewModel}}"
+             x:Class="MauiAdmin.Pages.JiangHu">
+    <WebView  x:Name="WebBrowser" Source="https://xn--27vv2de2b.xn--fiqs8s/#/" android:WebView.MixedContentMode="AlwaysAllow" />
+
+    <!--<VerticalStackLayout>
+        <Label 
+            Text="Welcome to .NET MAUI!"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+    </VerticalStackLayout>-->
+</ContentPage>

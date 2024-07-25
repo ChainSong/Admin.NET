@@ -15,6 +15,8 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
+using FluentEmail.Core;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -84,11 +86,40 @@ namespace Admin.NET.Application.Strategy
                     return response;
                 }
             }
-            await request.ForEachAsync(async a =>
+            List<WMSAdjustmentInformationDto> AdjustmentInfo = new List<WMSAdjustmentInformationDto>();
+            foreach (var a in request)
             {
                 var sugarParameter = new SugarParameter("@AdjustmentId", a, typeof(long), ParameterDirection.Input);
-                await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmMove", sugarParameter);
-            });
+                DataTable AdjustmentInfoData = await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmMove", sugarParameter);
+                if (AdjustmentInfoData != null && AdjustmentInfoData.Rows.Count > 0)
+                {
+                    AdjustmentInfo.AddRange(AdjustmentInfoData.TableToList<WMSAdjustmentInformationDto>());
+                }
+            }
+            if (AdjustmentInfo.Count > 0)
+            {
+                AdjustmentInfo.ForEach(a =>
+                {
+                    response.Data.Add(new OrderStatusDto
+                    {
+                        ExternOrder = a.OrderNumber,
+                        SystemOrder = a.OrderNumber,
+                        Type = a.InformationType,
+                        StatusCode = StatusCode.Error,
+                        //StatusMsg = StatusCode.warning.ToString(),
+                        Msg = "订单移库失败:sku" + a.SKU + ",订单数量：" + a.Qty + ",库存数量：" + a.InventoryQty
+                    });
+                });
+
+                response.Code = StatusCode.Error;
+                response.Msg = "操作失败";
+                return response;
+            }
+            //await request.ForEachAsync(async a => 
+            //{
+            //    var sugarParameter = new SugarParameter("@AdjustmentId", a, typeof(long), ParameterDirection.Input);
+            //    await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmMove", sugarParameter);
+            //});
 
             var AdjustmentData = _repAdjustment.AsQueryable().Where(a => request.Contains(a.Id));
 

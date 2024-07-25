@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MauiAdmin"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:plain="clr-namespace:Plainer.Maui.Controls;assembly=Plainer.Maui"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="MauiAdmin.MainPage">
+
+    <VerticalStackLayout Spacing="25">
+        <Image 
+      Source="butterfly129793903a9f4.png"  
+      HeightRequest="200"
+      WidthRequest="200"
+      HorizontalOptions  ="Center" 
+   />
+        <!--<uranium:SelectableLabel Margin="15" Text="Hello, World! This text should be selectable!" />-->
+    </VerticalStackLayout>
+</ContentPage>

@@ -15,6 +15,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Admin.NET.Application.Service;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -84,13 +85,37 @@ namespace Admin.NET.Application.Strategy
                     return response;
                 }
             }
-            await request.ForEachAsync(async a =>
+            List<WMSAdjustmentInformationDto> AdjustmentInfo = new List<WMSAdjustmentInformationDto>();
+
+
+            foreach (var a in request)
             {
-
                 var sugarParameter = new SugarParameter("@AdjustmentId", a, typeof(long), ParameterDirection.Input);
-                await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmFrozen", sugarParameter);
+                DataTable AdjustmentInfoData = await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmFrozen", sugarParameter);
+                if (AdjustmentInfoData != null && AdjustmentInfoData.Rows.Count > 0)
+                {
+                    AdjustmentInfo.AddRange(AdjustmentInfoData.TableToList<WMSAdjustmentInformationDto>());
+                }
+            }
+            if (AdjustmentInfo.Count > 0)
+            {
+                AdjustmentInfo.ForEach(a =>
+                {
+                    response.Data.Add(new OrderStatusDto
+                    {
+                        ExternOrder = a.OrderNumber,
+                        SystemOrder = a.OrderNumber,
+                        Type = a.InformationType,
+                        StatusCode = StatusCode.Error,
+                        //StatusMsg = StatusCode.warning.ToString(),
+                        Msg = "订单移库失败:sku" + a.SKU + ",订单数量：" + a.Qty + ",库存数量：" + a.InventoryQty
+                    });
+                });
 
-            });
+                response.Code = StatusCode.Error;
+                response.Msg = "操作失败";
+                return response;
+            }
 
             var AdjustmentData = _repAdjustment.AsQueryable().Where(a => request.Contains(a.Id));
             //var ysxx = await _db.Ado.UseStoredProcedure().GetDataTableAsync("exec Proc_WMS_AutomatedOutbound ", sugarParameter);
@@ -159,16 +184,16 @@ namespace Admin.NET.Application.Strategy
             {
                 //if (a.AdjustmentStatus != (int)AdjustmentStatusEnum.新增)
                 //{
-                    response.Data.Add(new OrderStatusDto
-                    {
-                        ExternOrder = a.ExternNumber,
-                        SystemOrder = a.AdjustmentNumber,
-                        Type = a.AdjustmentType,
-                        StatusCode = a.AdjustmentStatus == (int)AdjustmentStatusEnum.完成 ? StatusCode.Success : StatusCode.Error,
-                        //StatusMsg = StatusCode.warning.ToString(),
-                        Msg = a.AdjustmentStatus == (int)AdjustmentStatusEnum.完成 ? "订单变更成功" : "订单变更失败",
+                response.Data.Add(new OrderStatusDto
+                {
+                    ExternOrder = a.ExternNumber,
+                    SystemOrder = a.AdjustmentNumber,
+                    Type = a.AdjustmentType,
+                    StatusCode = a.AdjustmentStatus == (int)AdjustmentStatusEnum.完成 ? StatusCode.Success : StatusCode.Error,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = a.AdjustmentStatus == (int)AdjustmentStatusEnum.完成 ? "订单变更成功" : "订单变更失败",
 
-                    });
+                });
                 //}
             });
 

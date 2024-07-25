@@ -266,16 +266,19 @@ const submit = async () => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
 				if (isValidDetail) {
-					let result = await addWMSASN(state.value.header);
-					if (result.data.result.code == "1") {
+					console.log("新增");
+					let results = await addWMSASN(state.value.header);
+				 
+					// alert(results.data.result.code );
+					if (results.data.result.code == "1") {
 						ElMessage.success("保存成功");
 						state.value.header = new Header();
 						state.value.headers = new Array<Header>();
 						state.value.details = [new Detail()];
 						closeDialog();
 					} else {
-						state.value.orderStatus = result.data.result;
-						// console.log(state.value.orderStatus);
+						state.value.orderStatus = results.data.result.data;
+					    console.log(state.value.orderStatus);
 						//导入弹框提醒
 						resultPopupShow.value = true;
 						// ElMessage.error(result.data.result.msg);

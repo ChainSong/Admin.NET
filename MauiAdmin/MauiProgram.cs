@@ -1,0 +1,61 @@
+﻿//using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
+using DotNurse.Injector;
+using Mopups.Hosting;
+using ReactiveUI;
+using System.Reactive;
+using UraniumUI;
+using UraniumUI.Dialogs;
+using UraniumUI.Options;
+using UraniumUI.Validations;
+
+namespace MauiAdmin;
+
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .UseUraniumUI()
+            .UseUraniumUIMaterial()
+            .UseUraniumUIBlurs(false)
+            .UseUraniumUIWebComponents()
+            .ConfigureMopups()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFontAwesomeIconFonts();
+                fonts.AddMaterialSymbolsFonts();
+                fonts.AddFluentIconFonts();
+            });
+
+        builder.Services.Configure<AutoFormViewOptions>(options =>
+        {
+            options.ValidationFactory = DataAnnotationValidation.CreateValidations;
+        });
+
+        RxApp.DefaultExceptionHandler = new AnonymousObserver<Exception>(ex =>
+        {
+            App.Current.MainPage.DisplayAlert("Error", ex.Message, "OK");
+
+            // Track the exception here... (e.g. AppCenter, Sentry, etc.)
+        });
+
+        var thisAssembly = typeof(MauiProgram).Assembly;
+
+        builder.Services.AddServicesFrom(
+            type => typeof(Page).IsAssignableFrom(type),
+            ServiceLifetime.Transient,
+            options => options.Assembly = thisAssembly)
+        .AddServicesByAttributes(assembly: thisAssembly);
+
+        //builder.Services.AddCommunityToolkitDialogs();
+        //builder.Services.AddMopupsDialogs();
+
+        return builder.Build();
+    }
+}

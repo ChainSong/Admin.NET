@@ -8,8 +8,10 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 
+using Admin.NET.Core.Do;
 using Admin.NET.Core.Entity;
 using SqlSugar;
+using System.Data;
 
 namespace Admin.NET.Core;
 
@@ -78,18 +80,58 @@ public class AutomatedAllocationJob : IJob
             db.DbMaintenance.CreateDatabase();
             //db.DbMaintenance.c
             //var dasd = db.Queryable<WMSInstruction>();
-            var data = db.Ado.SqlQuery<WMSInstruction>("  select * from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by id");
-            if (data != null)
+            var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by InstructionTaskNo");
+            if ( data != null && data.Count>0)
             {
+                List<WMSAdjustmentInformationDo> AdjustmentInfo = new List<WMSAdjustmentInformationDo>();
+
                 foreach (var instruction in data)
                 {
+
+                    //
+                    //foreach (var a in request)
+                    //{
+                    //    var sugarParameter = new SugarParameter("@AdjustmentId", a, typeof(long), ParameterDirection.Input);
+                    //    DataTable AdjustmentInfoData = await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmMove", sugarParameter);
+                    //    if (AdjustmentInfoData != null && AdjustmentInfoData.Rows.Count > 0)
+                    //    {
+                    //        AdjustmentInfo.AddRange(AdjustmentInfoData.TableToList<WMSAdjustmentInformationDto>());
+                    //    }
+                    //}
+
+
                     var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
-                    await db.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
+                    DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
+                    if (infoData != null && infoData.Rows.Count > 0)
+                    {
+                        AdjustmentInfo.AddRange(infoData.TableToList<WMSAdjustmentInformationDo>());
+                    }
                     SysNotice notice = new SysNotice();
                     notice.Title = "自动分配";
                     notice.PublicTime = DateTime.Now;
                     notice.Type = NoticeTypeEnum.NOTICE;
-                    notice.Content = "分配完成";
+                    if (AdjustmentInfo.Where(a => a.Qty != a.InventoryQty).Count() > 0)
+                    {
+                        notice.Title = "库存不足";
+                        //构建一个html的table
+                        notice.Content = "<table><tr><th>订单号</th><th>SKU</th><th>订单数量</th><th>库存数量</th></tr>";
+
+                        foreach (var item in AdjustmentInfo)
+                        {
+                            if (item.Qty != item.InventoryQty)
+                            {
+                                notice.Content += "<tr><td>" + item.OrderNumber + "</td><td>" + item.SKU + "</td><td>" + item.Qty + "</td><td>" + item.InventoryQty + "</td></tr>";
+                                //notice.Content += "订单号:"+item.OrderNumber + ":SKU:" + item.SKU + "订单数量" + item.Qty + "，库存数量" + item.InventoryQty  + ";数量不足，请及时补货！\n";
+                            }
+                        }
+                        notice.Content += "</table>";
+                        //notice.Content+= "";
+                    }
+                    else
+                    {
+                        notice.Title = "分配完成";
+                        notice.Content = "分配完成";
+                    }
                     notice.Status = NoticeStatusEnum.PUBLIC;
                     notice.PublicOrgId = 0;
                     notice.PublicUserId = 0;

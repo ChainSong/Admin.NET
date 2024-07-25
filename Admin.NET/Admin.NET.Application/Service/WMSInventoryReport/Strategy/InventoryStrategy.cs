@@ -185,10 +185,10 @@ public class InventoryStrategy : IInvrntoryInterface
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Str5), u => u.Str5.Contains(input.Str5.Trim()))
                     .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
-        //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
-        //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                    //.Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
+                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
+                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
                      .GroupBy(a => new
                      {
                          a.CustomerId
@@ -595,45 +595,88 @@ public class InventoryStrategy : IInvrntoryInterface
 
 
             DataRow row = dt.NewRow();
-
-
-            tableColumn.ForEach(h =>
+            try
             {
-                if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+
+                tableColumn.ForEach(h =>
                 {
-                    PropertyInfo property = receiptType.GetProperty(h.DbColumnName);
-
-
-                    if (property != null)
+                    if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
                     {
-
-                        // 判断是下拉列表 就取下拉列表的数据
-                        if (h.Type == "DropDownListInt")
+                        PropertyInfo property = receiptType.GetProperty(h.DbColumnName);
+                        //PropertyInfo property = preOrderType.GetProperty(h.DbColumnName);
+                        //如果该字段有下拉选项，则值取下拉选项中的值
+                        if (h.tableColumnsDetails.Count() > 0)
                         {
-                            try
+                            var val = property.GetValue(a);
+                            TableColumnsDetail data = new TableColumnsDetail();
+                            if (val is int)
                             {
-                                row[h.DisplayName] = _repTableColumnsDetail.AsQueryable().Where(q => q.Associated == h.Associated).First().Name;
+                                data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
                             }
-                            catch (Exception e)
+                            else
                             {
-                                row[h.DisplayName] = property.GetValue(a);
-                            }
+                                data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val)).FirstOrDefault();
 
+                            }
+                            //var data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                            if (data != null)
+                            {
+                                row[h.DisplayName] = data.Name;
+                            }
+                            else
+                            {
+                                row[h.DisplayName] = "";
+                            }
                         }
                         else
                         {
                             row[h.DisplayName] = property.GetValue(a);
                         }
+
+                        //if (property != null)
+                        //{
+                        //    var val = property.GetValue(a);
+                        //    TableColumnsDetail data = new TableColumnsDetail();
+                        //    if (val is int)
+                        //    {
+                        //        data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val) || c.CodeInt == Convert.ToInt32(val)).FirstOrDefault();
+                        //    }
+                        //    else
+                        //    {
+                        //        data = h.tableColumnsDetails.Where(c => c.CodeStr == Convert.ToString(val)).FirstOrDefault();
+
+                        //    }
+                        //    // 判断是下拉列表 就取下拉列表的数据
+                        //    //if (h.Type == "DropDownListInt")
+                        //    //{
+                        //    //    try
+                        //    //    {
+                        //    //        row[h.DisplayName] = _repTableColumnsDetail.AsQueryable().Where(q => q.Associated == h.Associated &&q.CodeInt== property.GetValue(a)).First().Name;
+                        //    //    }
+                        //    //    catch (Exception e)
+                        //    //    {
+                        //    //        row[h.DisplayName] = property.GetValue(a);
+                        //    //    }
+
+                        //    //}
+                        //    //else
+                        //    //{
+                        //    //    row[h.DisplayName] = property.GetValue(a);
+                        //    //}
+                        //}
+                        //else
+                        //{
+
+                        //    row[h.DisplayName] = "";
+
+                        //}
                     }
-                    else
-                    {
+                });
+            }
+            catch (Exception e)
+            {
 
-                        row[h.DisplayName] = "";
-
-                    }
-                }
-            });
-
+            }
             dt.Rows.Add(row);
 
 
@@ -669,9 +712,12 @@ public class InventoryStrategy : IInvrntoryInterface
               //由于框架约定大于配置， 数据库的字段首字母小写
               //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
               DbColumnName = a.DbColumnName,
+              Type = a.Type,
               IsImportColumn = a.IsImportColumn,
-              Associated = a.Associated,
-              Type = a.Type
+              Validation = a.Validation,
+              tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
+              //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
+              //.Select()
           }).ToList();
     }
 }

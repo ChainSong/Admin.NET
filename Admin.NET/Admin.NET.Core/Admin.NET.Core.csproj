@@ -45,5 +45,9 @@
   <ItemGroup>
     <Folder Include="Service\File\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Admin.NET.Common\Admin.NET.Common.csproj" />
+  </ItemGroup>
 	
 </Project>

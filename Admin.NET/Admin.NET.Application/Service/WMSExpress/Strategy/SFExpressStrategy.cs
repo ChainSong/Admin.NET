@@ -296,7 +296,7 @@ public class SFExpressStrategy : IExpressInterface
         List<SFCargodetail> sFCargodetails = new List<SFCargodetail>();
         packageDetail.ForEach(a =>
         {
-            sFCargodetails.Add(new SFCargodetail { name = a.SKU.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ') });
+            sFCargodetails.Add(new SFCargodetail { name = a.SKU.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ')+"："+a.Qty });
         });
 
         var senderContact = "";
@@ -457,10 +457,14 @@ public class SFExpressStrategy : IExpressInterface
 
         //packageData.Details = sfexpress;
         await _repExpressDelivery.InsertRangeAsync(packageData);
-        packageData.ForEach(c =>
-      {
-          _repPackage.Update(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
-      });
+        foreach (var c in packageData)
+        {
+            await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
+        }
+      //  packageData.ForEach(c =>
+      //{
+      //    _repPackage.Update(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
+      //});
         //await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
         response.Msg = "成功";

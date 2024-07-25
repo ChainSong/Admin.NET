@@ -79,7 +79,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" icon="ele-Fold" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单
+          <el-button type="primary" icon="ele-Fold" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单(全部)
           </el-button>
         </el-form-item>
 
@@ -120,12 +120,14 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="250">
+        <el-table-column fixed="right" label="操作" width="320">
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
+            <el-button @click="openCancel(scope.row)" class="el-icon-s-comment" type="text" size="small">取消
+            </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
-            <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text" size="small">转入库单</el-button>
+            <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text" size="small">转入库单(部分)</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -155,7 +157,7 @@ import editDialog from '/@/views/main/wMSASN/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
 import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDialog.vue'
-import { pageWMSASN, deleteWMSASN, asnForReceipt,exportASN } from '/@/api/main/wMSASN';
+import { pageWMSASN, deleteWMSASN, asnForReceipt,exportASN,cancelWMSASN } from '/@/api/main/wMSASN';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/asn";
@@ -287,6 +289,21 @@ const del = (row: any) => {
 };
 
 
+
+// 取消
+const openCancel = (row: any) => {
+  ElMessageBox.confirm(`确定要取消吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      await cancelWMSASN(row);
+      handleQuery();
+      ElMessage.success("取消成功");
+    })
+    .catch(() => { });
+};
 
 // 转入库单
 const asnForReceiptFun = () => {

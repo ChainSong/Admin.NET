@@ -6,7 +6,7 @@
 				<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 					<el-row :gutter="35">
 						<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-							v-for="i in state.tableColumnHeaders.filter(a => a.isUpdate == 1)" v-bind:key="i.id">
+							v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
 							<el-form-item :label="i.displayName"  style="width: 90%;height: 45px;"
 								:prop="i.columnName">
 								<template v-if="i.type == 'TextBox'">

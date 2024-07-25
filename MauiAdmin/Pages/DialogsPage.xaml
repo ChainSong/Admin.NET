@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage x:Class="MauiAdmin.Pages.DialogsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:local="clr-namespace:MauiAdmin.Pages">
+    <ContentPage.Resources>
+        <Style TargetType="Entry">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark= {StaticResource SurfaceDark}}" />
+            <Setter Property="WidthRequest" Value="100" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <material:TabView VerticalOptions="Fill" HorizontalOptions="Fill" TabPlacement="Start">
+
+            <material:TabItem Title="Radio Button">
+                <VerticalStackLayout Padding="40">
+                    <Label Text="Amount of RadioButton options" />
+                    <Slider x:Name="sliderForRadioButtons" Minimum="1" Maximum="12" Value="3" />
+                    <Button Text="Ask RadioButtons" Clicked="AskRadioButtons" StyleClass="FilledButton" HorizontalOptions="Center" />
+                    <HorizontalStackLayout Margin="20">
+                        <Label Text="Result: " FontAttributes="Bold" />
+                        <Label x:Name="labelSelected" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </material:TabItem>
+
+            <material:TabItem Title="Check Box">
+                <ListView Margin="20" x:Name="checkBoxResultListView" VerticalOptions="FillAndExpand" BackgroundColor="Transparent">
+                    <ListView.Header>
+                        <VerticalStackLayout Padding="20">
+                            <Label Text="Amount of CheckBox options" />
+                            <Slider x:Name="sliderForCheckBoxes" Minimum="1" Maximum="12" Value="3" />
+                            <Button Text="Ask CheckBoxes" Clicked="AskCheckBoxes" StyleClass="FilledButton" HorizontalOptions="Center" />
+                            <Label Text="Selected Items:" FontAttributes="Bold" Margin="20" />
+                        </VerticalStackLayout>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Label Text="{Binding .}" />
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </material:TabItem>
+
+            <material:TabItem Title="Text Prompt">
+                <VerticalStackLayout Padding="20">
+                    <Button Text="Ask Text Prompt" Clicked="AskTextPrompt" StyleClass="FilledButton" HorizontalOptions="Center" />
+                    <Label Text="Result: " x:Name="labelTextPrompt"/>
+                </VerticalStackLayout>
+            </material:TabItem>
+
+            <material:TabItem Title="Confirmation">
+                <VerticalStackLayout Padding="20">
+                    <Button Text="Ask Confirmation Prompt" Clicked="AskConfirmation" StyleClass="FilledButton" HorizontalOptions="Center" />
+                    <Label Text="Result: " x:Name="labelConfirmation"/>
+                </VerticalStackLayout>
+            </material:TabItem>
+        </material:TabView>
+    </ContentPage.Content>
+</ContentPage>

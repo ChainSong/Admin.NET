@@ -15,6 +15,7 @@
 					<el-button-group>
 						<el-button type="primary" icon="ele-Search" @click="handleQuery"> 查询 </el-button>
 						<el-button icon="ele-Refresh" @click="resetQuery"> 重置 </el-button>
+						<el-button type="primary" icon="ele-Plus" @click="openAllRead" v-auth="'sysNotice:page'"> 全部已读 </el-button>
 					</el-button-group>
 				</el-form-item>
 			</el-form>
@@ -74,10 +75,11 @@
 <script setup lang="ts" name="notice">
 import { onMounted, reactive } from 'vue';
 import commonFunction from '/@/utils/commonFunction';
-
+import { ElMessageBox, ElMessage } from 'element-plus';
 import { getAPI } from '/@/utils/axios-utils';
 import { SysNoticeApi } from '/@/api-services/api';
 import { SysNoticeUser } from '/@/api-services/models';
+import { allReadApi } from "/@/api/main/sysNotice";
 
 const { removeHtml } = commonFunction();
 const state = reactive({
@@ -100,6 +102,20 @@ onMounted(async () => {
 	handleQuery();
 });
 
+// 全部已读
+const openAllRead = (row: any) => {
+	ElMessageBox.confirm(`确定全部已读通知公告?`, '提示', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(async () => {
+			await allReadApi();
+			handleQuery();
+			ElMessage.success('已阅读');
+		})
+		.catch(() => {});
+};
 // 查询操作
 const handleQuery = async () => {
 	state.loading = true;

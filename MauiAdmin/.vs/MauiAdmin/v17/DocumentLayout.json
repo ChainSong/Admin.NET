@@ -1,0 +1,1993 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|e:\\obj\\sb\\android\\pro\\mauiadmin\\mauiadmin\\pages\\inputfields\\pickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\pickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\timepickerfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\timepickerfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\copybutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:copybutton.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\platforms\\tizen\\tizen-manifest.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:platforms\\tizen\\tizen-manifest.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|c:\\users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\uraniumui.webcomponents\\2.8.1\\contentfiles\\any\\net8.0-android34.0\\resources\\raw\\highlightjs\\languages\\livecodeserver.min.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\platforms\\android\\androidmanifest.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:platforms\\android\\androidmanifest.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\mauiadmin.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:mauiadmin.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\platforms\\ios\\info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:platforms\\ios\\info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\platforms\\maccatalyst\\info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:platforms\\maccatalyst\\info.plist||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\propertyeditorview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:propertyeditorview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\jianghu.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\jianghu.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\bottomsheets\\regularbottomsheetpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\bottomsheets\\regularbottomsheetpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\dialogspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\dialogspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\appshell.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:appshell.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\fodyweavers.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:fodyweavers.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\images\\cat180128703a9f4.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\images\\cat180128703a9f4.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\images\\butterfly129793903a9f4.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\images\\butterfly129793903a9f4.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\appicon\\appiconfg.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\appicon\\appiconfg.svg||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\simplecustomtitledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\simplecustomtitledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\buttonspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\buttonspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\elevationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\elevationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\customdatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\customdatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\fontimagesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\fontimagesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\customdatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\customdatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\chipsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\chipsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\checkboxesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\checkboxesviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\buttonsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\buttonsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\autoformviewpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\autoformviewpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\blurs\\blursdemoviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\blurs\\blursdemoviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\tabviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\tabviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\pickerfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\pickerfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\pickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\pickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\autocompletetextfield\\googleautocompletepage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\autocompletetextfield\\googleautocompletepage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\treeviews\\treeviewfilesystempage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\treeviews\\treeviewfilesystempage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\inputs\\colorpicking\\coloreditpopuppage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:inputs\\colorpicking\\coloreditpopuppage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\autocompletetextfield\\googleautocompleteviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\autocompletetextfield\\googleautocompleteviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\autocompletetextfield\\googleautocompletepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\autocompletetextfield\\googleautocompletepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\blurs\\blurspreviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\blurs\\blurspreviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\blurindexpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\blurindexpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\blurs\\blurspreviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\blurs\\blurspreviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\blurindexpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\blurindexpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\autoformviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\autoformviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\validationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\validationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\validationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\validationspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\radiobuttonspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\radiobuttonspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\validationspageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\validationspageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\treeviewpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\treeviewpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\autoformviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\autoformviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\dialogspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\dialogspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\chipspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\chipspage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\elevationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\elevationspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\expanderviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\expanderviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\expanderviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\expanderviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\mytemplateselector\\mytemplateselector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\mytemplateselector\\mytemplateselector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\treeviews\\treeviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\treeviews\\treeviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\checkboxespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\checkboxespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\buttonspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\buttonspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\treeviewfilesystemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\treeviewfilesystemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\tabviews\\webtabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\tabviews\\webtabviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\singlecontroleditingviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\singlecontroleditingviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\treeviews\\treeviewfilesystempage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\treeviews\\treeviewfilesystempage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\treeviews\\treeviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\treeviews\\treeviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\webtabviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\webtabviewpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\customtabitemtabview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\customtabitemtabview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\customtabitemtabview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\customtabitemtabview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\webtabviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\webtabviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\tabviews\\tabviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\tabviews\\tabviewpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\backdrops\\simplebackdroppage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\backdrops\\simplebackdroppage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\simpledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\simpledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\editordatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\editordatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\customdatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\customdatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\blurs\\blurspreviewviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\blurs\\blurspreviewviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\autocompleteviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\autocompleteviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\simpledatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\simpledatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\simpledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\simpledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\simplecustomtitledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\simplecustomtitledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\selectabledatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\selectabledatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\selectabledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\selectabledatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\selectabledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\selectabledatagridpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\editordatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\editordatagridpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\editordatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\editordatagridpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\datagridsindexpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\datagridsindexpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\datagrids\\datagridsindexpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\datagrids\\datagridsindexpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\backdrops\\simplebackdroppage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\backdrops\\simplebackdroppage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\bottomsheets\\expandingbottomsheetpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\bottomsheets\\expandingbottomsheetpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\bottomsheets\\regularbottomsheetpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\bottomsheets\\regularbottomsheetpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\datepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\datepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\timepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\timepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\chipspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\chipspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\checkboxespage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\checkboxespage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\editorfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\editorfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\datepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\datepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\editorfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\editorfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\textfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\textfieldviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\timepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\timepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\textfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\textfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\multiplepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\multiplepickerfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\multiplepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\multiplepickerfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\inputfields\\multiplepickerfieldvidemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\inputfields\\multiplepickerfieldvidemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\autocompletetextfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\autocompletetextfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\autocompletetextfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\autocompletetextfieldpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\editorfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\editorfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\inputfields\\textfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\inputfields\\textfieldpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\radiobuttonspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\radiobuttonspage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\inputs\\colorpicking\\coloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:inputs\\colorpicking\\coloreditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\inputs\\colorpicking\\slidercolorpicker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:inputs\\colorpicking\\slidercolorpicker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewmodels\\radiobuttonsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewmodels\\radiobuttonsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\jianghu.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\jianghu.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\viewshowcaseview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:viewshowcaseview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\fontimagespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\fontimagespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\gridlayoutpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\gridlayoutpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\pages\\gridlayoutpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:pages\\gridlayoutpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\styles\\styles.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\styles\\styles.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\resources\\styles\\override.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin.csproj|solutionrelative:resources\\styles\\override.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PickerFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\PickerFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\PickerFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\PickerFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\PickerFieldPage.xaml",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAAABoAAAANAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-13T07:51:22.239Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MainPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MainPage.xaml",
+              "RelativeDocumentMoniker": "MainPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MainPage.xaml",
+              "RelativeToolTip": "MainPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAArAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:26:35.439Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AppShell.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\AppShell.xaml",
+              "RelativeDocumentMoniker": "AppShell.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\AppShell.xaml",
+              "RelativeToolTip": "AppShell.xaml",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAAABcAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:40:05.208Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Colors.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Colors.xaml",
+              "RelativeDocumentMoniker": "Resources\\Styles\\Colors.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Colors.xaml",
+              "RelativeToolTip": "Resources\\Styles\\Colors.xaml",
+              "ViewState": "AQIAAAMAAAAAAAAAAADwvw0AAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:44:20.654Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "App.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "ViewState": "AQIAACQAAAAAAAAAAAAAAAkAAAAbAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:29:18.863Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TimePickerFieldViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\TimePickerFieldViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\TimePickerFieldViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\TimePickerFieldViewModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\TimePickerFieldViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:48:19.17Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "tizen-manifest.xml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\Tizen\\tizen-manifest.xml",
+              "RelativeDocumentMoniker": "Platforms\\Tizen\\tizen-manifest.xml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\Tizen\\tizen-manifest.xml",
+              "RelativeToolTip": "Platforms\\Tizen\\tizen-manifest.xml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAALAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2024-07-13T05:55:05.406Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CopyButton.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\CopyButton.cs",
+              "RelativeDocumentMoniker": "CopyButton.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\CopyButton.cs",
+              "RelativeToolTip": "CopyButton.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:23:21.225Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MainPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MainPage.xaml.cs",
+              "RelativeDocumentMoniker": "MainPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MainPage.xaml.cs",
+              "RelativeToolTip": "MainPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-13T05:51:29.973Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AndroidManifest.xml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\Android\\AndroidManifest.xml",
+              "RelativeDocumentMoniker": "Platforms\\Android\\AndroidManifest.xml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\Android\\AndroidManifest.xml",
+              "RelativeToolTip": "Platforms\\Android\\AndroidManifest.xml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAA7AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2024-07-13T05:54:16.745Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Info.plist",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\iOS\\Info.plist",
+              "RelativeDocumentMoniker": "Platforms\\iOS\\Info.plist",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\iOS\\Info.plist",
+              "RelativeToolTip": "Platforms\\iOS\\Info.plist",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAAAB0AAAAgAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-07-13T05:54:53.141Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "livecodeserver.min.js",
+              "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\uraniumui.webcomponents\\2.8.1\\contentFiles\\any\\net8.0-android34.0\\Resources\\Raw\\highlightjs\\languages\\livecodeserver.min.js",
+              "ToolTip": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\uraniumui.webcomponents\\2.8.1\\contentFiles\\any\\net8.0-android34.0\\Resources\\Raw\\highlightjs\\languages\\livecodeserver.min.js [\u53EA\u8BFB]",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAAAAgAAABLAgAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2024-07-13T05:55:39.63Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Info.plist",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\MacCatalyst\\Info.plist",
+              "RelativeDocumentMoniker": "Platforms\\MacCatalyst\\Info.plist",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Platforms\\MacCatalyst\\Info.plist",
+              "RelativeToolTip": "Platforms\\MacCatalyst\\Info.plist",
+              "ViewState": "AQIAACMAAAAAAAAAAAAAACMAAAAgAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-07-13T05:54:55.84Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MauiProgram.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MauiProgram.cs",
+              "RelativeDocumentMoniker": "MauiProgram.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MauiProgram.cs",
+              "RelativeToolTip": "MauiProgram.cs",
+              "ViewState": "AQIAABAAAAAAAAAAAAAIwBcAAAAlAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-13T05:51:32.055Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MauiAdmin.csproj",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MauiAdmin.csproj",
+              "RelativeDocumentMoniker": "MauiAdmin.csproj",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\MauiAdmin.csproj",
+              "RelativeToolTip": "MauiAdmin.csproj",
+              "ViewState": "AQIAABwAAAAAAAAAAAAnwCoAAABdAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-07-07T07:51:06.483Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "PropertyEditorView.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\PropertyEditorView.cs",
+              "RelativeDocumentMoniker": "PropertyEditorView.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\PropertyEditorView.cs",
+              "RelativeToolTip": "PropertyEditorView.cs",
+              "ViewState": "AQIAAGcAAAAAAAAAAAAiwAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-13T05:51:32.557Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "DialogsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DialogsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DialogsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DialogsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DialogsPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:20:01.315Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RegularBottomSheetPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\RegularBottomSheetPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\BottomSheets\\RegularBottomSheetPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\RegularBottomSheetPage.xaml",
+              "RelativeToolTip": "Pages\\BottomSheets\\RegularBottomSheetPage.xaml",
+              "ViewState": "AQIAABoAAAAAAAAAAADwvyoAAAA0AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:56:50.214Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "JiangHu.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\JiangHu.xaml",
+              "RelativeDocumentMoniker": "Pages\\JiangHu.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\JiangHu.xaml",
+              "RelativeToolTip": "Pages\\JiangHu.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAABSAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:26:14.043Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "AppShell.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\AppShell.xaml.cs",
+              "RelativeDocumentMoniker": "AppShell.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\AppShell.xaml.cs",
+              "RelativeToolTip": "AppShell.xaml.cs",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAIwAYAAAAnAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T09:22:00.184Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\App.xaml.cs",
+              "RelativeDocumentMoniker": "App.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\App.xaml.cs",
+              "RelativeToolTip": "App.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-13T05:41:22.766Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "FodyWeavers.xml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\FodyWeavers.xml",
+              "RelativeDocumentMoniker": "FodyWeavers.xml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\FodyWeavers.xml",
+              "RelativeToolTip": "FodyWeavers.xml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2024-07-07T09:54:11.99Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Microsoft.Maui.Resizetizer.After.targets",
+              "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets",
+              "ToolTip": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets",
+              "ViewState": "AQIAAF8CAAAAAAAAAAAcwGgCAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2024-07-13T05:32:17.4Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "appiconfg.svg",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\AppIcon\\appiconfg.svg",
+              "RelativeDocumentMoniker": "Resources\\AppIcon\\appiconfg.svg",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\AppIcon\\appiconfg.svg",
+              "RelativeToolTip": "Resources\\AppIcon\\appiconfg.svg",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|",
+              "WhenOpened": "2024-07-13T05:27:31.017Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "butterfly129793903a9f4.svg",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Images\\butterfly129793903a9f4.svg",
+              "RelativeDocumentMoniker": "Resources\\Images\\butterfly129793903a9f4.svg",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Images\\butterfly129793903a9f4.svg",
+              "RelativeToolTip": "Resources\\Images\\butterfly129793903a9f4.svg",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|",
+              "WhenOpened": "2024-07-13T05:27:34.252Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "cat180128703a9f4.svg",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Images\\cat180128703a9f4.svg",
+              "RelativeDocumentMoniker": "Resources\\Images\\cat180128703a9f4.svg",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Images\\cat180128703a9f4.svg",
+              "RelativeToolTip": "Resources\\Images\\cat180128703a9f4.svg",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwoAAAAdAAAA",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|",
+              "WhenOpened": "2024-07-13T05:27:34.96Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "ButtonsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ButtonsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\ButtonsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ButtonsPage.xaml",
+              "RelativeToolTip": "Pages\\ButtonsPage.xaml",
+              "ViewState": "AQIAAJMAAAAAAAAAAABIwCMAAAA0AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:13:23.87Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "FontImagesViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\FontImagesViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\FontImagesViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\FontImagesViewModel.cs",
+              "RelativeToolTip": "ViewModels\\FontImagesViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:44:56.767Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "SimpleCustomTitleDataGridPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAuwA0AAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:08:23.527Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "ElevationsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ElevationsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\ElevationsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ElevationsPage.xaml",
+              "RelativeToolTip": "Pages\\ElevationsPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:17:30.171Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "CustomDataGridPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPageViewModel.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\CustomDataGridPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPageViewModel.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\CustomDataGridPageViewModel.cs",
+              "ViewState": "AQIAACQAAAAAAAAAAAAUwDAAAABOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:07:40.655Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "CustomDataGridPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\CustomDataGridPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\CustomDataGridPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAEAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:07:31.893Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ChipsViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ChipsViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ChipsViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ChipsViewModel.cs",
+              "RelativeToolTip": "ViewModels\\ChipsViewModel.cs",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAgwAwAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:05:58.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "CheckBoxesViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\CheckBoxesViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\CheckBoxesViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\CheckBoxesViewModel.cs",
+              "RelativeToolTip": "ViewModels\\CheckBoxesViewModel.cs",
+              "ViewState": "AQIAAEUAAAAAAAAAAAA2wBcAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:21:41.914Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "ButtonsViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ButtonsViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ButtonsViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ButtonsViewModel.cs",
+              "RelativeToolTip": "ViewModels\\ButtonsViewModel.cs",
+              "ViewState": "AQIAAEwAAAAAAAAAAAAAwAoAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:15:36.29Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "AutoFormViewPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\AutoFormViewPageViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\AutoFormViewPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\AutoFormViewPageViewModel.cs",
+              "RelativeToolTip": "ViewModels\\AutoFormViewPageViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAACoAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:33:36.124Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "BlursDemoViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\Blurs\\BlursDemoViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\Blurs\\BlursDemoViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\Blurs\\BlursDemoViewModel.cs",
+              "RelativeToolTip": "ViewModels\\Blurs\\BlursDemoViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwwAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:09:09.784Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "TabViewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\TabViewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\TabViewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\TabViewPage.xaml",
+              "RelativeToolTip": "Pages\\TabViews\\TabViewPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwkAAAAUAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:58:23.459Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "TreeViewFileSystemPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewFileSystemPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\TreeViews\\TreeViewFileSystemPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewFileSystemPage.xaml",
+              "RelativeToolTip": "Pages\\TreeViews\\TreeViewFileSystemPage.xaml",
+              "ViewState": "AQIAAAkAAAAAAAAAAABIwBQAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:01:24.588Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "PickerFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\PickerFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\PickerFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\PickerFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\PickerFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:36:34.384Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "PickerFieldViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\PickerFieldViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\PickerFieldViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\PickerFieldViewModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\PickerFieldViewModel.cs",
+              "ViewState": "AQIAADAAAAAAAAAAAAAYwA8AAAA2AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:37:04.258Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "ColorEditPopupPage.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\ColorEditPopupPage.cs",
+              "RelativeDocumentMoniker": "Inputs\\ColorPicking\\ColorEditPopupPage.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\ColorEditPopupPage.cs",
+              "RelativeToolTip": "Inputs\\ColorPicking\\ColorEditPopupPage.cs",
+              "ViewState": "AQIAAGoAAAAAAAAAAAAYwG0AAAARAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:24:32.477Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "GoogleAutoCompletePage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml.cs",
+              "RelativeToolTip": "Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:42:28.563Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "GoogleAutoCompletePage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml",
+              "RelativeDocumentMoniker": "Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml",
+              "RelativeToolTip": "Pages\\AutoCompleteTextField\\GoogleAutoCompletePage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:42:13.208Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "GoogleAutoCompleteViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompleteViewModel.cs",
+              "RelativeDocumentMoniker": "Pages\\AutoCompleteTextField\\GoogleAutoCompleteViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoCompleteTextField\\GoogleAutoCompleteViewModel.cs",
+              "RelativeToolTip": "Pages\\AutoCompleteTextField\\GoogleAutoCompleteViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:42:22.788Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "BlursPreviewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Blurs\\BlursPreviewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\Blurs\\BlursPreviewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Blurs\\BlursPreviewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\Blurs\\BlursPreviewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:40:46.939Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "BlursPreviewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Blurs\\BlursPreviewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\Blurs\\BlursPreviewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Blurs\\BlursPreviewPage.xaml",
+              "RelativeToolTip": "Pages\\Blurs\\BlursPreviewPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwMAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:40:40.937Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "BlurIndexPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BlurIndexPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\BlurIndexPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BlurIndexPage.xaml.cs",
+              "RelativeToolTip": "Pages\\BlurIndexPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:39:21.699Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "BlurIndexPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BlurIndexPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\BlurIndexPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BlurIndexPage.xaml",
+              "RelativeToolTip": "Pages\\BlurIndexPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:39:12.625Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "ValidationsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ValidationsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\ValidationsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ValidationsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\ValidationsPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:36:59.939Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "ValidationsPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ValidationsPageViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ValidationsPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\ValidationsPageViewModel.cs",
+              "RelativeToolTip": "ViewModels\\ValidationsPageViewModel.cs",
+              "ViewState": "AQIAACsAAAAAAAAAAAAAwAwAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:35:55.18Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "AutoFormViewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoFormViewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\AutoFormViewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoFormViewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\AutoFormViewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:33:07.755Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "ValidationsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ValidationsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\ValidationsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ValidationsPage.xaml",
+              "RelativeToolTip": "Pages\\ValidationsPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwoAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:36:53.809Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "RadioButtonsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\RadioButtonsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\RadioButtonsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\RadioButtonsPage.xaml",
+              "RelativeToolTip": "Pages\\RadioButtonsPage.xaml",
+              "ViewState": "AQIAAEoAAAAAAAAAAAAYwGYAAABkAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:25:38.774Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "AutoFormViewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoFormViewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\AutoFormViewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\AutoFormViewPage.xaml",
+              "RelativeToolTip": "Pages\\AutoFormViewPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAVAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:32:49.025Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "TreeViewPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TreeViewPageViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\TreeViewPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TreeViewPageViewModel.cs",
+              "RelativeToolTip": "ViewModels\\TreeViewPageViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:02:07.708Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "DialogsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DialogsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DialogsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DialogsPage.xaml",
+              "RelativeToolTip": "Pages\\DialogsPage.xaml",
+              "ViewState": "AQIAABsAAAAAAAAAAABIwA4AAAAZAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:19:50.57Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "ElevationsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ElevationsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\ElevationsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ElevationsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\ElevationsPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:17:33.756Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "ChipsPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ChipsPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\ChipsPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ChipsPage.xaml",
+              "RelativeToolTip": "Pages\\ChipsPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:51:45.422Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "ExpanderViewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ExpanderViewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\ExpanderViewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ExpanderViewPage.xaml",
+              "RelativeToolTip": "Pages\\ExpanderViewPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAEsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:54:28.87Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 62,
+              "Title": "TreeViewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\TreeViews\\TreeViewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewPage.xaml",
+              "RelativeToolTip": "Pages\\TreeViews\\TreeViewPage.xaml",
+              "ViewState": "AQIAAE8AAAAAAAAAAAAYwFgAAAA7AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T08:01:30.356Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "ExpanderViewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ExpanderViewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\ExpanderViewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ExpanderViewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\ExpanderViewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:54:30.574Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 61,
+              "Title": "MyTemplateSelector.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\MyTemplateSelector\\MyTemplateSelector.cs",
+              "RelativeDocumentMoniker": "ViewModels\\MyTemplateSelector\\MyTemplateSelector.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\MyTemplateSelector\\MyTemplateSelector.cs",
+              "RelativeToolTip": "ViewModels\\MyTemplateSelector\\MyTemplateSelector.cs",
+              "ViewState": "AQIAAAoAAAAAAAAAAAAUwBMAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:05:50.782Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
+              "Title": "CheckBoxesPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\CheckBoxesPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\CheckBoxesPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\CheckBoxesPage.xaml.cs",
+              "RelativeToolTip": "Pages\\CheckBoxesPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:21:01.49Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 64,
+              "Title": "ButtonsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ButtonsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\ButtonsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ButtonsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\ButtonsPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:13:21.223Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 65,
+              "Title": "TreeViewFileSystemViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TreeViewFileSystemViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\TreeViewFileSystemViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TreeViewFileSystemViewModel.cs",
+              "RelativeToolTip": "ViewModels\\TreeViewFileSystemViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwcAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:02:05.223Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 66,
+              "Title": "WebTabViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TabViews\\WebTabViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\TabViews\\WebTabViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\TabViews\\WebTabViewModel.cs",
+              "RelativeToolTip": "ViewModels\\TabViews\\WebTabViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:58:58.797Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 68,
+              "Title": "TreeViewFileSystemPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewFileSystemPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\TreeViews\\TreeViewFileSystemPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewFileSystemPage.xaml.cs",
+              "RelativeToolTip": "Pages\\TreeViews\\TreeViewFileSystemPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:01:39.813Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 67,
+              "Title": "SingleControlEditingViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\SingleControlEditingViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\SingleControlEditingViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\SingleControlEditingViewModel.cs",
+              "RelativeToolTip": "ViewModels\\SingleControlEditingViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwkAAAAPAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:26:07.208Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 69,
+              "Title": "TreeViewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\TreeViews\\TreeViewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TreeViews\\TreeViewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\TreeViews\\TreeViewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T08:01:36.518Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 70,
+              "Title": "WebTabViewPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\WebTabViewPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\WebTabViewPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\WebTabViewPage.xaml",
+              "RelativeToolTip": "Pages\\TabViews\\WebTabViewPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwsAAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:58:32.419Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 71,
+              "Title": "CustomTabItemTabView.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\CustomTabItemTabView.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\CustomTabItemTabView.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\CustomTabItemTabView.xaml.cs",
+              "RelativeToolTip": "Pages\\TabViews\\CustomTabItemTabView.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:58:17.347Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 72,
+              "Title": "CustomTabItemTabView.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\CustomTabItemTabView.xaml",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\CustomTabItemTabView.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\CustomTabItemTabView.xaml",
+              "RelativeToolTip": "Pages\\TabViews\\CustomTabItemTabView.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwkAAAAUAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:58:11.267Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 73,
+              "Title": "WebTabViewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\WebTabViewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\WebTabViewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\WebTabViewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\TabViews\\WebTabViewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:58:36.855Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 74,
+              "Title": "TabViewPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\TabViewPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\TabViews\\TabViewPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\TabViews\\TabViewPage.xaml.cs",
+              "RelativeToolTip": "Pages\\TabViews\\TabViewPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:58:28.732Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 76,
+              "Title": "SimpleDataGridPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SimpleDataGridPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\SimpleDataGridPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAuwAkAAAAhAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:08:30.127Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 75,
+              "Title": "SimpleBackdropPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Backdrops\\SimpleBackdropPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\Backdrops\\SimpleBackdropPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Backdrops\\SimpleBackdropPage.xaml",
+              "RelativeToolTip": "Pages\\Backdrops\\SimpleBackdropPage.xaml",
+              "ViewState": "AQIAABUAAAAAAAAAAAAuwB8AAABEAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:04:39.407Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 77,
+              "Title": "EditorDataGridPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\EditorDataGridPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\EditorDataGridPage.xaml",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAuwAkAAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:07:54.972Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 78,
+              "Title": "CustomDataGridPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\CustomDataGridPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\CustomDataGridPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\CustomDataGridPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:07:29.094Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 79,
+              "Title": "BlursPreviewViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\Blurs\\BlursPreviewViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\Blurs\\BlursPreviewViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\Blurs\\BlursPreviewViewModel.cs",
+              "RelativeToolTip": "ViewModels\\Blurs\\BlursPreviewViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwYAAAAPAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:09:13.919Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 81,
+              "Title": "SimpleDataGridPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPageViewModel.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SimpleDataGridPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPageViewModel.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\SimpleDataGridPageViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwMAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:38.25Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 82,
+              "Title": "SimpleDataGridPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SimpleDataGridPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleDataGridPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\SimpleDataGridPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:35.262Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 80,
+              "Title": "AutoCompleteViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\AutoCompleteViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\AutoCompleteViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\AutoCompleteViewModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\AutoCompleteViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:35:12.587Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 83,
+              "Title": "SimpleCustomTitleDataGridPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\SimpleCustomTitleDataGridPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:27.382Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 84,
+              "Title": "SelectableDataGridPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPageViewModel.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SelectableDataGridPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPageViewModel.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\SelectableDataGridPageViewModel.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAADwvwYAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:19.263Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 85,
+              "Title": "SelectableDataGridPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SelectableDataGridPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\SelectableDataGridPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:16.336Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 86,
+              "Title": "SelectableDataGridPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\SelectableDataGridPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\SelectableDataGridPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\SelectableDataGridPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwYAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:08:10.129Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 87,
+              "Title": "EditorDataGridPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPageViewModel.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\EditorDataGridPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPageViewModel.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\EditorDataGridPageViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwQAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:04.794Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 88,
+              "Title": "EditorDataGridPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\EditorDataGridPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\EditorDataGridPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\EditorDataGridPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:08:01.783Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 89,
+              "Title": "DataGridsIndexPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\DataGridsIndexPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\DataGridsIndexPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\DataGridsIndexPage.xaml.cs",
+              "RelativeToolTip": "Pages\\DataGrids\\DataGridsIndexPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:07:50.445Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 90,
+              "Title": "DataGridsIndexPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\DataGridsIndexPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\DataGrids\\DataGridsIndexPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\DataGrids\\DataGridsIndexPage.xaml",
+              "RelativeToolTip": "Pages\\DataGrids\\DataGridsIndexPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwUAAAAxAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T07:07:45.062Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 91,
+              "Title": "SimpleBackdropPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Backdrops\\SimpleBackdropPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\Backdrops\\SimpleBackdropPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\Backdrops\\SimpleBackdropPage.xaml.cs",
+              "RelativeToolTip": "Pages\\Backdrops\\SimpleBackdropPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T07:04:40.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 93,
+              "Title": "RegularBottomSheetPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\RegularBottomSheetPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\BottomSheets\\RegularBottomSheetPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\RegularBottomSheetPage.xaml.cs",
+              "RelativeToolTip": "Pages\\BottomSheets\\RegularBottomSheetPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAA9AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:56:39.206Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 92,
+              "Title": "ExpandingBottomSheetPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\ExpandingBottomSheetPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\BottomSheets\\ExpandingBottomSheetPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\BottomSheets\\ExpandingBottomSheetPage.xaml.cs",
+              "RelativeToolTip": "Pages\\BottomSheets\\ExpandingBottomSheetPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:56:42.57Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 94,
+              "Title": "DatePickerFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\DatePickerFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\DatePickerFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\DatePickerFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\DatePickerFieldPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAowAgAAAA1AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:49:02.59Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 95,
+              "Title": "TimePickerFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TimePickerFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\TimePickerFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TimePickerFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\TimePickerFieldPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:47:59.109Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 96,
+              "Title": "ChipsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ChipsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\ChipsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\ChipsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\ChipsPage.xaml.cs",
+              "ViewState": "AQIAAA0AAAAAAAAAAAAYwAsAAABFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:51:38.366Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 97,
+              "Title": "CheckBoxesPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\CheckBoxesPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\CheckBoxesPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\CheckBoxesPage.xaml",
+              "RelativeToolTip": "Pages\\CheckBoxesPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAvAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:21:07.402Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 99,
+              "Title": "DatePickerFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\DatePickerFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\DatePickerFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\DatePickerFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\DatePickerFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:48:58.431Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 98,
+              "Title": "EditorFieldViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\EditorFieldViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\EditorFieldViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\EditorFieldViewModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\EditorFieldViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:24:33.063Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 100,
+              "Title": "EditorFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\EditorFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\EditorFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\EditorFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\EditorFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:33:45.384Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 102,
+              "Title": "TimePickerFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TimePickerFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\TimePickerFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TimePickerFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\TimePickerFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:47:56.413Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 101,
+              "Title": "TextFieldViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\TextFieldViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\TextFieldViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\TextFieldViewModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\TextFieldViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:30:07.296Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 104,
+              "Title": "MultiplePickerFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\MultiplePickerFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\MultiplePickerFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\MultiplePickerFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\MultiplePickerFieldPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAowAsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:44:36.838Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 105,
+              "Title": "MultiplePickerFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\MultiplePickerFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\MultiplePickerFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\MultiplePickerFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\MultiplePickerFieldPage.xaml.cs",
+              "ViewState": "AQIAAAUAAAAAAAAAAADwvwgAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:44:32.063Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 103,
+              "Title": "TextFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TextFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\TextFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TextFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\TextFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:29:11.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 106,
+              "Title": "MultiplePickerFieldVideModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\MultiplePickerFieldVideModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\InputFields\\MultiplePickerFieldVideModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\InputFields\\MultiplePickerFieldVideModel.cs",
+              "RelativeToolTip": "ViewModels\\InputFields\\MultiplePickerFieldVideModel.cs",
+              "ViewState": "AQIAABkAAAAAAAAAAAAywB4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:44:54.606Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 107,
+              "Title": "AutoCompleteTextFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\AutoCompleteTextFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\AutoCompleteTextFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\AutoCompleteTextFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\AutoCompleteTextFieldPage.xaml",
+              "ViewState": "AQIAACwAAAAAAAAAAAAYwDkAAAA/AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:35:30.207Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 108,
+              "Title": "AutoCompleteTextFieldPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\AutoCompleteTextFieldPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\AutoCompleteTextFieldPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\AutoCompleteTextFieldPage.xaml.cs",
+              "RelativeToolTip": "Pages\\InputFields\\AutoCompleteTextFieldPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:35:27.095Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 109,
+              "Title": "EditorFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\EditorFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\EditorFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\EditorFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\EditorFieldPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAVAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:33:50.839Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 110,
+              "Title": "TextFieldPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TextFieldPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\InputFields\\TextFieldPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\InputFields\\TextFieldPage.xaml",
+              "RelativeToolTip": "Pages\\InputFields\\TextFieldPage.xaml",
+              "ViewState": "AQIAAJwAAAAAAAAAAADwv6oAAABkAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:29:15.864Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 112,
+              "Title": "ColorEditor.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\ColorEditor.cs",
+              "RelativeDocumentMoniker": "Inputs\\ColorPicking\\ColorEditor.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\ColorEditor.cs",
+              "RelativeToolTip": "Inputs\\ColorPicking\\ColorEditor.cs",
+              "ViewState": "AQIAADEAAAAAAAAAAAAUwD0AAAAIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:24:32.46Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 111,
+              "Title": "RadioButtonsPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\RadioButtonsPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\RadioButtonsPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\RadioButtonsPage.xaml.cs",
+              "RelativeToolTip": "Pages\\RadioButtonsPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:25:33.483Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 113,
+              "Title": "SliderColorPicker.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\SliderColorPicker.cs",
+              "RelativeDocumentMoniker": "Inputs\\ColorPicking\\SliderColorPicker.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Inputs\\ColorPicking\\SliderColorPicker.cs",
+              "RelativeToolTip": "Inputs\\ColorPicking\\SliderColorPicker.cs",
+              "ViewState": "AQIAAC8AAAAAAAAAAAAUwDsAAAAIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:24:32.487Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 114,
+              "Title": "RadioButtonsViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\RadioButtonsViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\RadioButtonsViewModel.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewModels\\RadioButtonsViewModel.cs",
+              "RelativeToolTip": "ViewModels\\RadioButtonsViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:26:04.575Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 115,
+              "Title": "JiangHu.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\JiangHu.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\JiangHu.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\JiangHu.xaml.cs",
+              "RelativeToolTip": "Pages\\JiangHu.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:25:29.988Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 116,
+              "Title": "ViewShowcaseView.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewShowcaseView.cs",
+              "RelativeDocumentMoniker": "ViewShowcaseView.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\ViewShowcaseView.cs",
+              "RelativeToolTip": "ViewShowcaseView.cs",
+              "ViewState": "AQIAAAQAAAAAAAAAAAAowA4AAAAIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:24:32.315Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 117,
+              "Title": "FontImagesPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\FontImagesPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\FontImagesPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\FontImagesPage.xaml.cs",
+              "RelativeToolTip": "Pages\\FontImagesPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T05:54:31.289Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 118,
+              "Title": "GridLayoutPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\GridLayoutPage.xaml",
+              "RelativeDocumentMoniker": "Pages\\GridLayoutPage.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\GridLayoutPage.xaml",
+              "RelativeToolTip": "Pages\\GridLayoutPage.xaml",
+              "ViewState": "AQIAACoAAAAAAAAAAABIwDMAAAA2AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T06:06:35.654Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 119,
+              "Title": "GridLayoutPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\GridLayoutPage.xaml.cs",
+              "RelativeDocumentMoniker": "Pages\\GridLayoutPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Pages\\GridLayoutPage.xaml.cs",
+              "RelativeToolTip": "Pages\\GridLayoutPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAACAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-07-07T06:06:30.583Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 121,
+              "Title": "Override.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Override.xaml",
+              "RelativeDocumentMoniker": "Resources\\Styles\\Override.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Override.xaml",
+              "RelativeToolTip": "Resources\\Styles\\Override.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:44:38.325Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 120,
+              "Title": "Styles.xaml",
+              "DocumentMoniker": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Styles.xaml",
+              "RelativeDocumentMoniker": "Resources\\Styles\\Styles.xaml",
+              "ToolTip": "E:\\Obj\\SB\\Android\\Pro\\MauiAdmin\\MauiAdmin\\Resources\\Styles\\Styles.xaml",
+              "RelativeToolTip": "Resources\\Styles\\Styles.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-07-07T05:44:36.111Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 135,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

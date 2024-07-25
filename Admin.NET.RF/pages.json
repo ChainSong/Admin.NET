@@ -133,7 +133,12 @@
 				"navigationBarTitleText": "",
 				"enablePullDownRefresh": false
 			}
-
+		}, {
+			"path": "pages/wMSRFReceiptAcquisition/index",
+			"style": {}
+		}, {
+			"path": "pages/wMSRFReceiptAcquisition/component/editDialog",
+			"style": {}
 		}
 		
 	],

@@ -29,8 +29,7 @@
         <el-table-column type="index" label="序号" width="55" align="center"/>
         <!-- <el-table-column type="customerName" label="序号" width="55" align="center"/> -->
         <el-table-column prop="customerName" label="公司名称"  />
-        <el-table-column prop="warehouseName" label="仓库名称"  />
-        <el-table-column prop="warehouseName" label="仓库名称"  />
+        <el-table-column prop="warehouseName" label="仓库名称"  /> 
         <el-table-column prop="packageNumber" label="包装号"  />
         <el-table-column prop="expressNumber" label="快递单号"  />
         <el-table-column prop="expressCompany" label="快递公司"  />

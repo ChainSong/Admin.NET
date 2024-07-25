@@ -27,6 +27,7 @@ using Magicodes.ExporterAndImporter.Excel;
 using System.IO;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Service;
+using Admin.NET.Application.Enumerate;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -51,7 +52,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep,SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
         //_db = db;
@@ -121,7 +122,6 @@ public class WMSASNService : IDynamicApiController, ITransient
                     //.Where(a=>_repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-
                     .Select<WMSASNOutput>()
 ;
         if (input.ExpectDate != null && input.ExpectDate.Count > 0)
@@ -252,6 +252,22 @@ public class WMSASNService : IDynamicApiController, ITransient
     }
 
     /// <summary>
+    /// 删除WMSASN
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [DisplayName("删除WMSASN")]
+    [ApiDescriptionSettings(Name = "Cancel")]
+    public async Task Cancel(DeleteWMSASNInput input)
+    {
+        var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        entity.ASNStatus = (int)ASNStatusEnum.取消;
+        await _rep.UpdateAsync(entity);   //删除
+        //await _rep.DeleteAsync(entity);   //删除
+    }
+
+    /// <summary>
     /// 更新WMSASN
     /// </summary>
     /// <param name="input"></param>
@@ -316,61 +332,68 @@ public class WMSASNService : IDynamicApiController, ITransient
     [DisplayName("接收上传文件方法")]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
-
-        //FileDir是存储临时文件的目录，相对路径
-        //private const string FileDir = "/File/ExcelTemp";
-        string url = await ImprotExcel.WriteFile(file);
-        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
-        //var aaaaa = ExcelData.GetData<DataSet>(url);
-        //1根据用户的角色 解析出Excel
-        IASNExcelInterface factoryExcel = ASNExcelFactory.ASNExcel();
-        factoryExcel._repTableColumns = _repTableColumns;
-        factoryExcel._userManager = _userManager;
-        factoryExcel._repASN = _rep;
-        var data = factoryExcel.Import(dataExcel);
-        if (data.Code == StatusCode.Error)
+        try
         {
-            Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
-            result.Code = data.Code;
-            result.Msg = data.Msg;
-            result.Data = data.Result;
-            return result;
+            //FileDir是存储临时文件的目录，相对路径
+            //private const string FileDir = "/File/ExcelTemp";
+            string url = await ImprotExcel.WriteFile(file);
+            var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+            //var aaaaa = ExcelData.GetData<DataSet>(url);
+            //1根据用户的角色 解析出Excel
+            IASNExcelInterface factoryExcel = ASNExcelFactory.ASNExcel();
+            factoryExcel._repTableColumns = _repTableColumns;
+            factoryExcel._userManager = _userManager;
+            factoryExcel._repASN = _rep;
+            var data = factoryExcel.Import(dataExcel);
+            if (data.Code == StatusCode.Error)
+            {
+                Response<List<OrderStatusDto>> result = new Response<List<OrderStatusDto>>();
+                result.Code = data.Code;
+                result.Msg = data.Msg;
+                result.Data = data.Result;
+                return result;
+            }
+            var entityListDtos = data.Data.TableToList<AddOrUpdateWMSASNInput>();
+            var entityDetailListDtos = data.Data.TableToList<WMSASNDetail>();
+
+            //将散装的主表和明细表 组合到一起 
+            List<AddOrUpdateWMSASNInput> ASNs = entityListDtos.GroupBy(x => x.ExternReceiptNumber).Select(x => x.First()).ToList();
+            ASNs.ForEach(item =>
+            {
+                item.Details = entityDetailListDtos.Where(a => a.ExternReceiptNumber == item.ExternReceiptNumber).ToList();
+            });
+
+            //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+            var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+            long customerId = 0;
+            if (customerData != null)
+            {
+                customerId = customerData.CustomerId;
+            }
+            //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
+            //使用简单工厂定制化修改和新增的方法
+            IASNInterface factory = ASNFactory.AddOrUpdate(customerId);
+            //factory._db = _db;
+            factory._userManager = _userManager;
+            factory._repASN = _rep;
+            factory._repCustomerUser = _repCustomerUser;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._repProduct = _repProduct;
+            var response = factory.AddStrategy(ASNs);
+            return await response;
         }
-        var entityListDtos = data.Data.TableToList<AddOrUpdateWMSASNInput>();
-        var entityDetailListDtos = data.Data.TableToList<WMSASNDetail>();
-
-        //将散装的主表和明细表 组合到一起 
-        List<AddOrUpdateWMSASNInput> ASNs = entityListDtos.GroupBy(x => x.ExternReceiptNumber).Select(x => x.First()).ToList();
-        ASNs.ForEach(item =>
+        catch (Exception ex)
         {
-            item.Details = entityDetailListDtos.Where(a => a.ExternReceiptNumber == item.ExternReceiptNumber).ToList();
-        });
-
-        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
-        long customerId = 0;
-        if (customerData != null)
-        {
-            customerId = customerData.CustomerId; 
+            return new Response<List<OrderStatusDto>> { Code = StatusCode.Error, Msg = ex.Message };
+            //throw Oops.Oh(ErrorCodeEnum.D1001, ex.Message);
         }
-        //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
-        //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(customerId);
-        //factory._db = _db;
-        factory._userManager = _userManager;
-        factory._repASN = _rep;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._repWarehouseUser = _repWarehouseUser;
-        factory._repProduct = _repProduct;
-        var response = factory.AddStrategy(ASNs);
-        return await response; 
     }
     [DisplayName("ASN 转入库单")]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "ASNForReceipt")]
     public async Task<Response<List<OrderStatusDto>>> ASNForReceipt(List<long> input)
     {
-        var asnData =await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+        var asnData = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
 
         if (asnData == null || asnData.Count == 0)
         {
@@ -426,10 +449,10 @@ public class WMSASNService : IDynamicApiController, ITransient
     public async Task<Response<List<OrderStatusDto>>> ASNForReceiptPart(List<WMSASNForReceiptDetailDto> input)
     {
         var asnData = _rep.AsQueryable().Where(a => a.Id == input.First().ASNId).First();
-         //根据订单类型判断是否存在该流程
-         var workflow =await _repWorkFlow.AsQueryable()
-            .Includes(a => a.SysWorkFlowSteps)
-            .Where(a => a.WorkName==asnData.ReceiptType).FirstAsync();
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == asnData.ReceiptType).FirstAsync();
 
         if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "部分转入库单").Count() == 0)
         {
@@ -462,7 +485,6 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repReceipt = _repReceipt;
         factory._repReceiptDetail = _repReceiptDetail;
-
         var response = factory.StrategyPart(input);
         return await response;
     }

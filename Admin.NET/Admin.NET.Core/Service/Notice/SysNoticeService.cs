@@ -154,6 +154,23 @@ public class SysNoticeService : IDynamicApiController, ITransient
             .ToPagedListAsync(input.Page, input.PageSize);
     }
 
+
+    /// <summary>
+    /// 获取接收的通知公告
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [DisplayName("全部已读")]
+    [ApiDescriptionSettings(Name = "AllRead"), HttpGet]
+    public async Task AllRead()
+    {
+        await _sysNoticeUserRep.UpdateAsync(u => new SysNoticeUser
+        {
+            ReadStatus = NoticeUserStatusEnum.READ,
+            ReadTime = DateTime.Now
+        }, u =>u.UserId == _userManager.UserId);
+    }
+
     /// <summary>
     /// 获取未读的通知公告
     /// </summary>

@@ -136,7 +136,7 @@ export const aProvider = function () {
 							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
 							{ title: '产品名称', align: 'center', field: 'goodsName', width: 150 },
 							{ title: '货号', align: 'center', field: 'sku' , width: 150 },
-							{ title: '数量', align: 'center', field: 'qty' , width: 150 },
+							{ title: '数量', align: 'center', field: 'allocatedQty' , width: 150 },
 							{ title: '单位', align: 'center', field: 'unitCode' , width: 150 },
 							{ title: '父件SKU', align: 'center', field: 'parentSku' , width: 150 },
 							{ title: '备注', align: 'center', field: 'remark' , width: 150 },

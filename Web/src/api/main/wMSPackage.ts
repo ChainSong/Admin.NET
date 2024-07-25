@@ -10,6 +10,7 @@ enum Api {
   AllWMSPackage = '/api/wMSPackage/All',
   AddPackageData = '/api/wMSPackage/AddPackage',
   ShortagePackageData = '/api/wMSPackage/ShortagePackage',
+  ResetPackageData = '/api/wMSPackage/resetPackage',
   
 }
 
@@ -52,10 +53,18 @@ export const scanPackageData = (params?: any) =>
 			data: params,
 		});		
 
-// 分页查询WMSPackage
+		// 分页查询WMSPackage
 export const shortagePackageData = (params?: any) => 
 	request({
-			url: Api.ShortagePackageData,
+			url: Api.ScanPackageData,
+			method: 'post',
+			data: params,
+		});		
+		
+// 分页查询WMSPackage
+export const resetPackageData = (params?: any) => 
+	request({
+			url: Api.ResetPackageData,
 			method: 'post',
 			data: params,
 		});				

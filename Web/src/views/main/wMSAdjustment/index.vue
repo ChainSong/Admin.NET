@@ -111,7 +111,7 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="250">
 
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
@@ -119,6 +119,7 @@
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
 
             <el-button @click="cxecute(scope.row)" v-if="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" size="small">完成</el-button>
+            <el-button @click="cancel(scope.row)" v-if="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" size="small">取消</el-button>
             <!-- <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="cxecute(scope.row)" title="确定完成吗？">
                 <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
@@ -136,7 +137,7 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
       <el-dialog v-model="resultPopupShow" title="调整结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder+':'+ i.msg" :type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
     </el-card>
@@ -152,7 +153,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSAdjustment/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSAdjustment/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSAdjustment/component/queryDialog.vue'
-import { pageWMSAdjustment, deleteWMSAdjustment, confirmWMSAdjustment } from '/@/api/main/wMSAdjustment';
+import { pageWMSAdjustment, deleteWMSAdjustment, confirmWMSAdjustment,cancelWMSAdjustment } from '/@/api/main/wMSAdjustment';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/adjustment";
@@ -272,6 +273,33 @@ const cxecute = (row: any) => {
         resultPopupShow.value = true;
       } else {
         ElMessage.success(result.data.result.msg);
+      }
+      handleQuery();
+      // ElMessage.success("删除成功");
+    })
+    .catch(() => { });
+};
+
+
+
+// 取消
+const cancel = (row: any) => {
+  ElMessageBox.confirm(`确定要取消吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+     var result= await cancelWMSAdjustment([row.id]);
+      if (result.data.result.code ==1) {
+        // state.value.orderStatus = result.data.result.data;
+        // console.log(state.value.orderStatus);
+        //导入弹框提醒
+        // resultPopupShow.value = true;
+        ElMessage.success(result.data.result.msg);
+
+      } else {
+        ElMessage.error(result.data.result.msg);
       }
       handleQuery();
       // ElMessage.success("删除成功");

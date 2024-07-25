@@ -6,7 +6,7 @@
 				<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 					<el-row :gutter="35">
 						<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-							v-for="i in state.tableColumnHeaders.filter(a => a.isUpdate == 1)" v-bind:key="i.id">
+							v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
 							<el-form-item :label="i.displayName"  style="width: 90%;height: 45px;"
 								:prop="i.columnName">
 								<template v-if="i.type == 'TextBox'">
@@ -23,14 +23,14 @@
 									</el-select>
 								</template>
 								<template v-if="i.type == 'DropDownListStrRemote'">
-									<select-Remote :whereData="state.header" :isDisabled="i.isUpdate" :columnData="i"
+									<select-Remote :whereData="state.header" :isDisabled="i.isUpdate" :columnData="i" 
 										:defaultvValue="state.header[i.columnName]"
 										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 
 								</template>
 								<template v-if="i.type == 'DropDownListStr'">
 
-									<el-select v-model="state.header[i.columnName]" placeholder="请选择"
+									<el-select v-model="state.header[i.columnName]" placeholder="请选择"  :isDisabled="i.isUpdate==0"
 										size="small" style="width:90%" filterable>
 										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
 											:label="item.name" :value="item.codeStr">
@@ -38,12 +38,12 @@
 									</el-select>
 								</template>
 								<template v-if="i.type == 'DatePicker'">
-									<el-date-picker v-model="state.header[i.columnName]"  type="date"
+									<el-date-picker v-model="state.header[i.columnName]"  type="date" :isDisabled="i.isUpdate==0"
 										placeholder="选择日期" size="small" style="width:90%">
 									</el-date-picker>
 								</template>
 								<template v-if="i.type == 'DateTimePicker'">
-									<el-date-picker v-model="state.header[i.columnName]"  type="datetime"
+									<el-date-picker v-model="state.header[i.columnName]"  type="datetime" :isDisabled="i.isUpdate==0"
 										start-placeholder="选择日期时间" size="small" style="width:90%">
 									</el-date-picker>
 								</template>

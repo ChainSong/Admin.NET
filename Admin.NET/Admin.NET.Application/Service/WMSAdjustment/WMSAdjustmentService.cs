@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Admin.NET.Application.Enumerate;
+using Admin.NET.Application.Dtos.Enum;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -249,6 +251,23 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpGet]
+    [ApiDescriptionSettings(Name = "Cancel")]
+    public async Task<Response> Cancel(long id)
+    {
+        //修改库存调整单的状态为取消
+        var entity = await _rep.GetFirstAsync(u => u.Id == id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
+        entity.AdjustmentStatus = (int)AdjustmentStatusEnum.取消;
+        await _rep.UpdateAsync(entity);
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
+
+    }
+
+    /// <summary>
+    /// 获取WMSAdjustment 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpGet]
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSAdjustment> Get(long id)
     {
@@ -313,59 +332,67 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<List<OrderStatusDto>> UploadExcelFile(IFormFile file)
     {
-
-        //FileDir是存储临时文件的目录，相对路径
-        //private const string FileDir = "/File/ExcelTemp";
-        string url = await ImprotExcel.WriteFile(file);
-        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
-        //var aaaaa = ExcelData.GetData<DataSet>(url);
-        //1根据用户的角色 解析出Excel
-        IAdjustmentExcelInterface factoryExcel = AdjustmentExcelFactory.AdjustmentExcel();
-
-
-        factoryExcel._userManager = _userManager;
-        factoryExcel._repTableColumns = _repTableColumns;
-
-        var data = factoryExcel.Strategy(dataExcel);
-        var entityListDtos = data.Data.TableToList<AddOrUpdateWMSAdjustmentInput>();
-        var entityDetailListDtos = data.Data.TableToList<WMSAdjustmentDetail>();
-        if (entityListDtos.Count > 0)
+        try
         {
-            //将散装的主表和明细表 组合到一起 
-            List<AddOrUpdateWMSAdjustmentInput> Adjustment = entityListDtos.GroupBy(x => x.AdjustmentNumber).Select(x => x.First()).ToList();
-            Adjustment.ForEach(item =>
-            {
-                item.Details = entityDetailListDtos.Where(a => a.AdjustmentNumber == item.AdjustmentNumber).ToList();
-            });
 
-            //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-            var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
-            long customerId = 0;
-            if (customerData != null)
+            //获取上传的文件名
+            //FileDir是存储临时文件的目录，相对路径
+            //private const string FileDir = "/File/ExcelTemp";
+            string url = await ImprotExcel.WriteFile(file);
+            var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+            //var aaaaa = ExcelData.GetData<DataSet>(url);
+            //1根据用户的角色 解析出Excel
+            IAdjustmentExcelInterface factoryExcel = AdjustmentExcelFactory.AdjustmentExcel();
+
+
+            factoryExcel._userManager = _userManager;
+            factoryExcel._repTableColumns = _repTableColumns;
+
+            var data = factoryExcel.Strategy(dataExcel);
+            var entityListDtos = data.Data.TableToList<AddOrUpdateWMSAdjustmentInput>();
+            var entityDetailListDtos = data.Data.TableToList<WMSAdjustmentDetail>();
+            if (entityListDtos.Count > 0)
             {
-                customerId = customerData.CustomerId;
+                //将散装的主表和明细表 组合到一起 
+                List<AddOrUpdateWMSAdjustmentInput> Adjustment = entityListDtos.GroupBy(x => x.AdjustmentNumber).Select(x => x.First()).ToList();
+                Adjustment.ForEach(item =>
+                {
+                    item.Details = entityDetailListDtos.Where(a => a.AdjustmentNumber == item.AdjustmentNumber).ToList();
+                });
+
+                //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+                var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+                long customerId = 0;
+                if (customerData != null)
+                {
+                    customerId = customerData.CustomerId;
+                }
+                //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
+                //使用简单工厂定制化修改和新增的方法
+                IAdjustmentInterface factory = AdjustmentFactory.AddOrUpdate(customerId);
+                factory._repAdjustment = _rep;
+                factory._repAdjustmentDetail = _repAdjustmentDetail;
+                //factory._db = _db;
+                factory._userManager = _userManager;
+                factory._repCustomerUser = _repCustomerUser;
+                factory._repWarehouseUser = _repWarehouseUser;
+                //factory._repTableColumns = _repTableColumns;
+                //factory._repTableColumnsDetail = _repTableColumnsDetail;
+                var response = factory.AddStrategy(Adjustment);
+
+                return response.Result.Data;
             }
-            //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
-            //使用简单工厂定制化修改和新增的方法
-            IAdjustmentInterface factory = AdjustmentFactory.AddOrUpdate(customerId);
-            factory._repAdjustment = _rep;
-            factory._repAdjustmentDetail = _repAdjustmentDetail;
-            //factory._db = _db;
-            factory._userManager = _userManager;
-            factory._repCustomerUser = _repCustomerUser;
-            factory._repWarehouseUser = _repWarehouseUser;
-            //factory._repTableColumns = _repTableColumns;
-            //factory._repTableColumnsDetail = _repTableColumnsDetail;
-            var response = factory.AddStrategy(Adjustment);
+            else
+            {
+                //return new List<OrderStatusDto>();
+                return new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = "上传失败，请检查文件格式或内容" } };
 
-            return response.Result.Data;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            return new List<OrderStatusDto>();
+            return new List<OrderStatusDto>() { new OrderStatusDto() { Id = 0, StatusCode = StatusCode.Error, Msg = ex.Message } };
         }
-
-
     }
 
 

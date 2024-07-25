@@ -110,7 +110,7 @@ namespace Admin.NET.Application.Strategy
                         await _repTableInventoryUsable.InsertRangeAsync(inventoryData);
 
                         //修改入库单状态
-                        await _repReceipt.Context.Updateable<WMSReceipt>()
+                        await _repReceipt.AsUpdateable()
                           .SetColumns(p => p.ReceiptStatus == (int)ReceiptStatusEnum.完成)
                           .SetColumns(p => p.CompleteTime == DateTime.Now)
                           .Where(p => receipt.Id == p.Id)
@@ -119,13 +119,19 @@ namespace Admin.NET.Application.Strategy
                         //修改入库单明细中的入库数量
                         //_wms_receiptdetailRepository.GetDbContext().BulkUpdate();
                         var receiptDetailData = _repReceiptDetail.AsQueryable().Where(a => a.ReceiptId == receipt.Id).ToList();
-                        receiptDetailData.ForEach(e =>
+                        foreach (var item in receiptDetailData)
                         {
-                            e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ReceiptDetailId == e.Id).Sum(c => c.ReceivedQty);
-                            e.Updator = _userManager.Account;
-                            e.UpdateTime = DateTime.Now;
+                            item.ReceiptQty = item.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ReceiptDetailId == item.Id).Sum(c => c.ReceivedQty);
+                            item.Updator = _userManager.Account;
+                            item.UpdateTime = DateTime.Now;
+                        }
+                        //receiptDetailData.ForEach(e =>
+                        //{
+                        //    e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ReceiptDetailId == e.Id).Sum(c => c.ReceivedQty);
+                        //    e.Updator = _userManager.Account;
+                        //    e.UpdateTime = DateTime.Now;
 
-                        });
+                        //});
                         await _repReceiptDetail.UpdateRangeAsync(receiptDetailData);
 
                         //_repReceiptDetail.AsUpdateable(receiptDetailData).ExecuteCommandAsync();
@@ -136,13 +142,19 @@ namespace Admin.NET.Application.Strategy
                         //修改ASN 明细中的实际入库数量
                         //_wms_asndetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(v =>new WMS_ASNDetail{ ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ASNDetailId == v.Id).Sum(c => c.ReceivedQty)});
                         var asnDetailData = _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToList();
-                        asnDetailData.ForEach(e =>
+                        foreach (var item in asnDetailData)
                         {
-                            e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == e.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);
-                            e.Updator = _userManager.Account;
-                            e.UpdateTime = DateTime.Now;
+                            item.ReceiptQty = item.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == item.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);
+                            item.Updator = _userManager.Account;
+                            item.UpdateTime = DateTime.Now;
+                        }
+                        //asnDetailData.ForEach(e =>
+                        //{
+                        //    e.ReceiptQty = e.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == e.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);
+                        //    e.Updator = _userManager.Account;
+                        //    e.UpdateTime = DateTime.Now;
 
-                        });
+                        //});
                         await _repASNDetail.UpdateRangeAsync(asnDetailData);
 
                         //修改ASN 状态
@@ -150,7 +162,7 @@ namespace Admin.NET.Application.Strategy
                         var asn = await _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId && a.ExpectedQty > a.ReceiptQty).ToListAsync();
                         if (asn != null && asn.Count == 0)
                         {
-                            await _repASN.Context.Updateable<WMSASN>()
+                            await _repASN.AsUpdateable()
                             .SetColumns(p => p.ASNStatus == (int)ASNStatusEnum.完成)
                             .SetColumns(p => p.CompleteTime == DateTime.Now)
                             .Where(p => receipt.ASNId == p.Id)

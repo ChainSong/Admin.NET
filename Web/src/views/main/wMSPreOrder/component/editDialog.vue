@@ -14,13 +14,13 @@
 										style="width: 90%;height: 45px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input placeholder="请输入内容" size="small" style="width:90%"
-												:disabled="i.isUpdate == 1" v-model="state.header[i.columnName]"
+												:disabled="i.isUpdate == 0" v-model="state.header[i.columnName]"
 												v-if="i.isCreate">
 											</el-input>
 										</template>
 										<template v-if="i.type == 'DropDownListInt'">
 											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
-												:disabled="i.isUpdate == 1" placeholder="请选择" size="small"
+												:disabled="i.isUpdate == 0" placeholder="请选择" size="small"
 												style="width:90%" filterable>
 												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
 													:label="item.name" :value="item.codeInt">
@@ -29,7 +29,7 @@
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
 											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
-												placeholder="请选择" :disabled="i.isUpdate == 1" size="small"
+												placeholder="请选择" :disabled="i.isUpdate == 0" size="small"
 												style="width:90%" filterable>
 												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
 													:label="item.name" :value="item.codeStr">
@@ -38,7 +38,7 @@
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
 
-											<select-Remote :whereData="state.header" :isDisabled="i.isUpdate == 1"
+											<select-Remote :whereData="state.header" :isDisabled="i.isUpdate"
 												:key="state.header[i.columnName]" :columnData="i"
 												:defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
@@ -46,13 +46,13 @@
 
 										<template v-if="i.type == 'DatePicker'">
 											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												:disabled="i.isUpdate == 1" type="date" placeholder="选择日期" size="small"
+												:disabled="i.isUpdate == 0" type="date" placeholder="选择日期" size="small"
 												style="width:90%">
 											</el-date-picker>
 										</template>
 										<template v-if="i.type == 'DateTimePicker'">
 											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												:disabled="i.isUpdate == 1" type="datetime" start-placeholder="选择日期时间"
+												:disabled="i.isUpdate == 0" type="datetime" start-placeholder="选择日期时间"
 												size="small" style="width:90%">
 											</el-date-picker>
 										</template>
@@ -94,32 +94,33 @@
 													</el-select>
 												</template>
 												<template v-else-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :whereData="state.header" :isDisabled="v.update"
+													 
+													<select-Remote :whereData="state.header" :isDisabled="v.isUpdate"
 														:key="state.details[scope.$index]" :columnData="v"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
 												<template v-else-if="v.type == 'DatePicker'">
 													<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" :disabled="!v.isUpdate" type="date"
+														v-if="v.isCreate" :disabled="v.isUpdate==0" type="date"
 														placeholder="选择日期" style="width: 100%">
 													</el-date-picker>
 												</template>
 												<template v-else-if="v.type == 'DatePicker'">
 													<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" :disabled="!v.isUpdate" type="date"
+														v-if="v.isCreate" :disabled="v.isUpdate==0" type="date"
 														placeholder="选择日期" style="width: 100%">
 													</el-date-picker>
 												</template>
 												<template v-else-if="v.type == 'InputNumber'">
 													<el-input-number placeholder="请输入内容"
 														v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" :disabled="!v.isUpdate"></el-input-number>
+														v-if="v.isCreate" :disabled="v.isUpdate==0"></el-input-number>
 												</template>
 												<template v-else>
 													<el-input placeholder="请输入内容"
 														v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" :disabled="!v.isUpdate">
+														v-if="v.isCreate" :disabled="v.isUpdate==0">
 													</el-input>
 												</template>
 
@@ -142,7 +143,7 @@
 						<el-form ref="headerRuleRef" label-position="top" :model="state.orderAddress">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isUpdate == 1)"
+									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isUpdate == 0)"
 									v-bind:key="i.id">
 									<el-form-item :label="i.displayName" v-if="i.isCreate"
 										style="width: 90%;height: 45px;" :prop="i.columnName">
@@ -152,7 +153,7 @@
 											</el-input>
 										</template>
 										<template v-if="i.type == 'DropDownListInt'">
-											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isUpdate"
+											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isCreate" :isDisabled="i.isUpdate==0"
 												placeholder="请选择" size="small" style="width:90%" filterable>
 												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
 													:label="item.name" :value="item.codeInt">
@@ -160,12 +161,12 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :whereData="state.orderAddress" :isDisabled="i.isUpdate"
+											<select-Remote :whereData="state.orderAddress" :isDisabled="i.isUpdate"  
 												:columnData="i" :defaultvValue="state.header[i.columnName]"
 												@select:model="data => { state.orderAddress[i.columnName] = data.text; state.orderAddress[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
 										</template>
 										<template v-if="i.type == 'DropDownListStr'">
-											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isUpdate"
+											<el-select v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
 												placeholder="请选择" size="small" style="width:90%" filterable>
 												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
 													:label="item.name" :value="item.codeStr">
@@ -173,12 +174,12 @@
 											</el-select>
 										</template>
 										<template v-if="i.type == 'DatePicker'">
-											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isUpdate"
+											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
 												type="date" placeholder="选择日期" size="small" style="width:90%">
 											</el-date-picker>
 										</template>
 										<template v-if="i.type == 'DateTimePicker'">
-											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isUpdate"
+											<el-date-picker v-model="state.orderAddress[i.columnName]" v-if="i.isCreate"
 												type="datetime" start-placeholder="选择日期时间" size="small"
 												style="width:90%">
 											</el-date-picker>

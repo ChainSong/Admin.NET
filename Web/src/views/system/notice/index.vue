@@ -15,8 +15,9 @@
 					<el-button-group>
 						<el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'sysNotice:page'"> 查询 </el-button>
 						<el-button icon="ele-Refresh" @click="resetQuery"> 重置 </el-button>
+						<el-button type="primary" icon="ele-Plus" @click="openAllRead" v-auth="'sysNotice:page'"> 全部已读 </el-button>
 					</el-button-group>
-				</el-form-item>
+				</el-form-item> 
 				<el-form-item>
 					<el-button type="primary" icon="ele-Plus" @click="openAddNotice" v-auth="'sysNotice:add'"> 新增 </el-button>
 				</el-form-item>
@@ -79,7 +80,7 @@ import EditNotice from '/@/views/system/notice/component/editNotice.vue';
 import { getAPI } from '/@/utils/axios-utils';
 import { SysNoticeApi } from '/@/api-services/api';
 import { SysNotice } from '/@/api-services/models';
-
+import { allReadApi } from "/@/api/main/sysNotice";
 const editNoticeRef = ref<InstanceType<typeof EditNotice>>();
 const { removeHtml } = commonFunction();
 const state = reactive({
@@ -130,6 +131,20 @@ const openEditNotice = (row: any) => {
 	editNoticeRef.value?.openDialog(row);
 };
 
+// 删除
+const openAllRead = (row: any) => {
+	ElMessageBox.confirm(`确定已读通知公告：【${row.title}】?`, '提示', {
+		confirmButtonText: '确定',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(async () => {
+			await allReadApi();
+			handleQuery();
+			ElMessage.success('已阅读');
+		})
+		.catch(() => {});
+};
 // 删除
 const delNotice = (row: any) => {
 	ElMessageBox.confirm(`确定删除通知公告：【${row.title}】?`, '提示', {

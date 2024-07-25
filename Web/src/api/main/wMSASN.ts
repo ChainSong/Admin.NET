@@ -8,6 +8,7 @@ enum Api {
   ASNForReceipt = '/api/wMSASN/ASNForReceipt',
   ASNForReceiptPart = '/api/wMSASN/ASNForReceiptPart',
   ExportASN = '/api/wMSASN/ExportASN',
+  CancelASN = '/api/wMSASN/Cancel',
   
 }
 
@@ -27,6 +28,14 @@ export const deleteWMSASN = (params?: any) =>
 			data: params,
 		});
 
+// 删除WMSASN
+export const cancelWMSASN = (params?: any) => 
+	request({
+			url: Api.CancelASN,
+			method: 'post',
+			data: params,
+		});
+		
 // 编辑WMSASN
 export const updateWMSASN = (params?: any) => 
 	request({

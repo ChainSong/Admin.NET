@@ -21,8 +21,10 @@
 								<view :class="['cuIcon-brandfill','text-' + menuColor]"></view>
 								<text>{{child.meta.title}}</text>
 							</navigator>
+							
 							<navigator v-else :url="child.path" open-type="navigate"
 								hover-class="other-navigator-hover">
+								
 								<view :class="['wlq-zhijian','text-' + menuColor]"></view>
 								<text>{{child.meta.title}}</text>
 							</navigator>

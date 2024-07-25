@@ -122,12 +122,13 @@
               </el-table-column>
             </template>
           </template>
-          <el-table-column fixed="right" label="操作" width="220">
+          <el-table-column fixed="right" label="操作" width="280">
 
             <template #default="scope">
               <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
               </el-button>
               <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" v-auth="'wMSPreOrder:edit'" size="small">编辑</el-button>
+              <el-button @click="openCancel(scope.row)" class="el-icon-edit" type="text" v-auth="'wMSPreOrder:edit'" size="small">取消</el-button>
               <el-button @click="openEditAddres(scope.row)" class="el-icon-edit" v-auth="'wMSPreOrder:editAddress'" type="text" size="small">编辑地址</el-button>
               <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
@@ -165,7 +166,7 @@ import editAddresDialog from '/@/views/main/wMSPreOrder/component/editAddresDial
 import editDialog from '/@/views/main/wMSPreOrder/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPreOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPreOrder/component/queryDialog.vue'
-import { pageWMSPreOrder, deleteWMSPreOrder, preOrderForOrder,exportPreOrder } from '/@/api/main/wMSPreOrder';
+import { pageWMSPreOrder, deleteWMSPreOrder, preOrderForOrder,exportPreOrder,cancelWMSPreOrder } from '/@/api/main/wMSPreOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "../../../entities/preOrder";
@@ -293,6 +294,21 @@ const del = (row: any) => {
 };
 
 
+
+// 取消
+const openCancel = (row: any) => {
+  ElMessageBox.confirm(`确定要取消吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      await cancelWMSPreOrder(row);
+      handleQuery();
+      ElMessage.success("取消成功");
+    })
+    .catch(() => { });
+};
 
 // 转入库单
 const PreOrderForOrderFun = () => {

@@ -318,8 +318,9 @@ const gettableColumn = async () => {
 // -------------------------------非可公用部分----------------------------------------
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
-	// console.log(response)
-	state.value.orderStatus = response.result;
+	console.log("response")
+	console.log(response)
+	state.value.orderStatus = response.result.data;
 	resultPopupShow.value = true;
 	closeDialog();
 }
