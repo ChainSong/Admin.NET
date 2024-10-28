@@ -22,17 +22,17 @@ using System.Reflection;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
 namespace Admin.NET.Application;
-public class OrderExportDefaultStrategy : IOrderExcelInterface
+public class OrderExportDefaultStrategy : ExportBaseStrategy, IOrderExcelInterface
 {
 
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
 
     public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
-    public UserManager _userManager { get; set; }
+    public static UserManager _userManager { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
-    public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+    public static SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
@@ -43,12 +43,21 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
 
 
+    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
     public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
 
+    //= new List<string>() { "WMS_Order", "WMS_OrderAddress", "WMS_Package", "WMS_PackageDetail" };
+
+
+    public OrderExportDefaultStrategy() : base(_repTableColumns, _userManager)
+    {
+
+    }
     /// <summary>
     /// 导出
     /// </summary>
@@ -59,9 +68,10 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
         Response<DataTable> response = new Response<DataTable>();
         //CreateOrUpdateWMS_ReceiptInput orders = new CreateOrUpdateWMS_ReceiptInput();
         //orders.WMS_Receipts = new List<WMSReceiptEditDto>();
-
-        var headerTableColumn = GetColumns("WMS_Order");
-        var detailTableColumn = GetColumns("WMS_OrderDetail");
+        //_tableNames.Add("WMS_Order");
+        //_tableNames.Add("WMS_OrderDetail"); 
+        var headerTableColumn = GetExportColumns("WMS_Order");
+        var detailTableColumn = GetExportColumns("WMS_OrderDetail");
         var orderData = _repOrder.AsQueryable().Includes(a => a.Details).Where(a => request.Contains(a.Id)).ToList();
 
 
@@ -105,7 +115,7 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
         //塞数据
         orderData.ForEach(a =>
         {
-         
+
             Type orderType = a.GetType();
             a.Details.ForEach(c =>
             {
@@ -159,58 +169,41 @@ public class OrderExportDefaultStrategy : IOrderExcelInterface
                 });
                 dt.Rows.Add(row);
             });
-         
+
 
         });
         response.Data = dt;
-        response.Code = StatusCode.Success;
-        //throw new NotImplementedException();
+        response.Code = StatusCode.Success; 
         return response;
     }
 
 
-    private List<TableColumns> GetColumns(string TableName)
+
+    //默认方法不做任何处理
+    public Response<DataTable> ExportPackage(List<long> request)
     {
-        return _repTableColumns.AsQueryable()
-           .Where(a => a.TableName == TableName &&
-             a.TenantId == _userManager.TenantId &&
-             a.IsImportColumn == 1
-           )
-          .Select(a => new TableColumns
-          {
-              DisplayName = a.DisplayName,
-              //由于框架约定大于配置， 数据库的字段首字母小写
-              //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-              DbColumnName = a.DbColumnName,
-              IsImportColumn = a.IsImportColumn,
-              tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
-              //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
-              //.Select()
-          }).ToList();
+        Response<DataTable> response = new Response<DataTable>();
+        var tableColumn = GetExportColumns("WMS_OrderAddress", "WMS_Package", "WMS_PackageDetail");
+
+        StringBuilder sql = new StringBuilder();
+        sql.Append("SELECT ");
+        foreach (var item in tableColumn)
+        {
+            sql.Append(item.TableName + "." + item.DbColumnName + " as '" + item.DisplayName + "',");
+        }
+        sql.Remove(sql.Length - 1, 1);
+        sql.Append(@"from   WMS_Package  
+            left join WMS_PackageDetail
+            on WMS_Package.Id=WMS_PackageDetail.PackageId 
+            left join WMS_OrderAddress
+            on WMS_Package.PreOrderNumber=WMS_OrderAddress.PreOrderNumber
+           ");
+        sql.Append("where WMS_Package.Id in (" + string.Join(",", request) + ")");
+        var data = _repOrder.Context.Ado.GetDataTable(sql.ToString());
+        response.Data = data;
+        response.Code = StatusCode.Success;
+        return response;
+
     }
 
-
 }
-
-    //public class PropertyValue<T>
-    //{
-    //    private static ConcurrentDictionary<string, MemberGetDelegate> _memberGetDelegate = new ConcurrentDictionary<string, MemberGetDelegate>();
-    //    delegate object MemberGetDelegate(T obj);
-    //    public PropertyValue(T obj)
-    //    {
-    //        Target = obj;
-    //    }
-    //    public T Target { get; private set; }
-    //    public object Get(string name)
-    //    {
-    //        MemberGetDelegate memberGet = _memberGetDelegate.GetOrAdd(name, BuildDelegate);
-    //        return memberGet(Target);
-    //    }
-    //    private MemberGetDelegate BuildDelegate(string name)
-    //    {
-    //        Type type = typeof(T);
-    //        PropertyInfo property = type.GetProperty(name);
-    //        return (MemberGetDelegate)Delegate.CreateDelegate(typeof(MemberGetDelegate), property.GetGetMethod());
-    //    }
-    //}
-//}

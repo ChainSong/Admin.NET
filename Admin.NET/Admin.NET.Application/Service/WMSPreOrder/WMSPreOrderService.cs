@@ -86,7 +86,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
-                    .WhereIF(input.PreOrderStatus > 0, u => u.PreOrderStatus == input.PreOrderStatus)
+                    .WhereIF(input.PreOrderStatus != 0, u => u.PreOrderStatus == input.PreOrderStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
@@ -402,6 +402,9 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             //private const string FileDir = "/File/ExcelTemp";
             string url = await ImprotExcel.WriteFile(file);
             var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+
+
+
             //var aaaaa = ExcelData.GetData<DataSet>(url);
             //1根据用户的角色 解析出Excel
             IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();

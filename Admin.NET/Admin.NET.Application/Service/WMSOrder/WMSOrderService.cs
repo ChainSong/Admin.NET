@@ -50,10 +50,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSPreOrderDetail> _repPreOrderDetail;
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
+    private readonly SqlSugarRepository<WMSPackage> _repPackage;
+    private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -75,6 +77,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repPreOrderDetail = repPreOrderDetail;
         _repPreOrder = repPreOrder;
         _repWarehouse = repWarehouse;
+        _repPackage = repPackage;
+        _repPackageDetail = repPackageDetail;
+
     }
 
     /// <summary>
@@ -96,7 +101,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
-                    .WhereIF(input.OrderStatus > 0, u => u.OrderStatus == input.OrderStatus)
+                    .WhereIF(input.OrderStatus != 0, u => u.OrderStatus == input.OrderStatus)
                      .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
@@ -394,6 +399,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
     [HttpPost]
     [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ExportOrder")]
     public ActionResult ExportOrder(List<long> input)
     {
         //使用简单工厂定制化  /
@@ -421,6 +427,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repOrderAllocation = _repOrderAllocation;
+        factory._repPackage = _repPackage;
+        factory._repPackageDetail = _repPackageDetail;
 
 
 
@@ -435,6 +443,60 @@ public class WMSOrderService : IDynamicApiController, ITransient
         };
     }
 
+
+
+
+    /// <summary>
+    /// 导出预出库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ExportPackage")]
+    public ActionResult ExportPackage(List<long> input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+
+        //private const string FileDir = "/File/ExcelTemp";
+        //string url = await ImprotExcel.WriteFile(file);
+        //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IOrderExcelInterface factory = OrderExcelFactory.Export();
+
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repPreOrder = _repPreOrder;
+        factory._reppreOrderDetail = _repPreOrderDetail;
+        factory._repInventoryUsable = _repInventoryUsable;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAllocation = _repOrderAllocation;
+        factory._repPackage = _repPackage;
+        factory._repPackageDetail = _repPackageDetail;
+
+
+
+        var response = factory.ExportPackage(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "包装信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
+    }
 
 
     /// <summary>

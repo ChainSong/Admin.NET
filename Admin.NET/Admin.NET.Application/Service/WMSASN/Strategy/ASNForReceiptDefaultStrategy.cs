@@ -272,6 +272,14 @@ namespace Admin.NET.Application.Strategy
             });
             var mapper = new Mapper(config);
             receipts = mapper.Map<List<WMSReceipt>>(entityASN);
+            //针对性补充一些数据
+            foreach (var item in receipts)
+            {
+                foreach (var itemDetail in item.Details)
+                {
+                    itemDetail.BatchCode= request.Where(d => d.Id == itemDetail.ASNDetailId).Select(d => d.BatchCode).First();
+                }
+            }
             return await Save(receipts, entityASN);
         }
 

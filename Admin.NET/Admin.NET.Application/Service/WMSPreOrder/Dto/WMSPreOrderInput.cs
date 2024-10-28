@@ -292,7 +292,7 @@ public class WMSPreOrderInput : BasePageInput
     /// <summary>
     /// PreOrderStatus
     /// </summary>
-    public int? PreOrderStatus { get; set; }
+    public int PreOrderStatus { get; set; }
 
     /// <summary>
     /// OrderTime

@@ -71,7 +71,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
-                    .WhereIF(input.AdjustmentStatus > 0, u => u.AdjustmentStatus == input.AdjustmentStatus)
+                    .WhereIF(input.AdjustmentStatus != 0, u => u.AdjustmentStatus == input.AdjustmentStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.AdjustmentType), u => u.AdjustmentType.Contains(input.AdjustmentType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.AdjustmentReason), u => u.AdjustmentReason.Contains(input.AdjustmentReason.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
@@ -357,11 +357,15 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
             if (entityListDtos.Count > 0)
             {
                 //将散装的主表和明细表 组合到一起 
-                List<AddOrUpdateWMSAdjustmentInput> Adjustment = entityListDtos.GroupBy(x => x.AdjustmentNumber).Select(x => x.First()).ToList();
-                Adjustment.ForEach(item =>
+                List<AddOrUpdateWMSAdjustmentInput> Adjustment = entityListDtos.GroupBy(x => x.ExternNumber).Select(x => x.First()).ToList();
+                //Adjustment.ForEach(item =>
+                //{
+                //    item.Details = entityDetailListDtos.Where(a => a.AdjustmentNumber == item.AdjustmentNumber).ToList();
+                //});
+                foreach (var item in Adjustment)
                 {
-                    item.Details = entityDetailListDtos.Where(a => a.AdjustmentNumber == item.AdjustmentNumber).ToList();
-                });
+                    item.Details = entityDetailListDtos.Where(a => a.ExternNumber == item.ExternNumber).ToList();
+                }
 
                 //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
                 var customerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();

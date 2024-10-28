@@ -4,9 +4,9 @@
 			<el-container>
 				<el-main>
 					<el-descriptions class="margin-top" :column="2" size="small" border>
-						<template v-for="i in state.tableColumnHeaders.filter(a=>a.isCreate || a.isKey)">
-						 
-							<el-descriptions-item  :prop="i.displayName" :label="i.displayName">
+						<template v-for="i in state.tableColumnHeaders.filter(a => a.isCreate || a.isKey)">
+
+							<el-descriptions-item :prop="i.displayName" :label="i.displayName">
 								<template>
 									<!-- <i></i>
 									{{ i.displayName }} -->
@@ -14,18 +14,20 @@
 
 								<template v-if="i.type == 'DropDownListStr'">
 									<template v-for="item in i.tableColumnsDetails">
-										<el-tag   v-if="item.codeStr == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
+										<el-tag v-if="item.codeStr == state.header[i.columnName]"
+											v-bind:key="item.color" show-icon :type="item.color">
+											{{ item.name }}
+										</el-tag>
 										<!-- <label v-if="item.codeStr == state.header[i.columnName]" v-text="item.name"
 											show-icon :type="item.color" :key="item.codeStr"></label> -->
 									</template>
 								</template>
 								<template v-else-if="i.type == 'DropDownListInt'">
 									<template v-for="item in i.tableColumnsDetails">
-										<el-tag   v-if="item.codeInt == state.header[i.columnName]"  v-bind:key="item.color" show-icon :type="item.color">
-													{{ item.name }}
-												</el-tag>
+										<el-tag v-if="item.codeInt == state.header[i.columnName]"
+											v-bind:key="item.color" show-icon :type="item.color">
+											{{ item.name }}
+										</el-tag>
 										<!-- <template v-if="item.codeInt == state.header[i.columnName]">
 											<label show-icon :type="item.color" v-text="item.name"
 												:key="item.codeInt"></label>
@@ -45,13 +47,28 @@
 					<el-form>
 						<el-table :data="state.details" style="width: 100%" height="250">
 							<template v-for="(v, index) in state.tableColumnDetails">
-								<el-table-column v-if="v.isCreate ||v.isKey" :key="index" :fixed="false" :label="v.displayName"
-									width="150">
+								<el-table-column v-if="v.isCreate || v.isKey" :key="index" :fixed="false"
+									:label="v.displayName" width="150">
 									<template #default="scope">
 										<label v-text="scope.row[v.columnName]"></label>
 									</template>
 								</el-table-column>
 							</template>
+
+							<el-table-column fixed="right" label="操作" width="90">
+								<template #header>
+									<el-select placeholder="请选择">
+										<template v-for="item in state.tableColumnDetails">
+										<el-option v-if="item.isCreate==1" :key="item.value">
+											<el-checkbox  @change="checked => showColumnOption(checked, item)"
+												:true-label="1" :false-label="0" :label="item.displayName"
+												:key="item.columnName" v-model="item.isCreate">{{ item.displayName}}</el-checkbox>
+										</el-option>
+									</template>
+									</el-select>
+								</template>
+							</el-table-column>
+
 						</el-table>
 					</el-form>
 				</el-main>
@@ -140,10 +157,18 @@ const closeDialog = () => {
 
 // 取消
 const cancel = () => {
+	// console.log("state.tableColumnDetails.filter(a => a.isCreate)");
+	// console.log(state.value.tableColumnDetails.filter(a => a.isCreate));
 	isShowDialog.value = false;
 };
 
-
+const showColumnOption = async (value: any, item: any) => {
+	if (value == 1) {
+		item.isCreate = 1;
+	} else {
+		item.isCreate = 0;
+	} 
+};
 const gettableColumn = async () => {
 	let res = await getByTableNameList("WMS_ASN");
 	state.value.tableColumnHeaders = res.data.result;
@@ -173,7 +198,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

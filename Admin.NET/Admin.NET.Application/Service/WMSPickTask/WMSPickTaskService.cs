@@ -59,7 +59,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
         _sysCacheService = sysCacheService;
-    
+
     }
 
     /// <summary>
@@ -78,7 +78,8 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickTaskNumber), u => u.PickTaskNumber.Contains(input.PickTaskNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
-                    .WhereIF(input.PickStatus > 0, u => u.PickStatus == input.PickStatus)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()))
+                    .WhereIF(input.PickStatus != 0, u => u.PickStatus == input.PickStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickType), u => u.PickType.Contains(input.PickType.Trim()))
                     .WhereIF(input.PrintNum > 0, u => u.PrintNum == input.PrintNum)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PrintPersonnel), u => u.PrintPersonnel.Contains(input.PrintPersonnel.Trim()))
@@ -244,9 +245,6 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPackage = _repPackage;
         factory._repPackageDetail = _repPackageDetail;
-
-
-          
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.PickTaskReturn(request);
     }
@@ -278,19 +276,22 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         //var entity = input.Adapt<WMSPickTask>();
         //await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
         var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(a => a.Id == input.Id).FirstAsync();
-        entity.PickStatus = (int)PickTaskStatusEnum.拣货完成;
-        entity.StartTime = DateTime.Now;
-        entity.EndTime = DateTime.Now;
-        entity.Details.ForEach(a =>
+        if (entity.PickStatus < (int)PickTaskStatusEnum.拣货完成)
         {
-            a.PickStatus = (int)PickTaskStatusEnum.拣货完成;
-            a.PickQty = a.Qty;
-            a.PikcTime = DateTime.Now;
-        });
+            entity.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+            entity.StartTime = DateTime.Now;
+            entity.EndTime = DateTime.Now;
+            entity.Details.ForEach(a =>
+            {
+                a.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+                a.PickQty = a.Qty;
+                a.PikcTime = DateTime.Now;
+            });
 
-        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b=>b.OrderId).Contains(a.Id));
-        //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
-        await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+            await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b => b.OrderId).Contains(a.Id));
+            //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+            await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
+        }
 
     }
 

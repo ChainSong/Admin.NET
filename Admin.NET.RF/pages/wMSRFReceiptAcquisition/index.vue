@@ -1,11 +1,11 @@
-﻿<template>
+<template>
 	<view>
 		<cu-custom bgColor="bg-gradual-blue" :isBack="true">
 			<block slot="backText">返回</block>
 			<block slot="content">RF采集</block>
 		</cu-custom>
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
-			<view class="cu-form-group round">
+			<view class="cu-form-group ">
 				<input placeholder="请输入订单号" v-model="form.externReceiptNumber" style="width: 100%;"
 					name="input"></input>
 				<button class="cu-btn bg-blue shadow-blur round" @tap="getOrderList()">查询</button>
@@ -81,7 +81,7 @@
 				done(); // 完成刷新
 			},
 			async goCollect (row) {
-				//返回
+			 
 				uni.navigateTo({
 					url: '/pages/wMSRFReceiptAcquisition/component/editDialog?receiptNumber='+row.receiptNumber
 				});

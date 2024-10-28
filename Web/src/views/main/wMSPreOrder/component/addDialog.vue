@@ -88,7 +88,7 @@
 													</el-select>
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :whereData="state.header" :isDisabled="v.isCreate" 
+													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
 														:columnData="v" :key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
 														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
@@ -125,7 +125,7 @@
 							</el-table>
 						</el-form>
 					</el-card>
-					
+
 				</el-tab-pane>
 				<el-tab-pane label="地址信息" name="AddressInfo">
 					<el-card>
@@ -208,30 +208,31 @@
 					</el-descriptions> -->
 				</el-tab-pane>
 				<el-tab-pane label="扩展配置" name="extends">
-						<el-form ref="extendsRuleRef" label-position="top" :rules="extendsRule"
-							:model="state.extend">
-							<el-row :gutter="35">
-								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="q in state.tableColumnExtends" v-bind:key="q.id">
-									<el-form-item :label="q.displayName" v-if="q.isCreate"
-										style="width: 90%;height: 100px;" :prop="q.columnName">
-										<template v-if="q.type == 'UploadFile'">
-											<el-upload class="upload-demo" :action="uploadFileURL" :headers="httpheaders"
-												:on-success="uploadFile">
-												<el-button type="primary">点击上传</el-button>
-												<div class="el-upload__tip">只能上传文件，且不超过500kb</div>
-											</el-upload>
-										</template>
-										<template v-if="q.type == 'TextBox'">
-											<el-input placeholder="请输入内容" size="small" style="width:90%"
-												v-model="state.extend[q.columnName]" v-if="q.isCreate">
-											</el-input>
-										</template>
-									</el-form-item>
-								</el-col>
-							</el-row>
-						</el-form>
-					</el-tab-pane>
+					<el-form ref="extendsRuleRef" label-position="top" :rules="extendsRule" :model="state.extend">
+						<el-row :gutter="35">
+							<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" v-for="q in state.tableColumnExtends"
+								v-bind:key="q.id">
+								<el-form-item :label="q.displayName" v-if="q.isCreate" style="width: 90%;height: 100px;"
+									:prop="q.columnName">
+									<template v-if="q.type == 'UploadFile'">
+										<el-upload class="upload-demo" :action="uploadFileURL" :headers="httpheaders"
+											:on-success="uploadFile">
+											<el-button type="primary">点击上传</el-button>
+											<div class="el-upload__tip">只能上传文件，且不超过500kb</div>
+											<div class="el-upload__tip">由于Excel版本格式冗杂，请统一将Excel单元格设置成为文本格式</div>
+											<div class="el-upload__tip">请保存的时候删除一下空白行</div>
+										</el-upload>
+									</template>
+									<template v-if="q.type == 'TextBox'">
+										<el-input placeholder="请输入内容" size="small" style="width:90%"
+											v-model="state.extend[q.columnName]" v-if="q.isCreate">
+										</el-input>
+									</template>
+								</el-form-item>
+							</el-col>
+						</el-row>
+					</el-form>
+				</el-tab-pane>
 				<el-tab-pane label="Excel导入" name="ExcelCreate">
 					<el-row>
 						<el-col>
@@ -490,14 +491,14 @@ const gettableColumn = async () => {
 
 	console.log("state.value.tableColumnExtends");
 	console.log(state.value.tableColumnExtends);
-	
+
 };
 
 // -------------------------------非可公用部分----------------------------------------
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
-	if (response.result.data!=null && response.result.data.length > 0) {
+	if (response.result.data != null && response.result.data.length > 0) {
 		state.value.orderStatus = response.result.data;
 		// console.log(state.value.orderStatus);
 		//导入弹框提醒
@@ -511,7 +512,7 @@ const ImportExcel = (response, file, fileList) => {
 // 上传结果uploadImg
 const uploadFile = (response, file, fileList) => {
 	// closeDialog();
-	state.value.extend.shippingAttachmentsUrl=response.result;
+	state.value.extend.shippingAttachmentsUrl = response.result;
 }
 //获取导入的模板
 // 导出日志

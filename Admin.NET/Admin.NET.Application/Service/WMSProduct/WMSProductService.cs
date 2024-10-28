@@ -63,7 +63,7 @@ public class WMSProductService : IDynamicApiController, ITransient
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKU), u => u.SKU.Contains(input.SKU.Trim()))
-                    .WhereIF(input.ProductStatus > 0, u => u.ProductStatus == input.ProductStatus)
+                    .WhereIF(input.ProductStatus != 0, u => u.ProductStatus == input.ProductStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsName), u => u.GoodsName.Contains(input.GoodsName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsType), u => u.GoodsType.Contains(input.GoodsType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKUClassification), u => u.SKUClassification.Contains(input.SKUClassification.Trim()))

@@ -47,7 +47,7 @@ public class WMSInventoryUsableService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKU), u => u.SKU.Contains(input.SKU.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.UPC), u => u.UPC.Contains(input.UPC.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsType), u => u.GoodsType.Contains(input.GoodsType.Trim()))
-                    .WhereIF(input.InventoryStatus > 0, u => u.InventoryStatus == input.InventoryStatus)
+                    .WhereIF(input.InventoryStatus != 0, u => u.InventoryStatus == input.InventoryStatus)
                     .WhereIF(input.SuperId > 0, u => u.SuperId == input.SuperId)
                     .WhereIF(input.RelatedId > 0, u => u.RelatedId == input.RelatedId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsName), u => u.GoodsName.Contains(input.GoodsName.Trim()))

@@ -105,6 +105,12 @@ service.interceptors.response.use(
 			}
 			// 判断是否存在刷新 token，如果存在则存储在本地
 			else if (refreshAccessToken && accessToken && accessToken !== 'invalid_token') {
+				console.log("accessTokenKey")
+				console.log(accessTokenKey)
+				console.log(accessToken)
+				console.log("refreshAccessToken")
+				console.log(refreshAccessTokenKey)
+				console.log(refreshAccessToken)
 				uni.setStorageSync(accessTokenKey, accessToken);
 				uni.setStorageSync(refreshAccessTokenKey, refreshAccessToken);
 			}
@@ -112,6 +118,7 @@ service.interceptors.response.use(
 		
 		// 响应拦截及自定义处理
 		if (serve.code === 401) {
+			// alert("dasdasd");
 			clearAccessTokens();
 		} else if (serve.code === undefined) {
 			return Promise.resolve(res);
@@ -136,6 +143,7 @@ service.interceptors.response.use(
 		// 处理响应错误
 		if (error.response) {
 			if (error.response.status === 401) {
+		 
 				clearAccessTokens();
 			}
 		}

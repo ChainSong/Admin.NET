@@ -112,8 +112,8 @@
             </el-button>
             <el-button @click="addInventoryFun(scope.row)" class="el-icon-s-comment" type="text" size="small">加入库存
             </el-button>
-            <el-button type="text" class="el-icon-delete" @click="del(scope.row)" style="color:#F56C6C;margin-left: 10px;"
-              size="small">删除</el-button>
+            <el-button type="text" class="el-icon-delete" @click="del(scope.row)"
+              style="color:#F56C6C;margin-left: 10px;" size="small">删除</el-button>
             <!-- <el-popconfirm confirm-button-text="确定"   cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="del(scope.row)" title="确定删除吗？"> -->
             <!-- <el-button @click="del(scope.row)" class="el-icon-s-comment" type="text" size="small">删除
@@ -133,13 +133,17 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
-
+    <el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
+      <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+      </el-alert>
+    </el-dialog>
   </div>
 </template>
 
@@ -159,7 +163,7 @@ import Header from "/@/entities/receipt";
 import Details from "/@/entities/receiptReceiving";
 import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
-
+import orderStatus from "/@/entities/orderStatus";
 
 const state = ref({
   vm: {
@@ -174,6 +178,8 @@ const state = ref({
   header: new Header(),
   headers: new Array<Header>(),
   details: new Array<Details>(),
+  //导入提示
+  orderStatus: new Array<orderStatus>(),
   // header: new Array<Details>(),
 
   tableColumnHeader: new TableColumns(),
@@ -203,7 +209,8 @@ const tableParams = ref({
 const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
-
+//自定义提示
+const resultPopupShow = ref(false);
 // 页面加载时
 onMounted(async () => {
   gettableColumn();
@@ -261,7 +268,12 @@ const del = (row: any) => {
       if (result.data.result.code == "1") {
         ElMessage.success(result.data.result.msg);
       } else {
-        ElMessage.error(result.data.result.msg);
+        if (result.data.result.data.length > 0) {
+          resultPopupShow.value = true;
+          state.value.orderStatus = result.data.result.data;
+        } else {
+          ElMessage.error(result.data.result.msg);
+        }
       }
       handleQuery();
     })
@@ -285,7 +297,12 @@ const addInventoryFun = (row: any) => {
       if (result.data.result.code == "1") {
         ElMessage.success(result.data.result.msg);
       } else {
-        ElMessage.error(result.data.result.msg);
+        if (result.data.result.data.length > 0) {
+          resultPopupShow.value = true;
+          state.value.orderStatus = result.data.result.data;
+        } else {
+          ElMessage.error(result.data.result.msg);
+        }
       }
       handleQuery();
 
@@ -310,5 +327,3 @@ const handleCurrentChange = (val: number) => {
 
 handleQuery();
 </script>
-
-

@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    xmlns:mtk="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Title="个人中心"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:ProfilePageViewModel"
+    BackgroundColor="{x:Static app:AppColors.Purple}"
+    Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="200,*" RowSpacing="0">
+        <Grid
+            BackgroundColor="{x:Static app:AppColors.Purple}"
+            ColumnSpacing="0"
+            RowDefinitions="48,*"
+            RowSpacing="0"
+            Shadow="{x:Static app:Styles.Shadow2}">
+            <HorizontalStackLayout
+                Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                HorizontalOptions="Start"
+                Spacing="{x:Static app:Dimens.SpacingXs}"
+                VerticalOptions="Center">
+                <!--<Image Source="ic_cup.png" />-->
+                <!--<Label
+                    Style="{x:Static app:Styles.Subtitle6}"
+                    Text="10"
+                    TextColor="{x:Static app:AppColors.LightYellow}" />-->
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout
+                Grid.RowSpan="2"
+                Margin="{app:EdgeInsets Top={x:Static app:Dimens.SpacingMd}}"
+                HorizontalOptions="Center"
+                Spacing="0">
+                <Grid
+                    ColumnDefinitions="104"
+                    HorizontalOptions="Center"
+                    RowDefinitions="88"
+                    VerticalOptions="Start">
+                    <Border
+                        Background="{x:Static app:AppColors.Grey10}"
+                        HeightRequest="88"
+                        HorizontalOptions="Center"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 44,44,44,44"
+                        StrokeThickness="1"
+                        VerticalOptions="Start"
+                        WidthRequest="88" >
+                        <Image  Source="cap.png" />
+                    </Border>
+
+                    <Border
+                        Background="{x:Static app:AppColors.Grey40}"
+                        HeightRequest="36"
+                        HorizontalOptions="End"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 18,18,18,18"
+                        StrokeThickness="1"
+                        VerticalOptions="End"
+                        WidthRequest="36">
+                        <Image Margin="{x:Static app:Dimens.SpacingSm}" Source="ic_camera.png" />
+                    </Border>
+                </Grid>
+
+                <Label
+                    Margin="{app:EdgeInsets All={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Title4}"
+                    Text="个人中心"
+                    TextColor="{x:Static app:AppColors.White}" />
+
+                <Label
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Subtitle6}"
+                    Text="欢迎使用 WMS 1.0"
+                    TextColor="{x:Static app:AppColors.Green}" />
+            </VerticalStackLayout>
+
+            <!--<HorizontalStackLayout
+                Grid.Row="1"
+                Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                HorizontalOptions="Start"
+                Spacing="{x:Static app:Dimens.SpacingXs}"
+                VerticalOptions="Start">
+                <Image Source="ic_close.png" />
+                <Label
+                    Style="{x:Static app:Styles.Subtitle6}"
+                    Text="10"
+                    TextColor="{x:Static app:AppColors.Pink}" />
+            </HorizontalStackLayout>-->
+
+            <ContentView HorizontalOptions="End" VerticalOptions="Fill">
+                <ContentView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ViewSettingsCommand}" />
+                </ContentView.GestureRecognizers>
+                <Image HeightRequest="24" WidthRequest="24"
+                    Margin="{app:EdgeInsets Right={x:Static app:Dimens.SpacingMd}}"
+                    Source="ic_hoz_more.png"
+                    VerticalOptions="Center" />
+            </ContentView>
+        </Grid>
+        <Grid Grid.Row="1" BackgroundColor="{x:Static app:AppColors.BrColor}">
+
+            <Grid RowDefinitions="80"  >
+                <ScrollView   >
+                    <Grid >
+                        <Label
+                             HorizontalOptions="Center"
+                             HorizontalTextAlignment="Center" 
+                             FontAttributes="Bold" 
+                             Text="退出" >
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SignOutCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <BoxView Color="Gray" HeightRequest="1" />
+                    </Grid>
+                </ScrollView >
+
+                <!--<BoxView Color="Aqua" Grid.Row="1" Grid.Column="0"></BoxView>-->
+            </Grid>
+
+            <!--<ListView  ItemsSource="{Binding Contacts}"  >
+                <ListView.ItemTemplate>
+                    <DataTemplate  x:DataType="app:IndividualCenter">
+                        <ViewCell  >
+                            <Grid Padding="10">
+                                <StackLayout>
+                                    <Label Grid.Column="1"
+                                 Text="{Binding Name}"
+                                 FontAttributes="Bold" />
+                                    -->
+            <!-- 添加BoxView作为线条 -->
+            <!--
+                                    <BoxView Color="Gray" HeightRequest="1" />
+                                </StackLayout>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>-->
+            <!--<CollectionView>-->
+            <!--<CollectionView.ItemsSource>
+                    <Array Type="{Type x:String}">
+                        <x:String>Gà con</x:String>
+                        <x:String>Gà vườn</x:String>
+                        <x:String>Gà nòi</x:String>
+                        <x:String>Gà chiến</x:String>
+                        <x:String>Gà boss</x:String>
+                        <x:String>Gà vương</x:String>
+                    </Array>
+                </CollectionView.ItemsSource>-->
+            <!--<CollectionView.ItemsLayout>-->
+
+            <!--<GridItemsLayout
+                        HorizontalItemSpacing="{x:Static app:Dimens.SpacingMd}"
+                        Orientation="Vertical"
+                        Span="3"
+                        VerticalItemSpacing="{x:Static app:Dimens.SpacingMd}" />-->
+            <!--</CollectionView.ItemsLayout>-->
+            <!--<CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="{app:EdgeInsets Top={x:Static app:Dimens.SpacingMd}}">
+                            <Image Source="ic_feature_locked.png" />
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{x:Static app:Styles.Title6}"
+                                Text="{Binding .}"
+                                TextColor="{x:Static app:AppColors.Grey40}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>-->
+            <!--</CollectionView>-->
+
+            <!--<Grid
+                Padding="{app:EdgeInsets Bottom={x:Static app:Dimens.SpacingXxl}}"
+                RowDefinitions="48"
+                VerticalOptions="End">
+                <Label
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Subtitle6}"
+                    Text="WMS 1.0"
+                    TextColor="{x:Static app:AppColors.Purple}"
+                    WidthRequest="200" />
+            </Grid>-->
+        </Grid>
+    </Grid>
+</app:BasePage>

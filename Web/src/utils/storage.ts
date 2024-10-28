@@ -19,6 +19,8 @@ export const Local = {
 	},
 	// 获取永久缓存
 	get(key: string) {
+		// console.log("Local.setKey(key)")
+		// console.log(Local.setKey(key))
 		let json = <string>window.localStorage.getItem(Local.setKey(key));
 		return JSON.parse(json);
 	},

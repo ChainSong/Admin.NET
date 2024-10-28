@@ -471,15 +471,17 @@ DECLARE @tempAddPerOrderId TABLE
      ordernumber [NVARCHAR](50)
   );
 ----操作完成运单信息   
-DECLARE @WaybillInformation TABLE
+ 
+DECLARE @Information TABLE
   (
-     poid              BIGINT,
-     externordernumber VARCHAR(50),
-     customer          VARCHAR(50),
-     note              VARCHAR(50),
-     [type]            VARCHAR(50),
-     sku               VARCHAR(50),
-     qty               DECIMAL(18, 2)
+     Id              BIGINT,
+     OrderNumber VARCHAR(100),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
   );
 DECLARE @POID BIGINT;
 DECLARE @tempOrderNumber VARCHAR(50);
@@ -504,6 +506,8 @@ DECLARE @BoxCode VARCHAR(100);
 DECLARE @UnitCode VARCHAR(100);
 DECLARE @Onwer VARCHAR(100);
 DECLARE @TrayCode VARCHAR(100);
+DECLARE @AllocationBatch VARCHAR(100);
+DECLARE @PoCode VARCHAR(100);
 
 
 DECLARE @ISKU VARCHAR(50);
@@ -526,7 +530,7 @@ DECLARE @ITrayCode VARCHAR(100);
 DECLARE @Cursorid BIGINT;
 DECLARE @IId BIGINT;
 DECLARE @NewIId BIGINT;
-
+set @AllocationBatch=NEWID();
 ------------全局变量 保存分配后剩余的数量---------   
 DECLARE @NumberRemaining DECIMAL(18, 2);
 ------------------声明获取DetailID----------------   
@@ -562,7 +566,8 @@ IF ( 1 = 1 )
                            Max (od.allocatedqty)     AS AllocatedQty,
                            ( od.batchcode )          AS BatchCode,
                            ( od.boxcode )            AS BoxCode,
-                           ( od.unitcode )           AS UnitCode
+                           ( od.unitcode )           AS UnitCode,
+                           ( od.PoCode )           AS PoCode
                     FROM   [wms_orderdetail] od
                     WHERE  od.orderid = @Cursorid
                            
@@ -572,6 +577,7 @@ IF ( 1 = 1 )
                               od.goodstype,
                               od.batchcode,
                               od.boxcode,
+                              od.PoCode,
                               od.unitcode) a
                    OUTER apply (SELECT Sum(qty) Qty
                                 FROM   wms_inventory_usable i
@@ -579,18 +585,22 @@ IF ( 1 = 1 )
                                        AND i.goodstype = a.goodstype
                                        AND i.customername = a.customername
                                        AND i.warehousename = a.warehousename
-                                       AND i.upc = a.upc
-                                       AND i.batchcode = a.batchcode
-                                       AND i.boxcode = a.boxcode
-                                       AND i.unitcode = a.unitcode
+									    AND i.Location   in (select Location from WMS_Location where LocationStatus=1 and  WarehouseId=i.WarehouseId and Area=i.Area and Location=i.Location)
+									     AND( i.UPC = a.UPC 
+                                             OR  a.UPC='' ) 
+                                      AND( i.batchcode = a.batchcode 
+                                             OR  a.batchcode='' ) 
+											   AND( i.PoCode = a.PoCode 
+                                             OR  a.PoCode='' ) 
+                                     AND( i.boxcode = a.boxcode 
+                                             OR  a.boxcode='' ) 
+                                        AND( i.unitcode = a.unitcode 
+                                             OR  a.unitcode='' )  
                                        AND i.inventorystatus = 1
                                        AND i.qty > 0
                                 GROUP  BY i.sku,
                                           i.goodstype,
-                                          i.warehousename,
-                                          i.batchcode,
-                                          i.boxcode,
-                                          i.unitcode) Q
+                                          i.warehousename) Q
             WHERE  Q.qty >= ( a.orderqty - a.allocatedqty )
                    AND a.orderqty > 0;
 
@@ -603,6 +613,7 @@ IF ( 1 = 1 )
                                                  od.warehousename,
                                                  od.goodstype,
                                                  od.boxcode,
+                                                 od.PoCode,
                                                  od.upc,
                                                  od.boxcode,
                                                  od.unitcode) b) )
@@ -627,7 +638,8 @@ IF ( 1 = 1 )
                                od.boxcode,
                                od.unitcode,
                                od.Onwer,
-                               od.TrayCode
+                               od.TrayCode,
+                               od.PoCode
                         FROM   [wms_orderdetail] od
                         WHERE  od.orderqty > od.allocatedqty
                                AND od.orderid = @Cursorid
@@ -637,7 +649,7 @@ IF ( 1 = 1 )
                       @CustomerId,
                       @Warehouseid, @SKU, @UPC, --@GoodsName,   
                       @Goodstype, @OrderQty, @AllocatedQty, @BatchCode, @BoxCode,
-                      @UnitCode,@Onwer,@TrayCode;
+                      @UnitCode,@Onwer,@TrayCode,@PoCode;
 
                       WHILE ( @@FETCH_STATUS = 0 )
                         BEGIN
@@ -665,13 +677,28 @@ IF ( 1 = 1 )
                                      AND i.customerid = @CustomerId
                                      AND i.WarehouseId = @WarehouseId
                                      AND i.inventorystatus = 1
+									  AND i.Location   in (select Location from WMS_Location where LocationStatus=1 and  WarehouseId=i.WarehouseId and Area=i.Area and Location=i.Location)
                                      AND i.qty > 0
-                                     AND i.upc = @UPC
-                                     AND i.batchcode = @BatchCode
-                                     AND i.boxcode = @BoxCode
-                                     AND i.unitcode = @UnitCode
-                                     AND i.Onwer = @Onwer
-                                     AND i.TrayCode = @TrayCode
+									    AND( i.UPC = @UPC 
+                                             OR  @UPC='' ) 
+                                     --AND i.upc = @UPC
+									  AND( i.BatchCode = @BatchCode
+                                             OR  @BatchCode='' ) 
+                                     --AND i.batchcode = @BatchCode
+									   AND( i.boxcode = @boxcode
+                                             OR  @boxcode='' ) 
+                                     --AND i.boxcode = @BoxCode
+									   AND( i.unitcode = @unitcode
+                                             OR  @unitcode='' ) 
+                                     --AND i.unitcode = @UnitCode
+									  AND( i.Onwer = @Onwer
+                                             OR  @Onwer='' ) 
+                                     --AND i.Onwer = @Onwer
+									  AND( i.TrayCode = @TrayCode
+                                             OR  @TrayCode='' ) 
+											   AND( i.PoCode = @PoCode
+                                             OR  @PoCode='' ) 
+                                     --AND i.TrayCode = @TrayCode
                               ORDER  BY i.inventorytime
                             OPEN cursor_inventory
                             FETCH cursor_inventory INTO @IId, @ICustomerId,
@@ -779,7 +806,10 @@ IF ( 1 = 1 )
                                          WHERE  id = @IId);
 									    SET @NewIId= @@IDENTITY
 									   INSERT INTO [dbo].wms_orderallocation
-                                                    ([inventoryid],
+                                                    (
+													 AllocationBatch,
+													 AllocationStatus,
+													 [inventoryid],
                                                      [orderid],
                                                      [orderdetailid],
                                                      [customerid],
@@ -819,7 +849,7 @@ IF ( 1 = 1 )
                                                      [datetime2],
                                                      [int1],
                                                      [int2],[TenantId])
-                                        (SELECT i.id,
+                                        (SELECT @AllocationBatch,1,i.id,
                                                 @OId,
                                                 @ODId,
                                                 [customerid],
@@ -896,7 +926,8 @@ IF ( 1 = 1 )
                                     BEGIN
                                         --SET @NumberRemaining =@NumberRemaining-@IQty;   
                                         INSERT INTO [dbo].wms_orderallocation
-                                                    (
+                                                    (AllocationBatch,
+													 AllocationStatus,
                                                      [inventoryid],
                                                      [orderid],
                                                      [orderdetailid],
@@ -938,7 +969,7 @@ IF ( 1 = 1 )
                                                      [datetime2],
                                                      [int1],
                                                      [int2],[TenantId])
-                                        (SELECT
+                                        (SELECT @AllocationBatch,1,
                                                 @IId,
                                                 @OId,
                                                 @ODId,
@@ -1104,22 +1135,24 @@ IF ( 1 = 1 )
                             @CustomerId,
                             @Warehouseid, @SKU, @UPC, @Goodstype, @OrderQty,
                             @AllocatedQty,
-                            @BatchCode, @BoxCode, @UnitCode,@Onwer,@TrayCode;
+                            @BatchCode, @BoxCode, @UnitCode,@Onwer,@TrayCode,@PoCode;
                         END;
 
                       CLOSE cursor_order;
 
                       DEALLOCATE cursor_order;
 
-                      INSERT INTO @WaybillInformation
-                                  (poid,
-                                   externordernumber,
-                                   customer,
-                                   note)
+                             INSERT INTO @Information
+                                  (Id,
+                                   Ordernumber,
+                                   CustomerName,
+                                   Note,
+								   InformationType)
                       (SELECT id,
                               externordernumber,
                               customername,
-                              orderstatus
+                              orderstatus,
+                              '分配成功'
                        FROM   [dbo].[wms_order]
                        WHERE  id = @Cursorid)
 
@@ -1181,46 +1214,49 @@ IF ( 1 = 1 )
                          AND orderstatus != 9
                          AND orderstatus !=- 1;
 
-                  INSERT INTO @WaybillInformation
-                              (poid,
-                               externordernumber,
-                               customer,
-                               note,
-                               [type],
-                               sku,
-                               qty)
+                INSERT INTO @Information
+                              (Id,
+                               OrderNumber,
+                               CustomerName,
+                               Note,
+                               InformationType,
+                               SKU,
+                               InventoryQty,
+                               Qty)
                   (SELECT od.id,
                           od.externordernumber,
                           od.customername,
                           orderstatus,
-                          1,
+                          '分配失败',
                           sku,
-                          ( q.qty - od.orderqty ) QTY
+                          q.qty, od.orderqty  
                    FROM   [dbo].[wms_order] o
                           RIGHT JOIN [wms_orderdetail] od
-                                  ON od.id = o.id
+                                  ON od.OrderId = o.id
                           OUTER apply ((SELECT Isnull(Sum(qty), 0) Qty
                                         FROM   wms_inventory_usable i
                                         WHERE  i.sku = od.sku
                                                AND i.goodstype = od.goodstype
                                                AND i.CustomerId = od.CustomerId
                                                AND i.WarehouseId = od.WarehouseId
-                                               AND i.upc = od.upc
-                                               AND i.batchcode = od.batchcode
-                                               AND i.Onwer = od.Onwer
-                                               AND i.BoxCode = od.BoxCode
-                                               AND i.TrayCode = od.TrayCode
-                                               AND i.unitcode = od.unitcode
+                                               AND (i.upc = od.upc or od.upc='')
+                                               AND (i.batchcode = od.batchcode or od.batchcode='')
+                                               AND (i.Onwer = od.Onwer  or od.Onwer='')
+                                               AND (i.BoxCode = od.BoxCode  or od.BoxCode='')
+                                               AND (i.TrayCode = od.TrayCode or od.TrayCode='')
+                                               AND (i.unitcode = od.unitcode or od.unitcode='')
+                                               AND (i.PoCode = od.PoCode or od.PoCode='')
                                                AND i.inventorystatus = 1
                                                AND i.qty > 0)) Q
-                   WHERE  o.id = @Cursorid
-                          AND od.orderqty > q.qty)
+                   WHERE  o.id = @Cursorid)
               END;
 
             ----------------------------------------------------外围游标回收 --------------------------------------------------   
             FETCH cursor_externordernumber INTO @Cursorid;
         END;
-
+		 CLOSE cursor_externordernumber;
+                  DEALLOCATE cursor_externordernumber;
+		SELECT  * FROM   @Information
       IF Cursor_status('local', 'Cursor_ExternOrderNumber') <> -3
         BEGIN
             IF Cursor_status('local', 'Cursor_ExternOrderNumber') <> -1
@@ -1231,29 +1267,14 @@ IF ( 1 = 1 )
               END;
         END;
   END;
-
-SELECT poid,
-       externordernumber,
-       customer,
-       Max(note) Note,
-       [type],
-       sku,
-       Sum(qty)  QTY
-FROM   @WaybillInformation
-GROUP  BY poid,
-          externordernumber,
-          [type],
-          customer,
-          sku 
+ 
   END; ");
         db.Ado.GetLong(procSql.ToString(), null);
         //db.Ado.GetCommand(procSql.ToString(), null);
         //StringBuilder procSql = new StringBuilder();
         StringBuilder procSqlAdjustmentConfirmFrozen = new StringBuilder();
         //创建Proc_WMS_AdjustmentConfirmFrozen
-        procSqlAdjustmentConfirmFrozen.Append(@" 
- 
-Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmFrozen]( @AdjustmentId FLOAT)
+        procSqlAdjustmentConfirmFrozen.Append(@"Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmFrozen]( @AdjustmentId FLOAT)
 AS
   BEGIN
        
@@ -1300,7 +1321,19 @@ DECLARE @FromGoodsType  VARCHAR(50)
 DECLARE @ToGoodsType  VARCHAR(50)		   
 DECLARE @FromUnitCode  VARCHAR(100)		   
 DECLARE @ToUnitCode   VARCHAR(100)		    
+----操作信息   
 
+DECLARE @Information TABLE
+  (
+     Id              BIGINT,
+     OrderNumber VARCHAR(50),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
+  );
 
 DECLARE @NumberRemaining FLOAT
 
@@ -1443,6 +1476,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	 , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,[Qty]
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1460,7 +1497,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2])
+      ,[Int2],[TenantId])
              (select [ReceiptDetailId]
       ,[ReceiptReceivingId]
       ,[CustomerId]
@@ -1481,6 +1518,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	   , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,[Qty]
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1498,7 +1539,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2] from WMS_Inventory_Usable where Id=@IId)
+      ,[Int2],[TenantId] from WMS_Inventory_Usable where Id=@IId)
 
               UPDATE WMS_Inventory_Usable
               SET    InventoryStatus=99,Qty=0
@@ -1536,6 +1577,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	 , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,[Qty]
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1553,7 +1598,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2])
+      ,[Int2],[TenantId])
              (select [ReceiptDetailId]
       ,[ReceiptReceivingId]
       ,[CustomerId]
@@ -1574,6 +1619,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	  , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,@NumberRemaining
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1591,7 +1640,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2] from WMS_Inventory_Usable where Id=@IId)
+      ,[Int2],[TenantId] from WMS_Inventory_Usable where Id=@IId)
 	       
 	           UPDATE WMS_Inventory_Usable
               SET    Qty=ABS(@NumberRemaining-@IQty)
@@ -1665,7 +1714,9 @@ DECLARE @NumberRemaining FLOAT
   CLOSE cursor_adjustmentDetail --关闭游标
 
   DEALLOCATE cursor_adjustmentDetail --释放游标
-
+  insert @Information(Id,OrderNumber,CustomerName,Note,InformationType,SKU,InventoryQty,Qty)
+  select Id,ExternNumber,CustomerName,'库存冻结差异','库存冻结',SKU,ToQty,Qty from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
+  and ToQty<>Qty
  	 ---当ToQty = Qty 的时候意味着全部处理完成，改变订单状态
 	 if((select COUNT(1) from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
 	 and ToQty<>Qty)>0)
@@ -1679,8 +1730,9 @@ DECLARE @NumberRemaining FLOAT
 	     update WMS_Adjustment set AdjustmentStatus=99 where id=@AdjustmentId 
 		 
 	   COMMIT;
+	
 	 end
-	 
+	    select * from @Information
 
   IF Cursor_status('local', 'cursor_adjustmentDetail') <> -3
   BEGIN
@@ -1723,9 +1775,7 @@ DECLARE @NumberRemaining FLOAT
         db.Ado.GetLong(procSqlAdjustmentConfirmFrozen.ToString(), null);
         StringBuilder procSqlAdjustmentConfirmGoodsType = new StringBuilder();
         //创建Proc_WMS_AdjustmentConfirmGoodsType
-        procSqlAdjustmentConfirmGoodsType.Append(@" 
- 
-Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmGoodsType]( @AdjustmentId FLOAT)
+        procSqlAdjustmentConfirmGoodsType.Append(@"Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmGoodsType]( @AdjustmentId FLOAT)
 AS
   BEGIN
        
@@ -1773,6 +1823,17 @@ DECLARE @ToGoodsType  VARCHAR(50)
 DECLARE @FromUnitCode  VARCHAR(100)		   
 DECLARE @ToUnitCode   VARCHAR(100)		    
 
+DECLARE @Information TABLE
+  (
+     Id              BIGINT,
+     OrderNumber VARCHAR(50),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
+  );
 
 DECLARE @NumberRemaining FLOAT
 
@@ -1931,6 +1992,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	   , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,[Qty]
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1948,7 +2013,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2])
+      ,[Int2],[TenantId])
              (select [ReceiptDetailId]
       ,[ReceiptReceivingId]
       ,[CustomerId]
@@ -1969,6 +2034,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	   , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,@NumberRemaining
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -1986,7 +2055,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2] from WMS_Inventory_Usable where Id=@IId)
+      ,[Int2],[TenantId] from WMS_Inventory_Usable where Id=@IId)
 	       
 	           UPDATE WMS_Inventory_Usable
               SET    Qty=abs(@NumberRemaining-@IQty)
@@ -2060,7 +2129,9 @@ DECLARE @NumberRemaining FLOAT
   CLOSE cursor_adjustmentDetail --关闭游标
 
   DEALLOCATE cursor_adjustmentDetail --释放游标
-
+   insert @Information(Id,OrderNumber,CustomerName,Note,InformationType,SKU,InventoryQty,Qty)
+  select Id,ExternNumber,CustomerName,'库存冻结差异','库存冻结',SKU,ToQty,Qty from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
+  and ToQty<>Qty
  	 ---当ToQty = Qty 的时候意味着全部处理完成，改变订单状态
 	 if((select COUNT(1) from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
 	 and ToQty<>Qty)>0)
@@ -2076,7 +2147,7 @@ DECLARE @NumberRemaining FLOAT
 	   COMMIT;
 	 end
 	 
-
+	    select * from @Information
   IF Cursor_status('local', 'cursor_adjustmentDetail') <> -3
   BEGIN
   IF Cursor_status('local', 'cursor_adjustmentDetail') <> -1
@@ -2118,9 +2189,7 @@ DECLARE @NumberRemaining FLOAT
         db.Ado.GetLong(procSqlAdjustmentConfirmGoodsType.ToString(), null);
         StringBuilder procSqlAdjustmentConfirmMove = new StringBuilder();
         //创建Proc_WMS_AdjustmentConfirmMove
-        procSqlAdjustmentConfirmMove.Append(@" 
- 
-Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmMove]( @AdjustmentId FLOAT)
+        procSqlAdjustmentConfirmMove.Append(@"Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmMove]( @AdjustmentId FLOAT)
 AS
   BEGIN
        
@@ -2168,6 +2237,21 @@ AS
     DECLARE @FromUnitCode VARCHAR(100)
     DECLARE @ToUnitCode VARCHAR(100)
     DECLARE @NumberRemaining FLOAT
+
+	
+DECLARE @Information TABLE
+  (
+     Id              BIGINT,
+     OrderNumber VARCHAR(50),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
+  );
+
+
     --------------------------获取调整明细------------------------------------------------------
     DECLARE cursor_adjustmentdetail CURSOR FOR --定义游标
       SELECT id,
@@ -2294,7 +2378,7 @@ AS
                                          [datetime1],
                                          [datetime2],
                                          [int1],
-                                         [int2])
+                                         [int2],[TenantId])
                             (SELECT [receiptdetailid],
                                     [receiptreceivingid],
                                     [customerid],
@@ -2332,7 +2416,7 @@ AS
                                     [datetime1],
                                     [datetime2],
                                     [int1],
-                                    [int2]
+                                    [int2],[TenantId]
                              FROM   wms_inventory_usable
                              WHERE  id = @IId)
 
@@ -2391,7 +2475,7 @@ AS
                                          [datetime1],
                                          [datetime2],
                                          [int1],
-                                         [int2])
+                                         [int2],[TenantId])
                             (SELECT [receiptdetailid],
                                     [receiptreceivingid],
                                     [customerid],
@@ -2429,7 +2513,7 @@ AS
                                     [datetime1],
                                     [datetime2],
                                     [int1],
-                                    [int2]
+                                    [int2],[TenantId]
                              FROM   wms_inventory_usable
                              WHERE  id = @IId)
 
@@ -2474,6 +2558,11 @@ AS
       END 
     CLOSE cursor_adjustmentdetail --关闭游标
     DEALLOCATE cursor_adjustmentdetail --释放游标
+
+	  insert @Information(Id,OrderNumber,CustomerName,Note,InformationType,SKU,InventoryQty,Qty)
+  select Id,ExternNumber,CustomerName,'库存冻结差异','库存冻结',SKU,ToQty,Qty from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
+  and ToQty<>Qty
+
     ---当ToQty = Qty 的时候意味着全部处理完成，改变订单状态
     IF( (SELECT Count(1)
          FROM   wms_adjustmentdetail
@@ -2492,7 +2581,7 @@ AS
 
           COMMIT;
       END
-
+	     select * from @Information
     IF Cursor_status('local', 'cursor_adjustmentDetail') <> -3
       BEGIN
           IF Cursor_status('local', 'cursor_adjustmentDetail') <> -1
@@ -2528,9 +2617,7 @@ END catch;
         db.Ado.GetLong(procSqlAdjustmentConfirmMove.ToString(), null);
         StringBuilder procSqlAdjustmentConfirmQuantity = new StringBuilder();
         //创建PProc_WMS_AdjustmentConfirmQuantity
-        procSqlAdjustmentConfirmQuantity.Append(@" 
- 
-Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmQuantity]( @AdjustmentId FLOAT)
+        procSqlAdjustmentConfirmQuantity.Append(@"Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmQuantity]( @AdjustmentId FLOAT)
 AS
   BEGIN
        
@@ -2577,6 +2664,17 @@ DECLARE @FromGoodsType  VARCHAR(50)
 DECLARE @ToGoodsType  VARCHAR(50)		   
 DECLARE @FromUnitCode  VARCHAR(100)		   
 DECLARE @ToUnitCode   VARCHAR(100)		    
+DECLARE @Information TABLE
+  (
+     Id              BIGINT,
+     OrderNumber VARCHAR(50),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
+  );
 
 
 DECLARE @NumberRemaining FLOAT
@@ -2679,7 +2777,7 @@ and ToQty<Qty
               ,[DateTime1]
               ,[DateTime2]
               ,[Int1]
-              ,[Int2])
+              ,[Int2],[TenantId])
                      (select top 1 [ReceiptDetailId]
               ,[ReceiptReceivingId]
               ,[CustomerId]
@@ -2717,7 +2815,7 @@ and ToQty<Qty
               ,[DateTime1]
               ,[DateTime2]
               ,[Int1]
-              ,[Int2] from WMS_Inventory_Usable    where  
+              ,[Int2],[TenantId] from WMS_Inventory_Usable    where  
              CustomerId 	    =   @CustomerId 	 
             and WarehouseId 	   	=   @WarehouseId 	
             and SKU 		   		=   @SKU 		   	
@@ -2883,6 +2981,9 @@ and ToQty<Qty
   CLOSE cursor_adjustmentDetail --关闭游标
 
   DEALLOCATE cursor_adjustmentDetail --释放游标
+    insert @Information(Id,OrderNumber,CustomerName,Note,InformationType,SKU,InventoryQty,Qty)
+  select Id,ExternNumber,CustomerName,'库存冻结差异','库存冻结',SKU,ToQty,Qty from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
+  and ToQty<>Qty
 
  	 ---当ToQty = Qty 的时候意味着全部处理完成，改变订单状态
 	 if((select COUNT(1) from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
@@ -2898,7 +2999,7 @@ and ToQty<Qty
 		 
 	   COMMIT;
 	 end
-	 
+	   select * from @Information
 
   IF Cursor_status('local', 'cursor_adjustmentDetail') <> -3
   BEGIN
@@ -2941,9 +3042,7 @@ and ToQty<Qty
         db.Ado.GetLong(procSqlAdjustmentConfirmQuantity.ToString(), null);
         StringBuilder procSqlAdjustmentConfirmUnfreeze = new StringBuilder();
         //创建Proc_WMS_AdjustmentConfirmUnfreeze
-        procSqlAdjustmentConfirmUnfreeze.Append(@" 
- 
-Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmUnfreeze]( @AdjustmentId FLOAT)
+        procSqlAdjustmentConfirmUnfreeze.Append(@"Create PROCEDURE [dbo].[Proc_WMS_AdjustmentConfirmUnfreeze]( @AdjustmentId FLOAT)
 AS
   BEGIN
        
@@ -2990,6 +3089,17 @@ DECLARE @FromGoodsType  VARCHAR(50)
 DECLARE @ToGoodsType  VARCHAR(50)		   
 DECLARE @FromUnitCode  VARCHAR(100)		   
 DECLARE @ToUnitCode   VARCHAR(100)		    
+DECLARE @Information TABLE
+  (
+     Id              BIGINT,
+     OrderNumber VARCHAR(50),
+     CustomerName          VARCHAR(50),
+     Note              VARCHAR(50),
+     InformationType            VARCHAR(50),
+     SKU               VARCHAR(50),
+     InventoryQty              FLOAT,
+     Qty              FLOAT
+  );
 
 
 DECLARE @NumberRemaining FLOAT
@@ -3149,6 +3259,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	   , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,[Qty]
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -3166,7 +3280,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2])
+      ,[Int2],[TenantId])
              (select [ReceiptDetailId]
       ,[ReceiptReceivingId]
       ,[CustomerId]
@@ -3187,6 +3301,10 @@ DECLARE @NumberRemaining FLOAT
       ,[BoxCode]
       ,[TrayCode]
       ,[BatchCode]
+	   , [LotCode]
+     , [PoCode] 
+     , [Weight] 
+     , [Volume] 
       ,@NumberRemaining
       ,[ProductionDate]
       ,[ExpirationDate]
@@ -3204,7 +3322,7 @@ DECLARE @NumberRemaining FLOAT
       ,[DateTime1]
       ,[DateTime2]
       ,[Int1]
-      ,[Int2] from WMS_Inventory_Usable where Id=@IId)
+      ,[Int2] ,[TenantId] from WMS_Inventory_Usable where Id=@IId)
 	       
 	           UPDATE WMS_Inventory_Usable
               SET    Qty=(ABS(@NumberRemaining)-@IQty)
@@ -3277,7 +3395,9 @@ DECLARE @NumberRemaining FLOAT
   CLOSE cursor_adjustmentDetail --关闭游标
 
   DEALLOCATE cursor_adjustmentDetail --释放游标
-
+    insert @Information(Id,OrderNumber,CustomerName,Note,InformationType,SKU,InventoryQty,Qty)
+  select Id,ExternNumber,CustomerName,'库存冻结差异','库存冻结',SKU,ToQty,Qty from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
+  and ToQty<>Qty
  	 ---当ToQty = Qty 的时候意味着全部处理完成，改变订单状态
 	 if((select COUNT(1) from WMS_AdjustmentDetail where AdjustmentId=@AdjustmentId
 	 and ToQty<>Qty)>0)
@@ -3292,7 +3412,7 @@ DECLARE @NumberRemaining FLOAT
 		 
 	   COMMIT;
 	 end
-	 
+	   select * from @Information
 
   IF Cursor_status('local', 'cursor_adjustmentDetail') <> -3
   BEGIN

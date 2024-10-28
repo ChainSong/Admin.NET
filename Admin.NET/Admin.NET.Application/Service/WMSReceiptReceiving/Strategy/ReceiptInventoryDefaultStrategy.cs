@@ -101,8 +101,35 @@ namespace Admin.NET.Application.Strategy
                 if (receipt != null && receipt.ReceiptStatus == (int)ReceiptStatusEnum.上架)
                 {
                     //var receiptreceiving = _wms_receiptreceivingRepository.GetAll().Where(b => b.ReceiptId == a).ToList();
-                    if (receipt.ReceiptReceivings.Sum(r => r.ReceivedQty) == receipt.ReceiptReceivings.Sum(r => r.ReceivedQty))
+                    if (receipt.Details.Sum(r => r.ReceivedQty) == receipt.ReceiptReceivings.Sum(r => r.ReceivedQty))
                     {
+                        //对比每一条数据，如果入库数量和上架数量一致，就加入库存
+                        foreach (var detail in receipt.Details)
+                        {
+                            if (detail.ReceivedQty < receipt.ReceiptReceivings.Where(a => a.ReceiptDetailId == detail.Id).Sum(r => r.ReceivedQty))
+                            {
+                                orderStatuses.Add(new OrderStatusDto()
+                                {
+                                    Id = id,
+                                    ExternOrder = receipt.ExternReceiptNumber,
+                                    SystemOrder = receipt.ReceiptNumber,
+                                    StatusCode = StatusCode.Error,
+                                    //StatusMsg = StatusCode.error.ToString(), 
+                                    Msg = "SKU：" + detail.SKU + "行号：" + detail.LineNumber + "，上架数量和订单不符"
+                                });
+
+
+                            }
+                        }
+                        if (orderStatuses.Count > 0)
+                        {
+                            response.Data = orderStatuses;
+                            response.Code = StatusCode.Error;
+                            response.Msg = "加入库存失败，请检查订单数量";
+                            //throw new NotImplementedException();
+                            return response;
+                        }
+
                         var inventoryData = mapper.Map<List<WMSInventoryUsable>>(receipt.ReceiptReceivings);
                         //inventory.AddRange(inventoryData);
                         //添加到库存表
@@ -197,6 +224,11 @@ namespace Admin.NET.Application.Strategy
                             //StatusMsg = StatusCode.error.ToString(), 
                             Msg = "请检查订单数量"
                         });
+                        response.Data = orderStatuses;
+                        response.Code = StatusCode.Error;
+                        response.Msg = "加入库存失败，请检查订单数量";
+                        //throw new NotImplementedException();
+                        return response;
                     }
                 }
                 else if (receipt.ReceiptStatus != (int)ReceiptStatusEnum.上架)
@@ -210,6 +242,11 @@ namespace Admin.NET.Application.Strategy
                         //StatusMsg = StatusCode.error.ToString(),
                         Msg = "请检查订单状态"
                     });
+                    response.Data = orderStatuses;
+                    response.Code = StatusCode.Error;
+                    response.Msg = "加入库存失败，请检查订单状态";
+                    //throw new NotImplementedException();
+                    return response;
                 }
             };
 

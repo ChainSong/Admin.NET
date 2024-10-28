@@ -11,8 +11,12 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Admin.NET.Core.Service;
 using FluentEmail.Core;
-using RunBowLibaray.RulesEngine;
+using Microsoft.CodeAnalysis;
+using Nest;
+using Newtonsoft.Json;
+using RulesEngine.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,111 +25,179 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
+using Rule = RulesEngine.Models.Rule;
 
 namespace Admin.NET.Application.Service;
 public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
 {
 
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
-    //public readonly SqlSugarRepository<TableColumnsDetail> _repDetail { get; set; }
     public UserManager _userManager { get; set; }
 
     static List<TableColumns> tableColumnList = new List<TableColumns>();
-    //public List<string> _tableNames { get; set; }
 
-    //public CheckColumnDefaultStrategy(List<string> tableNames)
+    public List<string> _tableNames { get; set; }
+
     public CheckColumnDefaultStrategy()
     {
-        //this._tableNames = tableNames;
-
+        //_tableNames = tableNames;
     }
-    public async Task<Response<List<OrderStatusDto>>> CheckColumns<T>(IEnumerable<T> collection, string tableName)
+
+    public virtual async Task<Response<List<OrderStatusDto>>> CheckColumns<T>(IEnumerable<T> collection, string tableName)
     {
+
+        //var aa=RunBowLibaray.RulesEngine.RuleManage
+
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
         List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
-        //List<AddOrUpdateWMSASNInput> tableNames = new List<AddOrUpdateWMSASNInput>();
-        tableColumnList = GetColumns(tableName);
-        statusDtos = ValidateCollection<T>(collection, tableName);
-        //验证数据
-        if (statusDtos.Count > 0)
-        {
-            response.Code = StatusCode.Error;
-        }
-        else
-        {
-            response.Code = StatusCode.Success;
-        }
-        //response.Result = statusDtos;
-        response.Data = statusDtos;
 
-        //throw new NotImplementedException();
-        return response;
-    }
-
-
-    public static List<OrderStatusDto> ValidateCollection<T>(IEnumerable<T> collection, string tableName)
-    {
-        List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
-        foreach (var item in collection)
+        try
         {
-            statusDtos.AddRange(ValidateItem(item, tableName));
-        }
-        return statusDtos;
-    }
-
-    private static List<OrderStatusDto> ValidateItem<T>(T item, string tableName)
-    {
-        List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
-        foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var tableColumn = tableColumnList.Where(a => a.DbColumnName == property.Name).FirstOrDefault();
-            if (tableColumn == null || tableColumn.Validation != "Required")
+            tableColumnList = GetColumns(tableName);
+            Workflow[] workflowRules = new Workflow[1];
+            List<Rule> rules = new List<Rule>();
+            foreach (var item in tableColumnList)
             {
-                continue;
-            }
-            var value = property.GetValue(item);
-            if (string.IsNullOrEmpty(value.ToString()))
-            {
-                statusDtos.Add(new OrderStatusDto()
+                if (item.Validation == "Required")
                 {
-                    StatusCode = StatusCode.Warning,
-                    Msg = property.Name + ":数据不能为空"
-                });
+                    Rule rule = new Rule();
+                    rule.RuleName = item.DbColumnName;
+                    if (item.Type == "DropDownListInt" || item.Type == "DropDownListStr")
+                    {
+                        //rule.Id = item.DbColumnName;
+
+                        rule.ErrorMessage = item.DisplayName + "不能为空";
+                        rule.Expression = "!string.IsNullOrEmpty(" + item.DbColumnName + ")";
+
+                    }
+                    else if (item.Type == "DateTimePicker" || item.Type == "DatePicker")
+                    {
+                        rule.ErrorMessage = "时间格式不正确";
+                        rule.Expression = "Convert.ToDateTime(" + item.DbColumnName + ").Year>2000";
+                    }
+                    else
+                    {
+                        rule.ErrorMessage = item.DisplayName + "不能为空";
+                        rule.Expression = "!string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
+
+                        //判断是否包含空格
+                        //rule.Expression = "string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
+
+                    }
+                    rules.Add(rule);
+                }
+            }
+            workflowRules[0] = (new WorkflowRules() { Rules = rules, WorkflowName = "UserInputWorkflow" });
+            //反序列化Json格式规则字符串
+            //var workflowRuless = JsonConvert.DeserializeObject<List<WorkflowRules>>(workflowRules);
+
+            //初始化规则引擎
+            var rulesEngine = new RulesEngine.RulesEngine(workflowRules);
+            //List<RuleResultTree> resultList = new List<RuleResultTree>();
+            int flag = 1;
+            foreach (var item in collection)
+            {
+                //使用规则进行判断，并返回结果
+                var result = await rulesEngine.ExecuteAllRulesAsync("UserInputWorkflow", item);
+
+                foreach (var rule in result.Where(a => a.IsSuccess == false))
+                {
+                    statusDtos.Add(new OrderStatusDto()
+                    {
+                        StatusCode = StatusCode.Warning,
+                        Msg = rule.Rule.ErrorMessage,
+                        ExternOrder = "第" + flag + "行",
+                        SystemOrder = "第" + flag + "行",
+                    });
+                }
+                flag++;
+            } 
+            //验证数据
+            if (statusDtos.Count > 0)
+            {
+                response.Code = StatusCode.Error;
             }
             else
             {
-                if (tableColumn.Type == "DropDownListInt" && tableColumn.tableColumnsDetails.Where(a => a.Name == value.ToString()).Count() == 0)
-                {
-                    statusDtos.Add(new OrderStatusDto()
-                    {
-                        StatusCode = StatusCode.Warning,
-                        Msg = property.Name + ":数据错误,“" + value + "”不在系统提供范围内"
-                    });
-                }
-                else if (tableColumn.Type == "DropDownListStr" && tableColumn.tableColumnsDetails.Where(a => a.Name == value.ToString()).Count() == 0)
-                {
-                    statusDtos.Add(new OrderStatusDto()
-                    {
-                        StatusCode = StatusCode.Warning,
-                        Msg = property.Name + ":数据错误,“" + value + "”不在系统提供范围内"
-                    });
-                }
-                else if (tableColumn.Type == "DatePicker" || tableColumn.Type == "DateTimePicker")
-                {
-                    var isDate = DateTime.TryParse(value.ToString(), out DateTime date);
-                    if (!isDate && date.Year < 2000)
-                    {
-                        statusDtos.Add(new OrderStatusDto()
-                        {
-                            StatusCode = StatusCode.Warning,
-                            Msg = property.Name + ":数据错误,“" + value + "”不是有效格式"
-                        });
-                    }
-                }
+                response.Code = StatusCode.Success;
             }
+            //response.Result = statusDtos;
+            response.Data = statusDtos;
+
+            //throw new NotImplementedException();
+            return response;
+
         }
-        return statusDtos;
+        catch (Exception ex)
+        {
+            return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = ex.Message };
+        }
     }
+
+
+    //public static List<OrderStatusDto> ValidateCollection<T>(IEnumerable<T> collection, string tableName)
+    //{
+    //    List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
+    //    foreach (var item in collection)
+    //    {
+    //        statusDtos.AddRange(ValidateItem(item, tableName));
+    //    }
+    //    return statusDtos;
+    //}
+
+    //private static List<OrderStatusDto> ValidateItem<T>(T item, string tableName)
+    //{
+    //    List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
+    //    foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+    //    {
+    //        var tableColumn = tableColumnList.Where(a => a.DbColumnName == property.Name).FirstOrDefault();
+    //        if (tableColumn == null || tableColumn.Validation != "Required")
+    //        {
+    //            continue;
+    //        }
+    //        var value = property.GetValue(item);
+    //        if (string.IsNullOrEmpty(value.ToString()))
+    //        {
+    //            statusDtos.Add(new OrderStatusDto()
+    //            {
+    //                StatusCode = StatusCode.Warning,
+    //                Msg = property.Name + ":数据不能为空"
+    //            });
+    //        }
+    //        else
+    //        {
+    //            if (tableColumn.Type == "DropDownListInt" && tableColumn.tableColumnsDetails.Where(a => a.Name == value.ToString()).Count() == 0)
+    //            {
+    //                statusDtos.Add(new OrderStatusDto()
+    //                {
+    //                    StatusCode = StatusCode.Warning,
+    //                    Msg = property.Name + ":数据错误,“" + value + "”不在系统提供范围内"
+    //                });
+    //            }
+    //            else if (tableColumn.Type == "DropDownListStr" && tableColumn.tableColumnsDetails.Where(a => a.Name == value.ToString()).Count() == 0)
+    //            {
+    //                statusDtos.Add(new OrderStatusDto()
+    //                {
+    //                    StatusCode = StatusCode.Warning,
+    //                    Msg = property.Name + ":数据错误,“" + value + "”不在系统提供范围内"
+    //                });
+    //            }
+    //            else if (tableColumn.Type == "DatePicker" || tableColumn.Type == "DateTimePicker")
+    //            {
+    //                var isDate = DateTime.TryParse(value.ToString(), out DateTime date);
+    //                if (!isDate && date.Year < 2000)
+    //                {
+    //                    statusDtos.Add(new OrderStatusDto()
+    //                    {
+    //                        StatusCode = StatusCode.Warning,
+    //                        Msg = property.Name + ":数据错误,“" + value + "”不是有效格式"
+    //                    });
+    //                }
+    //            }
+    //        }
+    //    }
+    //    return statusDtos;
+    //}
 
 
     //private static List<OrderStatusDto> ValidateItemDetail<T>(T item, string tableName)

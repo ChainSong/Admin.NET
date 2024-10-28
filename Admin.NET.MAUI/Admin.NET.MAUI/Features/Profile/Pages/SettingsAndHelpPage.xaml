@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI.SettingsAndHelpPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    Title="Cài đặt và Hỗ trợ"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:SettingsAndHelpPageViewModel"
+    Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="48,*" RowSpacing="0">
+        <Grid
+            BackgroundColor="{x:Static app:AppColors.White}"
+            RowDefinitions="48"
+            Shadow="{x:Static app:Styles.Shadow1}"
+            VerticalOptions="End">
+            <Label
+                HorizontalTextAlignment="Center"
+                Style="{x:Static app:Styles.Title4}"
+                Text="Cài đặt và Hỗ trợ"
+                TextColor="{x:Static app:AppColors.Black}"
+                VerticalOptions="Center" />
+            <ImageButton
+                Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                Command="{Binding BackCommand}"
+                HorizontalOptions="Start"
+                Source="ic_back.png"
+                VerticalOptions="Center" />
+        </Grid>
+        <Grid Grid.Row="1" BackgroundColor="{x:Static app:AppColors.BrColor}">
+            <VerticalStackLayout Spacing="0">
+                <Button
+                    Margin="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingLg},
+                                            Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    Command="{Binding CancelRelationshipCommand}"
+                    Style="{x:Static app:Styles.ButtonAccent}"
+                    Text="Hủy ghép đôi" />
+
+                <app:SettingItemView
+                    Title="Cài đặt"
+                    Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingSm},
+                                             Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    IconSource="ic_cog.png">
+                    <app:SettingItemView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ViewSettingsCommand}" />
+                    </app:SettingItemView.GestureRecognizers>
+                </app:SettingItemView>
+
+                <app:SettingItemView
+                    Title="Thông báo"
+                    Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingSm},
+                                             Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    IconSource="ic_bell.png">
+                    <app:SettingItemView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ViewNotificationsCommand}" />
+                    </app:SettingItemView.GestureRecognizers>
+                </app:SettingItemView>
+
+                <app:SettingItemView
+                    Title="Trung tâm hỗ trợ"
+                    Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingSm},
+                                             Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    IconSource="ic_phone_call.png"
+                    ShowRightAngle="False">
+                    <app:SettingItemView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SupportCommand}" />
+                    </app:SettingItemView.GestureRecognizers>
+                </app:SettingItemView>
+
+                <app:SettingItemView
+                    Title="Đăng xuất"
+                    Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingSm},
+                                             Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    IconSource="ic_exit.png"
+                    ShowRightAngle="False">
+                    <app:SettingItemView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SignOutCommand}" />
+                    </app:SettingItemView.GestureRecognizers>
+                </app:SettingItemView>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</app:BasePage>

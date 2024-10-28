@@ -1,13 +1,13 @@
-﻿<template>
+<template>
 	<view>
 		<cu-custom bgColor="bg-gradual-blue" :isBack="true">
 			<block slot="backText">返回</block>
 			<block slot="content">{{form.receiptNumber}}</block>
 		</cu-custom>
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
-			<view class="cu-form-group round">
+			<view class="cu-form-group ">
 				<input v-model="form.scanInput" id="scanInput" v-focus="input" v-select="input" ref="input" name="input"
-					@keypress="scanAcquisition()" clearable="" placeholder="请扫描"></input>
+					@confirm="scanAcquisition()" clearable="" placeholder="请扫描"></input>
 				<!-- <button class="cu-btn bg-blue shadow-blur round" @tap="getOrderList()">查询</button> -->
 			</view>
 			<view class="cu-list menu-avatar">
@@ -63,7 +63,7 @@
 					lot: "",
 					expirationDate: "",
 					externReceiptNumber: "",
-					receiptNumber:"",
+					receiptNumber: "",
 					sn: "",
 					scanInput: "",
 				},
@@ -89,34 +89,32 @@
 		},
 		methods: {
 			async scanAcquisition() {
-				if (event.keyCode === 13) {
-					 
-					this.form.sku = "";
-					this.form.lot = "";
-					this.form.expirationDate = "";
-					this.form.sn = "";
-					let acquisitionData = this.form.scanInput.split('|');
+				this.form.sku = "";
+				this.form.lot = "";
+				this.form.expirationDate = "";
+				this.form.sn = "";
+				let acquisitionData = this.form.scanInput.split('|');
 
-					if (acquisitionData.length == 3) {
-						this.form.sku = acquisitionData[1];
-						this.form.sn = acquisitionData[2] ?? "";
-					} else {
-						this.form.sku = acquisitionData[1];
-						this.form.lot = acquisitionData[2] ?? "";
-						this.form.expirationDate = acquisitionData[3] ?? "";
-						// state.value.vm.form.sn = acquisitionData[4] ?? "";
-					}
-					let res = await saveAcquisition(this.form);
-					if (res.data.result.code == "1") {
-						uni.showLoading({
-							title: '操作成功...'
-						});
-					} else {
-						uni.showLoading({
-							title: "操作失败:" + res.data.result.msg
-						});
-					}
+				if (acquisitionData.length == 3) {
+					this.form.sku = acquisitionData[1];
+					this.form.sn = acquisitionData[2] ?? "";
+				} else {
+					this.form.sku = acquisitionData[1];
+					this.form.lot = acquisitionData[2] ?? "";
+					this.form.expirationDate = acquisitionData[3] ?? "";
+					// state.value.vm.form.sn = acquisitionData[4] ?? "";
 				}
+				let res = await saveAcquisition(this.form);
+				if (res.data.result.code == "1") {
+					uni.showLoading({
+						title: '操作成功...'
+					});
+				} else {
+					uni.showLoading({
+						title: "操作失败:" + res.data.result.msg
+					});
+				}
+
 			}
 		}
 	}

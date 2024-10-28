@@ -10,7 +10,7 @@
 							<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
 								:prop="i.columnName">
 								<template v-if="i.type == 'TextBox'">
-									<el-input placeholder="请输入内容" size="small" style="width:90%" :disabled="i.isUpdate = 1"
+									<el-input placeholder="请输入内容" size="small" style="width:90%" :disabled="i.isUpdate==0"
 										v-model="state.header[i.columnName]" v-if="i.isCreate">
 									</el-input>
 								</template>
@@ -56,7 +56,6 @@
 					</el-row>
 				</el-form>
 			</el-card>
-			<el-button @click="handleAdd" type="primary" size="large" class="toolbar-btn">添加一条</el-button>
 			<el-card>
 				<el-form label-position="top" :model="state" ref="detailRuleRef" :rules="detailRule">
 					<el-table :data="state.details" height="250">
@@ -184,8 +183,7 @@ const state = ref({
 let headerRuleRef = ref<any>({});
 let headerRule = ref({});
 let detailRuleRef = ref<any>({});
-let detailRule = ref({});
-
+let detailRule = ref({}); 
 
 //父级传递来的函数，用于回调
 const emit = defineEmits(["reloadTable"]);
@@ -228,7 +226,6 @@ const cancel = () => {
 // 提交
 const submit = async () => {
 	state.value.header.details = state.value.details
-
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {

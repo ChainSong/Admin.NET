@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="Admin.NET.MAUI.CoupleMilestoneExpandedView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI"
+    xmlns:mtk="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Name="root"
+    x:DataType="app:NewsFeedModel">
+    <Grid
+        BackgroundColor="{x:Static app:AppColors.White}"
+        RowDefinitions="16,61,16,Auto,16,36,16"
+        RowSpacing="0">
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="16,61,12,*,16"
+            ColumnSpacing="0"
+            RowDefinitions="*,*">
+            <Grid
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="1">
+                <Border
+                    BackgroundColor="{x:Static app:AppColors.LightBlue}"
+                    Stroke="{x:Static app:AppColors.White}"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="1" />
+                <Image
+                    Aspect="AspectFill"
+                    HeightRequest="60"
+                    HorizontalOptions="Center"
+                    Source="{Binding AvatarUrl}"
+                    VerticalOptions="Center"
+                    WidthRequest="60">
+                    <Image.Clip>
+                        <RoundRectangleGeometry CornerRadius="12" Rect="0,0,60,60" />
+                    </Image.Clip>
+                </Image>
+            </Grid>
+
+
+            <Label
+                Grid.Column="3"
+                LineBreakMode="TailTruncation"
+                MaxLines="1"
+                Style="{x:Static app:Styles.Title5}"
+                Text="{Binding Title}"
+                VerticalOptions="End" />
+            <HorizontalStackLayout
+                Grid.Row="1"
+                Grid.Column="3"
+                Spacing="{x:Static app:Dimens.SpacingXs}"
+                VerticalOptions="Start">
+                <Image
+                    HorizontalOptions="Start"
+                    Source="ic_date.png"
+                    VerticalOptions="Center" />
+                <Label
+                    HorizontalOptions="Start"
+                    Style="{x:Static app:Styles.Body3}"
+                    Text="{Binding CreatedAt, StringFormat='{0:MMM dd, yy}'}"
+                    TextColor="{x:Static app:AppColors.Grey30}"
+                    VerticalOptions="Center" />
+                <Image
+                    Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalOptions="Start"
+                    Source="ic_pin.png"
+                    VerticalOptions="Center" />
+                <Label
+                    HorizontalOptions="Start"
+                    Style="{x:Static app:Styles.Body3}"
+                    Text="{Binding Location}"
+                    TextColor="{x:Static app:AppColors.Grey30}"
+                    VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <ImageButton
+            Grid.RowSpan="2"
+            Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd},
+                                     Vertical={x:Static app:Dimens.SpacingSm}}"
+            Command="{Binding MoreCommand, Source={x:Reference root}}"
+            HorizontalOptions="End"
+            Source="ic_hoz_more.png"
+            VerticalOptions="Start">
+            <ImageButton.Behaviors>
+                <mtk:IconTintColorBehavior TintColor="{x:Static app:AppColors.Grey30}" />
+            </ImageButton.Behaviors>
+        </ImageButton>
+
+        <Label
+            Grid.Row="3"
+            Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+            Style="{x:Static app:Styles.Subtitle6}"
+            Text="{Binding Content}"
+            TextColor="{x:Static app:AppColors.Grey40}" />
+
+        <HorizontalStackLayout
+            Grid.Row="5"
+            Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+            Spacing="{x:Static app:Dimens.SpacingMd}">
+            <Image
+                Aspect="AspectFill"
+                HeightRequest="28"
+                HorizontalOptions="Start"
+                Source="ic_messaging.png"
+                VerticalOptions="Center"
+                WidthRequest="28">
+                <Image.Behaviors>
+                    <mtk:IconTintColorBehavior TintColor="{x:Static app:AppColors.Grey20}" />
+                </Image.Behaviors>
+            </Image>
+            <Label
+                Style="{x:Static app:Styles.Subtitle6}"
+                Text="Hồi ức của bạn là gì?"
+                TextColor="{x:Static app:AppColors.Grey30}"
+                VerticalOptions="Center" />
+
+            <HorizontalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ReplyCommand, Source={x:Reference root}}" />
+            </HorizontalStackLayout.GestureRecognizers>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentView>
+

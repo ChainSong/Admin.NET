@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="Admin.NET.MAUI.CoupleHeaderView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI"
+    x:Name="root"
+    x:DataType="app:HomePageViewModel">
+    <Grid
+        BackgroundColor="{x:Static app:AppColors.White}"
+        RowDefinitions="182,30,30,80,4"
+        RowSpacing="0">
+        <Grid Grid.RowSpan="2">
+            <Image Aspect="AspectFill" Source="{Binding CoupleCoverUrl}" />
+            <ContentView BackgroundColor="{x:Static app:AppColors.Grey10}" Opacity="0.33" />
+
+            <VerticalStackLayout
+                Padding="{app:EdgeInsets All={x:Static app:Dimens.SpacingSm}}"
+                HorizontalOptions="End"
+                Spacing="{x:Static app:Dimens.SpacingXs}"
+                VerticalOptions="End">
+                <HorizontalStackLayout
+                    BindableLayout.ItemsSource="{Binding DaysSinceMet, StringFormat='{0}'}"
+                    HorizontalOptions="End"
+                    Spacing="{x:Static app:Dimens.SpacingXs}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="40" RowDefinitions="42">
+                                <Border
+                                    BackgroundColor="{x:Static app:AppColors.Grey60}"
+                                    Opacity="0.35"
+                                    StrokeShape="RoundRectangle 5,5,5,5"
+                                    StrokeThickness="0" />
+                                <Label
+                                    Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingSm},
+                                                             Vertical={x:Static app:Dimens.SpacingXs}}"
+                                    HorizontalTextAlignment="Start"
+                                    Style="{x:Static app:Styles.Title1}"
+                                    Text="{Binding .}"
+                                    TextColor="{x:Static app:AppColors.White}"
+                                    VerticalTextAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+
+                <Grid HorizontalOptions="End">
+                    <Border
+                        BackgroundColor="{x:Static app:AppColors.Grey60}"
+                        Opacity="0.35"
+                        StrokeShape="RoundRectangle 5,5,5,5"
+                        StrokeThickness="0" />
+                    <Label
+                        Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingSm},
+                                                 Vertical={x:Static app:Dimens.SpacingXs}}"
+                        HorizontalTextAlignment="Center"
+                        Style="{x:Static app:Styles.Subtitle6}"
+                        Text="Ngày quen nhau"
+                        TextColor="{x:Static app:AppColors.White}" />
+                </Grid>
+            </VerticalStackLayout>
+
+        </Grid>
+
+        <Grid
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+            ColumnDefinitions="84"
+            ColumnSpacing="0">
+            <Border
+                BackgroundColor="{x:Static app:AppColors.Purple}"
+                HeightRequest="36"
+                HorizontalOptions="End"
+                Stroke="{x:Static app:AppColors.White}"
+                StrokeShape="RoundRectangle 18"
+                StrokeThickness="4"
+                WidthRequest="36" />
+            <Border
+                BackgroundColor="{x:Static app:AppColors.Pink}"
+                HeightRequest="56"
+                HorizontalOptions="Start"
+                Stroke="{x:Static app:AppColors.White}"
+                StrokeShape="RoundRectangle 28"
+                StrokeThickness="4"
+                WidthRequest="56" />
+        </Grid>
+
+        <Label
+            Grid.Row="3"
+            Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+            Style="{x:Static app:Styles.Title5}"
+            Text="Gà con . Hạt thóc" />
+
+        <HorizontalStackLayout
+            Grid.Row="2"
+            Grid.RowSpan="2"
+            Padding="{app:EdgeInsets All={x:Static app:Dimens.SpacingMd}}"
+            HorizontalOptions="End"
+            Spacing="{x:Static app:Dimens.SpacingSm}"
+            VerticalOptions="Start">
+            <ImageButton Command="{Binding AddCommand, Source={x:Reference root}}" Source="ic_new_story.png" />
+            <ImageButton Command="{Binding ModeCommand, Source={x:Reference root}}" Source="ic_grid.png" />
+        </HorizontalStackLayout>
+
+        <Grid
+            Grid.Row="3"
+            Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingSm},
+                                     Horizontal={x:Static app:Dimens.SpacingXl}}"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="0"
+            VerticalOptions="End">
+            <Button
+                Command="{Binding ViewMilestonesCommand, Source={x:Reference root}}"
+                Style="{x:Static app:Styles.ButtonOutlinedXs}"
+                Text="Cột mốc" />
+            <Button
+                Grid.Column="1"
+                Command="{Binding ViewObjectivesCommand, Source={x:Reference root}}"
+                Style="{x:Static app:Styles.ButtonFlatXs}"
+                Text="Mục tiêu" />
+        </Grid>
+
+        <ContentView Grid.Row="4" BackgroundColor="{x:Static app:AppColors.BrColor}" />
+    </Grid>
+</ContentView>
+

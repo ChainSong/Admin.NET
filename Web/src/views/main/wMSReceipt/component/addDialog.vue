@@ -131,6 +131,8 @@
 								:on-success="ImportExcel">
 								<el-button type="primary">点击上传</el-button>
 								<div class="el-upload__tip">只能上传xlsx/xls文件，且不超过500kb</div>
+								<div class="el-upload__tip">由于Excel版本格式冗杂，请统一将Excel单元格设置成为文本格式</div>
+								<div class="el-upload__tip">请保存Excel的时候删除一下空白行</div>
 							</el-upload>
 						</el-col>
 					</el-row>

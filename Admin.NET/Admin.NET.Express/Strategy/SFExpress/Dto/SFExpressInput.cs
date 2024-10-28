@@ -36,6 +36,13 @@ public class SFRootobjectPrint
     public string version { get; set; }
     public string fileType { get; set; }
     public string sync { get; set; }
+    
+    //public string language { get; set; }
+    //public string monthlyCard { get; set; }
+    //public string orderId { get; set; }
+    //public int parcelQty { get; set; }
+    //public int payMethod { get; set; }
+    //public double totalWeight { get; set; }
     public List<Document> documents { get; set; }
 }
 

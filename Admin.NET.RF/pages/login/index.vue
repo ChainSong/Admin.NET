@@ -24,15 +24,15 @@
 					<button @tap="login()">登 录</button>
 					<view class="reg" @tap="fogetpassword()">忘记密码</view>
 				</form>
-				<view class="t-f"><text>—————— 上海尼望软件 ——————</text></view>
+				<view class="t-f"><text>—————— W ——————</text></view>
 				<view class="t-e cl">
-					<view class="t-g">
+				<!-- 	<view class="t-g">
 						<image src="@/static/cumminsLogo.png"></image>
-					</view>
-					<view class="t-g">
+					</view> -->
+					<!-- <view class="t-g">
 						<view class="cu-avatar round sm margin-left bg-blue"
-							style="font-size: 0.8em;width:27px;height: 27px;">尼望</view>
-					</view>
+							style="font-size: 0.8em;width:27px;height: 27px;">W</view>
+					</view> -->
 				</view>
 			</view>
 		</view>

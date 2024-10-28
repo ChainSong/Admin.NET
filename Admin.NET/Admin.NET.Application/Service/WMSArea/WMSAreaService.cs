@@ -37,7 +37,7 @@ public class WMSAreaService : IDynamicApiController, ITransient
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.AreaName), u => u.AreaName.Contains(input.AreaName.Trim()))
-                    .WhereIF(input.AreaStatus > 0, u => u.AreaStatus == input.AreaStatus)
+                    .WhereIF(input.AreaStatus != 0, u => u.AreaStatus == input.AreaStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.AreaType), u => u.AreaType.Contains(input.AreaType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))

@@ -127,6 +127,7 @@
             </el-button>
             <el-button class="el-icon-printer"   type="text" @click="printExpress(scope.row)" size="small">打印
             </el-button>
+            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> 
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
             </el-button> -->
             <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
@@ -143,6 +144,7 @@
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
         :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
         @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
@@ -179,11 +181,7 @@ import sfExpress from "/@/api/expressInterface/sfExpress";
 
 const state = ref({
   vm: {
-    id: "",
-
-    // form: {
-    //     customerDetails: []
-    // } as any,
+    id: "", 
   },
   visible: false,
   loading: false,
@@ -198,13 +196,9 @@ const state = ref({
   tableColumnDetail: new TableColumns(),
   tableColumnDetails: new Array<TableColumns>(),
   //自定义提示
-  orderStatus: new Array<orderStatus>(),
-  // tableColumn: new TableColumns(),
-  // tableColumns: new Array<TableColumns>(),
-  // tableColumnsDetails: new Array<TableColumnsDetails>(),
-  //   tableColumnsDetail = ref();
+  orderStatus: new Array<orderStatus>(), 
 });
-
+const editTitle = ref("");
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
@@ -213,9 +207,6 @@ const loading = ref(false);
 const multipleTableRef = ref();
 const token = ref("");
 const expressConfig = ref({});
-
-// const select_order_number = ref('') //表格select选中的条数
-// const multipleSelection = ref([])
 //自定义提示
 const resultPopupShow = ref(false);
 // const tableData = ref<any>
@@ -226,9 +217,7 @@ const tableParams = ref({
   page: 1,
   pageSize: 10,
   total: 0,
-});
-// const editTitle = ref("");
-// const addTitle = ref("");
+}); 
 const queryTitle = ref("");
 const ptintTitle = ref("");
 
@@ -244,6 +233,11 @@ const gettableColumn = async () => {
 
 };
 
+// 打开编辑页面
+const openEdit = (row: any) => {
+editTitle.value = '编辑';
+editDialogRef.value.openDialog(row);
+};
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
@@ -255,24 +249,7 @@ const handleQuery = async () => {
   state.value.headers = res.data.result?.items ?? [];
   tableParams.value.total = res.data.result?.total;
   loading.value = false;
-};
-
-// // 打开新增页面
-// const openAdd = () => {
-// addTitle.value = '添加';
-// addDialogRef.value.openDialog({});
-// };
-
-// // 打开编辑页面
-// const openEdit = (row: any) => {
-
-// if (row.PickStatus != 1) {
-//   ElMessage.warning("订单状态不允许编辑");
-//   return;
-// }
-// editTitle.value = '编辑';
-// editDialogRef.value.openDialog(row);
-// };
+}; 
 // 打开查询页面
 const openQuery = (row: any) => {
   queryTitle.value = '查看';
@@ -303,196 +280,35 @@ const del = (row: any) => {
 
 // 打印快递单
 const printExpress = async (row: any) => {
-
 ElMessageBox.confirm(`确定要打印吗?`, "提示", {
   confirmButtonText: "确定",
   cancelButtonText: "取消",
   type: "warning",
 })
-  .then(async () => {
-    // console.log(row);
+  .then(async () => { 
     if (row.expressCompany == "顺丰快递") {
-        // let resToken = await getExpressConfig(row);
-        // // console.log("resToken")
-        // if (resToken.data.result.code == 1) {
-        //   // console.log(resToken)
-        //   expressConfig.value = resToken.data.result.data;
-        // }
-
-        // console.log(expressConfig.value);
         let res = await printExpressData(row);
-        // alert(res.data.result.code);
         if(res.data.result.code==-1)
         {
           ElMessage.error(res.data.result.msg);
           return ;
-        }
-       
-        // alert(res.data.result.data.expressNumber);
-        // // console.log(expressConfig.value);
-        // sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-        // sdkParams.partnerID = expressConfig.value.partnerId;
-        // sdkParams.callback = sdkCallback;
-        // sdkParams.notips = true;
-        // printSdk = new SCPPrint(sdkParams);
-        // };
-        console.log(expressConfig.value);
-        //print(res.data.result.data.expressNumber, expressConfig.value.token);
+        } 
         sfExpress.print(res.data.result.data)
-        // allPackage(state.value.vm.form);
     }
   })
-  .catch(() => { });
-// allPackage(state.value.vm.form);
-};
-
-
-
-
+  .catch(() => { }); 
+}; 
 // 改变页面容量
 const handleSizeChange = (val: number) => {
   tableParams.value.pageSize = val;
   handleQuery();
 };
-
 // 改变页码序号
 const handleCurrentChange = (val: number) => {
   tableParams.value.page = val;
   handleQuery();
 };
-
-
 handleQuery();
-
-
-// const sdkCallback = result => {};
-//     const sdkParams = {
-//       env: "pro", // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-//       partnerID: "HJSRJOEY88G9",
-//       callback: sdkCallback,
-//       notips: false
-//     };
-//     const printSdk = new SCPPrint(sdkParams);
-
-// // 鑾峰彇鎵撳嵃鏈哄垪琛�
-// const getPrintersCallback = result => {
-//       if (result.code === 1) {
-//         const printers = result.printers;
-
-//         const selectElement = document.getElementById("printers");
-
-//         // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
-//         for (let i = 0; i < printers.length; i++) {
-//           const item = printers[i];
-//           var option = document.createElement("option");
-//           option.innerHTML = item.name;
-//           option.value = item.index;
-//           selectElement.appendChild(option);
-//         }
-
-//         // 璁剧疆榛樿鎵撳嵃鏈�
-//         var printer = 0;
-//         selectElement.value = printer;
-//         printSdk.setPrinter(printer);
-//       }
-//     };
-//     printSdk.getPrinters(getPrintersCallback);
-
-
-//   // 鎵撳嵃
-//   function print(masterWaybillNo: string,token:string) {
-//       const data = {
-//         requestID: "HJSRJOEY88G9",
-//         accessToken: token,
-//         templateCode: "fm_150_standard_HJSRJOEY88G9",
-//         templateVersion: "",
-//         documents: [
-//           {
-//             masterWaybillNo: masterWaybillNo
-//           }
-//         ],
-//         extJson: {},
-//         customTemplateCode: ""
-//       };
-//       console.log("data");
-//       console.log(data);
-//       const callback = function(result) {};
-//       const options = {
-//         lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
-//       };
-//       printSdk.print(data, callback, options);
-//     }
-
-
-
-// // --------------------顺丰快递打印-----------------------
-// // 寮曞叆SDK鍚庡垵濮嬪寲瀹炰緥锛屼粎鎵ц涓€娆�
-// const sdkCallback = result => { };
-// let sdkParams = {
-//   env: expressConfig.value.env, // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-//   partnerID: expressConfig.value.partnerId,
-//   callback: sdkCallback,
-//   notips: true
-// };
-// let printSdk = new SCPPrint(sdkParams);
-
-
-// // 鑾峰彇鎵撳嵃鏈哄垪琛�
-// const getPrintersCallback = result => {
-//   if (result.code === 1) {
-//     const printers = result.printers;
-
-//     const selectElement = document.getElementById("printers");
-
-//     // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
-//     for (let i = 0; i < printers.length; i++) {
-//       const item = printers[i];
-//       var option = document.createElement("option");
-//       option.innerHTML = item.name;
-//       option.value = item.index;
-//       selectElement.appendChild(option);
-//     }
-
-//     // 璁剧疆榛樿鎵撳嵃鏈�
-//     var printer = 0;
-//     selectElement.value = printer;
-//     printSdk.setPrinter(printer);
-//   }
-// };
-// printSdk.getPrinters(getPrintersCallback);
-
-// // 閫夋嫨鎵撳嵃鏈�
-// const selectPrinter = (e) => {
-//   // 璁剧疆鎵撳嵃鏈�
-//   printSdk.setPrinter(e.target.value);
-// }
-
-// // 鎵撳嵃
-// const print = (masterWaybillNo: string) => {
-//   console.log(expressConfig.value);
-//   const data = {
-//     requestID: expressConfig.value.partnerId,
-//     accessToken: expressConfig.value.token,
-//     templateCode: expressConfig.value.templateCode,
-//     templateVersion: "",
-//     documents: [
-//       {
-//         masterWaybillNo: masterWaybillNo
-//       }
-//     ],
-//     extJson: {},
-//     customTemplateCode: ""
-//   };
-//   const callback = function (result) { };
-//   const options = {
-//     lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
-//   };
-//   console.log(printSdk);
-//   console.log(printSdk.print(data, callback, options));
-// };
-
-
-
 </script>
 
 

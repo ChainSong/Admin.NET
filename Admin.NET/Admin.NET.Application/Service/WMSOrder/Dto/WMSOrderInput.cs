@@ -311,7 +311,7 @@ namespace Admin.NET.Application;
         /// <summary>
         /// OrderStatus
         /// </summary>
-        public int? OrderStatus { get; set; }
+        public int OrderStatus { get; set; }
         
         /// <summary>
         /// OrderTime

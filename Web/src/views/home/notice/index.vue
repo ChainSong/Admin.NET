@@ -15,7 +15,8 @@
 					<el-button-group>
 						<el-button type="primary" icon="ele-Search" @click="handleQuery"> 查询 </el-button>
 						<el-button icon="ele-Refresh" @click="resetQuery"> 重置 </el-button>
-						<el-button type="primary" icon="ele-Plus" @click="openAllRead" v-auth="'sysNotice:page'"> 全部已读 </el-button>
+						<el-button type="primary" icon="ele-Plus" @click="openAllRead"> 全部已读 </el-button>  
+						<!-- v-auth="'sysNotice:page'" -->
 					</el-button-group>
 				</el-form-item>
 			</el-form>

@@ -62,7 +62,7 @@ public class MMSMaterialService : IDynamicApiController, ITransient
                     .WhereIF(input.SupplierId > 0, u => u.SupplierId == input.SupplierId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SupplierName), u => u.SupplierName.Contains(input.SupplierName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKU), u => u.SKU.Contains(input.SKU.Trim()))
-                    .WhereIF(input.ProductStatus > 0, u => u.ProductStatus == input.ProductStatus)
+                    .WhereIF(input.ProductStatus != 0, u => u.ProductStatus == input.ProductStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsName), u => u.GoodsName.Contains(input.GoodsName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsType), u => u.GoodsType.Contains(input.GoodsType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKUClassification), u => u.SKUClassification.Contains(input.SKUClassification.Trim()))

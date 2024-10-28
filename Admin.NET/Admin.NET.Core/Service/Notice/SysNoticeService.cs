@@ -195,4 +195,33 @@ public class SysNoticeService : IDynamicApiController, ITransient
         notice.PublicUserName = _userManager.RealName;
         notice.PublicOrgId = _userManager.OrgId;
     }
+
+
+    /// <summary>
+    /// 发布通知公告
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [DisplayName("发布通知公告给自己")]
+    public async Task PublicByUser(NoticeInput input, long userId)
+    {
+        // 更新发布状态和时间
+        await _sysNoticeRep.UpdateAsync(u => new SysNotice() { Status = NoticeStatusEnum.PUBLIC, PublicTime = DateTime.Now }, u => u.Id == input.Id);
+
+        var notice = await _sysNoticeRep.GetFirstAsync(u => u.Id == input.Id);
+
+        // 通知到的人(自己)
+        var userIdList = await _sysUserRep.AsQueryable().Where(c => c.Id == userId).Select(u => u.Id).ToListAsync();
+
+        await _sysNoticeUserRep.DeleteAsync(u => u.NoticeId == notice.Id);
+        var noticeUserList = userIdList.Select(u => new SysNoticeUser
+        {
+            NoticeId = notice.Id,
+            UserId = u,
+        }).ToList();
+        await _sysNoticeUserRep.InsertRangeAsync(noticeUserList);
+
+        // 广播所有在线账号
+        await _sysOnlineUserService.PublicNotice(notice, userIdList);
+    }
 }

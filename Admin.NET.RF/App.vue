@@ -101,7 +101,7 @@
 					title: '雅白',
 					name: 'white',
 					color: '#ffffff'
-				},
+				}
 			]
 
 		},

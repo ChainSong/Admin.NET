@@ -16,6 +16,11 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using System.Data;
+using NewLife;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -25,37 +30,17 @@ namespace Admin.NET.Application;
 public class WMSLowCodeService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSLowCode> _rep;
-
-    //private readonly SqlSugarRepository<TableColumns> _rep;
-    //private readonly SqlSugarRepository<TableColumnsDetail> _repDetail;
     private readonly UserManager _userManager;
-
-    //private readonly ISqlSugarClient _db;
-
-    //private readonly SqlSugarRepository<TableColumnsDetail> _repDetail;
-    //private readonly SysRoleMenu _repRoleMenu;
-
-
-
     private readonly SqlSugarRepository<SysMenu> _repMenu;
     private readonly SqlSugarRepository<SysRoleMenu> _repRoleMenu;
-    //private readonly SqlSugarRepository<SysRole> _repRole; 
-
-
     private readonly SqlSugarRepository<SysUserRole> _repUserRole;
     public WMSLowCodeService(SqlSugarRepository<WMSLowCode> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<SysMenu> repMenu, SqlSugarRepository<SysRoleMenu> repRoleMenu, SqlSugarRepository<SysUserRole> repUserRole)
     {
         _rep = rep;
         _userManager = userManager;
-        //_db = db;
         _repMenu = repMenu;
         _repRoleMenu = repRoleMenu;
         _repUserRole = repUserRole;
-        //_repRole = repRole;
-        //_repMenu = repMenu;
-        //_repRoleMenu = repRoleMenu;
-
-
     }
 
     /// <summary>
@@ -101,7 +86,8 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     {
         Response response = new Response();
         //判断SQL 语句有没有注入的风险
-        if (!ProcessSqlStr(input.SQLCode)) {
+        if (!ProcessSqlStr(input.SQLCode))
+        {
             response.Code = StatusCode.Warning;
             response.Msg = "有风险的SQL语句";
             return response;
@@ -118,16 +104,19 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
         //将UI另存为文件
         var path = TextHelper.Writtxt(input.UICode, input.MenuName);
         entity.UICode = path;
+        entity.Creator = _userManager.Account;
+        entity.CreationTime = DateTime.Now;
         await _rep.InsertAsync(entity);
 
+        var menu = _repMenu.AsQueryable().Where(a => a.Title == "自定义").ToList().First();
         //构建新的菜单
         SysMenu menuData = new SysMenu();
         menuData.Id = 0;
         menuData.Title = input.MenuName;
         menuData.Name = input.MenuName;
         //将路径转换成MD5 存文字路由会有问题
-        menuData.Path = "/develop/" + MD5Helper.CalcMD5(input.MenuName);
-        menuData.Pid = 1310000000601;
+        menuData.Path = "/custom/" + MD5Helper.CalcMD5(input.MenuName);
+        menuData.Pid = menu.Id;
         menuData.Type = MenuTypeEnum.Menu;
         menuData.Component = "/system/formDes/lowCodePage";
         menuData.Icon = "ele-Basketball";
@@ -146,7 +135,6 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
         var getRoleId = _repUserRole.AsQueryable().Where(a => a.UserId == _userManager.UserId).First();
         //1300000000101
         SysRoleMenu roleMenuData = new SysRoleMenu();
-        //var roleMenuData = _repRoleMenu.AsQueryable().Where(a => a.RoleId == getRoleId.Id).ToList().First();
         roleMenuData.MenuId = menuId.Id;
         //针对超级管理员特殊操作
         roleMenuData.RoleId = _userManager.RealName == "超级管理员" ? 1300000000101 : getRoleId.RoleId;
@@ -155,7 +143,6 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
         response.Code = StatusCode.Success;
         response.Msg = "添加成功";
         return response;
-        //var page = _repMenu.AsQueryable().Where(a => a.Id == 15143302587845);
     }
 
 
@@ -168,18 +155,15 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     /// true-安全；false-有注入攻击现有；
     public bool ProcessSqlStr(string inputString)
     {
-        string SqlStr = @"and|or|exec|execute|insert|select|delete|update|alter|create|drop|count|\*|chr|char|asc|mid|substring|master|truncate|declare|xp_cmdshell|restore|backup|net +user|net +localgroup +administrators";
+        string SqlStr = @"exec|execute|insert|delete|update|alter|create|drop|\*|chr|char|asc|mid|substring|master|truncate|declare|xp_cmdshell|restore|backup|net +user|net +localgroup +administrators";
         try
         {
             if ((inputString != null) && (inputString != String.Empty))
             {
                 string str_Regex = @"\b(" + SqlStr + @")\b";
-
                 Regex Regex = new Regex(str_Regex, RegexOptions.IgnoreCase);
-                //string s = Regex.Match(inputString).Value; 
                 if (true == Regex.IsMatch(inputString))
                     return false;
-
             }
         }
         catch
@@ -241,8 +225,6 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
             }
 
         }
-        //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        //await _rep.DeleteAsync(entity);   //假删除
     }
 
     /// <summary>
@@ -271,10 +253,8 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
     public async Task<WMSLowCode> Get(string name)
     {
         var entity = await _rep.AsQueryable().Where(u => u.MenuName == name).FirstAsync();
-
         string UICode = TextHelper.Readtxt(entity.UICode);
         entity.UICode = UICode;
-
         return entity;
     }
 
@@ -296,7 +276,54 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "GetData")]
-    public async Task<Response<dynamic>> GetData(dynamic input)
+    public async Task<Response<dynamic, int>> GetData(dynamic input)
+    {
+        string name = input.name;
+        string page = input.page;
+        string pageSize = input.pageSize;
+        string total = input.total;
+
+        Response<dynamic, int> response = new Response<dynamic, int>();
+        //string str = input;
+        Dictionary<string, string> pairs = GetModelDictionary(input.formDataModel);
+        StringBuilder strSql = new StringBuilder();
+        var sqlCode = _rep.AsQueryable().Where(u => u.MenuName == name).ToList();
+        if (sqlCode.Count > 0)
+        {
+            strSql.Append(sqlCode[0].SQLCode);
+            foreach (var item in pairs)
+            {
+                if (!string.IsNullOrEmpty(item.Value))
+                {
+                    strSql.Append(" and " + item.Key + "='" + item.Value + "'");
+                }
+            }
+            //获取总数和列名称
+
+            DataTable dt = _rep.Context.Ado.GetDataTable(strSql.ToString().Replace("select ", "SELECT TOP 1 COUNT(*) Total, "));
+            if (dt.Rows.Count > 0)
+            {
+                response.Result = Convert.ToInt32(dt.Rows[0]["Total"]);
+                strSql.Append(" ORDER BY ");
+
+                //strSql.Append("ORDER BY ");
+
+                strSql.Append(string.Join(",", dt.Columns.Cast<DataColumn>().Where(c => c.ColumnName != "Total").Select(c => "'" + c.ColumnName + "'").ToArray()));
+                //foreach (DataColumn dc in dt.Columns)
+                //{
+                //    strSql.Append("" + dc.ColumnName);
+                //}
+            }
+            var data = _rep.Context.Ado.GetDataTable(strSql.ToString());
+            response.Data = data;
+        }
+        return response;
+    }
+
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetExcel")]
+    public ActionResult GetExcel(dynamic input)
     {
         string name = input.name;
 
@@ -318,7 +345,13 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
             var data = _rep.Context.Ado.GetDataTable(strSql.ToString());
             response.Data = data;
         }
-        return response;
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
     }
 
     /// <summary>

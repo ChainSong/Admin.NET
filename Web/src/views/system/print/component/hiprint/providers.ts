@@ -134,10 +134,15 @@ export const aProvider = function () {
 					columns: [
 						[
 							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
+							{ title: '合同编号', align: 'center', field: 'poCode', width: 250 },
 							{ title: '产品名称', align: 'center', field: 'goodsName', width: 150 },
+							{ title: '订货号', align: 'center', field: 'sku', width: 150 },
 							{ title: '货号', align: 'center', field: 'sku' , width: 150 },
 							{ title: '数量', align: 'center', field: 'allocatedQty' , width: 150 },
 							{ title: '单位', align: 'center', field: 'unitCode' , width: 150 },
+							{ title: '箱号', align: 'center', field: 'boxCode' , width: 150 },
+							{ title: '批次号', align: 'center', field: 'batchCode' , width: 150 },
+							{ title: 'LOT', align: 'center', field: 'lotCode' , width: 150 },
 							{ title: '父件SKU', align: 'center', field: 'parentSku' , width: 150 },
 							{ title: '备注', align: 'center', field: 'remark' , width: 150 },
 							// { title: '名称', align: 'center', field: 'NAME', width: 150 },

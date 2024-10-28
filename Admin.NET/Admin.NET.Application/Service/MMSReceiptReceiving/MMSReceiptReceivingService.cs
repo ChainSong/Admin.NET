@@ -86,7 +86,7 @@ public class MMSReceiptReceivingService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SupplierName), u => u.SupplierName.Contains(input.SupplierName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
-                    .WhereIF(input.ReceiptReceivingStatus > 0, u => u.ReceiptReceivingStatus == input.ReceiptReceivingStatus)
+                    .WhereIF(input.ReceiptReceivingStatus != 0, u => u.ReceiptReceivingStatus == input.ReceiptReceivingStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptReceivingType), u => u.ReceiptReceivingType.Contains(input.ReceiptReceivingType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Remark), u => u.Remark.Contains(input.Remark.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))

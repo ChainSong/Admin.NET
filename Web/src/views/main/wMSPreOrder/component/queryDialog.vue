@@ -96,10 +96,10 @@
 							<el-descriptions class="margin-top" :column="2" size="small" border>
 								<template
 									v-for="q in state.tableColumnExtends.filter(q => q.isCreate == 1 || q.isKey == 1)">
-									<el-descriptions-item :prop="q.displayName" :label="q.displayName">
-									 
+									<el-descriptions-item   :prop="q.displayName" :label="q.displayName">
 										<template v-if="q.type == 'UploadFile'">
-											<a :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a>
+											<!-- <a  :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a> -->
+											<a  :href="isBaseURL(state.extend[q.columnName])" target="_blank">{{ state.extend[q.columnName] }}</a>
 										</template>
 										<template v-else-if="q.type == 'TextBox'">
 											<label font-family="Helvetica Neue"
@@ -180,6 +180,13 @@ let activeMainName: string = 'OrderInfo';
 //自行添加其他规则
 // const rules = ref<FormRules>({
 // });
+const isBaseURL= (row: string) =>  {
+    if (row!="" && row!=undefined && row.includes("http")){
+        return row;
+    }else{
+        return baseURL+row;
+    }
+};
 
 // 打开弹窗
 const openDialog = (row: any) => {

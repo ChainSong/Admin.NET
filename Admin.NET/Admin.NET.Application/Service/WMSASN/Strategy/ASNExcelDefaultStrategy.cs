@@ -79,6 +79,7 @@ namespace Admin.NET.Application.Strategy
                 });
                 response.Result = statusDtos;
                 response.Data = request;
+                response.Code = StatusCode.Error;
                 //response.Code = StatusCode.Success;
                 //throw new NotImplementedException();
                 return response;

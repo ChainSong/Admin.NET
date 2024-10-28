@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiAdmin", "MauiAdmin\MauiAdmin.csproj", "{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.MAUI", "Admin.NET.MAUI\Admin.NET.MAUI.csproj", "{6328DEB2-7DC7-419A-A307-6EE54998B25C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Services", "Admin.NET.Services\Admin.NET.Services.csproj", "{223F1E71-227B-4D52-8CDA-C87F67D26FE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Common", "Admin.NET.Common\Admin.NET.Common.csproj", "{93FB8C18-A906-459A-B33F-D827ED5B34AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.NET.Entity", "Admin.NET.Entity\Admin.NET.Entity.csproj", "{985B6E80-AFDA-41A7-A644-32DDA9295F83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Admin.NET.MAUI2C", "Admin.NET.MAUI2C\Admin.NET.MAUI2C.csproj", "{2373D6B1-B6BC-4118-B7BB-378A457CB51C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6328DEB2-7DC7-419A-A307-6EE54998B25C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{223F1E71-227B-4D52-8CDA-C87F67D26FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{223F1E71-227B-4D52-8CDA-C87F67D26FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{223F1E71-227B-4D52-8CDA-C87F67D26FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{223F1E71-227B-4D52-8CDA-C87F67D26FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93FB8C18-A906-459A-B33F-D827ED5B34AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93FB8C18-A906-459A-B33F-D827ED5B34AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93FB8C18-A906-459A-B33F-D827ED5B34AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93FB8C18-A906-459A-B33F-D827ED5B34AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{985B6E80-AFDA-41A7-A644-32DDA9295F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{985B6E80-AFDA-41A7-A644-32DDA9295F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{985B6E80-AFDA-41A7-A644-32DDA9295F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{985B6E80-AFDA-41A7-A644-32DDA9295F83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2373D6B1-B6BC-4118-B7BB-378A457CB51C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8C72768E-1338-4B87-B8B0-F77F0F4508BD}
+	EndGlobalSection
+EndGlobal

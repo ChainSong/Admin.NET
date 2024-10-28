@@ -119,17 +119,22 @@
             </template>
           </template>
           <el-table-column fixed="right" label="操作" width="200">
+            <template #header>
+									<el-select placeholder="请选择">
+										<template v-for="item in state.tableColumnHeaders">
+										<el-option v-if="item.isShowInList==1" :key="item.value">
+											<el-checkbox  @change="checked => showColumnOption(checked, item)"
+												:true-label="1" :false-label="0" :label="item.displayName"
+												:key="item.columnName" v-model="item.isShowInList">{{ item.displayName}}</el-checkbox>
+										</el-option>
+									</template>
+									</el-select>
+								</template>
             <template #default="scope">
               <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
               </el-button>
               <el-button @click="del(scope.row)" class="el-icon-delete" type="text" size="small">删除
-              </el-button>
-              <!-- <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> -->
-              <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
-                icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
-                <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
-                  size="small">删除</el-button>
-              </el-popconfirm> -->
+              </el-button> 
 
             </template>
           </el-table-column>
@@ -239,6 +244,14 @@ const handleQuery = async () => {
 const openAdd = () => {
   addTitle.value = '添加';
   addDialogRef.value.openDialog({});
+};
+
+const showColumnOption = async (value :any,item: any) => {
+  if(value==1){
+    item.isShowInList=1;
+  }else{
+    item.isShowInList=0;
+  }
 };
 
 // 打开编辑页面

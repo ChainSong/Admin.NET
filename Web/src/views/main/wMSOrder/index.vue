@@ -72,7 +72,16 @@
 
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出
+            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出出库单
+            </el-button>
+            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
+          </el-button-group>
+
+        </el-form-item>
+
+        <el-form-item>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Download" @click="exportPackageFun" v-auth="'wMSOrder:export'"> 导出包装
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
@@ -183,7 +192,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder } from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder ,exportPackage} from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import printDialog from '/@/views/tools/printDialog.vue';
@@ -368,6 +377,25 @@ const automatedAllocationFun = () => {
     .catch(() => { });
 };
 
+
+
+
+//导出包装
+const exportPackageFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  let res = await exportPackage(ids);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 
 //导出出库单
 const exportOrderFun = async () => {

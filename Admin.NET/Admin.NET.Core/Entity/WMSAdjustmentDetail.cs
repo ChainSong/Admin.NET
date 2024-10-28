@@ -103,13 +103,51 @@ public class WMSAdjustmentDetail : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "货品名称", Length = 100)]
     public string? GoodsName { get; set; }
-    
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? LotCode { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PoCode { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public float? Weight { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public float? Volume { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? ProductionDate { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? ExpirationDate { get; set; }
+
+
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? FromWarehouseName { get; set; }
-    
+
+
+
     /// <summary>
     /// 
     /// </summary>

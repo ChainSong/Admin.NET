@@ -128,7 +128,7 @@ namespace Admin.NET.Application.Strategy
             //});
 
             //var AdjustmentData = mapper.Map<List<WMS_Adjustment>>(request);
-            
+
 
             int LineNumber = 1;
             foreach (var item in AdjustmentData)
@@ -151,8 +151,8 @@ namespace Admin.NET.Application.Strategy
                 foreach (var a in item.Details)
                 {
 
-                    var fromLocation = _repLocation.AsQueryable().Where(l => l.WarehouseId == a.WarehouseId && l.Location == a.FromLocation).First();
-                    var toLocation = _repLocation.AsQueryable().Where(l => l.WarehouseId == a.WarehouseId && l.Location == a.ToLocation).First();
+                    var fromLocation = _repLocation.AsQueryable().Where(l => l.WarehouseName == a.WarehouseName && l.Location == a.FromLocation).First();
+                    var toLocation = _repLocation.AsQueryable().Where(l => l.WarehouseName == a.WarehouseName && l.Location == a.ToLocation).First();
 
                     if (fromLocation == null)
                     {
@@ -186,7 +186,7 @@ namespace Admin.NET.Application.Strategy
                         //return response;
                         continue;
                     }
-                    a.AdjustmentNumber = item.AdjustmentNumber; 
+                    a.AdjustmentNumber = item.AdjustmentNumber;
                     item.ExternNumber = item.ExternNumber;
                     a.CustomerId = CustomerId;
                     a.CustomerName = item.CustomerName;
@@ -200,6 +200,12 @@ namespace Admin.NET.Application.Strategy
                 //{
                 //});
                 LineNumber++;
+            }
+            if (response.Data!=null &&  response.Data.Count > 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "导入失败";
+                return response;
             }
             //AdjustmentData.ForEach(item =>
             //{

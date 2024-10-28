@@ -2,6 +2,7 @@
 import { ref, onMounted, nextTick } from "vue";
 import request from '/@/utils/request';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
+import { forEach } from "lodash-es";
 
 const expressConfig = ref({});
 // --------------------顺丰快递打印-----------------------
@@ -19,82 +20,116 @@ let printSdk = new SCPPrint(sdkParams);
 
 // 鑾峰彇鎵撳嵃鏈哄垪琛�
 const getPrintersCallback = result => {
-    if (result.code === 1) {
-      const printers = result.printers;
-  
-      const selectElement = document.getElementById("printers");
-  
-      // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
-      for (let i = 0; i < printers.length; i++) {
-        const item = printers[i];
-        var option = document.createElement("option");
-        option.innerHTML = item.name;
-        option.value = item.index;
-        selectElement.appendChild(option);
-      }
-  
-      // 璁剧疆榛樿鎵撳嵃鏈�
-      var printer = 0;
-      selectElement.value = printer;
-      // console.log("printerprinter")
-      // console.log("printerprinter")
-      // console.log("printerprinter")
-      // console.log(printer)
-      printSdk.setPrinter(printer);
-    }
-  };
-  printSdk.getPrinters(getPrintersCallback);
-  
-  // 閫夋嫨鎵撳嵃鏈�
-  const selectPrinter = (e) => {
-    // 璁剧疆鎵撳嵃鏈�
-    printSdk.setPrinter(e.target.value);
-  }
-  export const getExpress= async(express:any)=>{
-    // let res = await printExpressData(row);
-    // alert(res.data.result.data.expressNumber);
-    // console.log(expressConfig.value);
-   
-    let resToken = await getExpressConfig(express);
-    // console.log("resToken")
-    if (resToken.data.result.code == 1) {
-      // console.log(resToken)
-      expressConfig.value = resToken.data.result.data;
-    }
-  sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-    sdkParams.partnerID = expressConfig.value.partnerId;
-    sdkParams.callback = sdkCallback;
-    sdkParams.notips = true;
-    printSdk = new SCPPrint(sdkParams);
+  if (result.code === 1) {
+    const printers = result.printers;
 
+    const selectElement = document.getElementById("printers");
+
+    // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
+    for (let i = 0; i < printers.length; i++) {
+      const item = printers[i];
+      var option = document.createElement("option");
+      option.innerHTML = item.name;
+      option.value = item.index;
+      selectElement.appendChild(option);
+    }
+
+    // 璁剧疆榛樿鎵撳嵃鏈�
+    var printer = 0;
+    selectElement.value = printer;
+    // console.log("printerprinter")
+    // console.log("printerprinter")
+    // console.log("printerprinter")
+    // console.log(printer)
+    printSdk.setPrinter(printer);
   }
-  // 鎵撳嵃
-  export const print = async (express:any) => {
-    //获取token；
-   await  getExpress(express);
-    //  console.log("expressConfig.value");
-    //  console.log(expressConfig.value);
-    //  console.log(express);
-    const data = {
+};
+printSdk.getPrinters(getPrintersCallback);
+
+// 閫夋嫨鎵撳嵃鏈�
+const selectPrinter = (e) => {
+  // 璁剧疆鎵撳嵃鏈�
+  printSdk.setPrinter(e.target.value);
+}
+export const getExpress = async (express: any) => {
+  // let res = await printExpressData(row);
+  // alert(res.data.result.data.expressNumber);
+  // console.log(expressConfig.value);
+
+  let resToken = await getExpressConfig(express);
+  // console.log("resToken")
+  if (resToken.data.result.code == 1) {
+    // console.log(resToken)
+    expressConfig.value = resToken.data.result.data;
+  }
+  sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
+  sdkParams.partnerID = expressConfig.value.partnerId;
+  sdkParams.callback = sdkCallback;
+  sdkParams.notips = true;
+  printSdk = new SCPPrint(sdkParams);
+
+}
+// 鎵撳嵃
+export const print = async (express: any) => {
+  //获取token；
+   await getExpress(express);
+  //  console.log("expressConfig.value");
+  //  console.log(expressConfig.value);
+  //  console.log(express);
+  let data = {};
+  console.log("express");
+  console.log(express);
+  if (express.sumOrder == 1) {
+    data = {
       requestID: expressConfig.value.partnerId,
       accessToken: expressConfig.value.token,
       templateCode: expressConfig.value.templateCode,
       templateVersion: "",
       documents: [
         {
-          masterWaybillNo: express.expressNumber
+          masterWaybillNo: express.expressNumber,
+          seq: 1,
+          sum: 1,
         }
       ],
       extJson: {},
       customTemplateCode: ""
     };
-    const callback = function (result) { };
-    const options = {
-      lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
+  } else {
+    data = {
+      requestID: expressConfig.value.partnerId,
+      accessToken: expressConfig.value.token,
+      templateCode: expressConfig.value.templateCode,
+      templateVersion: "",
+      documents: [
+        {
+          masterWaybillNo: express.expressNumber,
+          seq: express.waybillType,
+          sum: express.sumOrder,
+        }
+      ],
+      extJson: {},
+      customTemplateCode: ""
     };
-    console.log(printSdk);
-    console.log(printSdk.print(data, callback, options));
+  }
+  if (express.details.length > 0) {
+    data.documents[0].remark = express.packageNumber + "::";
+    express.details.forEach(a => {
+      data.documents[0].remark += (a.sku + "*" + a.qty + ";")
+    })
+
+
+  }
+
+  console.log("expressData");
+  console.log(data);
+  const callback = function (result) { };
+  const options = {
+    lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
   };
-  
-  // 导出   实例
-export default {print,getExpress};
+  console.log(printSdk);
+  console.log(printSdk.print(data, callback, options));
+};
+
+// 导出   实例
+export default { print, getExpress };

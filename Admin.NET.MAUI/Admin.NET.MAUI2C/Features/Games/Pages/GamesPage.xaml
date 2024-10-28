@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI2C.GamesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI2C"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    Title="系统"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:GamesPageViewModel"
+    BackgroundColor="{x:Static app:AppColors.BrColor}"
+    Shell.NavBarIsVisible="False">
+    <!--<Grid RowDefinitions="48,*">-->
+        <!--<Grid RowDefinitions="48" VerticalOptions="End">
+            <Label
+                HorizontalTextAlignment="Center"
+                Style="{x:Static app:Styles.Title4}"
+                Text="Trò chơi"
+                TextColor="{x:Static app:AppColors.Black}"
+                VerticalOptions="Center" />
+            <Grid.Shadow>
+                <Shadow
+                    Opacity="0.1"
+                    Radius="20"
+                    Offset="0,4">
+                    <Shadow.Brush>
+                        <SolidColorBrush Color="{x:Static app:AppColors.Purple}" />
+                    </Shadow.Brush>
+                </Shadow>
+            </Grid.Shadow>
+        </Grid>
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <StackLayout Spacing="0">
+                <Label
+                    Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingXxl},
+                                            Top={x:Static app:Dimens.SpacingXxl},
+                                            Bottom={x:Static app:Dimens.SpacingLg}}"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Title1}"
+                    Text="Trang chủ"
+                    TextColor="{x:Static app:AppColors.Grey60}" />
+            </StackLayout>
+        </ScrollView>
+    </Grid>-->
+    <WebView x:Name="webView" Margin="{app:EdgeInsets Top=10, Bottom=10, Horizontal={x:Static app:Dimens.SpacingLg}}" HorizontalOptions="Center" VerticalOptions="EndAndExpand" HeightRequest="100" IsVisible="False"  />
+</app:BasePage>

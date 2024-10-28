@@ -82,7 +82,7 @@
   import { ElMessageBox, ElMessage } from "element-plus";
   import { auth } from '/@/utils/authFunction';
   //import { formatDate } from '/@/utils/formatTime';
-
+  
   import editDialog from '/@/views/main/wMSLowCode/component/editDialog.vue'
   import { pageWMSLowCode, deleteWMSLowCode } from '/@/api/main/wMSLowCode';
 

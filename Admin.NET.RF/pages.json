@@ -139,6 +139,12 @@
 		}, {
 			"path": "pages/wMSRFReceiptAcquisition/component/editDialog",
 			"style": {}
+		}, {
+			"path": "pages/wMSReceiptReceiving/index",
+			"style": {}
+		}, {
+			"path": "pages/wMSReceiptReceiving/component/editDialog",
+			"style": {}
 		}
 		
 	],

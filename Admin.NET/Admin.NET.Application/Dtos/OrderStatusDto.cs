@@ -1,6 +1,7 @@
 ﻿
 
 using Admin.NET.Application.Dtos.Enum;
+using Nest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +20,11 @@ namespace Admin.NET.Application.Dtos
         /// <summary>
         /// 系统单号
         /// </summary>
-        public string SystemOrder { get; set; }
+        public string SystemOrder { get; set; } = "";
         /// <summary>
         /// 客户单号
         /// </summary>
-        public string ExternOrder { get; set; }
+        public string ExternOrder { get; set; } = "";
         /// <summary>
         /// 状态代码
         /// </summary>
@@ -61,3 +62,4 @@ namespace Admin.NET.Application.Dtos
 
     }
 }
+

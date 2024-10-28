@@ -1,0 +1,57 @@
+import Entity from './entity'
+export default class stockCheckDetail extends Entity<number>{
+    stockCheckId:number;
+    stockCheckNumber:string;
+    externNumber:string;
+    customerId:number;
+    customerName:string;
+    warehouseId:number;
+    warehouseName:string;
+    area:string;
+    location:string;
+    sKU:string;
+    uPC:string;
+    goodsType:string;
+    goodsName:string;
+    unitCode:string;
+    onwer:string;
+    boxCode:string;
+    trayCode:string;
+    batchCode:string;
+    lotCode:string;
+    poCode:string;
+    productionDate:string;
+    expirationDate:string;
+    inventoryQty:number;
+    checkQty:number;
+    remark:string;
+    stockCheckStatus:number;
+    checkUser:string;
+    checkAccount:string;
+    stockCheckTime:string;
+    creator:string;
+    creationTime:string;
+    updator:string;
+    updateTime:string;
+    str1:string;
+    str2:string;
+    str3:string;
+    str4:string;
+    str5:string;
+    str6:string;
+    str7:string;
+    str8:string;
+    str9:string;
+    str10:string;
+    dateTime1:string;
+    dateTime2:string;
+    dateTime3:string;
+    dateTime4:string;
+    dateTime5:string;
+    int1:string;
+    int2:string;
+    int3:string;
+    int4:string;
+    int5:string;
+
+}

@@ -49,7 +49,11 @@ public class AutomatedAllocationJob : IJob
         var repSysNotice = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNotice>>();
         var repSysNoticeUser = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNoticeUser>>();
         var repSysTenant = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysTenant>>();
+        var noticeServic = serviceScope.ServiceProvider.GetService<SysNoticeService>();
+        var repWorkFlow = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysWorkFlow>>();
         var tenantdata = repSysTenant.AsQueryable().Select(a => a).ToList();
+
+
         foreach (var tenant in tenantdata)
         {
             //if (tenant.Id == 1300000000001)
@@ -80,28 +84,27 @@ public class AutomatedAllocationJob : IJob
             db.DbMaintenance.CreateDatabase();
             //db.DbMaintenance.c
             //var dasd = db.Queryable<WMSInstruction>();
-            var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by InstructionTaskNo");
-            if ( data != null && data.Count>0)
+            var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo,CustomerName, Creator from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by InstructionTaskNo");
+            if (data != null && data.Count > 0)
             {
                 List<WMSAdjustmentInformationDo> AdjustmentInfo = new List<WMSAdjustmentInformationDo>();
 
                 foreach (var instruction in data)
                 {
+                    //默认分配规则
+                    string procedureName = "Proc_WMS_AutomatedOutbound";
+                    //根据订单类型判断是否存在该流程
+                    var workflow = await repWorkFlow.AsQueryable()
+                       .Includes(a => a.SysWorkFlowSteps)
+                       .Where(a => a.WorkName == instruction.CustomerName + "自动分配").FirstAsync();
 
-                    //
-                    //foreach (var a in request)
-                    //{
-                    //    var sugarParameter = new SugarParameter("@AdjustmentId", a, typeof(long), ParameterDirection.Input);
-                    //    DataTable AdjustmentInfoData = await _repAdjustment.Context.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AdjustmentConfirmMove", sugarParameter);
-                    //    if (AdjustmentInfoData != null && AdjustmentInfoData.Rows.Count > 0)
-                    //    {
-                    //        AdjustmentInfo.AddRange(AdjustmentInfoData.TableToList<WMSAdjustmentInformationDto>());
-                    //    }
-                    //}
-
+                    if (workflow != null && workflow.SysWorkFlowSteps.Count() > 0)
+                    {
+                        procedureName = workflow.SysWorkFlowSteps[1].StepName;
+                    }
 
                     var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
-                    DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync("Proc_WMS_AutomatedOutbound", sugarParameter);
+                    DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync(procedureName, sugarParameter);
                     if (infoData != null && infoData.Rows.Count > 0)
                     {
                         AdjustmentInfo.AddRange(infoData.TableToList<WMSAdjustmentInformationDo>());
@@ -114,7 +117,7 @@ public class AutomatedAllocationJob : IJob
                     {
                         notice.Title = "库存不足";
                         //构建一个html的table
-                        notice.Content = "<table><tr><th>订单号</th><th>SKU</th><th>订单数量</th><th>库存数量</th></tr>";
+                        notice.Content = "<table border='1'><tr><th>订单号</th><th>SKU</th><th>订单数量</th><th>库存数量</th></tr>";
 
                         foreach (var item in AdjustmentInfo)
                         {
@@ -141,17 +144,21 @@ public class AutomatedAllocationJob : IJob
                     //修改任务状态
                     //await repInstruction.UpdateAsync(data.Result);
                     db.Ado.SqlQuery<WMSInstruction>("  update WMS_Instruction set  InstructionStatus=99 where InstructionTaskNo='" + instruction.InstructionTaskNo + "' ");
-
-                    //// 通知到的人（发布分配的人)
+                    NoticeInput noticeInput = new NoticeInput();
+                    noticeInput.Id = notice.Id;
                     var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == instruction.Creator).Select(u => u.Id).ToListAsync();
-                    //var userIdList= data.Result.InstructionStatus.
-                    await repSysNoticeUser.DeleteAsync(u => u.NoticeId == notice.Id);
-                    var noticeUserList = userIdList.Select(u => new SysNoticeUser
-                    {
-                        NoticeId = notice.Id,
-                        UserId = u,
-                    }).ToList();
-                    await repSysNoticeUser.InsertRangeAsync(noticeUserList);
+                    await noticeServic.PublicByUser(noticeInput, userIdList.First());
+
+                    // 通知到的人（发布分配的人)
+                    //var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == instruction.Creator).Select(u => u.Id).ToListAsync();
+                    ////var userIdList= data.Result.InstructionStatus.
+                    //await repSysNoticeUser.DeleteAsync(u => u.NoticeId == notice.Id);
+                    //var noticeUserList = userIdList.Select(u => new SysNoticeUser
+                    //{
+                    //    NoticeId = notice.Id,
+                    //    UserId = u,
+                    //}).ToList();
+                    //await repSysNoticeUser.InsertRangeAsync(noticeUserList);
                 }
             }
         }

@@ -35,6 +35,7 @@ using NPOI.SS.Formula.PTG;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 using Admin.NET.Application.Service.WMSExpress.Enumerate;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaGetWxaGameFrameResponse.Types.Data.Types.Frame.Types;
+using Admin.NET.Application.Service.WMSExpress.Dto;
 
 namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 
@@ -56,6 +57,7 @@ public class SFExpressStrategy : IExpressInterface
     //public ISqlSugarClient _db { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SqlSugarRepository<WMSExpressFee> _repWMSExpressFee { get; set; }
+    //public SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery { get; set; }
 
 
     public SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery { get; set; }
@@ -96,7 +98,7 @@ public class SFExpressStrategy : IExpressInterface
         List<SFCargodetail> sFCargodetails = new List<SFCargodetail>();
         packageDetail.ForEach(a =>
         {
-            sFCargodetails.Add(new SFCargodetail { name = a.GoodsName.Replace('(', ' ').Replace(')', ' ') });
+            sFCargodetails.Add(new SFCargodetail { name = a.OrderNumber + "| &" + a.PreOrderNumber });
         });
 
         var senderContact = "";
@@ -247,6 +249,7 @@ public class SFExpressStrategy : IExpressInterface
 
 
         //packageData.Details = sfexpress;
+        //await 【【【【【【【【【【【【【【【=】、、、【、【】‘、
         await _repExpressDelivery.InsertAsync(packageData);
         await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
@@ -294,10 +297,10 @@ public class SFExpressStrategy : IExpressInterface
 
 
         List<SFCargodetail> sFCargodetails = new List<SFCargodetail>();
-        packageDetail.ForEach(a =>
-        {
-            sFCargodetails.Add(new SFCargodetail { name = a.SKU.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ')+"："+a.Qty });
-        });
+        //packageDetail.ForEach(a =>
+        //{
+        sFCargodetails.Add(new SFCargodetail { name = packageDetail.First().PickTaskNumber.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ') });
+        //});
 
         var senderContact = "";
         var senderMobile = "";
@@ -370,7 +373,7 @@ public class SFExpressStrategy : IExpressInterface
             expressTypeId = 2, //快件产品类别表 https://open.sf-express.com/developSupport/734349?activeIndex=324604
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
-            contactInfoList = sFContactinfolists 
+            contactInfoList = sFContactinfolists
         };
 
         input.Checkword = getExpressConfig.Checkword;
@@ -387,6 +390,7 @@ public class SFExpressStrategy : IExpressInterface
             response.Code = StatusCode.Error;
             response.Msg = output.apiErrorMsg;
             return response;
+
         }
         if (apiresultdata.success.ToUpper() == "false".ToUpper())
         {
@@ -440,6 +444,8 @@ public class SFExpressStrategy : IExpressInterface
             item.RecipientsCounty = receiver.County;
             item.RecipientsCompany = receiver.ExpressCompany;
             item.ExpressNumber = Waybillnoinfolist[sfexpressflag].waybillNo; //sfexpress.WaybillNo;
+            item.WaybillType = Waybillnoinfolist[sfexpressflag].waybillType.ToString(); //sfexpress.waybillType;
+            item.SumOrder = Waybillnoinfolist.Length; //sfexpress.waybillType;
             item.RecipientsContact = receiver.Name;
             item.RecipientsTel = receiver.Phone;
             item.RecipientsAddress = receiver.Address;
@@ -453,18 +459,26 @@ public class SFExpressStrategy : IExpressInterface
 
         ///计算预计的价格
 
-
+        //package.ForEach(a =>
+        //{
+        //    a.ExpressNumber = Waybillnoinfolist[sfexpressflag].waybillNo;
+        //    sfexpressflag++;
+        //});
 
         //packageData.Details = sfexpress;
         await _repExpressDelivery.InsertRangeAsync(packageData);
         foreach (var c in packageData)
         {
-            await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
+            await _repPackage.AsUpdateable()
+                .SetColumns(a => a.ExpressNumber == c.ExpressNumber)
+                .Where(a => a.PackageNumber == c.PackageNumber)
+                .ExecuteCommandAsync();
+            //await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
         }
-      //  packageData.ForEach(c =>
-      //{
-      //    _repPackage.Update(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
-      //});
+        //  packageData.ForEach(c =>
+        //{
+        //    _repPackage.Update(a => new WMSPackage { ExpressNumber = c.ExpressNumber }, a => a.PackageNumber == c.PackageNumber);
+        //});
         //await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
         response.Msg = "成功";
@@ -549,10 +563,17 @@ public class SFExpressStrategy : IExpressInterface
         SFExpressInput<SFRootobjectPrint> input = new SFExpressInput<SFRootobjectPrint>();
 
         //获取包裹信息
-        //var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
 
         var expressConfig = _sysCacheService.Get<WMSExpressConfigOutput>("SFExpress_" + request.CustomerId + "_" + request.WarehouseId);
+        var flag = _sysCacheService.Get<int>("SFExpress_" + request.CustomerId + "_" + request.WarehouseId + "_" + request.PackageNumber + "_flag");
+        var flagCount = _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId + "_" + request.PackageNumber + "_flag", (flag + 1), new TimeSpan(1, 0, 0));
 
+        //同一个快递单，获取打印快递超过5次，就清理token 就更新token
+        if (expressConfig != null && flag >= 3)
+        {
+            expressConfig.Token = "";
+        }
         if (expressConfig != null && !string.IsNullOrEmpty(expressConfig.Token))
         {
             response.Msg = "成功";
@@ -565,12 +586,7 @@ public class SFExpressStrategy : IExpressInterface
 
         //获取快递信息
         var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == request.CustomerId && a.WarehouseId == request.WarehouseId && a.Status == 1).First();
-
         //var Express = _repExpressDelivery.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).FirstAsync();
-
-
-
-
         //WMSExpressConfigOutput wMSExpress = new WMSExpressConfigOutput();
 
         var wMSExpressConfig = getExpressConfig.Adapt<WMSExpressConfigOutput>();
@@ -580,17 +596,25 @@ public class SFExpressStrategy : IExpressInterface
             input.Checkword = getExpressConfig.Checkword;
             input.Url = getExpressConfig.Url;
             input.UrlToken = getExpressConfig.UrlToken;
+            input.UrlToken = "https://sfapi.sf-express.com/oauth2/accessToken";
             input.Env = getExpressConfig.Env;
             input.PartnerId = getExpressConfig.PartnerId;
-            input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
-                                                                 //input.Data = new SFRootobjectPrint()
-                                                                 //{
-                                                                 //    templateCode = "fm_150_standard_HJSRJOEY88G9",
-                                                                 //    version = "2.0",
-                                                                 //    fileType = "pdf",
-                                                                 //    sync = "true",
-                                                                 //    documents = new List<Document>() { new Document() { masterWaybillNo = package.ExpressNumber } }
-                                                                 //};
+            //input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
+            //input.Data = new SFRootobjectPrint();
+            //input.Data.orderId = package.PackageNumber;
+            //input.Data.monthlyCard = getExpressConfig.MonthAccount;//顺丰月结卡号 月结支付时传值，现结不需传值；沙箱联调可使用测试月结卡号7551234567（非正式，无须绑定，仅支持联调使用）
+            //input.Data.language = "zh-CN";
+            //input.Data.payMethod = 1; //付款方式，支持以下值： 1:寄方付 2:收方付 3:第三方付    
+
+
+            //input.Data = new SFRootobjectPrint()
+            //{
+            //    templateCode = "fm_150_standard_HJSRJOEY88G9",
+            //    version = "2.0",
+            //    fileType = "pdf",
+            //    sync = "true",
+            //    documents = new List<Document>() { new Document() { masterWaybillNo = package.ExpressNumber } }
+            //};
 
             string ResultData = ExpressApplication.TokenExpress(input);
 
@@ -665,17 +689,22 @@ public class SFExpressStrategy : IExpressInterface
     {
         Response<dynamic> response = new Response<dynamic>();
         //request.PackageNumber = "126370824143168";
-
         //获取包裹信息
-        var package = _repPackage.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).First();
+        var package = _repPackage.AsQueryable().Includes(a => a.Details).Where(a => a.PackageNumber == request.PackageNumber).First();
+        var result = package.Adapt<PrintSFExpressDto>();
         if (package != null && !string.IsNullOrEmpty(package.ExpressNumber))
         {
+            //获取快递信息
+            var getExpressDelivery = _repExpressDelivery.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.OrderNumber == package.OrderNumber && a.ExpressNumber == package.ExpressNumber).First();
+
             package.PrintNum = ((package.PrintNum ?? 0) + 1);
             package.PrintPersonnel = _userManager.Account;
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
+            result.WaybillType = getExpressDelivery.WaybillType;
+            result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
-            response.Data = package;
+            response.Data = result;
             response.Msg = "成功";
             response.Code = StatusCode.Success;
             return response;

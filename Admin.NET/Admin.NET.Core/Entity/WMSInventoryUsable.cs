@@ -306,4 +306,7 @@ public class WMSInventoryUsable : ITenantIdFilter
     [SugarColumn(ColumnDescription = "")]
     public int Int2 { get; set; }
 
+
+
+
 }

@@ -41,7 +41,7 @@ public class WMSPreOrderExtend  : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 100)]
+    [SugarColumn(ColumnDescription = "", Length = 300)]
     public string? ShippingAttachmentsUrl { get; set; }
     
     /// <summary>

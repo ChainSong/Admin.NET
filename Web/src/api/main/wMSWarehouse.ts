@@ -6,6 +6,7 @@ enum Api {
   PageWMSWarehouse = '/api/wMSWarehouse/page',
   GetWMSWarehouse = '/api/wMSWarehouse/Query',
   AllWMSWarehouse = '/api/wMSWarehouse/All',
+  SelectWarehouse = '/api/wMSWarehouse/SelectWarehouse',
 }
 
 // 增加WMSWarehouse
@@ -53,3 +54,10 @@ request({
 	method: 'get'
 });
 
+// selectWarehouse
+export const selectWarehouse = (params?: any) => 
+	request({
+		url: Api.SelectWarehouse,
+		method: 'post',
+		data: params,
+	});

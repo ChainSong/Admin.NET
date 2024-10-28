@@ -6,6 +6,7 @@ enum Api {
   PageWMSLowCode = '/api/wMSLowCode/page',
   GetWMSLowCode = '/api/wMSLowCode/Query',
   GetData = '/api/WMSLowCode/GetData',
+  GetExcel = '/api/WMSLowCode/GetExcel',
 //   AddLowCode = '/api/WMSLowCode/Add',
 //   GetLowCode = '/api/WMSLowCode/Query', 
   InitializeLowCode= '/api/WMSLowCode/Initialize',
@@ -59,6 +60,14 @@ request({
 	method: 'get'
 });
 	
+// 导出
+export const getExcel = (params?: any) =>
+	request({
+		url: Api.GetExcel,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
 
 // 查询单条
 // export const getLowCode = (params?: any) => 

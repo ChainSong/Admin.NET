@@ -48,7 +48,7 @@ public class WMSCustomerService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Description), u => u.Description.Contains(input.Description.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerType), u => u.CustomerType.Contains(input.CustomerType.Trim()))
-                    .WhereIF(input.CustomerStatus > 0, u => u.CustomerStatus == input.CustomerStatus)
+                    .WhereIF(input.CustomerStatus != 0, u => u.CustomerStatus == input.CustomerStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CreditLine), u => u.CreditLine.Contains(input.CreditLine.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Province), u => u.Province.Contains(input.Province.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.City), u => u.City.Contains(input.City.Trim()))

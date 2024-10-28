@@ -74,7 +74,7 @@ namespace System.Data
                                 }
                                 else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
                                 {
-                                    if (value== null || value.ToString() == "")
+                                    if (value == null || value.ToString() == "")
                                     {
                                         p.SetValue(model, Convert.ToInt32(0), null);
                                     }
@@ -86,7 +86,7 @@ namespace System.Data
 
                                 else if (p.PropertyType.GenericTypeArguments != null && p.PropertyType.GenericTypeArguments.Where(a => a.Name.Contains("Int")).Count() > 0 || p.PropertyType.Name.Contains("Int"))
                                 {
-                                    if (value==null || value.ToString() == "")
+                                    if (value == null || value.ToString() == "")
                                     {
                                         p.SetValue(model, Convert.ToInt32(0), null);
                                     }
@@ -112,7 +112,15 @@ namespace System.Data
                                 }
                                 else
                                 {
-                                    p.SetValue(model, value, null);
+                                    if (value == null)
+                                    {
+                                        p.SetValue(model, value, null);
+                                    }
+                                    else
+                                    {
+                                        p.SetValue(model, Convert.ToString(value).Trim(), null);
+                                    }
+
                                 }
                             }
                         }

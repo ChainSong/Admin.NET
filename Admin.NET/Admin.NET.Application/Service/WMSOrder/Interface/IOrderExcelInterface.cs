@@ -32,12 +32,14 @@ namespace Admin.NET.Application.Interface
 
         public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
 
-
+        public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+        public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
         public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
+ 
 
         /// <summary>
         /// 导出
@@ -45,5 +47,7 @@ namespace Admin.NET.Application.Interface
         /// <param name="request"></param>
         /// <returns></returns>
         Response<DataTable> Export(List<long> request);
+        Response<DataTable> ExportPackage(List<long> request);
     }
+    
 }

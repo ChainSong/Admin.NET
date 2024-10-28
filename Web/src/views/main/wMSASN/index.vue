@@ -5,7 +5,6 @@
         <el-row :gutter="[16, 15]">
           <template v-for="i in  state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
-
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
@@ -19,9 +18,7 @@
                       :label="item.name" :value="item.codeInt">
                     </el-option>
                   </el-select>
-
                 </el-form-item>
-
               </template>
               <template v-if="i.type == 'DropDownListStrRemote'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -72,7 +69,7 @@
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSASN:add'"> 新增
           </el-button>
         </el-form-item>
-       
+
         <el-form-item>
           <el-button type="primary" icon="ele-Download" @click="exportASNFun" v-auth="'wMSASN:export'"> 导出
           </el-button>
@@ -87,14 +84,13 @@
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
 
-      <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
-        >
+      <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id">
         <el-table-column type="selection" width="55">
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
             <el-table-column v-if="v.type == 'DropDownListInt'" v-bind:key="v.columnName" :fixed="false"
-              :prop="v.columnName" :label="v.displayName"   max-height="50">
+              :prop="v.columnName" :label="v.displayName" max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
                   <el-tag v-if="item.codeInt == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
@@ -105,7 +101,7 @@
               </template>
             </el-table-column>
             <el-table-column v-else-if="v.type == 'DropDownListStr'" v-bind:key="v.columnName" :fixed="false"
-              :prop="v.columnName" :label="v.displayName"  max-height="50">
+              :prop="v.columnName" :label="v.displayName" max-height="50">
               <template #default="scope">
                 <template v-for="item in v.tableColumnsDetails">
                   <el-tag v-if="item.codeStr == state.headers[scope.$index][v.columnName]" v-bind:key="item.codeStr"
@@ -116,25 +112,38 @@
               </template>
             </el-table-column>
             <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName"
-               max-height="50">
+              max-height="50">
             </el-table-column>
           </template>
         </template>
         <el-table-column fixed="right" label="操作" width="320">
+          <template #header>
+            <el-select placeholder="请选择">
+              <el-option v-for="item in state.tableColumnHeaders.filter(a=>a.isCreate==1)" :key="item.value">
+                <el-checkbox @change="checked =>showColumnOption(checked,item)" 
+                :true-label="1"
+                :false-label="0"
+                :label="item.displayName" :key="item.columnName"
+                  v-model="item.isShowInList">{{ item.displayName }}</el-checkbox>
+              </el-option>
+            </el-select>
+          </template>
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
             <el-button @click="openCancel(scope.row)" class="el-icon-s-comment" type="text" size="small">取消
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
-            <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text" size="small">转入库单(部分)</el-button>
+            <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text"
+              size="small">转入库单(部分)</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
@@ -157,7 +166,7 @@ import editDialog from '/@/views/main/wMSASN/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
 import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDialog.vue'
-import { pageWMSASN, deleteWMSASN, asnForReceipt,exportASN,cancelWMSASN } from '/@/api/main/wMSASN';
+import { pageWMSASN, deleteWMSASN, asnForReceipt, exportASN, cancelWMSASN } from '/@/api/main/wMSASN';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/asn";
@@ -188,10 +197,6 @@ const state = ref({
   tableColumnDetails: new Array<TableColumns>(),
   //自定义提示
   orderStatus: new Array<orderStatus>(),
-  // tableColumn: new TableColumns(),
-  // tableColumns: new Array<TableColumns>(),
-  // tableColumnsDetails: new Array<TableColumnsDetails>(),
-  //   tableColumnsDetail = ref();
 });
 
 const editDialogRef = ref();
@@ -200,8 +205,6 @@ const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
 const multipleTableRef = ref();
-// const select_order_number = ref('') //表格select选中的条数
-// const multipleSelection = ref([])
 //自定义提示
 const resultPopupShow = ref(false);
 // const tableData = ref<any>
@@ -223,13 +226,18 @@ onMounted(async () => {
   gettableColumn();
 });
 
+const showColumnOption = async (value :any,item: any) => {
+  if(value==1){
+    item.isShowInList=1;
+  }else{
+    item.isShowInList=0;
+  }
+};
 const gettableColumn = async () => {
-
   let res = await getByTableNameList("WMS_ASN");
   state.value.tableColumnHeaders = res.data.result;
 
-};
-
+}; 
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
@@ -246,9 +254,9 @@ const openAdd = () => {
 };
 
 // 打开转入库单页面
-const  openAsnforReceipt= (row: any) => {
+const openAsnforReceipt = (row: any) => {
 
-  if (row.asnStatus == 99 || row.asnStatus == 10 || row.asnStatus==-1) {
+  if (row.asnStatus == 99 || row.asnStatus == 10 || row.asnStatus == -1) {
     ElMessage.warning("订单状态不允许转入库单");
     return;
   }
@@ -378,5 +386,3 @@ const handleCurrentChange = (val: number) => {
 
 handleQuery();
 </script>
-
-

@@ -23,6 +23,9 @@ export const refreshAccessTokenKey = `x-${accessTokenKey}`;
 
 // 获取 token
 export const getToken = () => {
+	console.log('getToken');
+	console.log(accessTokenKey);
+	console.log( Local.get(accessTokenKey));
 	return Local.get(accessTokenKey);
 };
 

@@ -150,6 +150,8 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
                             continue;
                         }
 
+                       
+
                         dto.Area = area.AreaName;
                         dto.Location = item.Location;
                         dto.ExpirationDate = item.ExpirationDate;

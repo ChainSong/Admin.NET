@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI.PairPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    Title="Ghép đôi"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:PairPageViewModel"
+    BackgroundColor="{x:Static app:AppColors.White}"
+    Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="48,*" RowSpacing="0">
+        <Grid Grid.RowSpan="2" BackgroundColor="{x:Static app:AppColors.BrColor}">
+            <Image
+                Aspect="AspectFit"
+                HeightRequest="298"
+                HorizontalOptions="End"
+                Source="ic_pairing_bg_topright.png"
+                VerticalOptions="Start"
+                WidthRequest="216" />
+            <Image
+                Aspect="AspectFit"
+                HeightRequest="130"
+                HorizontalOptions="Start"
+                Source="ic_pairing_bg_middle.png"
+                VerticalOptions="Center"
+                WidthRequest="101" />
+        </Grid>
+        <Grid
+            BackgroundColor="{x:Static app:AppColors.White}"
+            RowDefinitions="48"
+            Shadow="{x:Static app:Styles.Shadow1}"
+            VerticalOptions="End">
+            <Label
+                HorizontalTextAlignment="Center"
+                Style="{x:Static app:Styles.Title4}"
+                Text="Ghép đôi"
+                TextColor="{x:Static app:AppColors.Black}"
+                VerticalOptions="Center" />
+            <ImageButton
+                Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                Command="{Binding BackCommand}"
+                HorizontalOptions="Start"
+                Source="ic_back.png"
+                VerticalOptions="Center" />
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid RowDefinitions="*,*">
+                <Image
+                    Aspect="AspectFill"
+                    HeightRequest="302"
+                    HorizontalOptions="Center"
+                    Source="ic_pairing.png"
+                    VerticalOptions="End"
+                    WidthRequest="302" />
+                <StackLayout
+                    Grid.Row="1"
+                    Margin="{app:EdgeInsets Top={x:Static app:Dimens.SpacingXxl}}"
+                    Spacing="{x:Static app:Dimens.SpacingLg}"
+                    VerticalOptions="Fill">
+                    <Grid
+                        Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+                        HorizontalOptions="Center"
+                        WidthRequest="{x:Static app:Dimens.ButtonWidth}">
+                        <Label
+                            HorizontalTextAlignment="Center"
+                            Style="{x:Static app:Styles.Subtitle5}"
+                            Text="Kết nối cùng với partner của bạn để sử dụng tất cả các chức năng của app."
+                            TextColor="{x:Static app:AppColors.Grey50}" />
+                    </Grid>
+                    <Button
+                        Command="{Binding ViewMyPairingIdCommand}"
+                        HorizontalOptions="Center"
+                        Style="{x:Static app:Styles.ButtonPrimary}"
+                        Text="ID của tôi"
+                        WidthRequest="{x:Static app:Dimens.ButtonWidth}" />
+                    <Button
+                        Command="{Binding EnterMyPartnerIdCommand}"
+                        HorizontalOptions="Center"
+                        Style="{x:Static app:Styles.ButtonAccent}"
+                        Text="Nhập ID ghép đôi"
+                        WidthRequest="{x:Static app:Dimens.ButtonWidth}" />
+                </StackLayout>
+            </Grid>
+        </Grid>
+    </Grid>
+</app:BasePage>

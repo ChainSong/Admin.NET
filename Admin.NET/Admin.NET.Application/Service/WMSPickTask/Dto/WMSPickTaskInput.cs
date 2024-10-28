@@ -237,14 +237,14 @@ public class WMSPickTaskInput : BasePageInput
     /// PickTaskNumber
     /// </summary>
     /// 
-
+    public string OrderNumber { get; set; }
 
     public string PickTaskNumber { get; set; }
 
     /// <summary>
     /// PickStatus
     /// </summary>
-    public int? PickStatus { get; set; }
+    public int PickStatus { get; set; }
 
     /// <summary>
     /// PickType

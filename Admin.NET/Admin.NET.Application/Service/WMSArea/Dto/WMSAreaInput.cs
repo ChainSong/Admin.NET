@@ -79,7 +79,7 @@ namespace Admin.NET.Application;
         /// <summary>
         /// AreaStatus
         /// </summary>
-        public int? AreaStatus { get; set; }
+        public int AreaStatus { get; set; }
         
         /// <summary>
         /// AreaType

@@ -51,6 +51,19 @@
 									</template>
 								</el-table-column>
 							</template>
+							<el-table-column fixed="right" label="操作" width="90">
+								<template #header>
+									<el-select placeholder="请选择">
+										<template v-for="item in state.tableColumnDetails">
+										<el-option v-if="item.isCreate==1" :key="item.value">
+											<el-checkbox  @change="checked => showColumnOption(checked, item)"
+												:true-label="1" :false-label="0" :label="item.displayName"
+												:key="item.columnName" v-model="item.isCreate">{{ item.displayName}}</el-checkbox>
+										</el-option>
+									</template>
+									</el-select>
+								</template>
+							</el-table-column>
 						</el-table>
 					</el-form>
 				</el-main>
@@ -140,7 +153,13 @@ const closeDialog = () => {
 const cancel = () => {
 	isShowDialog.value = false;
 };
-
+const showColumnOption = async (value: any, item: any) => {
+	if (value == 1) {
+		item.isCreate = 1;
+	} else {
+		item.isCreate = 0;
+	} 
+};
 
 const gettableColumn = async () => {
 	let res = await getByTableNameList("WMS_Receipt");

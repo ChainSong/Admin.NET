@@ -6,6 +6,7 @@ enum Api {
   PageWMSCustomer = '/api/wMSCustomer/page',
   GetWMSCustomer = '/api/wMSCustomer/query',
   AllWMSCustomer = '/api/wMSCustomer/all',
+  SelectCustomer = '/api/wMSCustomer/SelectCustomer',
   
 }
 
@@ -54,6 +55,17 @@ request({
 	url: `${Api.GetWMSCustomer}/${params}`,
 	method: 'get'
 });
+
+
+// 查询单条Customer
+export const selectCustomer = (params?: any) => 
+	request({
+		url: Api.SelectCustomer,
+		method: 'post',
+		data: params,
+	});
+
+
 	// request({
 	// 		url: Api.GetWMSCustomer,
 	// 		method: 'get',

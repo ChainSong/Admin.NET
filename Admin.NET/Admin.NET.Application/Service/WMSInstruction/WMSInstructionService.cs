@@ -39,7 +39,7 @@ public class WMSInstructionService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.InstructionType), u => u.InstructionType.Contains(input.InstructionType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.BusinessType), u => u.BusinessType.Contains(input.BusinessType.Trim()))
                     .WhereIF(input.OperationId>0, u => u.OperationId == input.OperationId)
-                    .WhereIF(input.InstructionStatus>0, u => u.InstructionStatus == input.InstructionStatus)
+                    .WhereIF(input.InstructionStatus != 0, u => u.InstructionStatus == input.InstructionStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.InstructionTaskNo), u => u.InstructionTaskNo.Contains(input.InstructionTaskNo.Trim()))
                     .WhereIF(input.InstructionPriority>0, u => u.InstructionPriority == input.InstructionPriority)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Message), u => u.Message.Contains(input.Message.Trim()))

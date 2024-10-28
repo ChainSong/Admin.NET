@@ -7,11 +7,11 @@
 			<template #dropdown>
 				<el-dropdown-menu>
 					<el-dropdown-item command="large" :disabled="state.disabledSize === 'large'">{{
-						$t('message.user.dropdownLarge') }}</el-dropdown-item>
+		$t('message.user.dropdownLarge') }}</el-dropdown-item>
 					<el-dropdown-item command="default" :disabled="state.disabledSize === 'default'">{{
-						$t('message.user.dropdownDefault') }}</el-dropdown-item>
+		$t('message.user.dropdownDefault') }}</el-dropdown-item>
 					<el-dropdown-item command="small" :disabled="state.disabledSize === 'small'">{{
-						$t('message.user.dropdownSmall') }}</el-dropdown-item>
+		$t('message.user.dropdownSmall') }}</el-dropdown-item>
 				</el-dropdown-menu>
 			</template>
 		</el-dropdown>
@@ -225,7 +225,7 @@ onMounted(async () => {
 
 	// 接收站内信
 	signalR.on('PublicNotice', receiveNotice);
-	dateRefreh();
+	// dateRefreh();
 	// // 处理消息已读
 	// mittBus.on('noticeRead', (id) => {
 	// 	const notice = state.noticeList.find((r: any) => r.id == id);
@@ -240,34 +240,40 @@ onMounted(async () => {
 // 	mittBus.off('noticeRead', () => {});
 // });
 // 定时刷新数据函数
-const dateRefreh = () => {
-	// 计时器正在进行中，退出函数
-	if (intervalId.value != null) {
-		return;
-	}
-	// 计时器为空，操作
-	intervalId.value = setInterval(async () => {
-		// console.log("刷新" + new Date());
-		let flag=state.noticeList.length;
-		// 加载未读的站内信
-		var resData = await getAPI(SysNoticeApi).apiSysNoticeUnReadListGet();
-		// console.log("定时获取通知信息")
-		// console.log(resData)
-		state.noticeList = resData.data.result ?? [];
-		// 接收站内信
-		signalR.on('PublicNotice', receiveNotice);
-		if (state.noticeList.length > 0 && flag!=state.noticeList.length && state.noticeList.length>flag) {
-			ElNotification({
-				title: '提示',
-				message: '您有未读消息...',
-				type: 'info',
-				position: 'bottom-right',
-			});
-		}
+// const dateRefreh = () => {
+// 	// 计时器正在进行中，退出函数
+// 	if (intervalId.value != null) {
+// 		return;
+// 	}
+// 	// 计时器为空，操作
+// 	intervalId.value = setInterval(async () => {
+// 		// console.log("刷新" + new Date());
+// 		let flag=state.noticeList.length;
+// 		// 加载未读的站内信
+// 		var resData = await getAPI(SysNoticeApi).apiSysNoticeUnReadListGet();
+// 		// console.log("定时获取通知信息")
+// 		// console.log(resData)
+// 		state.noticeList = resData.data.result ?? [];
+// 		// 接收站内信
+// 		signalR.on('PublicNotice', receiveNotice);
+// 		if (state.noticeList.length > 0 && flag!=state.noticeList.length && state.noticeList.length>flag) {
+// 			ElNotification({
+// 				title: '提示',
+// 				message: '您有未读消息...',
+// 				type: 'info',
+// 				position: 'bottom-right',
+// 			});
+// 		}
 
-	}, 8000);
-};
+// 	}, 8000);
+// };
 const receiveNotice = (msg: any) => {
+	// console.log('收到站内信', msg);
+	// console.log(msg);
+	if (msg.title=="系统内容更新信息") {
+		//用户使用退出按钮的时候清理所有的localStorage 缓存
+		localStorage.clear();
+	}
 	state.noticeList.unshift(msg);
 
 	ElNotification({

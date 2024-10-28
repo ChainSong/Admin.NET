@@ -2,126 +2,6 @@
 	<div class="wMSAdjustment-container">
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="1000" draggable="">
 			<el-tabs v-model="activeName">
-				<!-- <el-tab-pane label="页面创建" name="PageCreate">
-
-					<el-card>
-						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
-							<el-row :gutter="35">
-								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
-									<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 45px;"
-										:prop="i.columnName">
-										<template v-if="i.type == 'TextBox'">
-											<el-input placeholder="请输入内容" size="small" style="width:90%"
-												v-model="state.header[i.columnName]" v-if="i.isCreate">
-											</el-input>
-										</template>
-										<template v-if="i.type == 'DropDownListInt'">
-											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
-												placeholder="请选择" size="small" style="width:90%" filterable>
-												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
-													:label="item.name" :value="item.codeInt">
-												</el-option>
-											</el-select>
-										</template>
-										<template v-if="i.type == 'DropDownListStrRemote'">
-											<select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
-												:defaultvValue="state.header[i.columnName]"
-												@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationDBColumn] = data.value; console.log(state.header) }"></select-Remote>
-										</template>
-										<template v-if="i.type == 'DropDownListStr'">
-											<el-select v-model="state.header[i.columnName]" v-if="i.isCreate"
-												placeholder="请选择" size="small" style="width:90%" filterable>
-												<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
-													:label="item.name" :value="item.codeStr">
-												</el-option>
-											</el-select>
-										</template>
-										<template v-if="i.type == 'DatePicker'">
-											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												type="date" placeholder="选择日期" size="small" style="width:90%">
-											</el-date-picker>
-										</template>
-										<template v-if="i.type == 'DateTimePicker'">
-											<el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
-												type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
-											</el-date-picker>
-										</template>
-									</el-form-item>
-								</el-col>
-							</el-row>
-						</el-form>
-					</el-card>
-					<el-button @click="handleAdd" type="primary" size="large" class="toolbar-btn">添加一条</el-button>
-					<el-card>
-						<el-form label-position="top" :model="state" ref="detailRuleRef" :rules="detailRule">
-							<el-table :data="state.details" height="250">
-								<template v-for="(v, index) in state.tableColumnDetails">
-									<el-table-column v-if="v.isCreate" :key="index" style="margin:0;padding:0;"
-										:fixed="false" :prop="v.columnName" :label="v.displayName" width="150">
-										<template #default="scope">
-											<el-form-item :key="scope.row.key" style="margin:0;padding:0;"
-												:prop="'details.' + scope.$index + '.' + v.columnName"
-												:rules="detailRule[v.columnName]">
-												<template v-if="v.type == 'TextBox'">
-													<el-input placeholder="请输入内容" v-model="scope.row[v.columnName]"
-														v-if="v.isCreate">
-													</el-input>
-												</template>
-												<template v-if="v.type == 'DropDownListInt'">
-													<el-select v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeInt"
-															:label="item.name" :value="item.codeInt">
-														</el-option>
-													</el-select>
-												</template>
-												<template v-if="v.type == 'DropDownListStr'">
-													<el-select v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
-														<el-option v-for="item in v.tableColumnsDetails" :key="item.codeStr"
-															:label="item.name" :value="item.codeStr">
-														</el-option>
-													</el-select>
-												</template>
-												<template v-if="v.type == 'DropDownListStrRemote'">
-													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
-														:columnData="v"
-														:defaultvValue="state.details[scope.$index][v.columnName]"
-														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
-												</template>
-												<template v-if="v.type == 'DatePicker'">
-													<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" type="date" placeholder="选择日期"
-														style="width: 100%">
-													</el-date-picker>
-												</template>
-												<template v-if="v.type == 'DateTimePicker'">
-													<el-date-picker v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate" type="datetime" start-placeholder="选择日期时间"
-														style="width: 100%">
-													</el-date-picker>
-												</template>
-												<template v-if="v.type == 'InputNumber'">
-													<el-input-number placeholder="请输入内容" size="small"
-														v-model="state.details[scope.$index][v.columnName]"
-														v-if="v.isCreate"></el-input-number>
-
-												</template>
-											</el-form-item>
-										</template>
-									</el-table-column>
-								</template>
-								<el-table-column>
-									<template #default="scope">
-										<el-button size="mini" type="primary"
-											@click="handleDelete(scope.$index)">删除</el-button>
-									</template>
-								</el-table-column>
-							</el-table>
-						</el-form>
-					</el-card>
-				</el-tab-pane> -->
 				<el-tab-pane label="Excel导入" name="ExcelCreate">
 					<el-row>
 						<el-col>
@@ -138,8 +18,6 @@
 				</el-tab-pane>
 			</el-tabs>
 			<div>
-				<!-- <Button @click="cancel">{{ L("Cancel") }}</Button>
-				<Button @click="save" type="primary">{{ L("OK") }}</Button> -->
 			</div>
 			<template #footer>
 				<span class="dialog-footer">
@@ -149,7 +27,8 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
 	</div>
@@ -320,8 +199,16 @@ const gettableColumn = async () => {
 const ImportExcel = (response, file, fileList) => {
 	console.log("response")
 	console.log(response)
-	state.value.orderStatus = response.result.data;
-	resultPopupShow.value = true;
+	if (response.result.data.length > 0) {
+		state.value.orderStatus = response.result.data;
+		resultPopupShow.value = true;
+	} else {
+		ElMessage({
+			message: response.result.msg,
+			type: "error",
+		});
+	}
+	
 	closeDialog();
 }
 //获取导入的模板
@@ -343,7 +230,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

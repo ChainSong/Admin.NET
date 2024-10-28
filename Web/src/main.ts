@@ -17,9 +17,21 @@ import vue3TreeOrg from 'vue3-tree-org'; // 组织架构图
 import 'vue3-tree-org/lib/vue3-tree-org.css'; // 组织架构图样式
 import 'animate.css'; // 动画库
 
+import tableModel from '/@/views/system/formDes/VFormDesigner/tableModel.vue';
+
 const app = createApp(App);
 
 directive(app);
 other.elSvg(app);
+
+
+
+ 
+
+ 
+ 
+// 全局注册
+app.component('tableModel', tableModel);
+
 
 app.use(pinia).use(router).use(ElementPlus).use(i18n).use(VueGridLayout).use(VForm3).use(VueSignaturePad).use(vue3TreeOrg).mount('#app');

@@ -331,7 +331,7 @@ public class WMSReceiptInput : BasePageInput
     /// <summary>
     /// 1入库 5待上架 9上架  -1取消
     /// </summary>
-    public int? ReceiptStatus { get; set; }
+    public int ReceiptStatus { get; set; }
 
     /// <summary>
     /// 收货类型

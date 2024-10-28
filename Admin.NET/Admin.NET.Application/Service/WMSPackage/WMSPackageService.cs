@@ -2,12 +2,12 @@
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
+using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
 using Admin.NET.Application.Service.Factory;
 using Admin.NET.Application.Service.WMSExpress.Factory;
 using Admin.NET.Application.Service.WMSExpress.Interface;
-
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -19,8 +19,12 @@ using AutoMapper;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
 using NewLife.Reflection;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 
 namespace Admin.NET.Application;
@@ -95,6 +99,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .WhereIF(input.OrderId > 0, u => u.OrderId == input.OrderId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PackageNumber), u => u.PackageNumber.Contains(input.PackageNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.PickTaskNumber), u => u.PickTaskNumber.Contains(input.PickTaskNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
@@ -107,7 +112,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .WhereIF(input.IsComposited > 0, u => u.IsComposited == input.IsComposited)
                     .WhereIF(input.IsHandovered > 0, u => u.IsHandovered == input.IsHandovered)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Handoveror), u => u.Handoveror.Contains(input.Handoveror.Trim()))
-                    .WhereIF(input.PackageStatus > 0, u => u.PackageStatus == input.PackageStatus)
+                    .WhereIF(input.PackageStatus != 0, u => u.PackageStatus == input.PackageStatus)
                     .WhereIF(input.DetailCount > 0, u => u.DetailCount == input.DetailCount)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
@@ -271,10 +276,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Update")]
-    public async Task Update(UpdateWMSPackageInput input)
+    public async Task<Response> Update(UpdateWMSPackageInput input)
     {
         var entity = input.Adapt<WMSPackage>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+        return new Response() {  Code = StatusCode.Success, Msg = "更新成功" };
     }
 
 
@@ -312,7 +318,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
-    [ApiDescriptionSettings(Name = "scanPackageData")]
+    [ApiDescriptionSettings(Name = "ScanPackageData")]
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
 
@@ -376,7 +382,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
-    [ApiDescriptionSettings(Name = "printExpress")]
+    [ApiDescriptionSettings(Name = "PrintExpress")]
     public async Task<Response<dynamic>> PrintExpress(ScanPackageInput input)
     {
         Response<dynamic> response = new Response<dynamic>();
@@ -482,5 +488,35 @@ public class WMSPackageService : IDynamicApiController, ITransient
         return new Response() { Code = StatusCode.Success, Msg = "清理成功" };
         //_sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
     }
+
+
+    //[UnitOfWork]
+    //public ActionResult ExportPackage(List<long> input)
+    //{
+    //    //使用简单工厂定制化  /
+    //    //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+    //    //默认：1，按照已有库存，且库存最小推荐
+    //    //默认：2，没有库存，以前有库存
+    //    //默认：3，随便推荐
+    //    IPackageExportInterface factory = PackageExportFactory();
+
+    //    factory._repReceipt = _rep;
+    //    factory._repReceiptDetail = _repReceiptDetail;
+    //    factory._userManager = _userManager;
+    //    factory._repTableColumns = _repTableColumns;
+    //    factory._repTableColumnsDetail = _repTableColumnsDetail;
+    //    factory._repTableInventoryUsable = _repTableInventoryUsable;
+    //    factory._repTableInventoryUsed = _repTableInventoryUsed;
+    //    //factory._repTableColumns = _repTableInventoryUsed;
+    //    var response = factory.Strategy(input);
+    //    IExporter exporter = new ExcelExporter();
+    //    var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+    //    var fs = new MemoryStream(result.Result);
+    //    //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+    //    return new FileStreamResult(fs, "application/octet-stream")
+    //    {
+    //        FileDownloadName = "上架单.xlsx" // 配置文件下载显示名
+    //    };
+    //}
 }
 

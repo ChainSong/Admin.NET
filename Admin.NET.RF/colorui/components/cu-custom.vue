@@ -82,6 +82,7 @@
 			bgColor: {
 				type: String,
 				default: 'bg-gradual-blue'
+				
 			},
 			isSearch: {
 				type: [Boolean, String],
@@ -105,7 +106,7 @@
 			},
 			leftImage: {
 				type: String,
-				default: '/static/cumminsLogo.svg'
+				default: '/static/warehouseLogo.svg'
 			}
 		},
 		created() {
@@ -146,7 +147,7 @@
 				await signOut().then(() => {
 
 					this.$mStore.commit('logout');
-
+                    this.hideModal();
 					uni.navigateTo({
 						url: `/pages/login/index`
 					});
@@ -154,7 +155,7 @@
 						title: '退出成功',
 						icon: 'none'
 					});
-
+             
 				});
 			},
 		}

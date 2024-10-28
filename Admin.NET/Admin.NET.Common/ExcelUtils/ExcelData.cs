@@ -199,6 +199,9 @@ namespace Admin.NET.Common.ExcelCommon
                         DataRow dataRow = data.NewRow();
                         for (int j = row.FirstCellNum; j < cellCount; ++j)
                         {
+                            if (j < 0) {
+                                continue;
+                            }
                             if (row.GetCell(j) != null) //同理，没有数据的单元格都默认是null
                                 dataRow[j] = row.GetCell(j).ToString();
                         }

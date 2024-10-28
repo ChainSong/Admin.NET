@@ -5,6 +5,7 @@ enum Api {
   UpdateWMSArea = '/api/wMSArea/update',
   PageWMSArea = '/api/wMSArea/page',
   GetWMSArea = '/api/wMSArea/Query',
+  SelectArea = '/api/wMSArea/SelectArea',
 }
 
 // 增加库区管理
@@ -45,4 +46,13 @@ request({
 	url: `${Api.GetWMSArea}/${params}`,
 	method: 'get'
 });
+
+// selectWarehouse
+export const selectArea = (params?: any) => 
+	request({
+		url: Api.SelectArea,
+		method: 'post',
+		data: params,
+	});
+
 		

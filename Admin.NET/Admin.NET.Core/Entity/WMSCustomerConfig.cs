@@ -23,7 +23,7 @@ public class WMSCustomerConfig : ITenantIdFilter
     /// <summary>
     /// 客户代码
     /// </summary>
-    [SugarColumn(ColumnDescription = "ID", Length = 50)]
+    [SugarColumn(ColumnDescription = "CustomerId")]
     public long? CustomerId { get; set; }
 
     /// <summary>

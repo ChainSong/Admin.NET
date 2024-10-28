@@ -26,6 +26,7 @@ using Admin.NET.Application.Service;
 using XAct;
 using Furion.FriendlyException;
 using SqlSugar;
+using System.Text.RegularExpressions;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
@@ -57,25 +58,64 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         //判断扫描的是不是条形码（有两种条形码）
         if (!string.IsNullOrEmpty(request.Input))
         {
-            var skuInfo = request.Input.Split('|');
-            if (skuInfo.Length > 1)
+            //var skuInfo = request.Input.Split('|');
+            if (request.Input.Split(' ').Length > 1 || request.Input.Split('|').Length > 1)
             {
-                if (skuInfo.Length == 3)
-                {
-                    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
-                    request.SN = skuInfo[2];
 
+                string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+                string LOTRegex = @"(?<=\|LOT)[^|\]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+                string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+                MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
+                request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
 
-                }
-                else
-                {
-                    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
-                    request.Lot = skuInfo[2];
-                    request.AcquisitionData = skuInfo[3];
-                    request.SN = skuInfo[4];
-
-                }
+                MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
+                request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
+                MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
+                request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+                request.Input = request.SKU;
+                //if (skuInfo.Length == 3)
+                //{
+                //    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+                //    request.SN = skuInfo[2];
+                //}
+                //else
+                //{
+                //    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+                //    request.Lot = skuInfo[2];
+                //    request.AcquisitionData = skuInfo[3];
+                //    request.SN = skuInfo[4];
+                //}
             };
+
+
+            //skuInfo = request.Input.Split(' ');
+            //if (skuInfo.Length > 1)
+            //{
+
+            //    string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+            //    string LOTRegex = @"(?<=\|LOT)[^|\]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+            //    string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+            //    MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
+            //    request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
+
+            //    MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
+            //    request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
+            //    MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
+            //    request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+            //    request.Input = request.SKU;
+            //    //if (skuInfo.Length == 3)
+            //    //{
+            //    //    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+            //    //    request.SN = skuInfo[2];
+            //    //}
+            //    //else
+            //    //{
+            //    //    request.Input = skuInfo[1] != "" ? skuInfo[1].Replace("ITM", "") : "";
+            //    //    request.Lot = skuInfo[2];
+            //    //    request.AcquisitionData = skuInfo[3];
+            //    //    request.SN = skuInfo[4];
+            //    //}
+            //};
         }
 
         response.Data.PickTaskNumber = request.PickTaskNumber;

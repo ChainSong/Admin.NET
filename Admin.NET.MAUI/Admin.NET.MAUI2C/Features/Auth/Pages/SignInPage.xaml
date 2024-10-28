@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI2C.SignInPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI2C"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:SignInPageViewModel"
+    BackgroundColor="{x:Static app:AppColors.BrColor}"
+    Shell.NavBarIsVisible="False">
+    <Grid>
+        <ScrollView VerticalScrollBarVisibility="Never">
+            <StackLayout Spacing="0">
+                <Image
+                    Margin="{app:EdgeInsets Top=118,
+                                            Bottom={x:Static app:Dimens.SpacingMd}}"
+                    HeightRequest="48"
+                    HorizontalOptions="Center"
+                    SemanticProperties.Description="Chick and Paddy in MAUI"
+                    Source="cap_icon" />
+                <Label
+                    Margin="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingLg}}"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Title3}"
+                    Text="WMS"
+                    TextColor="{x:Static app:AppColors.Black}" />
+                <!--Keyboard="Telephone"-->
+                <app:RoundedEntry
+                    Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingLg},
+                                            Bottom={x:Static app:Dimens.SpacingSm}}"
+                    IsValid="{x:Binding Form.UserNameErrors,
+                                        Converter={x:Static app:AppConverters.IsListNullOrEmpty}}"
+                    Placeholder="账号"
+                    PrefixIcon="ic_phone_call.png"
+                    Text="{x:Binding Form.UserName}" />
+                <app:RoundedEntry
+                    Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingLg}}"
+                    IsPassword="True"
+                    IsValid="{x:Binding Form.PasswordErrors,
+                                        Converter={x:Static app:AppConverters.IsListNullOrEmpty}}"
+                    Placeholder="密码"
+                    PrefixIcon="ic_password.png"
+                    Text="{x:Binding Form.Password}" />
+
+                <Label
+                    Margin="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingLg},
+                                            Bottom={x:Static app:Dimens.SpacingMd}}"
+                    Padding="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalOptions="End"
+                    Style="{x:Static app:Styles.Title6}"
+                    Text="忘记密码?"
+                    TextColor="{x:Static app:AppColors.LightBlue}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label
+                    Padding="{app:EdgeInsets Horizontal={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Body2}"
+                    TextColor="{x:Static app:AppColors.Red}">
+                    <Label.Opacity>
+                        <MultiBinding Converter="{Static app:AppConverters.AnyFalseToOpacity}">
+                            <Binding Converter="{x:Static app:AppConverters.IsListNullOrEmpty}" Path="Form.UserNameErrors" />
+                            <Binding Converter="{x:Static app:AppConverters.IsListNullOrEmpty}" Path="Form.PasswordErrors" />
+                        </MultiBinding>
+                    </Label.Opacity>
+                    <Label.Text>
+                        <MultiBinding Converter="{Static app:AppConverters.FirstItem}">
+                            <Binding Converter="{x:Static app:AppConverters.FirstItem}" Path="Form.UserNameErrors" />
+                            <Binding Converter="{x:Static app:AppConverters.FirstItem}" Path="Form.PasswordErrors" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
+
+                <Button
+                    Margin="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingLg}}"
+                    Command="{Binding SignInCommand}"
+                    HorizontalOptions="Center"
+                    Style="{x:Static app:Styles.ButtonPrimary}"
+                    Text="登录" />
+              
+                <!--<Label
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Title6}"
+                    Text="第三方登录"
+                    TextColor="{x:Static app:AppColors.Grey40}" />
+
+                <HorizontalStackLayout
+                    Margin="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalOptions="Center"
+                    Spacing="{x:Static app:Dimens.SpacingXl}">
+                    <HorizontalStackLayout.Resources>
+                        <ResourceDictionary>
+                            <Style x:Key="SocialAccountButton" TargetType="ImageButton">
+                                <Setter Property="MaximumHeightRequest" Value="{x:Static app:Dimens.ButtonHeight}" />
+                                <Setter Property="MinimumHeightRequest" Value="{x:Static app:Dimens.ButtonHeight}" />
+                                <Setter Property="MaximumWidthRequest" Value="{x:Static app:Dimens.ButtonHeight}" />
+                                <Setter Property="MinimumWidthRequest" Value="{x:Static app:Dimens.ButtonHeight}" />
+                            </Style>
+                        </ResourceDictionary>
+                    </HorizontalStackLayout.Resources>
+                    <ImageButton
+                        Command="{Binding SignInWithSocialAccountCommand}"
+                        CommandParameter="{x:Static app:SocialAccountType.Apple}"
+                        Source="apple_logo.png"
+                        Style="{x:StaticResource SocialAccountButton}" />
+                    <ImageButton
+                        Command="{Binding SignInWithSocialAccountCommand}"
+                        CommandParameter="{x:Static app:SocialAccountType.Facebook}"
+                        Source="facebook_logo.png"
+                        Style="{x:StaticResource SocialAccountButton}" />
+                    <ImageButton
+                        Command="{Binding SignInWithSocialAccountCommand}"
+                        CommandParameter="{x:Static app:SocialAccountType.Google}"
+                        Source="google_logo.png"
+                        Style="{x:StaticResource SocialAccountButton}" />
+                </HorizontalStackLayout>-->
+
+                <Label
+                    Margin="{app:EdgeInsets Vertical={x:Static app:Dimens.SpacingMd}}"
+                    HorizontalTextAlignment="Center"
+                    Style="{x:Static app:Styles.Title6}"
+                    TextColor="{x:Static app:AppColors.Grey40}"
+                    VerticalOptions="EndAndExpand">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="没有账户? " />
+                            <Span Text="注册" TextColor="{x:Static app:AppColors.LightBlue}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SignUpCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </StackLayout>
+        </ScrollView>
+    </Grid>
+</app:BasePage>

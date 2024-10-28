@@ -138,8 +138,15 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
             //}
             string pattern = @"([a-zA-Z]+)|([0-9]+)"; // 正则表达式匹配英文字符或数字
 
+            string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+            string LOTRegex = @"(?<=\|LOT)[^|\]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+            string ExpirationDateRegex = @"(?<=\|EXP)[^|\]+|(?<=\s)\d{6}\b";
             MatchCollection matches = Regex.Matches(input.ExpirationDate.Replace("EXP", ""), pattern);
-            var dateStr = matches[2].Value + matches[1].Value + matches[0].Value;
+            string dateStr = "";
+            if (matches.Count > 2)
+            {
+                  dateStr = matches[2].Value + matches[1].Value + matches[0].Value;
+            }
             //foreach (Match match in matches)
             //{
             //    Console.WriteLine(match.Value); // 输出匹配到的连续英文字符和数字  
@@ -148,7 +155,7 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
             input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
             input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
             var entity = input.Adapt<WMSRFReceiptAcquisition>();
-            if (string.IsNullOrEmpty(entity.SN))
+            if (!string.IsNullOrEmpty(entity.SN))
             {
                 entity.Qty = 1;
             }
@@ -160,7 +167,7 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
             //先删除已经存在的SN 
             await _rep.DeleteAsync(a => a.SKU == entity.SKU && a.SN == entity.SN && a.CustomerId == entity.CustomerId && !string.IsNullOrEmpty(a.SN));
             await _rep.InsertAsync(entity);
-            await _repReceiptDetail.UpdateAsync(a => new WMSReceiptDetail { ExpirationDate = input.ExpirationDate.ToDateTime(), Remark = input.Lot }, (a => a.SKU == input.SKU && a.ReceiptNumber == input.ReceiptNumber));
+            await _repReceiptDetail.UpdateAsync(a => new WMSReceiptDetail { ExpirationDate = input.ExpirationDate.ToDateTime(), LotCode = input.Lot }, (a => a.SKU == input.SKU && a.ReceiptNumber == input.ReceiptNumber));
             response.Code = StatusCode.Success;
             response.Msg = "成功";
             return response;

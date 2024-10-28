@@ -44,7 +44,7 @@ public class MMSSupplierService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SupplierName), u => u.SupplierName.Contains(input.SupplierName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Description), u => u.Description.Contains(input.Description.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SupplierType), u => u.SupplierType.Contains(input.SupplierType.Trim()))
-                    .WhereIF(input.SupplierStatus >-1, u => u.SupplierStatus == input.SupplierStatus)
+                    .WhereIF(input.SupplierStatus !=0, u => u.SupplierStatus == input.SupplierStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CreditLine), u => u.CreditLine.Contains(input.CreditLine.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Province), u => u.Province.Contains(input.Province.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.City), u => u.City.Contains(input.City.Trim()))

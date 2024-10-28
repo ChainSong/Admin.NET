@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI2C.NotificationsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI2C"
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    Title="HI"
+    ios:Page.UseSafeArea="False"
+    x:DataType="app:NotificationsPageViewModel"
+    Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="48,*" RowSpacing="0">
+        <Grid
+            BackgroundColor="{x:Static app:AppColors.White}"
+            RowDefinitions="48"
+            Shadow="{x:Static app:Styles.Shadow1}"
+            VerticalOptions="End">
+            <Label
+                HorizontalTextAlignment="Center"
+                Style="{x:Static app:Styles.Title4}"
+                Text="消息"
+                TextColor="{x:Static app:AppColors.Black}"
+                VerticalOptions="Center" />
+            <ImageButton
+                Margin="{app:EdgeInsets Left={x:Static app:Dimens.SpacingMd}}"
+                HeightRequest="30"
+                Command="{Binding BackCommand}"
+                HorizontalOptions="Start"
+                Source="ic_back.png"
+                VerticalOptions="Center" />
+        </Grid>
+        <!--RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"-->
+        <Grid Grid.Row="1" BackgroundColor="{x:Static app:AppColors.BrColor}">
+            <CollectionView
+                ItemsSource="{Binding Notifications}"
+                RemainingItemsThreshold="5"
+                >
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="0" Orientation="Vertical" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="app:Notifications">
+                        <Grid
+                            Padding="{app:EdgeInsets All={x:Static app:Dimens.SpacingMd}}"
+                            ColumnDefinitions="28,*"
+                            ColumnSpacing="{x:Static app:Dimens.SpacingSm}">
+                            <Grid
+                                Grid.Column="0"
+                                ColumnDefinitions="28"
+                                HorizontalOptions="Center"
+                                RowDefinitions="28"
+                                VerticalOptions="Center">
+                                <Border
+                                    BackgroundColor="{x:Static app:AppColors.Purple}"
+                                    Stroke="Transparent"
+                                    StrokeShape="RoundRectangle 14,14,14,14"
+                                    StrokeThickness="1">
+                                    <Image Margin="{app:EdgeInsets All={x:Static app:Dimens.SpacingXs}}" Source="cap.png" />
+                                </Border>
+                                <Image Source="{Binding content}">
+                                    <Image.Clip>
+                                        <EllipseGeometry
+                                            Center="14,14"
+                                            RadiusX="14"
+                                            RadiusY="14" />
+                                    </Image.Clip>
+                                </Image>
+                            </Grid>
+                            <Label
+                                Grid.Column="1"
+                                LineBreakMode="WordWrap"
+                                Style="{x:Static app:Styles.Subtitle6}"
+                                Text="{Binding title}"
+                                TextColor="{x:Static app:AppColors.Grey50}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
+</app:BasePage>

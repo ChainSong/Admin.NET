@@ -12,9 +12,9 @@ const CONFIG = {
 	},
 	// 生产环境配置
 	production: {
-		assetsPath: 'http://localhost:5005/WebStatic', // 静态资源路径
-		baseUrl: 'http://180.169.76.205:8097', // 后台接口请求地址
-		filebaseUrl: 'http://localhost:5005', // 后台文件地址 
+		assetsPath: 'https://nike.rbow-logistics.com.cn:8034/WebStatic', // 静态资源路径
+		baseUrl: 'https://nike.rbow-logistics.com.cn:8034', // 后台接口请求地址
+		filebaseUrl: 'https://nike.rbow-logistics.com.cn:8034', // 后台文件地址 
 		hostUrl: '', // H5地址(前端运行地址)
 		websocketUrl: '', // websocket服务端地址
 		weixinAppId: '', // 微信公众号appid

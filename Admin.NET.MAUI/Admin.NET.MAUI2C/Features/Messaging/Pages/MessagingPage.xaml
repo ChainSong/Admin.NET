@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<app:BasePage
+    x:Class="Admin.NET.MAUI2C.MessagingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:app="clr-namespace:Admin.NET.MAUI2C" 
+    xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
+    Title="聊天" 
+    ios:Page.UseSafeArea="False" 
+    BackgroundColor="{x:Static app:AppColors.BrColor}"  
+    Shell.NavBarIsVisible="False">
+
+    <VerticalStackLayout>
+        <ScrollView HeightRequest="300"  Orientation ="Both"  VerticalOptions="End">
+
+            <ListView x:Name="ChatList"  HeightRequest="300"   ItemsSource="{Binding Messages}"   VerticalOptions="FillAndExpand">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="app:MessageModel">
+                        <ViewCell  >
+                            <Grid Padding="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Column="1"
+                           Text="{Binding Sender}"
+                           FontAttributes="Bold" />
+
+                                <Label Grid.Row="1"
+                                       IsVisible="{Binding IsString}"
+                           Grid.Column="1" 
+                           Text="{Binding Msg}"
+                           FontAttributes="Italic"
+                           VerticalOptions="End" />
+                                <WebView Grid.Row="2"    IsVisible="{Binding IsDataTable}"    HorizontalOptions="End" VerticalOptions="End" WidthRequest="200" HeightRequest="200">
+                                    <WebView.Source  >
+                                        <HtmlWebViewSource Html="{Binding Msg}" />
+                                    </WebView.Source>
+                                </WebView>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </ScrollView>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="50" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" WidthRequest="300">
+                <ContentView BackgroundColor="White">
+                    <Entry x:Name="MessageEntry"  
+               Placeholder="Enter your message..."  
+               Keyboard="Chat"   
+               Margin="0,0,0,0" />
+                </ContentView>
+            </Grid>
+            <Grid Grid.Column="1" >
+                <Button Text="V" Clicked="SendButton_Clicked" />
+                <!--<Button WidthRequest="50"
+                   Command="{Binding PairsCommand}"
+                   HorizontalOptions="Center"
+                   Style="{x:Static app:Styles.ButtonPrimary}"
+                   Text="V" />-->
+            </Grid>
+        </Grid>
+        <!--<HorizontalStackLayout>
+            <Entry x:Name="MessageEntry" Placeholder="Type your message" />
+            <Button Text="Send" Clicked="SendButton_Clicked" />
+        </HorizontalStackLayout>-->
+    </VerticalStackLayout>
+
+         
+</app:BasePage>

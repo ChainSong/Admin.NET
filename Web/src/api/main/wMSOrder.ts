@@ -10,6 +10,7 @@ enum Api {
 	CompleteOrder = '/api/wMSOrder/CompleteOrder',
 	ExportOrder = '/api/wMSOrder/ExportOrder',
 	PrintShippingList = '/api/wMSOrder/PrintShippingList',
+	ExportPackage = '/api/wMSOrder/ExportPackage',
 	
 }
 
@@ -19,6 +20,15 @@ export const addWMSOrder = (params?: any) =>
 		url: Api.AddWMSOrder,
 		method: 'post',
 		data: params,
+	});
+
+	// 导出包装清单
+export const exportPackage = (params?: any) =>
+	request({
+		url: Api.ExportPackage,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
 	});
 
 // 删除WMSOrder
