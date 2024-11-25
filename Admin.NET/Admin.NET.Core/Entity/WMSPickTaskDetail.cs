@@ -112,8 +112,8 @@ public class WMSPickTaskDetail : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "")]
-    public DateTime? PikcTime { get; set; }
+    //[SugarColumn(ColumnDescription = "")]
+    //public DateTime? PickTime { get; set; }
     
     /// <summary>
     /// 
@@ -126,7 +126,14 @@ public class WMSPickTaskDetail : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? PickPersonnel { get; set; }
-    
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? PickTime { get; set; }
 
     /// <summary>
     /// 

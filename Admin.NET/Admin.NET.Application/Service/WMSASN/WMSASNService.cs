@@ -51,8 +51,9 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
+    private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
     {
         _rep = rep;
         //_db = db;
@@ -67,6 +68,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repASNDetail = repASNDetail;
         _repWorkFlow = repWorkFlow;
         _repProduct = repProduct;
+        _repRFIDInfo = repRFIDInfo;
     }
 
     /// <summary>
@@ -432,10 +434,10 @@ public class WMSASNService : IDynamicApiController, ITransient
            .Includes(a => a.SysWorkFlowSteps)
            .Where(a => a.WorkName == asnData.First().ReceiptType).FirstAsync();
 
-        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "全部转入库单").Count() == 0)
-        {
-            throw Oops.Oh("该订单类型不支持部分转入库单");
-        }
+        //if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "全部转入库单").Count() == 0)
+        //{
+        //    throw Oops.Oh("该订单类型不支持全部转入库单");
+        //}
 
         //long customerId = 0;
         //if (asnData != null)
@@ -448,10 +450,12 @@ public class WMSASNService : IDynamicApiController, ITransient
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
+        factory._repRFIDInfo = _repRFIDInfo;
         factory._repASNDetail = _repASNDetail;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repReceipt = _repReceipt;
+        factory._repProduct = _repProduct;
         factory._repReceiptDetail = _repReceiptDetail;
         var response = factory.Strategy(input);
         return await response;
@@ -505,6 +509,9 @@ public class WMSASNService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repReceipt = _repReceipt;
+        factory._repProduct = _repProduct;
+
+        factory._repRFIDInfo = _repRFIDInfo;
         factory._repReceiptDetail = _repReceiptDetail;
         var response = factory.StrategyPart(input);
         return await response;
@@ -522,7 +529,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     [HttpPost]
     [DisplayName("导出预出库单")]
     [UnitOfWork]
-    public ActionResult ExportASN(List<long> input)
+    public ActionResult ExportASN(WMSASNExcelInput input)
     {
         //使用简单工厂定制化  /
         //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，

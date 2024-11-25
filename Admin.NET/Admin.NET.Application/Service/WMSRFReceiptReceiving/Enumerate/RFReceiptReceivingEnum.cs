@@ -14,7 +14,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
-public class RFReceiptReceivingEnum
+public enum RFReceiptReceivingEnum
 {
+    /// <summary>
+    /// 待上架
+    /// </summary>
+    待上架 = 1,
 
+
+    /// <summary>
+    /// 已经上架    
+    /// /// </summary>
+    已上架 = 9,
 }

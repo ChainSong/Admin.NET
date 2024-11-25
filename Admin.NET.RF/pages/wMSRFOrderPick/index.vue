@@ -2,11 +2,11 @@
 	<view>
 		<cu-custom bgColor="bg-gradual-blue" :isBack="true">
 			<block slot="backText">返回</block>
-			<block slot="content">RF上架</block>
+			<block slot="content">RF拣货</block>
 		</cu-custom>
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
 			<view class="cu-form-group ">
-				<input placeholder="请输入订单号" v-model="form.externReceiptNumber" style="width: 100%;"
+				<input placeholder="请输入拣货任务号" v-model="form.pickTaskNumber" style="width: 100%;"
 					name="input"></input>
 				<button class="cu-btn bg-blue shadow-blur round" @tap="getOrderList()">查询</button>
 			</view>
@@ -17,18 +17,17 @@
 				 			style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big10001.jpg);">
 				 		</view> -->
 						<view class="content">
-							<view class="text-grey">{{item.externReceiptNumber}}</view>
-							<view class="text-gray text-sm flex">
+							<view class="text-grey">{{item.pickTaskNumber}}</view>
+							<!-- <view class="text-gray text-sm flex">
 				 				<view class="text-cut">
-				 					<text class="cuIcon-selection text-red  margin-right-xs"></text>
-									{{item.receiptNumber}}
-				 					<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
+				 					<text class="cuIcon-infofill text-red  margin-right-xs"></text>
+				 					我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。
 				 				</view>
-				 			</view>
+				 			</view> -->
 							
 						</view>
 						<view class="action">
-							 <button class="cu-btn bg-blue shadow-blur round" style="width: 60px;" @tap="goShelve(item)">上架</button>
+							 <button class="cu-btn bg-blue shadow-blur round" style="width: 60px;" @tap="goCollect(item)">拣货</button>
 						</view>
 					</view>
 				</view>
@@ -46,11 +45,11 @@
 
 <script>
 	import {
-		getRFReceiptReceiving
-	} from "@/services/wMSReceiptReceiving/wMSReceiptReceiving";
+		pageWMSRFOrderPickApi
+	} from "@/services/wMSRFOrderPick/wMSRFOrderPick";
 	import youScroll from '@/components/you-scroll';
 	export default {
-		name: "wMSReceiptReceiving",
+		name: "WMSRFOrderPick",
 		components: {
 			youScroll
 		},
@@ -71,9 +70,9 @@
 			this.getOrderList();
 		},
 		filters: {
-			// carNumber(val) {
-			// 	return val ? val.slice(0, 1) : '';
-			// }
+			carNumber(val) {
+				return val ? val.slice(0, 1) : '';
+			}
 		},
 		methods: {
 			onPullDown(done) { // 下拉刷新
@@ -81,9 +80,12 @@
 				// this.getMenuList();
 				done(); // 完成刷新
 			},
-			async goShelve (row) {
+			async goCollect (row) {
+			 
 				uni.navigateTo({
-					url: '/pages/wMSReceiptReceiving/component/editDialog?receiptNumber='+row.receiptNumber
+					url: '/pages/wMSRFOrderPick/component/editDialog?pickTaskNumber='
+					+row.pickTaskNumber+"&id="
+					+row.id
 				});
 			},
 			//获取订单列表
@@ -94,7 +96,7 @@
 				});
 
 				try {
-					await getRFReceiptReceiving(this.form).then((res) => {
+					await pageWMSRFOrderPickApi(this.form).then((res) => {
 						console.log(res)
 						this.list = res.data.result.items ?? [];
 						uni.showToast({

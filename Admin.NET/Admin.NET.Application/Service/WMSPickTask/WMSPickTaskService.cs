@@ -285,7 +285,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
             {
                 a.PickStatus = (int)PickTaskStatusEnum.拣货完成;
                 a.PickQty = a.Qty;
-                a.PikcTime = DateTime.Now;
+                a.PickTime = DateTime.Now;
             });
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b => b.OrderId).Contains(a.Id));

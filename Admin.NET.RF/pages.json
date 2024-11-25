@@ -140,10 +140,22 @@
 			"path": "pages/wMSRFReceiptAcquisition/component/editDialog",
 			"style": {}
 		}, {
-			"path": "pages/wMSReceiptReceiving/index",
+			"path": "pages/wMSRFReceiptReceiving/index",
 			"style": {}
 		}, {
-			"path": "pages/wMSReceiptReceiving/component/editDialog",
+			"path": "pages/wMSRFReceiptReceiving/component/editDialog",
+			"style": {}
+		}, {
+			"path": "pages/wMSRFOrderPick/index",
+			"style": {}
+		}, {
+			"path": "pages/wMSRFOrderPick/component/editDialog",
+			"style": {}
+		}, {
+			"path": "pages/wMSASNCountQuantity/component/editDialog",
+			"style": {}
+		}, {
+			"path": "pages/wMSASNCountQuantity/index",
 			"style": {}
 		}
 		

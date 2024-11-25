@@ -90,6 +90,7 @@
     <Folder Include="Service\MMSReceipt\Abstract\" />
     <Folder Include="Service\MMSReceipt\Exporting\" />
     <Folder Include="Service\TableColumns\Exporting\" />
+    <Folder Include="Service\WMSASNCountQuantity\Filter\" />
     <Folder Include="Service\WMSASN\Abstract\" />
     <Folder Include="Service\WMSASN\Exporting\" />
     <Folder Include="Service\WMSASN\Mapper\" />
@@ -98,6 +99,12 @@
     <Folder Include="Service\WMSOrder\Abstract\" />
     <Folder Include="Service\WMSReceiptReceiving\Dto\" />
     <Folder Include="Service\WMSReport\Dto\" />
+    <Folder Include="Service\WMSRFASNReceiptDetail\Dto\" />
+    <Folder Include="Service\WMSRFASNReceiptDetail\Enumerate\" />
+    <Folder Include="Service\WMSRFOrderPick\Enumerate\" />
+    <Folder Include="Service\WMSRFReceiptAcquisition\Factory\" />
+    <Folder Include="Service\WMSRFReceiptAcquisition\Interface\" />
+    <Folder Include="Service\WMSRFReceiptAcquisition\Strategy\" />
     <Folder Include="Service\WMSRFReceiptReceiving\Abstract\" />
   </ItemGroup>
 

@@ -15,17 +15,18 @@ namespace Admin.NET.Application.Factory
         public static IASNForReceiptInterface ASNForReceipt(long CustomerId, string ReceiptType)
         {
             //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
-            Enum.TryParse(typeof(ReceiptTypeEnum), ReceiptType, out object _ReceiptType);
+            //Enum.TryParse(typeof(ReceiptTypeEnum), ReceiptType, out object _ReceiptType);
+            ReceiptTypeEnum _ReceiptType = (ReceiptTypeEnum)Enum.Parse(typeof(ReceiptTypeEnum), ReceiptType, true);
             switch (_ReceiptType)
             {
-                case ReceiptTypeEnum.虚拟上架:
+                case ReceiptTypeEnum.虚拟入库:
                     return new ASNForReceiptDefaultStrategy();
                 case ReceiptTypeEnum.收货入库:
                     return new ASNForReceiptDefaultStrategy();
                 case ReceiptTypeEnum.通用入库:
                     return new ASNForReceiptDefaultStrategy();
                 case ReceiptTypeEnum.其它入库:
-                    return new ASNForReceiptDefaultStrategy();
+                    return new ASNForReceiptHachStrategy();
                 case ReceiptTypeEnum.采购入库:
                     return new ASNForReceiptDefaultStrategy();
                 default:

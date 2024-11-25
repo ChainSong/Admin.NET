@@ -176,7 +176,7 @@
     </el-card>
 
 
-    <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
+    <el-dialog v-model="resultPopupShow" title="消息" :append-to-body="true">
       <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
       </el-alert>
     </el-dialog>

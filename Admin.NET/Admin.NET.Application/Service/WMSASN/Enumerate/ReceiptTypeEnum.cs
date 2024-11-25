@@ -8,7 +8,7 @@ namespace Admin.NET.Application.Enumerate
 {
     public enum ReceiptTypeEnum
     {
-        虚拟上架,
+        虚拟入库,
         收货入库,
         通用入库,
         其它入库,

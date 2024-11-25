@@ -34,6 +34,8 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchRespon
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using System.Reflection.Emit;
 using FastExpressionCompiler;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
+using Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
 
 namespace Admin.NET.Application;
 public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
@@ -51,8 +53,10 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
     public SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving { get; set; }
 
-    public async Task<Response<RFReceiptReceivingOutput>> RFReceiptReceivingSave(RFReceiptReceivingInput request, WMSReceipt receipt)
+    TimeSpan timeSpan = new TimeSpan(72, 0, 0);
+    public async Task<Response<List<RFReceiptReceivingOutput>>> RFReceiptReceivingSave(RFReceiptReceivingInput request, WMSReceipt receipt)
     {
+        Response<List<RFReceiptReceivingOutput>> response = new Response<List<RFReceiptReceivingOutput>>();
         //判断扫描的是不是条形码（有两种条形码）
         if (!string.IsNullOrEmpty(request.ScanInput))
         {
@@ -60,27 +64,34 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             if (request.ScanInput.Split(' ').Length > 1 || request.ScanInput.Split('|').Length > 1)
             {
 
-                string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
-                string LOTRegex = @"(?<=\|LOT)[^|\]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
-                string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
-                MatchCollection matchesSKU = Regex.Matches(request.ScanInput, SKURegex);
+                string skuRegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+                string lotRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+                string expirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+                MatchCollection matchesSKU = Regex.Matches(request.ScanInput, skuRegex);
                 request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
 
-                MatchCollection matchesExpirationDateRegex = Regex.Matches(request.ScanInput, ExpirationDateRegex);
+                MatchCollection matchesExpirationDateRegex = Regex.Matches(request.ScanInput, expirationDateRegex);
                 request.ExpirationDate = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
-                MatchCollection matchesLOT = Regex.Matches(request.ScanInput, LOTRegex);
+                MatchCollection matchesLOT = Regex.Matches(request.ScanInput, lotRegex);
                 request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.SKU = request.SKU;
-                request.CustomerId = receipt.CustomerId;
+
 
             };
+            request.CustomerId = receipt.CustomerId;
         }
+        //var orderDatass = _sysCacheService.Get<string>("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber);
+
         //获取加载需要上架的订单
-        var OrderData = _sysCacheService.Get<List<WMSReceiptDetail>>("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber);
-        if (OrderData == null || OrderData.Count == 0)
+        var orderData = _sysCacheService.Get<List<WMSReceiptDetail>>("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber);
+        if (orderData == null || orderData.Count == 0)
         {
-            OrderData = await _repReceiptDetail.GetListAsync(it => it.ReceiptNumber == receipt.ReceiptNumber && it.CustomerId == receipt.CustomerId);
+            orderData = await _repReceiptDetail.AsQueryable().Where(it => it.ReceiptNumber == receipt.ReceiptNumber && it.CustomerId == receipt.CustomerId).ToListAsync();
+            _sysCacheService.Set("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber, orderData, timeSpan);
         }
+
+        //var OrderDatasss = _sysCacheService.Get<List<WMSReceiptDetail>>("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber);
+
         //response.Data.PickTaskNumber = request.PickTaskNumber;
         //response.Data.Weight = request.Weight;
         //response.Data.SKU = request.SKU;
@@ -89,20 +100,74 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
         //response.Data.Lot = request.Lot;
         //response.Data.AcquisitionData = request.AcquisitionData;
         //判断扫描的是产品条码还是库位
-        //if (!string.IsNullOrEmpty(request.SKU))
-        //{
-        //  return  await ScanSKU(request, OrderData);
+        if (!string.IsNullOrEmpty(request.SKU))
+        {
+            var data = await ScanSKU(request, orderData);
+            if (data.Code == StatusCode.Error)
+            {
+                response.Code = data.Code;
+                response.Msg = data.Msg;
+                return response;
+            }
+        }
+        else
+        {
+            //判断扫描的是库位
+            var CheckLocation = await _repLocation.GetListAsync(it => it.Location == request.ScanInput);
+            if (CheckLocation != null && CheckLocation.Count > 0)
+            {
+                var data = await ScanLocation(request, orderData);
+                if (data.Code == StatusCode.Error)
+                {
+                    response.Code = data.Code;
+                    response.Msg = data.Msg;
+                    return response;
+                }
+                else
+                {
+                    //_sysCacheService.Remove("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber);
+                }
+            }
+            else
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "扫描数据无法识别";
+                return response;
+            }
+        }
 
-        //}
-        //else {
-        //    return await ScanLocation(request, OrderData);
-        //}
 
-        return new Response<RFReceiptReceivingOutput>();
+        var orderCheckData = _sysCacheService.Get<List<WMSReceiptReceiving>>("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber);
+
+        if (orderCheckData != null && orderCheckData.Count > 0)
+        {
+            //构建扫描数据
+            //var receiptReceiving = new List<RFReceiptReceivingOutput>();
+            response.Data = orderCheckData.Where(it => it.ReceiptReceivingStatus == (int)RFReceiptReceivingEnum.待上架 && it.Creator == _userManager.Account).GroupBy(a => new { a.SKU, a.BatchCode }).Select(a => new RFReceiptReceivingOutput()
+            {
+                SKU = a.Key.SKU,
+                BatchCode = a.Key.BatchCode,
+                ReceivedQty = orderData.Where(b => b.SKU == a.Key.SKU).Sum(b => b.ReceivedQty),
+                ReceiptQty = orderData.Where(b => b.SKU == a.Key.SKU).Sum(b => b.ReceiptQty),
+                ScanQty = a.Sum(b => b.ReceivedQty),
+            }).ToList();
+            response.Code = StatusCode.Success;
+            response.Msg = "成功";
+            return response;
+
+        }
+        else
+        {
+
+            response.Code = StatusCode.Success;
+            response.Msg = "成功";
+            return new Response<List<RFReceiptReceivingOutput>>();
+        }
+
     }
 
     //扫描SKU 注意区分有唯一编码和没有唯一编码
-    private async Task<Response> ScanSKU(RFReceiptReceivingInput request, List<WMSReceiptDetail> OrderData)
+    private async Task<Response> ScanSKU(RFReceiptReceivingInput request, List<WMSReceiptDetail> orderData)
     {
         Response response = new Response();
         var config = new MapperConfiguration(cfg =>
@@ -110,6 +175,9 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             cfg.CreateMap<WMSReceiptDetail, WMSReceiptReceiving>()
                //添加创建人为当前用户
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+               .ForMember(a => a.ReceivedQty, opt => opt.MapFrom(c => 0))
+               .ForMember(a => a.ReceiptDetailId, opt => opt.MapFrom(c => c.Id))
+               .ForMember(a => a.ReceiptReceivingStatus, opt => opt.MapFrom(c => (int)RFReceiptReceivingEnum.待上架))
 
                .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                .ForMember(a => a.Id, opt => opt.Ignore())
@@ -134,15 +202,29 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             //OrderCheckData =await  _repReceiptDetail.GetListAsync(it => it.ReceiptNumber == request.ReceiptNumber && it.CustomerId == request.CustomerId);
         }
         //判断需不需要上架，数量是否足够
-        if (OrderData.Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).Count() >= 0)
+        if (orderData.Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).Count() > 0)
         {
             //可继续上架
 
-            var receiptReceiving = OrderData.Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).First();
-            receiptReceiving.ReceivedQty = receiptReceiving.ReceivedQty + 1;
+            var receiptReceiving = orderData
+                .WhereIF(!string.IsNullOrEmpty(request.Lot), it => it.BatchCode == request.Lot || string.IsNullOrEmpty(it.BatchCode))
+                .Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).FirstOrDefault();
+            if (receiptReceiving == null)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "上架批次不正确";
+                return response;
+            }
+            orderData
+                .WhereIF(!string.IsNullOrEmpty(request.Lot), it => it.BatchCode == request.Lot || string.IsNullOrEmpty(it.BatchCode))
+                .Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).First().ReceiptQty = orderData.Where(it => it.SKU == request.SKU && it.ReceivedQty > it.ReceiptQty).First().ReceiptQty + 1;
             var packageData = mapper.Map<WMSReceiptReceiving>(receiptReceiving);
             packageData.ReceivedQty = 1;
+            packageData.BatchCode = !string.IsNullOrEmpty(request.Lot) ? request.Lot : receiptReceiving.BatchCode;
+            packageData.ExpirationDate = !string.IsNullOrEmpty(request.ExpirationDate) ? Convert.ToDateTime(request.ExpirationDate) : receiptReceiving.ExpirationDate;
             orderCheckData.Add(packageData);
+            _sysCacheService.Set("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber, orderCheckData, timeSpan);
+            _sysCacheService.Set("RFReceiptReceivingOrder:" + request.CustomerId + ":" + request.ReceiptNumber, orderData, timeSpan);
         }
         else
         {
@@ -150,6 +232,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             response.Msg = "上架数量足够";
             return response;
         }
+
         response.Code = StatusCode.Success;
         response.Msg = "成功";
         return response;
@@ -161,7 +244,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
     {
         Response response = new Response();
         //判断是不是可用的库存
-        var checkLocation = await _repLocation.GetListAsync(it => it.Location == request.ScanInput);
+        var checkLocation = await _repLocation.GetListAsync(it => it.Location == request.ScanInput && it.WarehouseId == orderData.First().WarehouseId);
         if (checkLocation != null && checkLocation.Count > 0)
         {
             var orderCheckData = _sysCacheService.Get<List<WMSReceiptReceiving>>("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber);
@@ -169,8 +252,23 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             {
                 //判断需不需要上架，数量是否足够
                 //将自己扫描的数据存入缓存，等待上架，补充库位信息
-                orderCheckData.Where(it => string.IsNullOrEmpty(it.Location) && it.Creator == _userManager.Account).ToList().ForEach(it => it.Location = request.ScanInput);
-                return await AddReceiptReceiving(orderCheckData, orderData);
+                orderCheckData.Where(it => string.IsNullOrEmpty(it.Location) && it.Creator == _userManager.Account).ToList().ForEach(it =>
+                {
+                    it.Location = checkLocation.First().Location;
+                    it.Area = checkLocation.First().AreaName;
+                    it.ReceiptReceivingStatus = (int)RFReceiptReceivingEnum.待上架;
+                });
+                _sysCacheService.Set("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber, orderCheckData, timeSpan);
+                var data = await AddReceiptReceiving(orderCheckData, orderData);
+                if (data.Code == StatusCode.Success)
+                {
+
+                    return data;
+                }
+                else
+                {
+                    return data;
+                }
             }
             else
             {
@@ -199,12 +297,16 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
         //{
         //var orderCheckData = _sysCacheService.Get<List<WMSReceiptReceiving>>("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber);
         //判断数量是否足够上架
-        if (request != null && OrderData.Count > 0 && OrderData.Where(it => it.ReceivedQty != it.ReceiptQty).Count() == 0)
+        //获取待上架状态的数据，插入上架表
+        var data = _sysCacheService.Get<List<WMSReceiptReceiving>>("RFReceiptReceivingScan:" + request.First().CustomerId + ":" + request.First().ReceiptNumber);
+        var receiptReceivingData = data.Where(it => it.ReceiptReceivingStatus == (int)RFReceiptReceivingEnum.待上架 && it.Creator == _userManager.Account).ToList();
+
+        if (receiptReceivingData != null && receiptReceivingData.Count > 0)
         {
             //判断需不需要上架，数量是否足够
             //将自己扫描的数据存入缓存，等待上架，补充库位信息
             //构建正式上架数据（同类型数据合并）
-            var receiptReceiving = request.GroupBy(r => new
+            var receiptReceiving = receiptReceivingData.Where(it => !string.IsNullOrEmpty(it.Location) && it.Creator == _userManager.Account && it.ReceiptReceivingStatus == (int)RFReceiptReceivingEnum.待上架).GroupBy(r => new
             {
 
                 r.ASNDetailId
@@ -268,14 +370,6 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 r.ExpirationDate
                 ,
                 r.Remark
-                ,
-                r.Creator
-                ,
-                r.CreationTime
-                ,
-                r.Updator
-                ,
-                r.UpdateTime
                 ,
                 r.Str1
                 ,
@@ -361,7 +455,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 ,
                 WarehouseName = a.Key.WarehouseName
                 ,
-                ReceiptReceivingStatus = a.Key.ReceiptReceivingStatus
+                ReceiptReceivingStatus = (int)ReceiptReceivingStatusEnum.上架
                 ,
                 GoodsStatus = a.Key.GoodsStatus
                 ,
@@ -405,13 +499,9 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 ,
                 Remark = a.Key.Remark
                 ,
-                Creator = a.Key.Creator
+                Creator = _userManager.Account
                 ,
-                CreationTime = a.Key.CreationTime
-                ,
-                Updator = a.Key.Updator
-                ,
-                UpdateTime = a.Key.UpdateTime
+                CreationTime = DateTime.Now
                 ,
                 Str1 = a.Key.Str1
                 ,
@@ -481,6 +571,9 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                    .SetColumns(p => p.ReceiptStatus == (int)ReceiptStatusEnum.上架)
                    .Where(p => OrderData.Select(c => c.ReceiptId).Contains(p.Id))
                    .ExecuteCommand();
+            data.ForEach(it => it.ReceiptReceivingStatus = (int)RFReceiptReceivingEnum.已上架);
+            _sysCacheService.Set("RFReceiptReceivingScan:" + request.First().CustomerId + ":" + request.First().ReceiptNumber, data, timeSpan);
+
             response.Code = StatusCode.Success;
             response.Msg = "成功";
             return response;
@@ -502,4 +595,34 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
 
         return response;
     }
+
+    //查看已扫描数据
+    public async Task<Response<List<RFReceiptReceivingOutput>>> GetScanData(RFReceiptReceivingInput request)
+    {
+        Response<List<RFReceiptReceivingOutput>> response = new Response<List<RFReceiptReceivingOutput>>();
+        var orderCheckData = _sysCacheService.Get<List<WMSReceiptReceiving>>("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber);
+        var orderCheckOrderData = _sysCacheService.Get<List<WMSReceiptDetail>>("RFReceiptReceivingOrder:" + request.CustomerId + ":" + request.ReceiptNumber);
+        if (orderCheckData != null && orderCheckData.Count > 0)
+        {
+            //构建扫描数据    
+            response.Data = orderCheckData.Where(it => it.ReceiptReceivingStatus == (int)RFReceiptReceivingEnum.待上架 && it.Creator == _userManager.Account).GroupBy(a => new { a.SKU, a.BatchCode }).Select(a => new RFReceiptReceivingOutput()
+            {
+                SKU = a.Key.SKU,
+                BatchCode = a.Key.BatchCode,
+                ReceivedQty = orderCheckData.Where(b => b.SKU == a.Key.SKU).Sum(b => b.ReceivedQty),
+                ReceiptQty = orderCheckOrderData.Where(b => b.SKU == a.Key.SKU).Sum(b => b.ReceiptQty),
+                ScanQty = a.Sum(b => b.ReceivedQty),
+            }).ToList();
+            response.Code = StatusCode.Success;
+            response.Msg = "成功";
+            return response;
+        }
+        else
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "请扫描产品条码";
+            return response;
+        }
+    }
+
 }

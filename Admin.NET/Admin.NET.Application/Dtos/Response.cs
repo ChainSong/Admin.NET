@@ -16,6 +16,9 @@ namespace Admin.NET.Application.Dtos
         public StatusCode Code { get; set; }
         public string Msg { get; set; }
 
+        public string ResponseType { get; set; }
+
+
     }
 
     public class Response<T>
@@ -23,6 +26,7 @@ namespace Admin.NET.Application.Dtos
         public StatusCode Code { get; set; }
 
         public string Msg { get; set; }
+        public string ResponseType { get; set; }
 
         public T Data { get; set; }
     }
@@ -32,6 +36,7 @@ namespace Admin.NET.Application.Dtos
         public StatusCode Code { get; set; }
 
         public string Msg { get; set; }
+        public string ResponseType { get; set; }
 
         public T Data { get; set; }
         public R Result { get; set; }

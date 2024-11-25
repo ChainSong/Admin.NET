@@ -34,10 +34,11 @@ namespace Admin.NET.Application.Strategy
 
         //注入ASNDetail仓储
         public SqlSugarRepository<WMSASNDetail> _repASNDetail { get; set; }
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         public SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
         public SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail { get; set; }
-
+        public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
         //注入仓库关系仓储
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }

@@ -26,6 +26,10 @@ namespace Admin.NET.Application.Interface
 
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+        public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+        public SqlSugarRepository<WMSOrderDetailBom> _repOrderDetailBom { get; set; }
+
+
         Task<Response<List<OrderStatusDto>>> Strategy(List<long> request);
     }
 }

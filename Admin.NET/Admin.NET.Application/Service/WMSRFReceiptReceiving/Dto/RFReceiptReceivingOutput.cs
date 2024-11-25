@@ -13,14 +13,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSRFReceiptReceiving.Dto;
+namespace Admin.NET.Application;
 public class RFReceiptReceivingOutput
 {
     /// <summary>
     /// SKU
     /// </summary>
     public string SKU { get; set; }
-
+    /// <summary>
+    /// BatchCode
+    /// </summary>
+    public string BatchCode { get; set; }
+    
     /// <summary>
     /// 扫描输入
     /// </summary>
@@ -57,6 +61,8 @@ public class RFReceiptReceivingOutput
     /// </summary>
 
     public double ReceiptQty { get; set; } = 0;
+
+    public double ScanQty { get; set; } = 0;
 
 
 

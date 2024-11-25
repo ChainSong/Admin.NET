@@ -52,6 +52,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
 
+    TimeSpan timeSpan = new TimeSpan(72, 0, 0);
     public WMSRFReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SysCacheService sysCacheService)
     {
         _rep = rep;
@@ -121,7 +122,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
                     .WhereIF(input.Int4 > 0, u => u.Int4 == input.Int4)
                     .WhereIF(input.Int5 > 0, u => u.Int5 == input.Int5)
-                    .Where(a => a.ReceiptStatus >= (int)ReceiptStatusEnum.新增)
+                    .Where(a => a.ReceiptStatus >= (int)ReceiptStatusEnum.新增 && a.ReceiptStatus < (int)ReceiptStatusEnum.完成)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
@@ -218,9 +219,9 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public async Task<Response<RFReceiptReceivingOutput>> ScanReceiptReceiving(RFReceiptReceivingInput input)
+    public async Task<Response<List<RFReceiptReceivingOutput>>> ScanReceiptReceiving(RFReceiptReceivingInput input)
     {
-        Response<RFReceiptReceivingOutput> response = new Response<RFReceiptReceivingOutput>();
+        Response<List<RFReceiptReceivingOutput>> response = new Response<List<RFReceiptReceivingOutput>>();
         //根据单号先获取客户信息，如果客户不存在，则返回错误信息。
         var receiptReceivingData = await _rep.AsQueryable().Where(u => u.ReceiptNumber == input.ReceiptNumber).FirstAsync();
         long customerId = 0;
@@ -228,7 +229,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
         if (receiptReceivingData == null || receiptReceivingData.CustomerId == 0)
         {
             response.Code = StatusCode.Error;
-            response.Msg = "订单补存在";
+            response.Msg = "订单不存在";
             return response;
 
         }

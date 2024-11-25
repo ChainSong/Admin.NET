@@ -19,6 +19,8 @@ namespace Admin.NET.Application.Factory
             {
                 case (long)OutboundEnum.OutboundDefault:
                     return new PreOrderForOrderDefaultStrategy();
+                case 20:
+                    return new PreOrderForOrderHachStrategy();
                 default:
                     return new PreOrderForOrderDefaultStrategy();
             }

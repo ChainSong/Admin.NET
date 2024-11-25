@@ -3,7 +3,7 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
         <el-row :gutter="[16, 15]">
-          <template v-for="i in  state.tableColumnHeaders">
+          <template v-for="i in state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -60,24 +60,18 @@
         </el-row>
 
         <el-form-item>
-          <el-button-group>
-            <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSASN:page'"> 查询 </el-button>
-          </el-button-group>
+          <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSASN:page'"> 查询 </el-button>
 
-        </el-form-item>
-        <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSASN:add'"> 新增
           </el-button>
-        </el-form-item>
 
-        <el-form-item>
           <el-button type="primary" icon="ele-Download" @click="exportASNFun" v-auth="'wMSASN:export'"> 导出
           </el-button>
-        </el-form-item>
 
-        <el-form-item>
           <el-button type="primary" icon="ele-Fold" @click="asnForReceiptFun" v-auth="'wMSASN:add'"> 转入库单(全部)
           </el-button>
+
+          <el-button type="primary" icon="ele-Fold" @click="asnCountQuantity" v-auth="'wMSASN:add'"> 点数</el-button>
         </el-form-item>
 
       </el-form>
@@ -85,6 +79,7 @@
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
 
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id">
+
         <el-table-column type="selection" width="55">
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
@@ -119,12 +114,11 @@
         <el-table-column fixed="right" label="操作" width="320">
           <template #header>
             <el-select placeholder="请选择">
-              <el-option v-for="item in state.tableColumnHeaders.filter(a=>a.isCreate==1)" :key="item.value">
-                <el-checkbox @change="checked =>showColumnOption(checked,item)" 
-                :true-label="1"
-                :false-label="0"
-                :label="item.displayName" :key="item.columnName"
-                  v-model="item.isShowInList">{{ item.displayName }}</el-checkbox>
+           
+              <el-option v-for="item in state.tableColumnHeaders.filter(a => a.isCreate == 1)" :key="item.value">
+                <el-checkbox @change="checked => showColumnOption(checked, item)" :true-label="1" :false-label="0"
+                  :label="item.displayName" :key="item.columnName" v-model="item.isShowInList">{{ item.displayName
+                  }}</el-checkbox>
               </el-option>
             </el-select>
           </template>
@@ -167,6 +161,7 @@ import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
 import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDialog.vue'
 import { pageWMSASN, deleteWMSASN, asnForReceipt, exportASN, cancelWMSASN } from '/@/api/main/wMSASN';
+import { addWMSASNCountQuantity } from '/@/api/main/wMSASNCountQuantity';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/asn";
@@ -226,18 +221,18 @@ onMounted(async () => {
   gettableColumn();
 });
 
-const showColumnOption = async (value :any,item: any) => {
-  if(value==1){
-    item.isShowInList=1;
-  }else{
-    item.isShowInList=0;
+const showColumnOption = async (value: any, item: any) => {
+  if (value == 1) {
+    item.isShowInList = 1;
+  } else {
+    item.isShowInList = 0;
   }
 };
 const gettableColumn = async () => {
   let res = await getByTableNameList("WMS_ASN");
   state.value.tableColumnHeaders = res.data.result;
 
-}; 
+};
 // 查询操作
 const handleQuery = async () => {
   loading.value = true;
@@ -252,6 +247,7 @@ const openAdd = () => {
   addTitle.value = '添加';
   addDialogRef.value.openDialog({});
 };
+ 
 
 // 打开转入库单页面
 const openAsnforReceipt = (row: any) => {
@@ -288,7 +284,6 @@ const del = (row: any) => {
     ElMessage.warning("订单状态不允许删除");
     return;
   }
-
   ElMessageBox.confirm(`确定要删除吗?`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -321,6 +316,34 @@ const openCancel = (row: any) => {
       await cancelWMSASN(row);
       handleQuery();
       ElMessage.success("取消成功");
+    })
+    .catch(() => { });
+};
+
+
+// 点数
+const asnCountQuantity = () => {
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+
+  ElMessageBox.confirm(`确定要生成点数单吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      let result = await addWMSASNCountQuantity(ids);
+      // console.log("result");
+      // console.log(result);
+      if (result.data.result.code == 1) {
+        handleQuery();
+        ElMessage.success("点数单生成成功");
+      } else {
+        resultPopupShow.value = true;
+        state.value.orderStatus = result.data.result.data;
+      }
     })
     .catch(() => { });
 };
@@ -360,14 +383,20 @@ const exportASNFun = async () => {
   multipleTableRef.value.getSelectionRows().forEach(a => {
     ids.push(a.id);
   });
-  // 2,验证数据有没有勾选
-  if (ids.length < 1) {
-    ElMessage.error("请勾选订单");
-    return;
+  // // 2,验证数据有没有勾选
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if (ids.length >= 1) {
+    let res = await exportASN({ "ids": ids });
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } else {
+    let res = await exportASN(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
   }
-  let res = await exportASN(ids);
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
 }
 
 

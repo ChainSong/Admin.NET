@@ -286,6 +286,8 @@ ElMessageBox.confirm(`确定要打印吗?`, "提示", {
   type: "warning",
 })
   .then(async () => { 
+    console.log("row");
+    console.log(row);
     if (row.expressCompany == "顺丰快递") {
         let res = await printExpressData(row);
         if(res.data.result.code==-1)

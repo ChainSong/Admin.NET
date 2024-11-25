@@ -48,7 +48,9 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPreOrderExtend> _repPreOrderExtend;
     private readonly SqlSugarRepository<UploadMappingLog> _repUploadMapping;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
-    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct)
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
+    private readonly SqlSugarRepository<WMSOrderDetailBom> _repOrderDetailBom;
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSOrderDetailBom> repOrderDetailBom)
     {
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
@@ -64,6 +66,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _repUploadMapping = repUploadMapping;
         _repOrderAddress = repOrderAddress;
         _repProduct = repProduct;
+        _repProductBom = repProductBom;
+        _repOrderDetailBom = repOrderDetailBom;
     }
 
 
@@ -502,7 +506,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     {
         //获取勾选的订单的客户
         //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var customerData = _repCustomerUser.AsQueryable().Where(a => a.Id == input.First()).First();
+        var customerData = _rep.AsQueryable().Where(a => a.Id == input.First()).First();
         long customerId = 0;
         if (customerData != null)
         {
@@ -519,6 +523,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         factory._repTableColumnsDetail = _repTableColumnsDetail;
         factory._repOrder = _repOrder;
         factory._repOrderDetail = _repOrderDetail;
+        factory._repProductBom = _repProductBom;
+        factory._repOrderDetailBom = _repOrderDetailBom;
         var response = await factory.Strategy(input);
         return response;
     }

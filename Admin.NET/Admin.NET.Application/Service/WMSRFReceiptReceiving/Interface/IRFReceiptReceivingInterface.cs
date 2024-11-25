@@ -37,5 +37,5 @@ public interface IRFReceiptReceivingInterface
 
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 
-    Task<Response<RFReceiptReceivingOutput>> RFReceiptReceivingSave(RFReceiptReceivingInput  request, WMSReceipt receipt);
+    Task<Response<List<RFReceiptReceivingOutput>>> RFReceiptReceivingSave(RFReceiptReceivingInput request, WMSReceipt receipt);
 }

@@ -214,10 +214,10 @@ namespace Admin.NET.Application.Strategy
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public Response<DataTable> Export(List<long> request)
+        public Response<DataTable> Export(WMSASNExcelInput request)
         {
             Response<DataTable> response = new Response<DataTable>();
-            //CreateOrUpdateWMS_ReceiptInput orders = new CreateOrUpdateWMS_ReceiptInput();
+            //CreateOrUpdateWMS_Receiptrequest orders = new CreateOrUpdateWMS_Receiptrequest();
             //orders.WMS_Receipts = new List<WMSReceiptEditDto>();
             //var orderDatas = _repASN.AsQueryable()
             //    //.LeftJoin<WMSASNDetail>（）
@@ -229,7 +229,137 @@ namespace Admin.NET.Application.Strategy
 
             var headerTableColumn = GetColumns("WMS_ASN");
             var detailTableColumn = GetColumns("WMS_ASNDetail");
-            var orderData = _repASN.AsQueryable().Includes(a => a.Details).Where(a => request.Contains(a.Id)).ToList();
+
+
+            var query = _repASN.AsQueryable()
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.ASNNumber), u => u.ASNNumber.Contains(request.ASNNumber.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(request.ExternReceiptNumber.Trim()))
+                    .WhereIF(request.CustomerId > 0, u => u.CustomerId == request.CustomerId)
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.CustomerName), u => u.CustomerName.Contains(request.CustomerName.Trim()))
+                    .WhereIF(request.WarehouseId > 0, u => u.WarehouseId == request.WarehouseId)
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.WarehouseName), u => u.WarehouseName.Contains(request.WarehouseName.Trim()))
+                    .WhereIF(request.ASNStatus != 0, u => u.ASNStatus == request.ASNStatus)
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.ReceiptType), u => u.ReceiptType.Contains(request.ReceiptType.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Po), u => u.Po.Contains(request.Po.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.So), u => u.So.Contains(request.So.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Contact), u => u.Contact.Contains(request.Contact.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.ContactInfo), u => u.ContactInfo.Contains(request.ContactInfo.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Remark), u => u.Remark.Contains(request.Remark.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Creator), u => u.Creator.Contains(request.Creator.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Updator), u => u.Updator.Contains(request.Updator.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str1), u => u.Str1.Contains(request.Str1.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str2), u => u.Str2.Contains(request.Str2.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str3), u => u.Str3.Contains(request.Str3.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str4), u => u.Str4.Contains(request.Str4.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str5), u => u.Str5.Contains(request.Str5.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str6), u => u.Str6.Contains(request.Str6.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str7), u => u.Str7.Contains(request.Str7.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str8), u => u.Str8.Contains(request.Str8.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str9), u => u.Str9.Contains(request.Str9.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str10), u => u.Str10.Contains(request.Str10.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str11), u => u.Str11.Contains(request.Str11.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str12), u => u.Str12.Contains(request.Str12.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str13), u => u.Str13.Contains(request.Str13.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str14), u => u.Str14.Contains(request.Str14.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str15), u => u.Str15.Contains(request.Str15.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str16), u => u.Str16.Contains(request.Str16.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str17), u => u.Str17.Contains(request.Str17.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str18), u => u.Str18.Contains(request.Str18.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str19), u => u.Str19.Contains(request.Str19.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(request.Str20), u => u.Str20.Contains(request.Str20.Trim()))
+                    //.WhereIF(request.Int1 > 0, u => u.Int1 == request.Int1)
+                    //.WhereIF(request.Int2 > 0, u => u.Int2 == request.Int2)
+                    //.WhereIF(request.Int3 > 0, u => u.Int3 == request.Int3)
+                    //.WhereIF(request.Int4 > 0, u => u.Int4 == request.Int4)
+                    //.WhereIF(request.Int5 > 0, u => u.Int5 == request.Int5)
+                    .WhereIF(request.Ids!= null && request.Ids.Count > 0, u => request.Ids.Contains(u.Id))
+                    //.Where(a=>_repCustomerUser.AsQueryable().Where(b=>b.CustomerId==a.CustomerId).Count()>0)
+                    //.Where(a=>_repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
+                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Select<WMSASN>()
+;
+            if (request.ExpectDate != null && request.ExpectDate.Count > 0)
+            {
+                DateTime? start = request.ExpectDate[0];
+                query = query.WhereIF(start.HasValue, u => u.ExpectDate > start);
+                if (request.ExpectDate.Count > 1 && request.ExpectDate[1].HasValue)
+                {
+                    var end = request.ExpectDate[1].Value.AddDays(1);
+                    query = query.Where(u => u.ExpectDate < end);
+                }
+            }
+            if (request.CompleteTime != null && request.CompleteTime.Count > 0)
+            {
+                DateTime? start = request.CompleteTime[0];
+                query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+                if (request.CompleteTime.Count > 1 && request.CompleteTime[1].HasValue)
+                {
+                    var end = request.CompleteTime[1].Value.AddDays(1);
+                    query = query.Where(u => u.CompleteTime < end);
+                }
+            }
+            if (request.CreationTime != null && request.CreationTime.Count > 0)
+            {
+                DateTime? start = request.CreationTime[0];
+                query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+                if (request.CreationTime.Count > 1 && request.CreationTime[1].HasValue)
+                {
+                    var end = request.CreationTime[1].Value.AddDays(1);
+                    query = query.Where(u => u.CreationTime < end);
+                }
+            }
+            if (request.DateTime1 != null && request.DateTime1.Count > 0)
+            {
+                DateTime? start = request.DateTime1[0];
+                query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+                if (request.DateTime1.Count > 1 && request.DateTime1[1].HasValue)
+                {
+                    var end = request.DateTime1[1].Value.AddDays(1);
+                    query = query.Where(u => u.DateTime1 < end);
+                }
+            }
+            if (request.DateTime2 != null && request.DateTime2.Count > 0)
+            {
+                DateTime? start = request.DateTime2[0];
+                query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+                if (request.DateTime2.Count > 1 && request.DateTime2[1].HasValue)
+                {
+                    var end = request.DateTime2[1].Value.AddDays(1);
+                    query = query.Where(u => u.DateTime2 < end);
+                }
+            }
+            if (request.DateTime3 != null && request.DateTime3.Count > 0)
+            {
+                DateTime? start = request.DateTime3[0];
+                query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+                if (request.DateTime3.Count > 1 && request.DateTime3[1].HasValue)
+                {
+                    var end = request.DateTime3[1].Value.AddDays(1);
+                    query = query.Where(u => u.DateTime3 < end);
+                }
+            }
+            if (request.DateTime4 != null && request.DateTime4.Count > 0)
+            {
+                DateTime? start = request.DateTime4[0];
+                query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+                if (request.DateTime4.Count > 1 && request.DateTime4[1].HasValue)
+                {
+                    var end = request.DateTime4[1].Value.AddDays(1);
+                    query = query.Where(u => u.DateTime4 < end);
+                }
+            }
+            if (request.DateTime5 != null && request.DateTime5.Count > 0)
+            {
+                DateTime? start = request.DateTime5[0];
+                query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+                if (request.DateTime5.Count > 1 && request.DateTime5[1].HasValue)
+                {
+                    var end = request.DateTime5[1].Value.AddDays(1);
+                    query = query.Where(u => u.DateTime5 < end);
+                }
+            }
+            var orderData = query.Includes(a => a.Details).ToList();
 
 
             DataTable dt = new DataTable();

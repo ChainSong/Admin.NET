@@ -27,9 +27,10 @@ namespace Admin.NET.Application.Interface
         SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         //仓库用户关系仓储
         SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
-
+        SqlSugarRepository<WMSProduct> _repProduct { get; set; }
         SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
-
+        SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
+        
         SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail { get; set; }
 
         Task<Response<List<OrderStatusDto>>> Strategy(List<long> request);

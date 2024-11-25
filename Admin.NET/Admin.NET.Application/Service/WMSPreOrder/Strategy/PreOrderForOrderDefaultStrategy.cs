@@ -29,7 +29,8 @@ namespace Admin.NET.ApplicationCore.Strategy
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-
+        public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+        public SqlSugarRepository<WMSOrderDetailBom> _repOrderDetailBom { get; set; }
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
 

@@ -138,9 +138,9 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
             //}
             string pattern = @"([a-zA-Z]+)|([0-9]+)"; // 正则表达式匹配英文字符或数字
 
-            string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
-            string LOTRegex = @"(?<=\|LOT)[^|\]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
-            string ExpirationDateRegex = @"(?<=\|EXP)[^|\]+|(?<=\s)\d{6}\b";
+            string skuRegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+            string lotRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+            string expirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
             MatchCollection matches = Regex.Matches(input.ExpirationDate.Replace("EXP", ""), pattern);
             string dateStr = "";
             if (matches.Count > 2)

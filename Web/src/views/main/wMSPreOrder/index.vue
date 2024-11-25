@@ -263,7 +263,7 @@ const openAdd = () => {
 
 // 打开编辑地址页面
 const openEditAddres = (row: any) => {
-  addresTitle.value = '查看';
+  addresTitle.value = '编辑地址';
   editAddresDialogRef.value.openDialog(row);
 };
  

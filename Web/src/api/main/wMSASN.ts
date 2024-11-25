@@ -9,6 +9,7 @@ enum Api {
   ASNForReceiptPart = '/api/wMSASN/ASNForReceiptPart',
   ExportASN = '/api/wMSASN/ExportASN',
   CancelASN = '/api/wMSASN/Cancel',
+  AddASNCountQuantity = '/api/WMSASNCountQuantity/AddASNCountQuantity',
   
 }
 
@@ -82,5 +83,11 @@ export const exportASN = (params?: any) =>
 		responseType: 'blob',
 	});
 
-	
-		
+// 创建点数清单
+export const addASNCountQuantity = (params?: any) =>
+	request({
+		url: Api.AddASNCountQuantity,
+		method: 'post',
+		data: params,
+	});
+			

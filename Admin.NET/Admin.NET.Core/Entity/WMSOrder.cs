@@ -333,6 +333,8 @@ public class WMSOrder : ITenantIdFilter
     public List<WMSOrderDetail> Details { get; set; }
 
 
+    [Navigate(NavigateType.OneToMany, nameof(WMSOrderDetailBom.OrderId))]
+    public List<WMSOrderDetailBom> DetailBoms { get; set; }
 
     [Navigate(NavigateType.OneToMany, nameof(WMSOrderAllocation.OrderId))]
     public List<WMSOrderAllocation> Allocation { get; set; }

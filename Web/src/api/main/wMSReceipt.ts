@@ -8,6 +8,7 @@ enum Api {
 	ExportReceipt = '/api/wMSReceipt/ExportReceipt',
 	ExportReceiptReceiving = '/api/wMSReceipt/ExportReceiptReceiving',
 	GetReceipts = '/api/wMSReceipt/GetReceipts',
+	// GetPrintRFIDData = '/api/wMSReceipt/GetPrintRFIDData',
 }
 
 // 增加WMSReceipt
@@ -77,3 +78,13 @@ export const exportReceiptReceiving = (params?: any) =>
 		data: params,
 		responseType: 'blob',
 	});
+
+	
+// 按照ids 打印RFID
+// export const getPrintRFIDData = (params?: any) =>
+// 	request({
+// 		url: Api.GetPrintRFIDData,
+// 		method: 'post',
+// 		data: params,
+// 	});
+

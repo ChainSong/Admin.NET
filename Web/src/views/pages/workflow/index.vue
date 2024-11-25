@@ -10,24 +10,7 @@
 				<div class="workflow-content">
 					<div class="workflow-left">
 						<el-scrollbar>
-							<div
-								ref="leftNavRefs"
-								v-for="val in state.leftNavList"
-								:key="val.id"
-								:style="{ height: val.isOpen ? 'auto' : '50px', overflow: 'hidden' }"
-								class="workflow-left-id"
-							>
-								<div class="workflow-left-title" @click="onTitleClick(val)">
-									<span>{{ val.title }}</span>
-									<SvgIcon :name="val.isOpen ? 'ele-ArrowDown' : 'ele-ArrowRight'" />
-								</div>
-								<div class="workflow-left-item" v-for="(v, k) in val.children" :key="k" :data-name="v.name" :data-icon="v.icon" :data-id="v.id">
-									<div class="workflow-left-item-icon">
-										<SvgIcon :name="v.icon" class="workflow-icon-drag" />
-										<div class="font10 pl5 name">{{ v.name }}</div>
-									</div>
-								</div>
-							</div>
+							
 						</el-scrollbar>
 					</div>
 

@@ -223,7 +223,34 @@ public class WMSProduct : ITenantIdFilter
     [Required]
     [SugarColumn(ColumnDescription = "")]
     public int ExpirationDate { get; set; }
-    
+
+
+    /// <summary>
+    /// 是否NFC
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsNFC { get; set; }
+    /// <summary>
+    /// 是否RFID
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsRFID { get; set; }
+    /// <summary>
+    ///  是否质检
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsQC { get; set; }
+
+    /// <summary>
+    ///  是否组合件
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsAssembly { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
