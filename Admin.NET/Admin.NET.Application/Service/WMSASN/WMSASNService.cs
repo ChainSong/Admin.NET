@@ -52,8 +52,9 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    private readonly SqlSugarRepository<SysWorkFlowStep> _repWorkFlowStep;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlowStep> repWorkFlowStep)
     {
         _rep = rep;
         //_db = db;
@@ -69,6 +70,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repWorkFlow = repWorkFlow;
         _repProduct = repProduct;
         _repRFIDInfo = repRFIDInfo;
+        _repWorkFlowStep = repWorkFlowStep;
     }
 
     /// <summary>
@@ -82,8 +84,8 @@ public class WMSASNService : IDynamicApiController, ITransient
     public async Task<SqlSugarPagedList<WMSASNOutput>> Page(WMSASNInput input)
     {
         var query = _rep.AsQueryable()
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
@@ -128,6 +130,68 @@ public class WMSASNService : IDynamicApiController, ITransient
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
                     .Select<WMSASNOutput>()
 ;
+
+
+        if (input.ASNNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ASNNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ASNNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ASNNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ASNNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ASNNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ASNNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => numbers.Contains(u.ASNNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()));
+            }
+        }
+
+        if (input.ExternReceiptNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ExternReceiptNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternReceiptNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternReceiptNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => numbers.Contains(u.ExternReceiptNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()));
+            }
+        }
+
         if (input.ExpectDate != null && input.ExpectDate.Count > 0)
         {
             DateTime? start = input.ExpectDate[0];
@@ -236,7 +300,14 @@ public class WMSASNService : IDynamicApiController, ITransient
             return result;
         }
         //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
+
+        //使用简单工厂定制化修改和新增的方法
+        IASNInterface factory = ASNFactory.AddOrUpdate(workflow, input.ReceiptType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -301,9 +372,14 @@ public class WMSASNService : IDynamicApiController, ITransient
         {
             return result;
         }
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == input.CustomerName+ InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
 
         //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(input.CustomerId);
+        IASNInterface factory = ASNFactory.AddOrUpdate(workflow, input.ReceiptType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -395,7 +471,14 @@ public class WMSASNService : IDynamicApiController, ITransient
             }
             //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
             //使用简单工厂定制化修改和新增的方法
-            IASNInterface factory = ASNFactory.AddOrUpdate(customerId);
+            //根据订单类型判断是否存在该流程
+            var workflow = await _repWorkFlow.AsQueryable()
+               .Includes(a => a.SysWorkFlowSteps)
+               .Where(a => a.WorkName == ASNs.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
+
+            //使用简单工厂定制化修改和新增的方法
+            IASNInterface factory = ASNFactory.AddOrUpdate(workflow, ASNs.First().ReceiptType);
             //factory._db = _db;
             factory._userManager = _userManager;
             factory._repASN = _rep;
@@ -431,22 +514,12 @@ public class WMSASNService : IDynamicApiController, ITransient
 
         //根据订单类型判断是否存在该流程
         var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == asnData.First().ReceiptType).FirstAsync();
+            .Includes(a => a.SysWorkFlowSteps)
+            .Where(a => a.WorkName == asnData.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
 
-        //if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "全部转入库单").Count() == 0)
-        //{
-        //    throw Oops.Oh("该订单类型不支持全部转入库单");
-        //}
-
-        //long customerId = 0;
-        //if (asnData != null)
-        //{
-        //    customerId = asnData.First().CustomerId;
-        //}
 
         //使用简单工厂定制化修改和新增的方法
-        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(asnData.First().CustomerId, asnData.First().ReceiptType);
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(workflow, asnData.First().ReceiptType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -477,9 +550,9 @@ public class WMSASNService : IDynamicApiController, ITransient
         //根据订单类型判断是否存在该流程
         var workflow = await _repWorkFlow.AsQueryable()
            .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == asnData.ReceiptType).FirstAsync();
+           .Where(a => a.WorkName == asnData.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
 
-        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == "部分转入库单").Count() == 0)
+        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == InboundWorkFlowConst.Workflow_ASNForReceiptPart).Count() == 0)
         {
             throw Oops.Oh("该订单类型不支持部分转入库单");
         }
@@ -501,7 +574,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         //    customerId = input.First().CustomerId;
         //}
         //使用简单工厂定制化修改和新增的方法
-        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(asnData.CustomerId, asnData.ReceiptType);
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(workflow, asnData.ReceiptType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;

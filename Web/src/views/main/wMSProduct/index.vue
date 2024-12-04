@@ -64,8 +64,10 @@
           </el-button-group>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSProduct:add'"> 新增
+          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSProduct:add'"> 新增产品信息
           </el-button>
+          <!-- <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSProduct:addBom'"> 新增产品Bom关系
+          </el-button> -->
         </el-form-item>
       </el-form>
     </el-card>

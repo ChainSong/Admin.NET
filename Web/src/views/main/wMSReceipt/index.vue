@@ -130,7 +130,7 @@
                 <el-option v-if="item.isShowInList == 1" :key="item.value">
                   <el-checkbox @change="checked => showColumnOption(checked, item)" :true-label="1" :false-label="0"
                     :label="item.displayName" :key="item.columnName" v-model="item.isShowInList">{{
-                    item.displayName}}</el-checkbox>
+                      item.displayName }}</el-checkbox>
                 </el-option>
               </template>
             </el-select>
@@ -176,6 +176,7 @@ import Details from "/@/entities/receiptDetail";
 import TableColumns from "/@/entities/tableColumns";
 // import { number } from "echarts";
 import { downloadByData, getFileName } from '/@/utils/download';
+import { stringify } from "querystring";
 import { signalR } from '/@/utils/signalRCustom';
 const state = ref({
   vm: {
@@ -228,13 +229,14 @@ const printDialogRef = ref();
 // 页面加载时
 onMounted(async () => {
   gettableColumn();
+  // signalR.on('Echo', (data: any) => {
+  //   console.log("WebSocket data");
+  //   console.log(data);
+  // });
 });
-
 const gettableColumn = async () => {
-
   let res = await getByTableNameList("WMS_Receipt");
   state.value.tableColumnHeaders = res.data.result;
-
 };
 
 // 查询操作
@@ -312,14 +314,10 @@ const printRFID = (row: any) => {
       console.log("result");
       console.log(result);
       if (result.data.result.code == 1) {
-        // handleQuery();
-        // signalRRFID(result.data.result.data);
-        signalR.invoke("sendMessage", result.data.result.data)
-        .catch(err => console.error(err));
+        await signalR.send("Echo", result.data.result.data);
         ElMessage.success("打印成功");
       } else {
         ElMessage.success("打印失败");
-
       }
     })
     .catch(() => { });

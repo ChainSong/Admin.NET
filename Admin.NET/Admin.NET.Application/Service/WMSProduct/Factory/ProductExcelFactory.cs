@@ -20,4 +20,9 @@ public class ProductExcelFactory
     {
         return new ProductExcelStrategy();
     }
+
+    public static IProductExcelInterface ProductBomExcel()
+    {
+        return new ProductBomExcelStrategy();
+    }
 }

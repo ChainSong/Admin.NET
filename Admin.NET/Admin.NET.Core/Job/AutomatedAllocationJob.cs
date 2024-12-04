@@ -50,6 +50,7 @@ public class AutomatedAllocationJob : IJob
         var repSysNoticeUser = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysNoticeUser>>();
         var repSysTenant = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysTenant>>();
         var noticeServic = serviceScope.ServiceProvider.GetService<SysNoticeService>();
+        var repOrder = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSOrder>>();
         var repWorkFlow = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysWorkFlow>>();
         var tenantdata = repSysTenant.AsQueryable().Select(a => a).ToList();
 
@@ -84,7 +85,7 @@ public class AutomatedAllocationJob : IJob
             db.DbMaintenance.CreateDatabase();
             //db.DbMaintenance.c
             //var dasd = db.Queryable<WMSInstruction>();
-            var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo,CustomerName, Creator from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1 order by InstructionTaskNo");
+            var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo,CustomerName,MAX(OperationId) OperationId, Creator from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1  group by InstructionTaskNo,CustomerName,Creator  order by InstructionTaskNo");
             if (data != null && data.Count > 0)
             {
                 List<WMSAdjustmentInformationDo> AdjustmentInfo = new List<WMSAdjustmentInformationDo>();
@@ -93,15 +94,18 @@ public class AutomatedAllocationJob : IJob
                 {
                     //默认分配规则
                     string procedureName = "Proc_WMS_AutomatedOutbound";
+                    //获取订单，判断订单类型
+                    var repOrderData = repOrder.AsQueryable().Where(a => a.Id == instruction.OperationId).First();
                     //根据订单类型判断是否存在该流程
                     var workflow = await repWorkFlow.AsQueryable()
                        .Includes(a => a.SysWorkFlowSteps)
-                       .Where(a => a.WorkName == instruction.CustomerName + "自动分配").FirstAsync();
+                       .Where(a => a.WorkName == instruction.CustomerName + repOrderData.OrderType + "自动分配").FirstAsync();
 
                     if (workflow != null && workflow.SysWorkFlowSteps.Count() > 0)
                     {
                         procedureName = workflow.SysWorkFlowSteps[1].StepName;
                     }
+                   
 
                     var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
                     DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync(procedureName, sugarParameter);

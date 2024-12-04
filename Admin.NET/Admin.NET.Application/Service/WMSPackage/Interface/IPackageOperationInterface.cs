@@ -38,8 +38,22 @@ public interface IPackageOperationInterface
 
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
-
+    public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
+    
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
+
+    /// <summary>
+    /// 校验包裹
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    Task<Response<ScanPackageOutput>> VerifyPackage(ScanPackageRFIDInput request);
+
+    /// <summary>
+    /// 获取包装信息
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     Task<Response<ScanPackageOutput>> GetPackage(ScanPackageInput request);
     /// <summary>
     /// 添加新的箱子

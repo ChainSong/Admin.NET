@@ -29,6 +29,9 @@ namespace Admin.NET.Application
                 case "WMS_Product":
                     return new ImportExcelTemplateProductDefault();
 
+                case "WMS_ProductBom":
+                    return new ImportExcelTemplateProductBomDefault();
+
                 default:
                     return new ImportExcelTemplateASNDefault();
             }

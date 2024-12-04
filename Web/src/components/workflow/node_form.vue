@@ -101,6 +101,13 @@ export default {
                         required: true,
                         colSize: 12
                     }],
+                    [
+                    {
+                        title: '节点备注',
+                        field: 'remark',
+                        // required: true,
+                        colSize: 12
+                    }],
                 [
                     {
                         dataKey: '',
@@ -295,6 +302,7 @@ export default {
                     node.top = this.node.top;
                     node.ico = this.node.ico;
                     node.state = this.node.state;
+                    node.remark = this.node.remark;
                     node.stepValue = this.node.stepValue;
                     this.$emit('repaintEverything', this.node);
                 }

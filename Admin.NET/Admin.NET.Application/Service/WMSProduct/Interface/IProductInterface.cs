@@ -26,6 +26,8 @@ public interface IProductInterface
     public UserManager _userManager { get; set; }
     //asn仓储
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+
     ////ASNDetail 仓储
     //SqlSugarRepository<WMSASNDetail> _repASNDetail { get; set; }
 
@@ -34,5 +36,6 @@ public interface IProductInterface
     //仓库用户关系仓储
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateProductInput> request);
+    Task<Response<List<OrderStatusDto>>> AddBomStrategy(List<AddOrUpdateProductBomInput> request);
     Task<Response<List<OrderStatusDto>>> UpdateStrategy(List<AddOrUpdateProductInput> request);
 }

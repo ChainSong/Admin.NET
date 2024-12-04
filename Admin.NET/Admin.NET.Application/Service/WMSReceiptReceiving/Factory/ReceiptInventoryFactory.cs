@@ -18,8 +18,8 @@ namespace Admin.NET.Application.ReceiptCore.Factory
              //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
             switch (CustomerId)
             {
-                case (long)ReceiptEnum.ReceiptExportDefault:
-                    return new ReceiptInventoryDefaultStrategy();
+                //case (long)ReceiptEnum.ReceiptExportDefault:
+                //    return new ReceiptInventoryDefaultStrategy();
                 default:
                     return new ReceiptInventoryDefaultStrategy();
             }

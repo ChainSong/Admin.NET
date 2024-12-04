@@ -11,6 +11,7 @@ enum Api {
   AddPackageData = '/api/wMSPackage/AddPackage',
   ShortagePackageData = '/api/wMSPackage/ShortagePackage',
   ResetPackageData = '/api/wMSPackage/resetPackage',
+  GetRFIDInfo = '/api/wMSPackage/GetRFIDInfo',
   
 }
 
@@ -94,10 +95,19 @@ request({
 	method: 'post',
 	data: params,
 });		
-
+//获取所有包装信息
 export const allWMSPackage = (params?: any) => 
 request({
 	url: Api.AllWMSPackage,
 	method: 'post',
 	data: params,
 });		
+
+
+//获取RFID信息
+export const getRFIDInfo = (params?: any) => 
+	request({
+		url: Api.GetRFIDInfo,
+		method: 'post',
+		data: params,
+	});		

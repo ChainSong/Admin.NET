@@ -37,6 +37,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
+    private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -47,7 +48,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SysCacheService _sysCacheService;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
     {
         _rep = rep;
         _userManager = userManager;
@@ -59,6 +60,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
         _sysCacheService = sysCacheService;
+        _repRFIDInfo = repRFIDInfo;
 
     }
 
@@ -371,4 +373,6 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         });
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
+
+
 }

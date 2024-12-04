@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application
 {
-    public enum ReceiptEnum
+    public enum ReceiptReturnEnum
     {
 
         /// <summary>
-        /// Receipt 导入默认
+        /// Receipt 导入回退
         /// </summary>
-        ReceiptExportDefault = 0,
+        ReceiptReturnDefault = 0,
+
+        ReceiptHachDefault = 20,
 
     }
 }

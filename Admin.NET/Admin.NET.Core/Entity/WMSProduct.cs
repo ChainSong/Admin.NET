@@ -427,5 +427,9 @@ public class WMSProduct : ITenantIdFilter
     [Required]
     [SugarColumn(ColumnDescription = "")]
     public int Int3 { get; set; }
-    
+
+
+    [Navigate(NavigateType.OneToMany, nameof(WMSProductBom.ProductId))]
+    public List<WMSProductBom> Details { get; set; }
+
 }

@@ -17,8 +17,8 @@ namespace Admin.NET.Application.Factory
             //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
             switch (CustomerId)
             {
-                case (long)OutboundEnum.OutboundDefault:
-                    return new PreOrderForOrderDefaultStrategy();
+                //case (long)OutboundEnum.OutboundDefault:
+                //    return new PreOrderForOrderDefaultStrategy();
                 case 20:
                     return new PreOrderForOrderHachStrategy();
                 default:

@@ -22,11 +22,15 @@
                 </tr>
                 <tr v-for="(item, index) in filters" :key="index">
 
-                    <td><el-select @change="(field) => { fieldChange(field, index) }" size="small" v-model="item.field"
+                    <td>
+                        <el-input  v-model="item.field" size="small" placeholder="请输入字段" :disabled="disabled"></el-input>
+
+                        <!-- <el-select @change="(field) => { fieldChange(field, index) }" size="small" v-model="item.field"
                             placeholder="请选择" :disabled="disabled">
                             <el-option v-for="data in fieldsOptions" :key="data.field" :label="data.name"
                                 :value="data.field" />
-                        </el-select></td>
+                        </el-select> -->
+                    </td>
                     <td><el-select size="small" v-model="item.filterType" placeholder="请选择" :disabled="disabled">
                             <el-option v-for="data in filterType" :key="data.value" :label="data.name"
                                 :value="data.value" />

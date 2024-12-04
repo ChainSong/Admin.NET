@@ -46,6 +46,7 @@ public class PackageData
     public string GoodsType { get; set; }
 
     public List<ScanPackageInput> ScanPackageInput { get; set; }
+    public List<ScanPackageRFIDInput> ScanPackageRFIDInput { get; set; }
 
     //public List<PackageData> packageDatas { get; set; }
 

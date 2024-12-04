@@ -20,7 +20,18 @@ namespace Admin.NET.Application.Service.Factory;
 internal static class PackageOperationFactory
 {
 
-    public static IPackageOperationInterface PackageOperation(string FactoryName) {
-        return new PackageOperationDefaultStrategy();
+    public static IPackageOperationInterface PackageOperation(string FactoryName)
+    {
+        switch (FactoryName)
+        {
+            //case "Default":
+            //return new PackageOperationDefaultStrategy();
+            case "RFID":
+                return new PackageOperationRFIDStrategy();
+            default:
+                return new PackageOperationDefaultStrategy();
+        }
+        //return new PackageOperationDefaultStrategy();
+        //return new PackageOperationDefaultStrategy();
     }
 }

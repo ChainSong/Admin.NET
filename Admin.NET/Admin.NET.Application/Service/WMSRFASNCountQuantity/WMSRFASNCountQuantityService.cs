@@ -1,5 +1,6 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
@@ -25,8 +26,8 @@ namespace Admin.NET.Application;
 [ApiDescriptionSettings(ApplicationConst.GroupName, Order = 100)]
 public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
 {
-    private readonly SqlSugarRepository<WMSASNCountQuantity> _rep; 
-    private readonly SqlSugarRepository<WMSASNCountQuantityDetail> _repASNCountQuantityDetail; 
+    private readonly SqlSugarRepository<WMSASNCountQuantity> _rep;
+    private readonly SqlSugarRepository<WMSASNCountQuantityDetail> _repASNCountQuantityDetail;
     private readonly SqlSugarRepository<WMSASN> _repASN;
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
 
@@ -223,7 +224,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "ScanAdd")]
-    public async Task<Response<OrderStatusDto>> ScanAdd(WMSASNCountQuantityDetailDto input)
+    public async Task<Response<List<WMSASNCountQuantityDetailDto>>> ScanAdd(WMSASNCountQuantityDetailDto input)
     {
 
 
@@ -245,6 +246,24 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         //var entity = input.Adapt<WMSASNCountQuantity>();
         //await _rep.InsertAsync(entity);
     }
+    /// <summary>
+    /// 删除入库点数
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "Clear")]
+    public async Task<Response> Clear(WMSASNCountQuantityDetailDto input)
+    {
+
+        var entity = await _repASNCountQuantityDetail.AsQueryable()
+               .WhereIF(!string.IsNullOrWhiteSpace(input.BatchCode), u => u.BatchCode.Contains(input.BatchCode.Trim()))
+               .Where(a => a.ASNId == input.ASNId && a.SKU == input.SKU).ToListAsync();
+        await _repASNCountQuantityDetail.DeleteAsync(entity);
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
+    }
+
+
     /// <summary>
     /// 删除入库点数
     /// </summary>

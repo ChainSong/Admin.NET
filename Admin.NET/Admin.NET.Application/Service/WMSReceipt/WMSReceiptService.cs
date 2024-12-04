@@ -11,15 +11,18 @@ using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using NewLife.Net;
+using NewLife.Security;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 
 namespace Admin.NET.Application;
 /// <summary>
 /// WMSReceipt服务
 /// </summary>
 [ApiDescriptionSettings(ApplicationConst.GroupName, Order = 100)]
+
 public class WMSReceiptService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSReceipt> _rep;
@@ -36,13 +39,15 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
+    private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
 
 
 
     private readonly SqlSugarRepository<WMSASN> _repASN;
     //注入ASNDetail仓储
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
-    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail)
+    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlow> repWorkFlow)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -57,6 +62,8 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         _repTableInventoryUsed = repTableInventoryUsed;
         _repASN = repASN;
         _repASNDetail = repASNDetail;
+        _repRFIDInfo = repRFIDInfo;
+        _repWorkFlow = repWorkFlow;
         //this._repTableInventoryUsable = repTableInventoryUsable;
 
     }
@@ -72,9 +79,9 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     {
         var query = _rep.AsQueryable()
                     .WhereIF(input.ASNId > 0, u => u.ASNId == input.ASNId)
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => u.ReceiptNumber.Contains(input.ReceiptNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => u.ReceiptNumber.Contains(input.ReceiptNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
@@ -117,9 +124,99 @@ public class WMSReceiptService : IDynamicApiController, ITransient
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Select<WMSReceiptOutput>();
 
-                    .Select<WMSReceiptOutput>()
-;
+
+        if (input.ASNNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ASNNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ASNNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ASNNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ASNNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ASNNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ASNNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => numbers.Contains(u.ASNNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()));
+            }
+        }
+
+        if (input.ExternReceiptNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ExternReceiptNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternReceiptNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternReceiptNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ExternReceiptNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => numbers.Contains(u.ExternReceiptNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()));
+            }
+        }
+
+        if (input.ReceiptNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ReceiptNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ReceiptNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ReceiptNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ReceiptNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ReceiptNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ReceiptNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => numbers.Contains(u.ReceiptNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => u.ReceiptNumber.Contains(input.ReceiptNumber.Trim()));
+            }
+        }
+
         if (input.ReceiptTime != null && input.ReceiptTime.Count > 0)
         {
             DateTime? start = input.ReceiptTime[0];
@@ -231,12 +328,17 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> Delete(DeleteWMSReceiptInput input)
     {
-        //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        //await _rep.DeleteAsync(entity);   //假删除
+        var entity = await _rep.GetByIdAsync(input.Id);
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == entity.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
+
         //使用简单工厂定制化  /
         List<DeleteWMSReceiptInput> request = new List<DeleteWMSReceiptInput>();
         request.Add(input);
-        IReceiptReturnInterface factory = ReceiptReturnFactory.ReturnReceipt(0);
+        IReceiptReturnInterface factory = ReceiptReturnFactory.ReturnReceipt(workflow, entity.ReceiptType);
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;
         factory._userManager = _userManager;

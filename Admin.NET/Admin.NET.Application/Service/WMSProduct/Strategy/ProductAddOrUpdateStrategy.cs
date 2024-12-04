@@ -32,6 +32,7 @@ public class ProductAddOrUpdateStrategy : IProductInterface
     public UserManager _userManager { get; set; }
     //asn仓储
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
 
     //客户用户关系仓储
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
@@ -327,4 +328,123 @@ public class ProductAddOrUpdateStrategy : IProductInterface
         response.Msg = "SKU修改成功";
         return response;
     }
+
+
+
+
+    public async Task<Response<List<OrderStatusDto>>> AddBomStrategy(List<AddOrUpdateProductBomInput> request)
+    {
+
+        Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
+
+        //开始校验数据
+        List<OrderStatusDto> orderStatus = new List<OrderStatusDto>();
+
+        //判断是否有权限操作
+        //先判断是否能操作客户
+        var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
+        if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "用户缺少客户操作权限";
+            return response;
+        }
+
+
+        if (request.Select(a => a.CustomerName).Distinct().Count() > 1)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "一次只能导入一家客户";
+            return response;
+        }
+
+        //1判断主档是不是存在SKU
+
+        var productCheck = _repProduct.AsQueryable().Where(a => (request.Select(r => r.SKU).ToList().Contains(a.SKU) || request.Select(r => r.ChildSKU).ToList().Contains(a.SKU)) && a.CustomerName == request.First().CustomerName).Distinct().ToList();
+        //判断SKU 在主表中是否存在
+        foreach (var item in request)
+        {
+            if (productCheck.Where(a => a.SKU == item.SKU).Count() == 0)
+            {
+                response.Data.Add(new OrderStatusDto()
+                {
+                    ExternOrder = item.CustomerName,
+                    SystemOrder = item.SKU,
+                    StatusCode = StatusCode.Error,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = "SKU:" + item.SKU + "在主档中不存在"
+                });
+            }
+            if (productCheck.Where(a => a.SKU == item.ChildSKU).Count() == 0)
+            {
+                response.Data.Add(new OrderStatusDto()
+                {
+                    ExternOrder = item.CustomerName,
+                    SystemOrder = item.ChildSKU,
+                    StatusCode = StatusCode.Error,
+                    //StatusMsg = StatusCode.warning.ToString(),
+                    Msg = "SKU:" + item.ChildSKU + "在主档中不存在"
+                });
+            }
+        }
+        if (response.Data.Count > 0)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "SKU 在主档中不存在";
+            return response;
+        }
+
+
+
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<AddOrUpdateProductBomInput, WMSProductBom>()
+                //将为Null的字段设置为"" () 
+                .AddTransform<string>(a => a == null ? "" : a)
+                .AddTransform<int?>(a => a == null ? 0 : a)
+                .AddTransform<long?>(a => a == null ? 0 : a)
+
+               //添加创建人为当前用户
+               .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+               //.ForMember(a => a.ASNDetails, opt => opt.MapFrom(c => c.ASNDetails))
+               //添加库存状态为可用
+               //.ForMember(a => a.ASNStatus, opt => opt.MapFrom(c => ASNStatusEnum.新增))
+               .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
+
+
+        });
+
+        var mapper = new Mapper(config);
+
+
+        var productData = mapper.Map<List<WMSProductBom>>(request);
+        var CustomerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == request.First().CustomerName).First().CustomerId;
+        //int LineNumber = 1;
+        productData.ForEach(item =>
+        {
+            item.ProductId = productCheck.Where(a => a.SKU == item.SKU).First().Id;
+            item.ChildSKUId = productCheck.Where(a => a.SKU == item.ChildSKU).First().Id;
+            item.CustomerId = CustomerId;
+        });
+
+
+        //开始插入订单
+        await _repProductBom.InsertRangeAsync(productData);
+
+        productData.ToList().ForEach(b =>
+        {
+            response.Data.Add(new OrderStatusDto()
+            {
+                ExternOrder = b.CustomerName,
+                SystemOrder = b.SKU,
+                StatusCode = StatusCode.Success,
+                Msg = "SKU:" + b.SKU + "新增成功"
+            });
+
+        });
+        response.Code = StatusCode.Success;
+        response.Msg = "SKU新增成功";
+        return response;
+    }
+
 }

@@ -22,6 +22,7 @@ using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Common;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Service;
+using System.Reflection;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -83,8 +84,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     public async Task<SqlSugarPagedList<WMSPreOrderOutput>> Page(WMSPreOrderInput input)
     {
         var query = _rep.AsQueryable()
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
+                    //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
@@ -128,6 +129,68 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
                     .Select<WMSPreOrderOutput>()
 ;
+
+
+
+        if (input.PreOrderNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.PreOrderNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.PreOrderNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.PreOrderNumber.IndexOf(',') > 0)
+            {
+                numbers = input.PreOrderNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.PreOrderNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.PreOrderNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => numbers.Contains(u.PreOrderNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()));
+            }
+        }
+
+        if (input.ExternOrderNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ExternOrderNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ExternOrderNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternOrderNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ExternOrderNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternOrderNumber.IndexOf(' ') > 0)
+            {
+                numbers = input.ExternOrderNumber.Split(' ').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => numbers.Contains(u.ExternOrderNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()));
+            }
+        }
         if (input.OrderTime != null && input.OrderTime.Count > 0)
         {
             DateTime? start = input.OrderTime[0];
@@ -571,7 +634,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         //var aaaaa = ExcelData.GetData<DataSet>(url);
         //1根据用户的角色 解析出Excel
         IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
-
+      
         factoryExcel._repPreOrder = _rep;
         factoryExcel._repWarehouseUser = _repWarehouseUser;
         //factoryExcel._db = _db;

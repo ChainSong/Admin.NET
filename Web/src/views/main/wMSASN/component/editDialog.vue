@@ -270,19 +270,19 @@ const get = async () => {
 	state.value.details=new Array<Detail>();
  
 	let result = await  getWMSASN(state.value.header.id);
-	console.log("result");
-	console.log(result);
-	console.log(result.data);
+	// console.log("result");
+	// console.log(result);
+	// console.log(result.data);
 
-	console.log(state.value.header );
-	console.log(state.value.details );
-	console.log(result.data.result);
-	console.log(result.data.result.detail);
+	// console.log(state.value.header );
+	// console.log(state.value.details );
+	// console.log(result.data.result);
+	// console.log(result.data.result.detail);
 	state.value.header = result.data.result;
 	state.value.details = result.data.result.details;
-	console.log("赋值");
-	console.log(state.value.header );
-	console.log(state.value.details );
+	// console.log("赋值");
+	// console.log(state.value.header );
+	// console.log(state.value.details );
 
 }
 

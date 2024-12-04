@@ -45,7 +45,14 @@ public class WMSPickTaskDetail : ITenantIdFilter
     [Required]
     [SugarColumn(ColumnDescription = "")]
     public long OrderDetailId { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public long OrderDetailBomId { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
