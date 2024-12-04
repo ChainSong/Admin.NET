@@ -30,7 +30,6 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.11" />
     <PackageReference Include="NPOI" Version="2.6.2" />
     <PackageReference Include="RulesEngine" Version="5.0.3" />
-    <PackageReference Include="RunBowLibaray.OWRulesEngine" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -98,7 +97,6 @@
     <Folder Include="Service\WMSInventoryReport\Enumerate\" />
     <Folder Include="Service\WMSOrder\Abstract\" />
     <Folder Include="Service\WMSReceiptReceiving\Dto\" />
-    <Folder Include="Service\WMSReport\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Enumerate\" />
     <Folder Include="Service\WMSRFOrderPick\Enumerate\" />
