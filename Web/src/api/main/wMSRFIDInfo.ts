@@ -6,6 +6,7 @@ enum Api {
   PageWMSRFIDInfo = '/api/wMSRFIDInfo/page',
   GetWMSRFIDInfo = '/api/wMSRFIDInfo/Query',
   GetPrinrRFIDInfoByReceiptId = '/api/wMSRFIDInfo/QueryByReceiptId',
+  reportScreen= '/api/wMSReport/reportScreen',
 }
 
 // 增加WMSRFIDInfo
@@ -54,3 +55,11 @@ export const getPrinrRFIDInfoByReceiptId = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+
+// 大屏接口
+export const reportScreen = () => 
+	request({
+		url: Api.reportScreen,
+		method: 'post',
+		// data: params,  params?: any
+	});	
