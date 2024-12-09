@@ -18,11 +18,11 @@
 				</el-card>
 				<el-card class="cardstop">
 					<p class="pfonttop">{{state.QtyOut}}</p><br>
-					<p style="font-size:20px;margin-left: 15%;font-weight:500;">9月出库总数量</p>
+					<p style="font-size:20px;margin-left: 15%;font-weight:500;">{{state.MonthNow}}月出库总数量</p>
 				</el-card>
 				<el-card class="cardstop">
 					<p class="pfonttop">{{state.MoneyOut}}</p><br>
-					<p style="font-size:20px;margin-left: 30%;font-weight:500;">9月出库总金额</p>
+					<p style="font-size:20px;margin-left: 24%;font-weight:500;">{{state.MonthNow}}月出库总金额</p>
 				</el-card>
 			</div>
 			<div id="middles">
@@ -63,9 +63,9 @@
 			<div id="bottoms">
 
 				<div class="cardsbottoms">
-					<div style="width: 100%;height: 85%;" id="bottomThree">
+					<div style="width: 100%;height: 85%;overflow: scroll;" id="bottomThree">
 						<table
-							style="border-collapse: collapse;border: 1px solid rgb(204, 190, 190);width: 100%;height: 100%;font:center;background-color:#F0F0F0 ;">
+							style="height: 100%; border-collapse: collapse;border: 1px solid rgb(204, 190, 190);width: 100%;font:center;background-color:#F0F0F0 ;">
 							<thead>
 								<tr
 									style="border: 1px solid rgb(204, 190, 190);background-color:#D8D8D8;color:darkslategray;text-align:center;">
@@ -205,7 +205,7 @@
 
 .pfonttop {
 	font-size: 30px;
-	margin-left: 37%;
+	margin-left: 27%;
 	color: green;
 	font-weight: 700;
 }
@@ -789,10 +789,10 @@ const getTable=async()=>{
     for (var i = 0; i < state.Datas.custOrderReceiptAmount.length; i++) {
        tableappend += '<tr>';
        tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].customerName + '</th>';
-       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].reSumPrice + '</th>'; 
-       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].reSumQty + '</th>';
-       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].woSumPrice + '</th>';
+       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].reSumQty + '</th>'; 
+       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].reSumPrice + '</th>';
        tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].woSumQty + '</th>';
+       tableappend += '<th style="border: 1px solid rgb(204, 190, 190);height: 20px;">' + state.Datas.custOrderReceiptAmount[i].woSumPrice + '</th>';
        tableappend += '</tr> '; 
    }
    document.getElementById('tbody1').innerHTML = tableappend;
