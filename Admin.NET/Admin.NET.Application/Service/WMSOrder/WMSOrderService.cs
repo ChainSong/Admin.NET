@@ -16,6 +16,7 @@ using Nest;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using XAct;
 
 namespace Admin.NET.Application;
@@ -52,10 +53,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
+    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -79,6 +82,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repWarehouse = repWarehouse;
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
+        _repWorkFlow = repWorkFlow;
 
     }
 
@@ -93,9 +97,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     {
         var query = _rep.AsQueryable()
                     .WhereIF(input.PreOrderId > 0, u => u.PreOrderId == input.PreOrderId)
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()))
-                    .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
+
                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
@@ -136,9 +138,86 @@ public class WMSOrderService : IDynamicApiController, ITransient
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Select<WMSOrderOutput>();
 
-                    .Select<WMSOrderOutput>()
-;
+
+
+        if (input.PreOrderNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.PreOrderNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.PreOrderNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.PreOrderNumber.IndexOf(',') > 0)
+            {
+                numbers = input.PreOrderNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => numbers.Contains(u.PreOrderNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()));
+            }
+        }
+
+        if (input.OrderNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.OrderNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.OrderNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.OrderNumber.IndexOf(',') > 0)
+            {
+                numbers = input.OrderNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => numbers.Contains(u.OrderNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()));
+            }
+        }
+        if (input.ExternOrderNumber != null)
+        {
+            IEnumerable<string> numbers = Enumerable.Empty<string>();
+            if (input.ExternOrderNumber.IndexOf("\n") > 0)
+            {
+                numbers = input.ExternOrderNumber.Split('\n').Select(s => { return s.Trim(); });
+            }
+            if (input.ExternOrderNumber.IndexOf(',') > 0)
+            {
+                numbers = input.ExternOrderNumber.Split(',').Select(s => { return s.Trim(); });
+            }
+            if (numbers != null && numbers.Any())
+            {
+                numbers = numbers.Where(c => !string.IsNullOrEmpty(c));
+            }
+            if (numbers != null && numbers.Any())
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => numbers.Contains(u.ExternOrderNumber.Trim()));
+
+            }
+            else
+            {
+                query.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()));
+            }
+        }
         if (input.OrderTime != null && input.OrderTime.Count > 0)
         {
             DateTime? start = input.OrderTime[0];
@@ -351,8 +430,28 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "CreatePickTask")]
     public async Task<Response<List<OrderStatusDto>>> CreatePickTask(List<long> input)
     {
+
+        //根据id 获取订单信息
+        var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+        //只允许同客户，同仓库同订单类型的订单进行拣货任务创建
+        if (order.GroupBy(a => new { a.CustomerId, a.WarehouseId, a.OrderType }).Count() > 1)
+        {
+            return new Response<List<OrderStatusDto>>()
+            {
+                Code = StatusCode.Error,
+                Msg = "只能选择同客户，同仓库，同订单类型的订单进行拣货任务创建！"
+            };
+        }
+
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == order.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
+
         //使用简单工厂定制化  / 
-        IPickTaskInterface factory = PickTaskFactory.PickTask();
+        IPickTaskInterface factory = PickTaskFactory.PickTask(workflow, order.First().OrderType);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;

@@ -5,6 +5,7 @@ using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 
 namespace Admin.NET.Application;
@@ -218,6 +219,29 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         return response;
     }
 
+
+
+    /// <summary>
+    /// 获取WMSRFIDInfo 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "QueryRFID")]
+    public async Task<Response<Dictionary<string, string>>> GetRFID(string rfid)
+    {
+        var entity = await _rep.AsQueryable().Where(u => u.RFID == rfid).OrderByDescending(u => u.Id).FirstAsync();
+        Response < Dictionary<string, string> > response = new Response<Dictionary<string, string>>();
+        response.Code = StatusCode.Success;
+        response.Msg = "成功";
+        response.Data = new Dictionary<string, string>();
+        response.Data.Add("RFID", entity.RFID);
+        response.Data.Add("合同单号", entity.PoCode);
+        response.Data.Add("入库时间", entity.ReceiptTime.ToString());
+        response.Data.Add("出库时间", entity.OrderTime.ToString());
+        return response;
+    }
 
 }
 

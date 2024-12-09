@@ -63,6 +63,12 @@ public class WMSProductBom : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? UnitCode { get; set; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? ChildGoodsName { get; set; }
     
     /// <summary>
@@ -117,20 +123,20 @@ public class WMSProductBom : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 1)]
-    public string? DateTime1 { get; set; }
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? DateTime1 { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 1)]
-    public string? DateTime2 { get; set; }
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? DateTime2 { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 1)]
-    public string? DateTime3 { get; set; }
+    [SugarColumn(ColumnDescription = "")]
+    public DateTime? DateTime3 { get; set; }
     
     /// <summary>
     /// 

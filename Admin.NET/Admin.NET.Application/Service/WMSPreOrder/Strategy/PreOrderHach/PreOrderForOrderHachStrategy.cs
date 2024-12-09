@@ -122,10 +122,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                //忽略修改时间
                .ForMember(a => a.UpdateTime, opt => opt.Ignore())
                //忽略修改人
-               .ForMember(a => a.Updator, opt => opt.Ignore())
-               ;
-
-
+               .ForMember(a => a.Updator, opt => opt.Ignore());
             });
 
 
@@ -152,7 +149,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                                   select new WMSOrderDetailBom
                                   {
                                       PreOrderId = a.PreOrderId,
-                                      PreOrderDetailId = a.Id,
+                                      PreOrderDetailId = a.PreOrderDetailId,
                                       //OrderId = a.OrderId,
                                       PreOrderNumber = a.PreOrderNumber,
                                       OrderNumber = a.OrderNumber,

@@ -33,7 +33,7 @@ public partial class GamesPage
 
         var webView = new WebView
         {
-            Source = "http://localhost:8080",
+            Source = "https://wms.rbow-logistics.com.cn:8036",
         };
 
         // 注入JavaScript代码，将token设置到页面中

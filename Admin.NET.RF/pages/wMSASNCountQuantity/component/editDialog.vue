@@ -14,35 +14,35 @@
 			<view v-if="this.list.length>0">
 				<view class="cu-list menu-avatar">
 					<view v-for="(item, index)  in this.list" :key="index" class="cu-item">
-						<view class="cu-avatar round lg text-black">{{item.pickQty}}
+						<view class="cu-avatar round lg text-black">{{item.qty}}
 						</view>
 						<view class="content">
 							<view class="text-grey">SKU:{{item.sku}}</view>
-							<view class="text-grey">库位:{{item.location}} | 批次:{{item.batchCode}}</view>
+							<!-- <view class="text-grey">库位:{{item.location}} | 批次:{{item.batchCode}}</view> -->
 							<view class="text-gray text-sm flex">
 								<view class="text-cut">
 									<text class="cuIcon-selection text-red  margin-right-xs">订单数量:</text>
-									{{item.qty}}
+									{{item.expectedQty}}
 									<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
 								</view>
-								<view class="text-cut">
+								<!-- <view class="text-cut">
 									<text class="cuIcon-selection text-red  margin-right-xs">已拣数量:</text>
 									{{item.pickQty}}
-									<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
-								</view>
+								</view> -->
 								<!-- 	<view class="text-cut">
 									<text class="cuIcon-selection text-red  margin-right-xs">已上架数量:</text>
 									{{item.qty}}
 								</view> -->
 							</view>
+						
 							<!-- <view class="action">
 								<view class="text-grey text-xs">22:20</view>
 								<view class="cu-tag round bg-grey sm">5</view>
 							</view> -->
 						</view>
-						<!-- <view class="action">
-							 	{{item.receivedQty}}
-						</view> -->
+						<view class="action">
+							 <button class="cu-btn bg-blue shadow-blur round" style="width: 60px;" @tap="clear(item)">重扫</button>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -54,7 +54,8 @@
 <script>
 	import {
 		pageWMSRFASNCountQuantity,
-		addWMSRFASNCountQuantityDetail
+		addWMSRFASNCountQuantityDetail,
+		clearWMSRFASNCountQuantityDetail
 	} from "@/services/wMSASNCountQuantity/wMSASNCountQuantity";
 	import youScroll from '@/components/you-scroll';
 	import {
@@ -95,12 +96,10 @@
 			};
 		},
 		created() {
-			this.getOrderList();
+			// this.getOrderList();
 		},
 		filters: {
-			// carNumber(val) {
-			// 	return val ? val.slice(0, 1) : '';
-			// }
+			
 		},
 		onLoad(options) {
 			console.log("options");
@@ -117,13 +116,36 @@
 				})
 				this.selectendlength = this.form.scanInput.length;
 			},
-			async getOrderList() {
-				this.lpnSearchSet();
+			// async getOrderList() {
+			// 	this.lpnSearchSet();
+			// 	let that = this;
+			// 	let res = await scanPickApi(this.form);
+			// 	that.list = res.data.result.data;
+			// 	if (res.data.result.code == "1") {
+			// 		uni.showToast({
+			// 			title: "操作成功",
+			// 			icon: 'success'
+			// 		});
+			// 		playSuccessSound();
+			// 	} else {
+			// 		uni.showToast({
+			// 			title: "操作失败:" + res.data.result.msg,
+			// 			icon: 'none'
+			// 		});
+			// 		playErrorSound();
+			// 	}
+
+			// },
+			
+			async clear(data) {
+				
 				let that = this;
-				let res = await scanPickApi(this.form);
-				console.log(res.data.result.data)
-				that.list = res.data.result.data;
+				let res = await clearWMSRFASNCountQuantityDetail(data);
+			
 				if (res.data.result.code == "1") {
+					that.list=[],
+					
+					// that.list = res.data.result.data;
 					uni.showToast({
 						title: "操作成功",
 						icon: 'success'
@@ -136,7 +158,6 @@
 					});
 					playErrorSound();
 				}
-
 			},
 			async scanAcquisition() {
 				this.lpnSearchSet();
@@ -144,11 +165,12 @@
 				let res = await addWMSRFASNCountQuantityDetail(this.form);
 				console.log(res.data.result.data)
 				if (res.data.result.code == "1") {
-					if (res.data.result.msg == "Location") {
-						that.form.location = that.form.scanInput;
-					} else if (res.data.result.msg == "SKU") {
+					that.list=res.data.result
+					// if (res.data.result.msg == "Location") {
+					// 	that.form.location = that.form.scanInput;
+					// } else if (res.data.result.msg == "SKU") {
 
-					}
+					// }
 					that.list = res.data.result.data;
 					uni.showToast({
 						title: "操作成功",

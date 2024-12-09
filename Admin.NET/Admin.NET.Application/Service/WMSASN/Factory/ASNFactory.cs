@@ -3,6 +3,9 @@ using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Strategy;
 using Admin.NET.Core;
+using Admin.NET.Core.Entity;
+using Nest;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,53 +17,43 @@ namespace Admin.NET.Application.Factory
 {
     public class ASNFactory
     {
-        //public static ISqlSugarClient _db { get; set; }
-        //public static UserManager _userManager { get; set; }
-        public static IASNInterface AddOrUpdate(long CustomerId)
+        //private static readonly string strategy= "Workflow_ASN";
+        public static IASNInterface AddOrUpdate(SysWorkFlow workFlow, string receiptType)
         {
-            //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
-            switch (CustomerId)
+            string customName = ""
+;            //判断是不是有定制化的流程
+            if (workFlow != null)
             {
-                case (long)ASNExcelEnum.ASNExportDefault:
-                    //ASNDefaultStrategy aSNDefaultStrategy = new ASNDefaultStrategy();
-                    //aSNDefaultStrategy._db = _db;
-                    //aSNDefaultStrategy._userManager = _userManager;
-                    return  new ASNAddOrUpdateDefaultStrategy();
+                var customWorkFlow = workFlow.SysWorkFlowSteps.Where(p => p.StepName == InboundWorkFlowConst.Workflow_ASN).ToList();
+
+             
+
+                //判断需不需要根据订单类型定制化流程
+                if (customWorkFlow.Count > 0)
+                {
+                    //判断有没有子流程
+                    if (!string.IsNullOrEmpty(customWorkFlow[0].Filters))
+                    {
+                        //将customWorkFlow[0].Filters 反序列化成List<SysWorkFlowFieldDto>
+                        List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow[0].Filters);
+                        customName = sysWorkFlowFieldDtos.Where(p => p.Field == receiptType).Select(p => p.Value).FirstOrDefault("");
+                    }
+                    else
+                    {
+                        customName = customWorkFlow[0].Remark;
+                    }
+                }
+            }
+            //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
+            switch (customName)
+            {
+                case "Hach":
+                    return new ASNAddOrUpdateDefaultStrategy();
                 default:
                     return new ASNAddOrUpdateDefaultStrategy();
             }
             //return new ASNDefaultStrategy();
         }
-        //public static IASNInterface UpdateASN(long CustomerId)
-        //{
-        //    //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
-        //    switch (CustomerId)
-        //    {
-        //        case (long)ASNExcelEnum.ASNExportDefault:
-        //            //ASNDefaultStrategy aSNDefaultStrategy = new ASNDefaultStrategy();
-        //            //aSNDefaultStrategy._db = _db;
-        //            //aSNDefaultStrategy._userManager = _userManager;
-        //            return new ASNAddDefaultStrategy();
-        //        default:
-        //            return new ASNAddDefaultStrategy();
-        //    }
-        //    //return new ASNDefaultStrategy();
-        //}
-        //public CreateOrUpdateWMS_ASNInput _createOrUpdateWMS { get; set; }
 
-        //public BaseASNData(CreateOrUpdateWMS_ASNInput createOrUpdateWMS)
-        //{
-        //    this._createOrUpdateWMS = createOrUpdateWMS;
-        //}
-
-        //public virtual void CustomerDefinedSettledTransData(ref string message)
-        //{
-
-        //}
-
-        //public Response<CreateOrUpdateWMS_ASNInput> Hub(string className)
-        //{
-
-        //}
     }
 }

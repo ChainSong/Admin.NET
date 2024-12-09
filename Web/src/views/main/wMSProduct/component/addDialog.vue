@@ -69,6 +69,23 @@
 					</el-row>
 					<el-link type="primary" @click="exportExcel">下载模板</el-link>
 				</el-tab-pane>
+
+				<el-tab-pane label="Execl导入Bom"  name="ExeclCreateBom">
+					<el-row>
+						<el-col>
+						</el-col>
+						<el-col>
+							<el-upload class="upload-demo" :action="uploadURLBom" :headers="httpheaders"
+								:on-success="ImportExcel">
+								<el-button type="primary">点击上传</el-button>
+								<div class="el-upload__tip">只能上传xlsx/xls文件，且不超过500kb</div>
+							</el-upload>
+						</el-col>
+					</el-row>
+					<el-link type="primary" @click="exportBomExcel">下载模板</el-link>
+				</el-tab-pane>
+
+				
 			</el-tabs>
 			<div>
 
@@ -145,6 +162,7 @@ let activeName: string = 'PageCreate';
 let baseURL = import.meta.env.VITE_API_URL;
 //给上传组件赋值url
 let uploadURL = baseURL + '/api/WMSProduct/UploadExcelFile';
+let uploadURLBom = baseURL + '/api/WMSProduct/UploadBomExcelFile';
 //给上传组件赋值token
 // 获取本地的 token
 const accessTokenKey = 'access-token';
@@ -295,6 +313,13 @@ const ImportExcel = (response, file, fileList) => {
 // 导出日志
 const exportExcel = async () => {
 	var res = await getImportExcelTemplate({ CustomerId: state.value.header.customerId, TableName: "WMS_Product" });
+	var fileName = getFileName(res.headers);
+	downloadByData(res.data as any, fileName);
+};
+//获取导入的模板
+// 导出日志
+const exportBomExcel = async () => {
+	var res = await getImportExcelTemplate({ CustomerId: state.value.header.customerId, TableName: "WMS_ProductBom" });
 	var fileName = getFileName(res.headers);
 	downloadByData(res.data as any, fileName);
 };

@@ -18,12 +18,11 @@
 				 		</view> -->
 						<view class="content">
 							<view class="text-grey">{{item.pickTaskNumber}}</view>
-							<!-- <view class="text-gray text-sm flex">
+							<view class="text-gray text-sm flex">
 				 				<view class="text-cut">
-				 					<text class="cuIcon-infofill text-red  margin-right-xs"></text>
-				 					我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。
+				 					<text class="cuIcon-infofill text-red  margin-right-xs">{{item.externOrderNumber}}</text>
 				 				</view>
-				 			</view> -->
+				 			</view>
 							
 						</view>
 						<view class="action">

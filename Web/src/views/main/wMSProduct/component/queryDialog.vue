@@ -41,8 +41,39 @@
 						</template>
 					</el-descriptions>
 				</el-main>
+				
 			</el-container>
+			<el-container title="明细信息">
+				<el-main>
+					<el-form>
+						<el-table :data="state.details" style="width: 100%" height="250">
+							<template v-for="(v, index) in state.tableColumnDetails">
+								<el-table-column v-if="v.isCreate || v.isKey" :key="index" :fixed="false"
+									:label="v.displayName" width="150">
+									<template #default="scope">
+										<label v-text="scope.row[v.columnName]"></label>
+									</template>
+								</el-table-column>
+							</template>
 
+							<!-- <el-table-column fixed="right" label="操作" width="90">
+								<template #header>
+									<el-select placeholder="请选择">
+										<template v-for="item in state.tableColumnDetails">
+										<el-option v-if="item.isCreate==1" :key="item.value">
+											<el-checkbox  @change="checked => showColumnOption(checked, item)"
+												:true-label="1" :false-label="0" :label="item.displayName"
+												:key="item.columnName" v-model="item.isCreate">{{ item.displayName}}</el-checkbox>
+										</el-option>
+									</template>
+									</el-select>
+								</template>
+							</el-table-column> -->
+
+						</el-table>
+					</el-form>
+				</el-main>
+			</el-container>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel" size="default">取 消</el-button>
@@ -60,6 +91,8 @@ import type { FormRules } from "element-plus";
 import { addWMSProduct, updateWMSProduct, getWMSProduct } from "/@/api/main/wMSProduct";
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import Header from "/@/entities/Product";
+import Detail from "/@/entities/productBom";
+
 // import Detail from "/@/entities/customerDetail";
 import TableColumns from "/@/entities/tableColumns";
 // import { getWMSCustomer } from "/@/api/main/wMSCustomer";
@@ -77,12 +110,12 @@ const state = ref({
 	loading: false,
 	header: new Header(),
 	headers: new Array<Header>(),
-	// details: new Array<Detail>(),
+	details: new Array<Detail>(),
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
-	// tableColumnDetail: new TableColumns(),
-	// tableColumnDetails: new Array<TableColumns>()
+	tableColumnDetail: new TableColumns(),
+	tableColumnDetails: new Array<TableColumns>()
 	// header: new Array<Details>(),
 })
 
@@ -137,12 +170,18 @@ const gettableColumn = async () => {
 
 	// let resDetail = await getByTableNameList("CustomerDetail");
 	// state.value.tableColumnDetails = resDetail.data.result;
+	let resDetail = await getByTableNameList("WMS_ProductBom");
+	// console.log("asdasdasdasdasdasddasdas")
+	// console.log(resDetail);
+	state.value.tableColumnDetails = resDetail.data.result;
+	
 
 };
 
 const get = async () => {
 	let result = await getWMSProduct(state.value.header.id);
 	state.value.header = result.data.result;
+	state.value.details = result.data.result.details;
 
 }
 

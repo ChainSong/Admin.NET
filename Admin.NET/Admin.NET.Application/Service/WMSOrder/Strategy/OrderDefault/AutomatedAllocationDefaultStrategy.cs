@@ -72,12 +72,14 @@ namespace Admin.NET.Application.Strategy
                     return response;
                 }
             }
+            //判断是否是同客户同订单类型的订单，后面分配逻辑按照客户+订单类型经行分配
+            if (orderData.GroupBy(a => new { a.CustomerId, a.OrderType }).Count() > 1)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "订单类型或客户不一致，请重新勾选选择";
+                return response;
+            }
 
-            //           ,[TableName]
-            //,[BusinessType]
-            //,[OperationId]
-            //,[Creator]
-            //,[CreationTime]
             var InstructionTaskNo = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
             //将需要分配的订单发送到分配队列
             //获取需要分配的订单，采用自动分配
@@ -98,10 +100,6 @@ namespace Admin.NET.Application.Strategy
                      //添加创建人为当前用户
                      .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                      .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
-
-
-
-
             });
 
 

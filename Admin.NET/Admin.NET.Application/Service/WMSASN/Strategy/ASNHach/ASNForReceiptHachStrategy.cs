@@ -344,10 +344,11 @@ namespace Admin.NET.Application.Strategy
                 {
                     var skuId = products.Where(a => a.SKU == item.SKU).First().Id;
                     var customerCode = item.CustomerId;
+                    var warehouseCode = item.WarehouseId;
                     long uniqueCode;
                     RedisCacheHelper.IncrementValue("RFID_UNIQUE_CODE", out uniqueCode);
                     var randomCode = new Random(Guid.NewGuid().GetHashCode()).Next(100, 999);
-                    var rfidCode = skuId.ToString().PadLeft(8, '0') + "" + customerCode.ToString().PadLeft(3, '0') + uniqueCode.ToString().PadLeft(6, '0') + randomCode + (randomCode % 10).ToString();
+                    var rfidCode = skuId.ToString().PadLeft(7, '0') + "" + customerCode.ToString().PadLeft(3, '0') + "" + warehouseCode.ToString().PadLeft(3, '0') + "" + uniqueCode.ToString().PadLeft(7, '0') + "" + randomCode + "" + (randomCode % 10).ToString();
                     var rfidInfo = item.Adapt<WMSRFIDInfo>();
                     rfidInfo.ReceiptDetailId = item.Id;
                     rfidInfo.Id = 0;
@@ -364,7 +365,6 @@ namespace Admin.NET.Application.Strategy
                     rfidInfos.Add(rfidInfo);
                 }
             }
-
             //插入入库单
             ////开始插入订单（排除数量为0的明细行）
             if (rfidInfos.Count > 0)
@@ -375,9 +375,6 @@ namespace Admin.NET.Application.Strategy
             response.Msg = "成功";
             return response;
         }
-
-
-
     }
 }
 

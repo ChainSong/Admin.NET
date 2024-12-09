@@ -43,7 +43,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysCacheService _sysCacheService;
 
-
+    
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
 
     private readonly SqlSugarRepository<WMSASN> _repASN;

@@ -54,7 +54,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a=>a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
             if (orderData != null && orderData.Where(a => a.OrderStatus != (int)OrderStatusEnum.已分配).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
@@ -86,7 +86,7 @@ namespace Admin.NET.Application.Strategy
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.拣货中 }, a => orderData.Select(c => c.Id).Contains(a.Id));
             List<WMSPickTask> pickTasks = new List<WMSPickTask>();
-            //分配队列按照客户ID+仓库ID创建
+            //新需求，按照同客户地址拣货任务合并，
             orderData.ForEach(data =>
             {
                 var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();

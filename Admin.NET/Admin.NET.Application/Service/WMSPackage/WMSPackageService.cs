@@ -64,8 +64,10 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSExpressFee> _repWMSExpressFee;
+    private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee)
+
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -84,6 +86,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repOrder = repOrder;
         _repRFPackageAcquisition = repRFPackageAcquisition;
         _repWMSExpressFee = repWMSExpressFee;
+        _repRFIDInfo = repRFIDInfo;
     }
 
     /// <summary>
@@ -490,33 +493,35 @@ public class WMSPackageService : IDynamicApiController, ITransient
     }
 
 
-    //[UnitOfWork]
-    //public ActionResult ExportPackage(List<long> input)
-    //{
-    //    //使用简单工厂定制化  /
-    //    //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
-    //    //默认：1，按照已有库存，且库存最小推荐
-    //    //默认：2，没有库存，以前有库存
-    //    //默认：3，随便推荐
-    //    IPackageExportInterface factory = PackageExportFactory();
+    /// <summary>
+    /// 根据RFID 获取RFID 信息
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
 
-    //    factory._repReceipt = _rep;
-    //    factory._repReceiptDetail = _repReceiptDetail;
-    //    factory._userManager = _userManager;
-    //    factory._repTableColumns = _repTableColumns;
-    //    factory._repTableColumnsDetail = _repTableColumnsDetail;
-    //    factory._repTableInventoryUsable = _repTableInventoryUsable;
-    //    factory._repTableInventoryUsed = _repTableInventoryUsed;
-    //    //factory._repTableColumns = _repTableInventoryUsed;
-    //    var response = factory.Strategy(input);
-    //    IExporter exporter = new ExcelExporter();
-    //    var result = exporter.ExportAsByteArray<DataTable>(response.Data);
-    //    var fs = new MemoryStream(result.Result);
-    //    //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
-    //    return new FileStreamResult(fs, "application/octet-stream")
-    //    {
-    //        FileDownloadName = "上架单.xlsx" // 配置文件下载显示名
-    //    };
-    //}
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetRFIDInfo")]
+    public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
+    {
+     
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.VerifyPackage(input);
+        return response;
+
+    }
 }
 

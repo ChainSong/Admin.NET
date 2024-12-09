@@ -18,7 +18,7 @@ using Nest;
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ReceiptReturnDefaultStrategy : IReceiptReturnInterface
+    public class ReceiptReturnHachStrategy : IReceiptReturnInterface
     {
 
         public SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
@@ -26,6 +26,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSASN> _repASN { get; set; }
         //注入ASNDetail仓储
         public SqlSugarRepository<WMSASNDetail> _repASNDetail { get; set; }
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         public UserManager _userManager { get; set; }
 
@@ -33,7 +34,7 @@ namespace Admin.NET.Application.Strategy
 
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
-        public ReceiptReturnDefaultStrategy()
+        public ReceiptReturnHachStrategy()
         {
 
         }
@@ -76,6 +77,9 @@ namespace Admin.NET.Application.Strategy
                     a.UpdateTime = DateTime.Now;
                 });
                 _repASNDetail.UpdateRange(repASNDetailData);
+
+                //删除RFID信息
+                _repRFIDInfo.Delete(a => a.ReceiptId == r.Id);
 
 
                 var asnDetail = _repASNDetail.AsQueryable().Where(b => b.ReceivedQty > 0 && b.ASNId == r.ASNId).ToList();

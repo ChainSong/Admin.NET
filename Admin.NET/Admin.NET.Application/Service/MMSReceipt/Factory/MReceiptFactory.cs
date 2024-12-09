@@ -16,8 +16,8 @@ namespace Admin.NET.Application.Factory
             //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
             switch (SupplierId)
             {
-                case (long)ReceiptEnum.ReceiptExportDefault:
-                    return new MReceiptDefaultStrategy();
+                //case (long)ReceiptEnum.ReceiptExportDefault:
+                //    return new MReceiptDefaultStrategy();
                 default:
                     return new MReceiptDefaultStrategy();
             }

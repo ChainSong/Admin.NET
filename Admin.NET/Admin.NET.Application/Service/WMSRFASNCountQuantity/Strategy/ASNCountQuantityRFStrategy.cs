@@ -45,10 +45,9 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
     //产品仓储
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
-
-
     //仓库用户关系仓储
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+ 
 
 
     /// <summary>
@@ -56,63 +55,9 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    //public async Task<Response<OrderStatusDto>> AddStrategy(List<long> request)
-    //{
-    //    Response<OrderStatusDto> response = new Response<OrderStatusDto>() { Data = new OrderStatusDto() };
-    //    //先获取ASN
-    //    var asnList = await _repASN.GetListAsync(m => request.Contains(m.Id));
-    //    var config = new MapperConfiguration(cfg =>
-    //    {
-    //        cfg.CreateMap<WMSASN, WMSASNCountQuantity>()
-    //           //添加创建人为当前用户
-    //           //.ForMember(a => a.Creator, opt => opt.MapFrom(c => abpSession.UserName))
-    //           //.ForMember(a => a.ASNDetails, opt => opt.MapFrom(c => c.ASNDetails))
-    //           //添加库存状态为可用
-    //           .ForMember(a => a.ASNId, opt => opt.MapFrom(c => c.Id))
-    //           .ForMember(a => a.ASNCountQuantityStatus, opt => opt.MapFrom(c => ASNCountQuantityStatusEnum.新增))
-    //           .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
-    //           .ForMember(a => a.Updator, opt => opt.Ignore())
-    //           .ForMember(a => a.UpdateTime, opt => opt.Ignore())
-    //           .ForMember(a => a.CompleteTime, opt => opt.Ignore());
-    //        // cfg.CreateMap<WMS_ASNDetailEditDto, WMS_ASNDetail>()
-    //        ////添加创建人为当前用户
-    //        //.ForMember(a => a.Creator, opt => opt.MapFrom(c => abpSession.UserName))
-    //        //.ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
-    //        //.ForMember(a => a.UpdateTime, opt => opt.Ignore());
-
-    //    });
-
-    //    var mapper = new Mapper(config);
-
-    //    //使用Mapper将ASN信息转为ASNCountQuantity信息
-    //    var asnCountQuantityList = mapper.Map<List<WMSASNCountQuantity>>(asnList);
-
-    //    asnCountQuantityList.ForEach(m =>
-    //    {
-    //        var ASNCountQuantityNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
-    //        m.ASNCountQuantityNumber = ASNCountQuantityNumber;
-    //    });
-
-    //    //新增ASNCountQuantity信息
-    //    await _repASNCountQuantity.InsertRangeAsync(asnCountQuantityList);
-    //    response.Code = StatusCode.Success;
-    //    response.Msg = "新增点数质检单成功";
-    //    return response;
-
-    //}
-
-
-
-
-
-    /// <summary>
-    /// 创建点数质检单
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    public async Task<Response<OrderStatusDto>> ScanAddStrategy(WMSASNCountQuantityDetailDto request)
+    public async Task<Response<List<WMSASNCountQuantityDetailDto>>> ScanAddStrategy(WMSASNCountQuantityDetailDto request)
     {
-        Response<OrderStatusDto> response = new Response<OrderStatusDto>() { Data = new OrderStatusDto() };
+        Response<List<WMSASNCountQuantityDetailDto>> response = new Response<List<WMSASNCountQuantityDetailDto>>() { Data = new List<WMSASNCountQuantityDetailDto>() };
         //判断扫描的是不是条形码（有两种条形码）
         if (!string.IsNullOrEmpty(request.ScanInput))
         {
@@ -134,6 +79,8 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             };
             //request.CustomerId = receipt.CustomerId;
         }
+
+
 
         //获取ASN明细中的同产品信息，补全基本信息
         //此处不补全ID等详细信息
@@ -171,9 +118,23 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
                    .ForMember(a => a.Updator, opt => opt.Ignore());
 
             });
+            //校验SKU 是否存在订单中
+
+            var checkProduct = await _repASNDetail.AsQueryable().Where(m => m.ASNId == request.ASNId && m.SKU == request.SKU).ToListAsync();
+            if (checkProduct == null && checkProduct.Count == 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "该SKU不存在订单中";
+            }
+            var chechQty = await _repASNCountQuantityDetail.AsQueryable().Where(m => m.ASNId == request.ASNId && m.SKU == request.SKU).SumAsync(a => a.Qty);
+            if (chechQty + 1 > checkProduct.Sum(a => a.ExpectedQty))
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "该SKU数量已超过订单中数量";
+            }
 
             var mapper = new Mapper(config);
-            string goodsName=await _repProduct.AsQueryable().Where(m => m.SKU == request.SKU).Select(m => m.GoodsName).FirstAsync();
+            string goodsName = await _repProduct.AsQueryable().Where(m => m.SKU == request.SKU).Select(m => m.GoodsName).FirstAsync();
             //使用Mapper将ASN信息转为ASNCountQuantity信息
             var wMSASNCountQuantityDetail = mapper.Map<WMSASNCountQuantityDetail>(asnDetailList.First());
             //WMSASNCountQuantityDetail wMSASNCountQuantityDetail = new WMSASNCountQuantityDetail();
@@ -193,6 +154,22 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             //wMSASNCountQuantityDetail.Id = SnowFlakeHelper.GetSnowInstance().NextId();
             await _repASNCountQuantityDetail.InsertAsync(wMSASNCountQuantityDetail);
             //response.Data.Add(Mapper.Map<WMSRFPickTaskDetailOutput>(wMSASNCountQuantityDetail));
+
+            var responseList = await _repASNCountQuantityDetail.AsQueryable()
+                .WhereIF(!string.IsNullOrEmpty(request.BatchCode), m => m.BatchCode.Contains(request.BatchCode))
+                .Where(m => m.ASNId == request.ASNId
+            && m.SKU == request.SKU
+            ).GroupBy(a => new { a.ExternReceiptNumber, a.ASNNumber, a.SKU, a.BatchCode, a.ASNId }).Select(a => new WMSASNCountQuantityDetailDto()
+            {
+                SKU = a.SKU,
+                ASNId = a.ASNId,
+                ASNNumber = a.ASNNumber,
+                ExternReceiptNumber = a.ExternReceiptNumber,
+                BatchCode = a.BatchCode,
+                ExpectedQty = SqlFunc.Subqueryable<WMSASNDetail>().Where(c => c.SKU == a.SKU && c.ASNId == a.ASNId).Max(a => a.ExpectedQty),
+                Qty = SqlFunc.AggregateSum(a.Qty),
+            }).ToListAsync();
+            response.Data = responseList;
             response.Code = StatusCode.Success;
             response.Msg = "新增点数质检单成功";
         }

@@ -17,6 +17,8 @@ using System.Linq;
 using Admin.NET.Application.Service;
 using XAct;
 using Furion.DatabaseAccessor;
+using Nest;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -26,6 +28,7 @@ namespace Admin.NET.Application;
 public class WMSProductService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSProduct> _rep;
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
 
@@ -39,7 +42,7 @@ public class WMSProductService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     //private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
-    public WMSProductService(SqlSugarRepository<WMSProduct> rep, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail)
+    public WMSProductService(SqlSugarRepository<WMSProduct> rep, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSCustomer> repCustomer)
     {
         _rep = rep;
         _repCustomerUser = repCustomerUser;
@@ -47,6 +50,7 @@ public class WMSProductService : IDynamicApiController, ITransient
         _repWarehouseUser = repWarehouseUser;
         _repTableColumns = repTableColumns;
         _repTableColumnsDetail = repTableColumnsDetail;
+        _repProductBom = repProductBom;
         //_repWarehouseUser = repWarehouseUser;
     }
 
@@ -209,7 +213,7 @@ public class WMSProductService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSProduct> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable().Includes(u => u.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
 
@@ -316,5 +320,48 @@ public class WMSProductService : IDynamicApiController, ITransient
     }
 
 
-}
+    /// <summary>
+    /// UploadBomExcelFile
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "UploadBomExcelFile")]
+    public async Task<Response<List<OrderStatusDto>>> UploadBomExcelFile(IFormFile file)
+    {
 
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        string url = await ImprotExcel.WriteFile(file);
+        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IProductExcelInterface factoryExcel = ProductExcelFactory.ProductBomExcel();
+        factoryExcel._repTableColumns = _repTableColumns;
+        factoryExcel._userManager = _userManager;
+        var data = factoryExcel.Strategy(dataExcel);
+        var entityListDtos = data.Data.TableToList<AddOrUpdateProductBomInput>();
+       
+        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+        //var CustomerData = entityListDtos.First();
+        var CustomerData = _repCustomerUser.AsQueryable().Where(a => a.CustomerName == entityListDtos.First().CustomerName).First();
+        long CustomerId = 0;
+        if (CustomerData != null)
+        {
+            CustomerId = CustomerData.CustomerId;
+        }
+        //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
+        //使用简单工厂定制化修改和新增的方法
+        IProductInterface factory = ProductFactory.AddOrUpdate(CustomerId);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repProduct = _rep;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repProductBom = _repProductBom;
+        var response = factory.AddBomStrategy(entityListDtos);
+        return await response;
+
+    }
+
+}

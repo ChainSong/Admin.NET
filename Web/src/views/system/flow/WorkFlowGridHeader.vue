@@ -234,7 +234,8 @@ export default {
               AuditBack: item.auditBack, //驳回(返回上一节点,流程重新开始,流程结束)
               AuditMethod: item.auditMethod,//审批方式(启用会签)
               SendMail: 0, //审核后发送邮件通知：
-              Filters: item.filters
+              Filters: item.filters,
+              Remark: item.remark,
             })
           }
         });

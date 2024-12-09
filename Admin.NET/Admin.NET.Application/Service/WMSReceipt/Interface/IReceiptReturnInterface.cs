@@ -22,6 +22,7 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<WMSASNDetail> _repASNDetail { get; set; }
 
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
         public UserManager _userManager { get; set; }
         public  Task<Response<List<OrderStatusDto>>> Strategy(List<DeleteWMSReceiptInput> request);
     }
