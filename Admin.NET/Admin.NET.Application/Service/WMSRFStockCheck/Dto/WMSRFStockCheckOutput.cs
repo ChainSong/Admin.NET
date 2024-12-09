@@ -3,7 +3,7 @@
 /// <summary>
 /// WMSStockCheck输出参数
 /// </summary>
-public class WMSStockCheckDto
+public class WMSRFStockCheckOutput
 {
     /// <summary>
     /// Id
@@ -33,7 +33,7 @@ public class WMSStockCheckDto
     /// <summary>
     /// WarehouseId
     /// </summary>
-    public long WarehouseId { get; set; }
+    public string WarehouseId { get; set; }
 
     /// <summary>
     /// WarehouseName
@@ -198,3 +198,5 @@ public class WMSStockCheckDto
     public int? Int5 { get; set; }
 
 }
+
+

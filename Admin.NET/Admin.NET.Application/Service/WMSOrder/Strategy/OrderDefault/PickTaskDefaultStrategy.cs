@@ -54,7 +54,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a=>a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
             if (orderData != null && orderData.Where(a => a.OrderStatus != (int)OrderStatusEnum.已分配).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
@@ -70,7 +70,6 @@ namespace Admin.NET.Application.Strategy
                             //StatusMsg = (string)StatusCode.warning,
                             Msg = "订单状态异常"
                         });
-
                 });
                 if (response.Data.Count > 0)
                 {
@@ -81,68 +80,92 @@ namespace Admin.NET.Application.Strategy
             }
 
 
-
-
-
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.拣货中 }, a => orderData.Select(c => c.Id).Contains(a.Id));
             List<WMSPickTask> pickTasks = new List<WMSPickTask>();
             //新需求，按照同客户地址拣货任务合并，
             orderData.ForEach(data =>
             {
-                var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
-
-
-
-                //将需要分配的订单发送到分配队列
-                //获取需要分配的订单，采用自动分配
-                var config = new MapperConfiguration(cfg =>
+                if (pickTasks == null || pickTasks.Where(a => a.Str1 == data.OrderAddress.City + data.OrderAddress.Address).ToList().Count == 0)
                 {
-                    cfg.CreateMap<WMSOrderAllocation, WMSPickTaskDetail>()
+                    var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+                    //将需要分配的订单发送到分配队列
+                    //获取需要分配的订单，采用自动分配
+                    var config = new MapperConfiguration(cfg =>
+                    {
+                        cfg.CreateMap<WMSOrderAllocation, WMSPickTaskDetail>()
+                             .ForMember(a => a.PickStatus, opt => opt.MapFrom(c => (int)PickTaskStatusEnum.新增))
+                             .ForMember(a => a.ExternOrderNumber, opt => opt.MapFrom(c => data.ExternOrderNumber))
+                             .ForMember(a => a.OrderNumber, opt => opt.MapFrom(c => data.OrderNumber))
+                             .ForMember(a => a.PreOrderNumber, opt => opt.MapFrom(c => data.PreOrderNumber))
+                             .ForMember(a => a.PickTaskNumber, opt => opt.MapFrom(c => pickTaskNumber))
+                             .ForMember(a => a.Id, opt => opt.Ignore())
+                             //添加创建人为当前用户
+                             .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                             .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
+                    });
 
-                         .ForMember(a => a.PickStatus, opt => opt.MapFrom(c => (int)PickTaskStatusEnum.新增))
-                         .ForMember(a => a.ExternOrderNumber, opt => opt.MapFrom(c => data.ExternOrderNumber))
-                         .ForMember(a => a.OrderNumber, opt => opt.MapFrom(c => data.OrderNumber))
-                         .ForMember(a => a.PreOrderNumber, opt => opt.MapFrom(c => data.PreOrderNumber))
-                         .ForMember(a => a.PickTaskNumber, opt => opt.MapFrom(c => pickTaskNumber))
-                         .ForMember(a => a.Id, opt => opt.Ignore())
-                         //添加创建人为当前用户
-                         .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
-                         .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
+                    var mapper = new Mapper(config);
+                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation);
 
-                });
+                    pickTasks.Add(new WMSPickTask
+                    {
+                        CustomerId = data.CustomerId,
+                        CustomerName = data.CustomerName,
+                        WarehouseId = data.WarehouseId,
+                        WarehouseName = data.WarehouseName,
+                        PickTaskNumber = pickTaskNumber,
+                        ExternOrderNumber = data.ExternOrderNumber,
+                        OrderNumber = data.OrderNumber,
+                        PickStatus = (int)OrderStatusEnum.新增,
+                        PickType = "普通拣货",
+                        //StartTime
+                        //EndTime
+                        PrintNum = 0,
+                        Str1 = data.OrderAddress.City + data.OrderAddress.Address,
+                        //PrintTime
+                        //PrintPersonnel
+                        //PickPlanPersonnel
+                        //DetailQty = detaildata.Sum(a => a.Qty),
+                        //DetailKindsQty = detaildata.GroupBy(a => a.SKU).Count(),
+                        //PickContainer
+                        Creator = _userManager.Account,
+                        CreationTime = DateTime.Now,
+                        Details = detaildata,
 
-                var mapper = new Mapper(config);
-                var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation);
-
-                pickTasks.Add(new WMSPickTask
+                    });
+                }
+                else
                 {
-                    CustomerId = data.CustomerId,
-                    CustomerName = data.CustomerName,
-                    WarehouseId = data.WarehouseId,
-                    WarehouseName = data.WarehouseName,
-                    PickTaskNumber = pickTaskNumber,
-                    ExternOrderNumber = data.ExternOrderNumber,
-                    OrderNumber = data.OrderNumber,
-                    PickStatus = (int)OrderStatusEnum.新增,
-                    PickType = "普通拣货",
-                    //StartTime
-                    //EndTime
-                    PrintNum = 0,
-                    //PrintTime
-                    //PrintPersonnel
-                    //PickPlanPersonnel
-                    DetailQty = detaildata.Sum(a => a.Qty),
-                    DetailKindsQty = detaildata.GroupBy(a => a.SKU).Count(),
-                    //PickContainer
-                    Creator = _userManager.Account,
-                    CreationTime = DateTime.Now,
-                    Details = detaildata,
+                    var pickTasksdata = pickTasks.Where(a => a.Str1 == data.OrderAddress.City + data.OrderAddress.Address).First();
+                    //将需要分配的订单发送到分配队列
+                    //获取需要分配的订单，采用自动分配
+                    var config = new MapperConfiguration(cfg =>
+                      {
+                          cfg.CreateMap<WMSOrderAllocation, WMSPickTaskDetail>()
+                               .ForMember(a => a.PickStatus, opt => opt.MapFrom(c => (int)PickTaskStatusEnum.新增))
+                               .ForMember(a => a.ExternOrderNumber, opt => opt.MapFrom(c => data.ExternOrderNumber))
+                               .ForMember(a => a.OrderNumber, opt => opt.MapFrom(c => data.OrderNumber))
+                               .ForMember(a => a.PreOrderNumber, opt => opt.MapFrom(c => data.PreOrderNumber))
+                               .ForMember(a => a.PickTaskNumber, opt => opt.MapFrom(c => pickTasksdata.PickTaskNumber))
+                               .ForMember(a => a.Id, opt => opt.Ignore())
+                               //添加创建人为当前用户
+                               .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                               .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now));
+                      });
 
-                }); ;
+                    var mapper = new Mapper(config);
+                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation);
 
+                    pickTasks.Where(a => a.Str1 == data.OrderAddress.City + data.OrderAddress.Address).First().Details.AddRange(detaildata);
+
+                }
 
             });
-
+            pickTasks.ToList().ForEach(a =>
+            {
+                a.DetailQty = a.Details.Sum(b => b.Qty);
+                a.DetailKindsQty = a.Details.GroupBy(b => b.SKU).Count();
+            });
             //_repPickTask.AsQueryable().Includes(a => a.Detail).Where(a => request.Contains(a.Id)).ToList();
             await _repOrder.Context.InsertNav(pickTasks).Include(a => a.Details).ExecuteCommandAsync();
 

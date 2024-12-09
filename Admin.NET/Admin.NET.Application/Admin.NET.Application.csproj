@@ -104,6 +104,10 @@
     <Folder Include="Service\WMSRFReceiptAcquisition\Interface\" />
     <Folder Include="Service\WMSRFReceiptAcquisition\Strategy\" />
     <Folder Include="Service\WMSRFReceiptReceiving\Abstract\" />
+    <Folder Include="Service\WMSRFStockCheck\Enumerate\" />
+    <Folder Include="Service\WMSRFStockCheck\Factory\" />
+    <Folder Include="Service\WMSRFStockCheck\Interface\" />
+    <Folder Include="Service\WMSRFStockCheck\Strategy\" />
   </ItemGroup>
 
 </Project>

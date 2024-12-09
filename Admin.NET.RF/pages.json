@@ -157,6 +157,12 @@
 		}, {
 			"path": "pages/wMSASNCountQuantity/index",
 			"style": {}
+		}, {
+			"path": "pages/wMSRFStockCheck/index",
+			"style": {}
+		}, {
+			"path": "pages/wMSRFStockCheck/component/editDialog",
+			"style": {}
 		}
 		
 	],
