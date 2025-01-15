@@ -121,7 +121,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.ExpectDate != null && input.ExpectDate.Count > 0)
         {
             DateTime? start = input.ExpectDate[0];
-            query = query.WhereIF(start.HasValue, u => u.ExpectDate > start);
+            query = query.WhereIF(start.HasValue, u => u.ExpectDate >= start);
             if (input.ExpectDate.Count > 1 && input.ExpectDate[1].HasValue)
             {
                 var end = input.ExpectDate[1].Value.AddDays(1);
@@ -131,7 +131,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
             DateTime? start = input.CompleteTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime >= start);
             if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
                 var end = input.CompleteTime[1].Value.AddDays(1);
@@ -141,7 +141,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
             DateTime? start = input.CreationTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
                 var end = input.CreationTime[1].Value.AddDays(1);
@@ -151,7 +151,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
             DateTime? start = input.DateTime1[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
                 var end = input.DateTime1[1].Value.AddDays(1);
@@ -161,7 +161,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
             DateTime? start = input.DateTime2[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
                 var end = input.DateTime2[1].Value.AddDays(1);
@@ -171,7 +171,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
             DateTime? start = input.DateTime3[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
                 var end = input.DateTime3[1].Value.AddDays(1);
@@ -181,7 +181,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
             DateTime? start = input.DateTime4[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
                 var end = input.DateTime4[1].Value.AddDays(1);
@@ -191,7 +191,7 @@ public class WMSRFASNReceiptDetailService : IDynamicApiController, ITransient
         if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
             DateTime? start = input.DateTime5[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
                 var end = input.DateTime5[1].Value.AddDays(1);

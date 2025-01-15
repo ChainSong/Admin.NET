@@ -36,6 +36,7 @@ using System.Reflection.Emit;
 using FastExpressionCompiler;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 using Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
+using System.Web;
 
 namespace Admin.NET.Application;
 public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
@@ -51,13 +52,14 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
     public SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed { get; set; }
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving { get; set; }
 
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
     public async Task<Response<List<RFReceiptReceivingOutput>>> RFReceiptReceivingSave(RFReceiptReceivingInput request, WMSReceipt receipt)
     {
         Response<List<RFReceiptReceivingOutput>> response = new Response<List<RFReceiptReceivingOutput>>();
-        //判断扫描的是不是条形码（有两种条形码）
+
         if (!string.IsNullOrEmpty(request.ScanInput))
         {
             //var skuInfo = request.Input.Split('|');
@@ -76,8 +78,28 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.SKU = request.SKU;
 
+            }
+            else if (request.ScanInput.Contains("http"))
+            {
+                //扫描的是HTTP 二维码，那么从中解析SKU
+                Uri uri = new Uri(request.ScanInput);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    request.SKU = collection["p"].Split(':')[1];
+                }
+            }
+            else
+            {
+                //直接判断是不是货号
+                var IsSKU = await _repProduct.AsQueryable().Where(it => it.SKU == request.ScanInput).FirstAsync();
+                if (IsSKU != null && !string.IsNullOrEmpty(IsSKU.SKU))
+                {
+                    request.SKU = IsSKU.SKU;
+                }
+            }
 
-            };
             request.CustomerId = receipt.CustomerId;
         }
         //var orderDatass = _sysCacheService.Get<string>("RFReceiptReceivingOrder:" + receipt.CustomerId + ":" + request.ReceiptNumber);

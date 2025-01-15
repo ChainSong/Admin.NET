@@ -15,13 +15,13 @@ using Admin.NET.Common.SnowflakeCommon;
 using Aliyun.OSS;
 using Nest;
 using SharpCompress.Common;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.ComponentTCBCreateContainerServiceRequest.Types;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchResponse.Types;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaSecOrderUploadCombinedShippingInfoRequest.Types.SubOrder.Types;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using System.Reflection.Emit;
+//using static CardCreateRequest.Types.GrouponCard.Types.Base.Types;
+//using static ChannelsECWarehouseGetResponse.Types;
+//using static ComponentTCBCreateContainerServiceRequest.Types;
+//using static SemanticSemproxySearchResponse.Types;
+//using static WxaSecOrderUploadCombinedShippingInfoRequest.Types.SubOrder.Types;
+//using static System.Runtime.CompilerServices.RuntimeHelpers;
+//using System.Reflection.Emit;
 
 namespace Admin.NET.ApplicationCore.Strategy
 {
@@ -138,7 +138,7 @@ namespace Admin.NET.ApplicationCore.Strategy
                     a.OrderNumber = OrderNumber;
                     a.ExternOrderNumber = item.ExternOrderNumber;
                 });
-
+                
                 //补充DetailBom的信息
                 var detailBomData = item.Details.Adapt<List<WMSOrderDetailBom>>();
                 //获取Bom信息
@@ -180,6 +180,8 @@ namespace Admin.NET.ApplicationCore.Strategy
                                       ProductionDate = a.ProductionDate,
                                       ExpirationDate = a.ExpirationDate,
                                       Remark = a.Remark,
+                                      Creator=_userManager.Account,
+                                      CreationTime= a.CreationTime,
                                       Str1 = a.Str1,
                                       Str2 = a.Str2,
                                       Str3 = a.Str3,

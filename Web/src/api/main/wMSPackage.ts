@@ -12,6 +12,7 @@ enum Api {
   ShortagePackageData = '/api/wMSPackage/ShortagePackage',
   ResetPackageData = '/api/wMSPackage/resetPackage',
   GetRFIDInfo = '/api/wMSPackage/GetRFIDInfo',
+  ExportPackage = '/api/wMSPackage/ExportPackage',
   
 }
 
@@ -111,3 +112,13 @@ export const getRFIDInfo = (params?: any) =>
 		method: 'post',
 		data: params,
 	});		
+
+// 导出出库信息
+export const exportPackage = (params?: any) =>
+	request({
+		url: Api.ExportPackage,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
+	

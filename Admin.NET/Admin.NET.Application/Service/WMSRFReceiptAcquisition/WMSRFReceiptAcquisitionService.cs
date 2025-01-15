@@ -21,6 +21,7 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSRFReceiptAcquisition> _rep;
 
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
 
 
     private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
@@ -33,7 +34,7 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly UserManager _userManager;
 
-    public WMSRFReceiptAcquisitionService(SqlSugarRepository<WMSRFReceiptAcquisition> rep, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager)
+    public WMSRFReceiptAcquisitionService(SqlSugarRepository<WMSRFReceiptAcquisition> rep, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSCustomer> repCustomer)
     {
         _rep = rep;
         _repReceipt = repReceipt;
@@ -41,6 +42,7 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
         _repCustomerUser = repCustomerUser;
         _repWarehouseUser = repWarehouseUser;
         _userManager = userManager;
+        _repProduct = repProduct;
 
     }
 
@@ -154,6 +156,9 @@ public class WMSRFReceiptAcquisitionService : IDynamicApiController, ITransient
             input.ExpirationDate = !string.IsNullOrEmpty(input.ExpirationDate) ? DateTime.Parse(dateStr).ToString() : null;
             input.Lot = !string.IsNullOrEmpty(input.Lot) ? input.Lot : "";
             input.SKU = input.SKU != "" ? input.SKU.Replace("ITM", "") : "";
+
+
+
             var entity = input.Adapt<WMSRFReceiptAcquisition>();
             if (!string.IsNullOrEmpty(entity.SN))
             {

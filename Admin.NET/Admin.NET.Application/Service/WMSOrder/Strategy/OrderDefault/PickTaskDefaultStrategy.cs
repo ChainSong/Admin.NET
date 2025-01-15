@@ -182,7 +182,7 @@ namespace Admin.NET.Application.Strategy
                     StatusCode = StatusCode.Success,
                     //StatusMsg = StatusCode.Success.ToString(),
                     Msg = "生成拣货任务成功"
-                }); ;
+                });
             });
 
             //开始校验数据

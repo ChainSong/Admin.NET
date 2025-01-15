@@ -34,6 +34,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -46,7 +47,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
 
-    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation)
+    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
         _userManager = userManager;
@@ -59,7 +60,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         _repPackageDetail = repPackageDetail;
         _sysCacheService = sysCacheService;
         _repLocation = repLocation;
-
+        _repProduct = repProduct;
     }
 
     /// <summary>
@@ -231,7 +232,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         factory._repPackage = _repPackage;
         factory._repPackageDetail = _repPackageDetail;
         factory._repLocation = _repLocation;
-
+        factory._repProduct = _repProduct;
+        
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.OrderPickTask(input);
 

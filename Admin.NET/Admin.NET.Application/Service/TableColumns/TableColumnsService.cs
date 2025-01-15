@@ -1,4 +1,5 @@
 ﻿using Admin.NET.Application.Const;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
@@ -312,7 +313,7 @@ public class TableColumnsService : IDynamicApiController, ITransient
 
         //var table_ColumnsListDtos = ObjectMapper.Map<List<Table_ColumnsListDto>>(table_ColumnsList);
         //query = query.OrderBuilder(input, "", "TableName");
-         return await query.ToListAsync();
+        return await query.ToListAsync();
         //return new PagedResultDto<Table_ColumnsListDto>(count, table_ColumnsListDtos);
 
 
@@ -466,24 +467,24 @@ public class TableColumnsService : IDynamicApiController, ITransient
     /// </summary>
     //[AbpAuthorize(WMS_ASNPermissions.Node)]
     [HttpPost]
-    public ActionResult ImportExcelTemplate(TableColumnsInput input)
+    public async Task<IActionResult> ImportExcelTemplate(TableColumnsInput input)
     {
         // TODO:批量删除前的逻辑判断，是否允许删除
-       // var query = _rep.AsQueryable()
-       ////模糊搜索TableName
-       //.WhereIF(!input.TableName.IsNullOrEmpty(), a => a.TableName == input.TableName)
-       ////.WhereIF(input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-       //.Where(a => a.TenantId == _userManager.TenantId && a.IsImportColumn == 1)
-       ////.WhereIF(a => a.IsImportColumn == 1)
-       ////.WhereIf(1 == 1, a => a.TenantId == input.TenantId)
-       //.Select(a => new TableColumns
-       //{
-       //    DisplayName = a.DisplayName,
-       //    //由于框架约定大于配置， 数据库的字段首字母小写
-       //    //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-       //    DbColumnName = a.DbColumnName,
-       //    IsImportColumn = a.IsImportColumn
-       //});
+        // var query = _rep.AsQueryable()
+        ////模糊搜索TableName
+        //.WhereIF(!input.TableName.IsNullOrEmpty(), a => a.TableName == input.TableName)
+        ////.WhereIF(input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+        //.Where(a => a.TenantId == _userManager.TenantId && a.IsImportColumn == 1)
+        ////.WhereIF(a => a.IsImportColumn == 1)
+        ////.WhereIf(1 == 1, a => a.TenantId == input.TenantId)
+        //.Select(a => new TableColumns
+        //{
+        //    DisplayName = a.DisplayName,
+        //    //由于框架约定大于配置， 数据库的字段首字母小写
+        //    //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+        //    DbColumnName = a.DbColumnName,
+        //    IsImportColumn = a.IsImportColumn
+        //});
 
         //使用简单工厂定制化
         IImportExcelTemplateInterface factory = ImportExcelTemplateFactory.ImportExcelTemplate(input.CustomerId, input.TableName);
@@ -491,14 +492,24 @@ public class TableColumnsService : IDynamicApiController, ITransient
         factory._userManager = _userManager;
         var response = factory.Strategy(input.CustomerId, _userManager.TenantId);
 
-        IExporter exporter = new ExcelExporter();
-        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
-        var fs = new MemoryStream(result.Result);
-        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
-        return new FileStreamResult(fs, "application/octet-stream")
+        if (response.Code == StatusCode.Success)
         {
-            FileDownloadName = "下载文件.xlsx" // 配置文件下载显示名
-        };
+            //IExporter exporter = new ExcelExporter();
+            //var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+            var fs = new MemoryStream(response.Data);
+            //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+            return new FileStreamResult(fs, "application/octet-stream")
+            {
+                FileDownloadName = "下载文件.xlsx" // 配置文件下载显示名
+            };
+
+        }
+        else
+        {
+            throw Oops.Oh(response.Msg);
+        }
+
+
 
 
         //var result = await _excelExporter.ExportAsByteArray(dto);

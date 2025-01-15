@@ -11,7 +11,9 @@
           </el-button-group>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAddSysWorkFlow" v-auth="'sysWorkFlow:add'"> 新增
+          <el-button type="primary" icon="ele-Plus" @click="openAddSysWorkFlow" v-auth="'sysWorkFlow:add'"> 新增流程
+          </el-button>
+          <el-button type="primary" icon="ele-Plus" @click="openAddSysWorkFlowAudit" v-auth="'sysWorkFlow:add'"> 新增审批
           </el-button>
         </el-form-item>
       </el-form>
@@ -19,17 +21,15 @@
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
       <el-table :data="tableData" style="width: 100%" v-loading="loading" tooltip-effect="light" row-key="id" border="">
         <el-table-column type="index" label="序号" />
-        <el-table-column prop="workName" label="流程名称" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="workTable" label="WorkTable" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="workTableName" label="WorkTableName" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="nodeConfig" label="NodeConfig" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="lineConfig" label="LineConfig" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="remark" label="备注" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="createDate" label="创建时间" fixed="" show-overflow-tooltip="" />
-        <el-table-column prop="creator" label="创建人" fixed="" show-overflow-tooltip="" />
-
-
-        <el-table-column prop="auditingEdit" label="AuditingEdit" fixed="" show-overflow-tooltip="" />
+        <el-table-column prop="workName" label="流程名称"   />
+        <el-table-column prop="workTable" label="WorkTable"    />
+        <el-table-column prop="workTableName" label="WorkTableName"   />
+        <el-table-column prop="nodeConfig" label="NodeConfig"   show-overflow-tooltip="" />
+        <el-table-column prop="lineConfig" label="LineConfig"   show-overflow-tooltip="" />
+        <el-table-column prop="remark" label="备注"  show-overflow-tooltip="" />
+        <el-table-column prop="createDate" label="创建时间"  show-overflow-tooltip="" />
+        <el-table-column prop="creator" label="创建人"   show-overflow-tooltip="" />
+        <el-table-column prop="auditingEdit" label="AuditingEdit"   show-overflow-tooltip="" />
         <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip=""
           v-if="auth('sysWorkFlow:edit') || auth('sysWorkFlow:delete')">
           <template #default="scope">
@@ -45,6 +45,8 @@
         @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editSysWorkFlowTitle" @reloadTable="handleQuery" />
       <workFlowGridHeader ref="workFlowGridHeaderRef" @reloadTable="handleQuery" />
+      <workFlowGridHeaderAdd ref="workFlowGridHeaderAddRef" @reloadTable="handleQuery" />
+      <workFlowGridAdd ref="workFlowGridAddRef" @reloadTable="handleQuery" />
     </el-card>
   </div>
 </template>
@@ -56,11 +58,16 @@ import { auth } from '/@/utils/authFunction';
 //import { formatDate } from '/@/utils/formatTime';
 
 import workFlowGridHeader from '/@/views/system/flow/WorkFlowGridHeader.vue'
+import workFlowGridHeaderAdd from '/@/views/system/flow/WorkFlowGridHeaderAdd.vue'
+import workFlowGrid from '/@/views/system/workFlow/WorkFlowGridHeader.vue'
+import workFlowGridAdd from '/@/views/system/workFlow/WorkFlowGridHeaderAdd.vue'
 // import editDialog from '/@/views/main/sysWorkFlow/component/editDialog.vue'
 import { pageSysWorkFlow, deleteSysWorkFlow } from '/@/api/main/sysWorkFlow';
 
 
 const workFlowGridHeaderRef = ref();
+const workFlowGridHeaderAddRef = ref();
+const workFlowGridAddRef = ref();
 const editDialogRef = ref();
 const loading = ref(false);
 const tableData = ref<any>
@@ -86,13 +93,28 @@ const handleQuery = async () => {
 
 // 打开新增页面
 const openAddSysWorkFlow = () => {
-  editSysWorkFlowTitle.value = '添加SysWorkFlow';
-  workFlowGridHeaderRef.value.open({});
+  editSysWorkFlowTitle.value = '添加业务流程';
+  workFlowGridHeaderAddRef.value.open({});
+};
+
+// 打开新增页面
+const openAddSysWorkFlowAudit = () => {
+  editSysWorkFlowTitle.value = '添加审批流程';
+  workFlowGridAddRef.value.open({});
+};
+// 打开编辑页面
+const openEditSysWorkFlow = (row: any) => {
+  editSysWorkFlowTitle.value = '编辑业务流程';
+  console.log(row);
+  console.log("row");
+  workFlowGridHeaderRef.value.open(row);
+  // editSysWorkFlowTitle.value = '编辑SysWorkFlow';
+  // editDialogRef.value.openDialog(row);
 };
 
 // 打开编辑页面
-const openEditSysWorkFlow = (row: any) => {
-  editSysWorkFlowTitle.value = '编辑SysWorkFlow';
+const openEditSysWorkFlowAudit = (row: any) => {
+  editSysWorkFlowTitle.value = '编辑审批流程';
   console.log(row);
   console.log("row");
   workFlowGridHeaderRef.value.open(row);

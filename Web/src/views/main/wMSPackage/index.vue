@@ -63,30 +63,24 @@
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSPackage:page'"> 查询
             </el-button>
-            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-
-        </el-form-item>
-
-        <!-- <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Printer" @click="openPrint" v-auth="'wMSPackage:page'"> 打印
+            <el-button type="primary" icon="ele-Search" @click="printPackageNumber('')" v-auth="'wMSPackage:printPackage'"> 打印箱号
             </el-button>
           </el-button-group>
-        </el-form-item> -->
-        <!-- <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSPackage:add'"> 新增
-          </el-button>
-        </el-form-item> -->
-        <!-- <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="PackageForOrderFun" v-auth="'wMSPackage:PackageForOrder'"> 转出库单
-          </el-button>
-        </el-form-item> -->
-
+          <el-button-group>
+            <el-button type="primary" icon="ele-Search" @click="printPackageList('')" v-auth="'wMSPackage:printPackage'"> 打印箱清单
+            </el-button>
+          </el-button-group>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Search" @click="exportPackageFun('')" v-auth="'wMSPackage:printPackage'"> 导出
+            </el-button>
+          </el-button-group>
+        </el-form-item>
+        
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
         style="width: 100%">
         <el-table-column type="selection" width="55">
@@ -120,12 +114,14 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="280">
 
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button class="el-icon-printer"   type="text" @click="printExpress(scope.row)" size="small">打印
+            <el-button class="el-icon-printer" v-auth="'wMSPackage:printExpress'"  type="text" @click="printExpress(scope.row)" size="small">打印
+            </el-button>
+            <el-button class="el-icon-printer"  v-auth="'wMSPackage:printPackage'" type="text" @click="printPackageNumber(scope.row)" size="small">打印箱号
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button> 
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
@@ -167,9 +163,10 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSPackage/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPackage/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPackage/component/queryDialog.vue'
-import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
+// import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
+import printDialog from '/@/views/tools/printDialog.vue';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
-import { pageWMSPackage, deleteWMSPackage, printExpressData } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, printExpressData,exportPackage } from '/@/api/main/wMSPackage';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "/@/entities/packageMain";
@@ -178,7 +175,7 @@ import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
 import sfExpress from "/@/api/expressInterface/sfExpress";
-
+import { downloadByData, getFileName } from '/@/utils/download';
 const state = ref({
   vm: {
     id: "", 
@@ -227,11 +224,34 @@ onMounted(async () => {
 });
 
 const gettableColumn = async () => {
-
   let res = await getByTableNameList("WMS_Package");
   state.value.tableColumnHeaders = res.data.result;
-
 };
+
+
+//导出预出库单
+const exportPackageFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  if (ids.length > 0) {
+    let res = await exportPackage({ "ids": ids });
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } else {
+    let res = await exportPackage(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  }
+}
+
 
 // 打开编辑页面
 const openEdit = (row: any) => {
@@ -257,26 +277,92 @@ const openQuery = (row: any) => {
 };
 
 // 打开打印页面
-const openPrint = (row: any) => {
-  ptintTitle.value = '打印';
-  printDialogRef.value.openDialog(row);
-};
+// const openPrint = (row: any) => {
+//   ptintTitle.value = '打印';
+//   printDialogRef.value.openDialog(row);
+// };
 
 // 删除
-const del = (row: any) => {
-  ElMessageBox.confirm(`确定要删除吗?`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
+// const del = (row: any) => {
+//   ElMessageBox.confirm(`确定要删除吗?`, "提示", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//   })
+//     .then(async () => {
+//       await deleteWMSPackage(row);
+//       handleQuery();
+//       ElMessage.success("删除成功");
+//     })
+//     .catch(() => { });
+// };
+
+
+
+//打印箱唛
+const printPackageList = async (row: any) => {
+  console.log("row");
+  console.log(row);
+  ptintTitle.value = '打印';
+ var ids = new Array<any>();
+ if(row==null || row==undefined || row=="") {
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    // console.log("a");
+    // console.log(a);
+    ids.push(a.id);
+  });
+}else{
+  ids.push(row.id);
+}
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+  confirmButtonText: "确定",
+  cancelButtonText: "取消",
+  type: "warning",
+})
+  .then(async () => { 
+    
+    printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
   })
-    .then(async () => {
-      await deleteWMSPackage(row);
-      handleQuery();
-      ElMessage.success("删除成功");
-    })
-    .catch(() => { });
+  .catch(() => { }); 
 };
 
+//打印箱唛
+const printPackageNumber = async (row: any) => {
+  console.log("row");
+  console.log(row);
+  ptintTitle.value = '打印';
+ var packageNumbers = new Array<any>();
+ if(row==null || row==undefined || row=="") {
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    // console.log("a");
+    // console.log(a);
+    packageNumbers.push(a);
+  });
+}else{
+  packageNumbers.push(row);
+}
+  if (packageNumbers.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+
+  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+  confirmButtonText: "确定",
+  cancelButtonText: "取消",
+  type: "warning",
+})
+  .then(async () => { 
+    console.log("row");
+    console.log(row);
+    console.log(packageNumbers);
+    printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+  })
+  .catch(() => { }); 
+};
 
 // 打印快递单
 const printExpress = async (row: any) => {

@@ -3,7 +3,7 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
         <el-row :gutter="[16, 15]">
-          <template v-for="i in  state.tableColumnHeaders">
+          <template v-for="i in state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
 
               <template v-if="i.type == 'TextBox'">
@@ -192,7 +192,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder ,exportPackage} from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder, exportPackage } from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import printDialog from '/@/views/tools/printDialog.vue';
@@ -405,13 +405,19 @@ const exportOrderFun = async () => {
     ids.push(a.id);
   });
   // 2,验证数据有没有勾选
-  if (ids.length < 1) {
-    ElMessage.error("请勾选订单");
-    return;
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if (ids.length > 0) {
+    let res = await exportOrder({ "ids": ids });
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } else {
+    let res = await exportOrder(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
   }
-  let res = await exportOrder(ids);
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
 }
 
 

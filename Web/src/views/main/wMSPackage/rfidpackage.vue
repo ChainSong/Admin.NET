@@ -209,7 +209,6 @@ const expressConfig = ref({});
 onMounted(async () => {
   gettableColumn();
   getExpress();
-
   signalR.on('echo', (data: any) => {
     console.log("WebSocket data");
     console.log(data);
@@ -239,25 +238,31 @@ const getRFIDInfoData = async () => {
     allPackage(state.value.vm.form);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
-    // state.value.vm.form.pickTaskNumber = "";
+    state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
       state.value.vm.tableData = res.data.result.data.packageDatas;
 
+    input.value = true;
+    input.value = false;
+    allPackage(state.value.vm.form);
+    nextTick(() => {
+      input.value.focus();
+      input.value.select();
+    });
+    // console.log("resRFID");
+    // console.log(res);
+
     ElMessage.success(res.data.result.msg);
-  } else {
+  } else if (res.data.result.code == -1) {
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
+  } else {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.warning(res.data.result.msg);
   }
-  input.value = true;
-  input.value = false;
-  allPackage(state.value.vm.form);
-  nextTick(() => {
-    input.value.focus();
-    input.value.select();
-  });
-  console.log("resRFID");
-  console.log(res);
+
 
 };
 const getExpress = async () => {
@@ -327,6 +332,7 @@ const addPackage = async (data: any) => {
   } else if (res.data.result.code == 99) {
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
+    // signalR.send('echo',99)
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
       state.value.vm.tableData = res.data.result.data.packageDatas;
@@ -347,7 +353,15 @@ const addPackage = async (data: any) => {
 
 
 const scanPackage = async () => {
+  // signalR.send('echo',1)
+  // 判断webSocket是否连接
+  if (signalR.state != "Connected") {
+    signalR.start();
+    ElMessage.error("连接状态" + signalR.state);
 
+  }
+  ElMessage.error("连接状态" + signalR.state);
+  // alert("请扫描商品");
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {

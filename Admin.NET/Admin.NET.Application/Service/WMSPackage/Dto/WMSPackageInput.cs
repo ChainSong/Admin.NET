@@ -339,11 +339,11 @@ public class WMSPackageInput : BasePageInput
     /// 出库外部编号
     /// </summary>
     public string PickTaskNumber { get; set; }
-    
+
     /// <summary>
     /// 货主ID
     /// </summary>
-    public long CustomerId { get; set; }
+    public long? CustomerId { get; set; } = 0;
 
     /// <summary>
     /// 货主名称
@@ -353,7 +353,7 @@ public class WMSPackageInput : BasePageInput
     /// <summary>
     /// WarehouseId
     /// </summary>
-    public long? WarehouseId { get; set; }
+    public long? WarehouseId { get; set; } = 0;
 
     /// <summary>
     /// 出库仓库
@@ -418,26 +418,26 @@ public class WMSPackageInput : BasePageInput
     /// <summary>
     /// 交接时间
     /// </summary>
-    public DateTime? HandoverTime { get; set; }
+    //public DateTime? HandoverTime { get; set; }
 
     /// <summary>
     /// 交接时间范围
     /// </summary>
-    public List<DateTime?> HandoverTimeRange { get; set; }
+    public List<DateTime?> HandoverTime { get; set; }
     /// <summary>
     /// PackageStatus
     /// </summary>
-    public int PackageStatus { get; set; }
+    public int? PackageStatus { get; set; }
 
     /// <summary>
     /// 包装时间
     /// </summary>
-    public DateTime? PackageTime { get; set; }
+    //public DateTime? PackageTime { get; set; }
 
     /// <summary>
     /// 包装时间范围
     /// </summary>
-    public List<DateTime?> PackageTimeRange { get; set; }
+    public List<DateTime?> PackageTime { get; set; }
     /// <summary>
     /// 明细数量
     /// </summary>
@@ -451,12 +451,12 @@ public class WMSPackageInput : BasePageInput
     /// <summary>
     /// CreationTime
     /// </summary>
-    public DateTime? CreationTime { get; set; }
+    //public DateTime? CreationTime { get; set; }
 
     /// <summary>
     /// CreationTime范围
     /// </summary>
-    public List<DateTime?> CreationTimeRange { get; set; }
+    public List<DateTime?> CreationTime { get; set; }
     /// <summary>
     /// Updator
     /// </summary>
@@ -570,48 +570,48 @@ public class WMSPackageInput : BasePageInput
     /// <summary>
     /// DateTime1
     /// </summary>
-    public DateTime? DateTime1 { get; set; }
+    //public DateTime? DateTime1 { get; set; }
 
     /// <summary>
     /// DateTime1范围
     /// </summary>
-    public List<DateTime?> DateTime1Range { get; set; }
+    public List<DateTime?> DateTime1 { get; set; }
     /// <summary>
     /// DateTime2
     /// </summary>
-    public DateTime? DateTime2 { get; set; }
+    //public DateTime? DateTime2 { get; set; }
 
     /// <summary>
     /// DateTime2范围
     /// </summary>
-    public List<DateTime?> DateTime2Range { get; set; }
+    public List<DateTime?> DateTime2 { get; set; }
     /// <summary>
     /// DateTime3
     /// </summary>
-    public DateTime? DateTime3 { get; set; }
+    //public DateTime? DateTime3 { get; set; }
 
     /// <summary>
     /// DateTime3范围
     /// </summary>
-    public List<DateTime?> DateTime3Range { get; set; }
+    public List<DateTime?> DateTime3 { get; set; }
     /// <summary>
     /// DateTime4
     /// </summary>
-    public DateTime? DateTime4 { get; set; }
+    //public DateTime? DateTime4 { get; set; }
 
     /// <summary>
     /// DateTime4范围
     /// </summary>
-    public List<DateTime?> DateTime4Range { get; set; }
+    public List<DateTime?> DateTime4 { get; set; }
     /// <summary>
     /// DateTime5
     /// </summary>
-    public DateTime? DateTime5 { get; set; }
+    //public DateTime? DateTime5 { get; set; }
 
     /// <summary>
     /// DateTime5范围
     /// </summary>
-    public List<DateTime?> DateTime5Range { get; set; }
+    public List<DateTime?> DateTime5 { get; set; }
     /// <summary>
     /// Int1
     /// </summary>
@@ -636,6 +636,8 @@ public class WMSPackageInput : BasePageInput
     /// Int5
     /// </summary>
     public int? Int5 { get; set; }
+
+    public virtual List<long> Ids { get; set; }
 
 }
 

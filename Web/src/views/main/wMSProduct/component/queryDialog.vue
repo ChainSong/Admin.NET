@@ -24,7 +24,7 @@
 								</template>
 								<template v-if="i.type == 'DropDownListInt'">
 									<template v-for="item in i.tableColumnsDetails">
-										<template v-if="item.codeStr == state.header[i.columnName]">
+										<template v-if="item.codeInt == state.header[i.columnName]">
 											<el-tag v-if="item.codeInt == state.header[i.columnName]"
 												v-bind:key="item.color" show-icon :type="item.color">
 												{{ item.name }}
@@ -48,8 +48,10 @@
 					<el-form>
 						<el-table :data="state.details" style="width: 100%" height="250">
 							<template v-for="(v, index) in state.tableColumnDetails">
+								
 								<el-table-column v-if="v.isCreate || v.isKey" :key="index" :fixed="false"
 									:label="v.displayName" width="150">
+									
 									<template #default="scope">
 										<label v-text="scope.row[v.columnName]"></label>
 									</template>

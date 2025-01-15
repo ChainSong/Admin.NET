@@ -231,7 +231,7 @@ namespace Admin.NET.Application.Strategy
             var detailTableColumn = GetColumns("WMS_ASNDetail");
 
 
-            var query = _repASN.AsQueryable()
+            var query = _repASN.AsQueryable().Includes(a=>a.Details)
                     .WhereIF(!string.IsNullOrWhiteSpace(request.ASNNumber), u => u.ASNNumber.Contains(request.ASNNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(request.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(request.ExternReceiptNumber.Trim()))
                     .WhereIF(request.CustomerId > 0, u => u.CustomerId == request.CustomerId)

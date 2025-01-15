@@ -1,12 +1,20 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service;
+using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Common.Utility;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using ServiceStack.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -16,9 +24,12 @@ namespace Admin.NET.Application;
 public class WMSRFIDInfoService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSRFIDInfo> _rep;
-    public WMSRFIDInfoService(SqlSugarRepository<WMSRFIDInfo> rep)
+    private readonly UserManager _userManager;
+
+    public WMSRFIDInfoService(SqlSugarRepository<WMSRFIDInfo> rep, UserManager userManager)
     {
         _rep = rep;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -51,6 +62,9 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
                     .WhereIF(input.OrderDetailId > 0, u => u.OrderDetailId == input.OrderDetailId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderPerson), u => u.OrderPerson.Contains(input.OrderPerson.Trim()))
                     .WhereIF(input.Status > 0, u => u.Status == input.Status)
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.PoCode), u => u.PoCode.Contains(input.PoCode.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.SoCode), u => u.SoCode.Contains(input.SoCode.Trim()))
+                    .WhereIF(!string.IsNullOrWhiteSpace(input.SnCode), u => u.SnCode.Contains(input.SnCode.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Sequence), u => u.Sequence.Contains(input.Sequence.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.RFID), u => u.RFID.Contains(input.RFID.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Link), u => u.Link.Contains(input.Link.Trim()))
@@ -72,7 +86,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.ReceiptTimeRange != null && input.ReceiptTimeRange.Count > 0)
         {
             DateTime? start = input.ReceiptTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.ReceiptTime > start);
+            query = query.WhereIF(start.HasValue, u => u.ReceiptTime >= start);
             if (input.ReceiptTimeRange.Count > 1 && input.ReceiptTimeRange[1].HasValue)
             {
                 var end = input.ReceiptTimeRange[1].Value.AddDays(1);
@@ -82,7 +96,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.OrderTimeRange != null && input.OrderTimeRange.Count > 0)
         {
             DateTime? start = input.OrderTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.OrderTime > start);
+            query = query.WhereIF(start.HasValue, u => u.OrderTime >= start);
             if (input.OrderTimeRange.Count > 1 && input.OrderTimeRange[1].HasValue)
             {
                 var end = input.OrderTimeRange[1].Value.AddDays(1);
@@ -92,7 +106,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.PrintTimeRange != null && input.PrintTimeRange.Count > 0)
         {
             DateTime? start = input.PrintTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.PrintTime > start);
+            query = query.WhereIF(start.HasValue, u => u.PrintTime >= start);
             if (input.PrintTimeRange.Count > 1 && input.PrintTimeRange[1].HasValue)
             {
                 var end = input.PrintTimeRange[1].Value.AddDays(1);
@@ -102,7 +116,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
         {
             DateTime? start = input.CreationTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
             {
                 var end = input.CreationTimeRange[1].Value.AddDays(1);
@@ -112,7 +126,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
         {
             DateTime? start = input.DateTime1Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
             {
                 var end = input.DateTime1Range[1].Value.AddDays(1);
@@ -122,7 +136,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
         {
             DateTime? start = input.DateTime2Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
             {
                 var end = input.DateTime2Range[1].Value.AddDays(1);
@@ -174,6 +188,47 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     }
 
 
+    /// <summary>
+    /// 更新WMSRFIDInfo(SN)
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "UpdateSNCode")]
+    public async Task<Response> UpdateSNCode(IFormFile file)
+    {
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        string path = await ImprotExcel.WriteFile(file);
+
+        var dataExcel = await ExcelData.ExcelToEntityCollection<WMSRFIDImportImport>(path, null, true);
+        List<WMSRFIDImportImport> _RFIDImportImports = new List<WMSRFIDImportImport>();
+        _RFIDImportImports = dataExcel.Data.Adapt<List<WMSRFIDImportImport>>();
+
+        //先校验验证码是否已经存在
+        var checkentity = await _rep.AsQueryable().Where(u => _RFIDImportImports.Select(a => a.SnCode).Contains(u.SnCode)).ToListAsync();
+        if (checkentity.Count > 0)
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "校验码码已经存在，请检查！" };
+        }
+        //按照导入的查询出来
+        //然后把序列号一个一个赋值上去
+        var getentity = await _rep.AsQueryable().Where(u => _RFIDImportImports.Select(a => a.ExternReceiptNumber).Contains(u.ExternReceiptNumber)).ToListAsync();
+        foreach (var item in _RFIDImportImports)
+        {
+            if (getentity.Where(u => u.ExternReceiptNumber == item.ExternReceiptNumber && u.PoCode == item.PoCode && u.SKU == item.SKU && string.IsNullOrEmpty(u.SnCode)).Count() > 0)
+            {
+                getentity.Where(u => u.ExternReceiptNumber == item.ExternReceiptNumber && u.PoCode == item.PoCode && u.SKU == item.SKU && string.IsNullOrEmpty(u.SnCode)).First().SnCode = item.SnCode;
+                //getentity.Where(u => u.ExternReceiptNumber == item.ExternReceiptNumber && u.PoCode == item.PoCode && u.SKU == item.SKU && string.IsNullOrEmpty(u.SnCode)).First() = item.SnCode;
+            }
+        }
+        //或者批量更新
+        //_rep.Update(u => new WMSRFIDInfo { SNCode = u.SNCode }, u => import.Where(x => x.RFID == u.RFID).Select(x => x.SNCode));
+        //var entity = input.Adapt<WMSRFIDInfo>();
+        await _rep.AsUpdateable(getentity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+
+        return new Response() { Code = StatusCode.Success, Msg = "更新成功" }; ;
+    }
 
 
     /// <summary>
@@ -209,11 +264,47 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "QueryByReceiptId")]
-    public async Task<Response<List<WMSRFIDInfo>>> GetPrinrRFIDInfoByReceiptId(List<long> receiptId)
+    public async Task<Response<List<WMSRFIDinfoPrinfDto>>> GetPrinrRFIDInfoByReceiptId(List<long> receiptIds)
     {
-        Response<List<WMSRFIDInfo>> response = new Response<List<WMSRFIDInfo>>();
-        var entity = await _rep.AsQueryable().Where(u => receiptId.Contains(u.ReceiptId.Value)).ToListAsync();
-        response.Data = entity;
+        Response<List<WMSRFIDinfoPrinfDto>> response = new Response<List<WMSRFIDinfoPrinfDto>>() { Data = new List<WMSRFIDinfoPrinfDto>() };
+        var entity = await _rep.AsQueryable().Where(u => receiptIds.Contains(u.ReceiptId.Value)).ToListAsync();
+        entity.ForEach(u =>
+        {
+            u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;
+        });
+        response.Data = entity.Adapt<List<WMSRFIDinfoPrinfDto>>();
+        response.Code = StatusCode.Success;
+        response.Msg = "成功";
+        return response;
+    }
+
+
+
+    /// <summary>
+    /// 获取WMSRFIDInfo 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "QueryById")]
+    public async Task<Response<List<WMSRFIDinfoPrinfDto>>> GetPrinrRFIDInfoById(List<long> ids)
+    {
+        Response<List<WMSRFIDinfoPrinfDto>> response = new Response<List<WMSRFIDinfoPrinfDto>>() { Data = new List<WMSRFIDinfoPrinfDto>() };
+        var entity = await _rep.AsQueryable().Where(u => ids.Contains(u.Id)).ToListAsync();
+
+        await _rep.Context.Updateable<WMSRFIDInfo>()
+       .SetColumns(p => p.PrintTime == DateTime.Now)
+       .SetColumns(p => p.PrintPerson == _userManager.Account)
+       .SetColumns(p => p.PrintNum == p.PrintNum + 1)
+      .Where(u => ids.Contains(u.Id))
+       .ExecuteCommandAsync();
+
+        //await _rep.UpdateAsync(a => a.PrintTime = DateTime.Now, a.).Where(u => ids.Contains(u.Id)).ToListAsync();
+        entity.ForEach(u =>
+        {
+            u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;
+        });
+        response.Data = entity.Adapt<List<WMSRFIDinfoPrinfDto>>();
         response.Code = StatusCode.Success;
         response.Msg = "成功";
         return response;
@@ -228,15 +319,84 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet]
+    [HttpPost]
     [ApiDescriptionSettings(Name = "QueryRFID")]
     public async Task<Response<Dictionary<string, string>>> GetRFID(string rfid)
     {
+        //string aaa, bbb;
+        //aaa = "cF/oxVfhjnF4OCg4XOsva9GmiGa4CbXaqeqQviNcG+A=";
+        //aaa = AESCryption.Encrypt(rfid);
+        rfid = AESCryption.Decrypt(rfid);
+        Response<Dictionary<string, string>> response = new Response<Dictionary<string, string>>();
+        //校验位 以24位为基准，多于24位则截取前24位，少于24位则反馈错误信息
+        if (string.IsNullOrEmpty(rfid) || rfid.Length < 24)
+        {
+            throw Oops.Oh(ErrorCodeEnum.D1002);
+        }
+        if (string.IsNullOrEmpty(rfid) || rfid.Length > 24)
+        {
+            //截取前24位
+            rfid = rfid.Substring(0, 24);
+        }
         var entity = await _rep.AsQueryable().Where(u => u.RFID == rfid).OrderByDescending(u => u.Id).FirstAsync();
-        Response < Dictionary<string, string> > response = new Response<Dictionary<string, string>>();
+        if (entity == null || string.IsNullOrEmpty(entity.RFID))
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "不存在的RFID";
+            return response;
+
+        }
         response.Code = StatusCode.Success;
         response.Msg = "成功";
         response.Data = new Dictionary<string, string>();
         response.Data.Add("RFID", entity.RFID);
+        response.Data.Add("SKU", entity.SKU);
+        response.Data.Add("合同单号", entity.PoCode);
+        response.Data.Add("入库时间", entity.ReceiptTime.ToString());
+        response.Data.Add("出库时间", entity.OrderTime.ToString());
+        return response;
+    }
+
+
+
+
+    /// <summary>
+    /// 获取WMSRFIDInfo 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet]
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "QueryRFIDInfo")]
+    public async Task<Response<Dictionary<string, string>>> QueryRFID(WMSRFIDInfoDto rfids)
+    {
+        //string rfid = rfids.RFID;
+        string rfid = AESCryption.Decrypt(rfids.RFID);
+        Response<Dictionary<string, string>> response = new Response<Dictionary<string, string>>();
+        //校验位 以24位为基准，多于24位则截取前24位，少于24位则反馈错误信息
+        if (string.IsNullOrEmpty(rfid) || rfid.Length < 24)
+        {
+            throw Oops.Oh(ErrorCodeEnum.D1002);
+        }
+        if (string.IsNullOrEmpty(rfid) || rfid.Length > 24)
+        {
+            //截取前24位
+            rfid = rfid.Substring(0, 24);
+        }
+        var entity = await _rep.AsQueryable().Where(u => u.RFID == rfid).OrderByDescending(u => u.Id).FirstAsync();
+        if (entity == null || string.IsNullOrEmpty(entity.RFID))
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "不存在的RFID";
+            return response;
+
+        }
+        response.Code = StatusCode.Success;
+        response.Msg = "成功";
+        response.Data = new Dictionary<string, string>();
+        response.Data.Add("RFID", entity.RFID);
+        response.Data.Add("SKU", entity.SKU);
         response.Data.Add("合同单号", entity.PoCode);
         response.Data.Add("入库时间", entity.ReceiptTime.ToString());
         response.Data.Add("出库时间", entity.OrderTime.ToString());

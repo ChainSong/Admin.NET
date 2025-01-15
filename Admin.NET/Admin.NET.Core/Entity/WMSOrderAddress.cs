@@ -43,7 +43,19 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? CompanyName { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? CompanyType { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? ShipType { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

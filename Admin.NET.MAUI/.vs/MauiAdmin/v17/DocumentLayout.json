@@ -3,8 +3,46 @@
   "WorkspaceRootPath": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\auth\\pages\\signinpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2373D6B1-B6BC-4118-B7BB-378A457CB51C}|Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui2c\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2373D6B1-B6BC-4118-B7BB-378A457CB51C}|Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj|solutionrelative:admin.net.maui2c\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\pages\\gamespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\pages\\gamespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\auth\\pages\\signinpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\auth\\pages\\signinpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appapis\\baseapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appapis\\baseapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\pages\\gamespageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\pages\\gamespageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\packs\\Microsoft.Android.Sdk.Windows\\34.0.52\\tools\\Xamarin.Android.EmbeddedResource.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\auth\\pages\\signuppageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\auth\\pages\\signuppageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appapis\\appauthapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appapis\\appauthapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\landing\\services\\landingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,7 +65,7 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\androidclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\androidclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\androidclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -39,28 +77,12 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appmessages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\pages\\gamespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\pages\\gamespage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\gamesextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\gamesextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\pages\\gamespageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\pages\\gamespageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\games\\pages\\gamespage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\games\\pages\\gamespage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appapis\\baseapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appapis\\baseapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appapis\\appauthapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appapis\\appauthapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\pages\\homepageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -92,7 +114,7 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\messaging\\pages\\messagingpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\home\\services\\impls\\newsfeedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\services\\impls\\newsfeedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\services\\impls\\newsfeedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -100,12 +122,8 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\services\\inewsfeedservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\home\\models\\sysmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\models\\sysmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\models\\sysmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\auth\\pages\\signuppageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\auth\\pages\\signuppageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\auth\\pages\\forgotpasswordpageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -116,15 +134,15 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\auth\\authextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\home\\models\\homeitemtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\models\\homeitemtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\models\\homeitemtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\home\\models\\newsfeedmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\models\\newsfeedmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\models\\newsfeedmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\features\\home\\utils\\homeitemtypehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\home\\utils\\homeitemtypehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\home\\utils\\homeitemtypehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -154,10 +172,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\appapis\\receiptapi.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -221,10 +235,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\features\\profile\\pages\\notificationspageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\features\\profile\\pages\\notificationspageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2373D6B1-B6BC-4118-B7BB-378A457CB51C}|Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui2c\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2373D6B1-B6BC-4118-B7BB-378A457CB51C}|Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj|solutionrelative:admin.net.maui2c\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2373D6B1-B6BC-4118-B7BB-378A457CB51C}|Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui2c\\platforms\\windows\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -1042,10 +1052,6 @@
       "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\utils\\asyncnetworkhttpclientnotoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\obj\\Debug\\net8.0-windows10.0.19041.0\\win10-x64\\Platforms\\Windows\\App.g.i.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Admin.NET.MAUI\\obj\\Debug\\net8.0-windows10.0.19041.0\\win10-x64\\Platforms\\Windows\\App.g.i.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -1072,7 +1078,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 34,
           "Children": [
             {
               "$type": "Bookmark",
@@ -1080,162 +1086,190 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Bookmark",
               "Name": "ST:0:0:{228e1580-0ef9-329a-bf07-81ebc3dcbf7e}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:131:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+              "Name": "ST:139:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:140:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:141:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:137:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:155:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:156:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:157:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:154:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:153:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:152:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:151:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:150:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:149:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:148:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:144:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:143:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:142:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:158:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:159:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "AndroidClass.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AndroidClass.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AndroidClass.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AndroidClass.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\AndroidClass.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T09:10:57.632Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "AppMessages.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppMessages.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppMessages.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppMessages.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\AppMessages.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAAfAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-07T04:04:47.531Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 2,
               "Title": "GamesPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml.cs",
               "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml.cs",
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAeAAAA",
+              "ViewState": "AQIAABIAAAAAAAAAAAAIwB4AAABEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-12T06:58:09.183Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "MauiProgram.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MauiProgram.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\MauiProgram.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MauiProgram.cs",
+              "RelativeToolTip": "Admin.NET.MAUI2C\\MauiProgram.cs",
+              "ViewState": "AQIAAAIAAAAAAAAAAAAjwA8AAAARAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-20T05:26:36.021Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "SignInPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
               "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
-              "ViewState": "AQIAAAoAAAAAAAAAAAAjwBcAAAAIAAAA",
+              "ViewState": "AQIAABUAAAAAAAAAAAAywCcAAAAoAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-13T07:51:05.843Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "LandingService.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
-              "ViewState": "AQIAAAcAAAAAAAAAAADwvxQAAAAqAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T05:58:29.797Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Usings.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Usings.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Usings.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Usings.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\Usings.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAADwvwcAAAAiAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-12T08:31:56.62Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "MauiProgram.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MauiProgram.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\MauiProgram.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MauiProgram.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\MauiProgram.cs",
-              "ViewState": "AQIAACEAAAAAAAAAAAAAAEkAAABFAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-20T06:24:18.464Z",
+              "DocumentIndex": 0,
+              "Title": "Microsoft.Maui.Resizetizer.After.targets",
+              "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets",
+              "ToolTip": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\microsoft.maui.resizetizer\\8.0.7\\buildTransitive\\Microsoft.Maui.Resizetizer.After.targets",
+              "ViewState": "AQIAAF4CAAAAAAAAAAAewG4CAAAZAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2024-12-16T06:29:39.736Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "MainPage.xaml.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MainPage.xaml.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\MainPage.xaml.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MainPage.xaml.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\MainPage.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "BaseApi.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\BaseApi.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\BaseApi.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\BaseApi.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\AppApis\\BaseApi.cs",
+              "ViewState": "AQIAAAYAAAAAAAAAAADwvxYAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-26T03:42:15.761Z",
+              "WhenOpened": "2024-10-14T09:45:18.314Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "AppShell.xaml.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppShell.xaml.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppShell.xaml.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppShell.xaml.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\AppShell.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAiAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-14T08:56:31.641Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "GamesExtensions.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-12T06:57:55.841Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "AppRoutes.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppRoutes.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppRoutes.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppRoutes.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\AppRoutes.cs",
-              "ViewState": "AQIAAAIAAAAAAAAAAADwvw4AAAAgAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-14T08:53:52.54Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
               "Title": "GamesPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPageViewModel.cs",
@@ -1248,33 +1282,56 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "GamesPage.xaml",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
-              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAOAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-10-12T06:57:57.326Z",
+              "DocumentIndex": 6,
+              "Title": "Xamarin.Android.EmbeddedResource.targets",
+              "DocumentMoniker": "C:\\Program Files\\dotnet\\packs\\Microsoft.Android.Sdk.Windows\\34.0.52\\tools\\Xamarin.Android.EmbeddedResource.targets",
+              "ToolTip": "C:\\Program Files\\dotnet\\packs\\Microsoft.Android.Sdk.Windows\\34.0.52\\tools\\Xamarin.Android.EmbeddedResource.targets",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAMwCYAAAAEAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2024-12-16T06:28:26.005Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "BaseApi.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\BaseApi.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\BaseApi.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\BaseApi.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\AppApis\\BaseApi.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAADwvw4AAAAFAAAA",
+              "DocumentIndex": 8,
+              "Title": "AsyncNetworkHttpClient.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "ViewState": "AQIAAJMAAAAAAAAAAAAAAIoAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-14T09:45:18.314Z",
+              "WhenOpened": "2024-10-13T12:26:38.842Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 12,
+              "Title": "Usings.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Usings.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Usings.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Usings.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Usings.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwcAAAAiAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-12T08:31:56.62Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "App.xaml",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\App.xaml",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\App.xaml",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\App.xaml",
+              "RelativeToolTip": "Admin.NET.MAUI\\App.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwYAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-10-17T07:00:52.101Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "AppAuthApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\AppAuthApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\AppAuthApi.cs",
@@ -1282,12 +1339,131 @@
               "RelativeToolTip": "Admin.NET.MAUI\\AppApis\\AppAuthApi.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwoAAAA8AAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-05T05:09:45.035Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-05T05:09:45.035Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AndroidClass.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AndroidClass.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AndroidClass.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AndroidClass.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\AndroidClass.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-03T09:10:57.632Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "AppMessages.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppMessages.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppMessages.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppMessages.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\AppMessages.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-07T04:04:47.531Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "SignUpPageViewModel.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-17T06:58:06.803Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "LandingService.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Landing\\Services\\LandingService.cs",
+              "ViewState": "AQIAAAcAAAAAAAAAAADwvxQAAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-03T05:58:29.797Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "MauiProgram.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MauiProgram.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\MauiProgram.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MauiProgram.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\MauiProgram.cs",
+              "ViewState": "AQIAACEAAAAAAAAAAAAAAEkAAABFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-20T06:24:18.464Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MainPage.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MainPage.xaml.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\MainPage.xaml.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MainPage.xaml.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\MainPage.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-26T03:42:15.761Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 15,
+              "Title": "AppShell.xaml.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppShell.xaml.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppShell.xaml.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppShell.xaml.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\AppShell.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAiAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-14T08:56:31.641Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "GamesExtensions.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Games\\GamesExtensions.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-12T06:57:55.841Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AppRoutes.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppRoutes.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppRoutes.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppRoutes.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\AppRoutes.cs",
+              "ViewState": "AQIAAAIAAAAAAAAAAADwvw4AAAAgAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-14T08:53:52.54Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "GamesPage.xaml",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
+              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Games\\Pages\\GamesPage.xaml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2024-10-12T06:57:57.326Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
               "Title": "HomePageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\HomePageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\HomePageViewModel.cs",
@@ -1295,12 +1471,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Pages\\HomePageViewModel.cs",
               "ViewState": "AQIAAIsBAAAAAAAAAAAlwJkBAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-26T09:54:45.86Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-26T09:54:45.86Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 27,
               "Title": "MessagingPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPage.xaml",
@@ -1308,12 +1483,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPage.xaml",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAiAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-10-12T06:35:59.38Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-12T06:35:59.38Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 22,
               "Title": "MessagingPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPage.xaml.cs",
@@ -1326,7 +1500,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 25,
               "Title": "InboundWorkFlowConst.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET\\Admin.NET.Application\\Const\\InboundWorkFlowConst.cs",
               "RelativeDocumentMoniker": "..\\Admin.NET\\Admin.NET.Application\\Const\\InboundWorkFlowConst.cs",
@@ -1334,12 +1508,11 @@
               "RelativeToolTip": "..\\Admin.NET\\Admin.NET.Application\\Const\\InboundWorkFlowConst.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:59:00.645Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:59:00.645Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 24,
               "Title": "OutboundWorkFlowConst.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET\\Admin.NET.Application\\Const\\OutboundWorkFlowConst.cs",
               "RelativeDocumentMoniker": "..\\Admin.NET\\Admin.NET.Application\\Const\\OutboundWorkFlowConst.cs",
@@ -1347,23 +1520,21 @@
               "RelativeToolTip": "..\\Admin.NET\\Admin.NET.Application\\Const\\OutboundWorkFlowConst.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:59:02.477Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:59:02.477Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 26,
               "Title": "Microsoft.Android.Sdk.Aot.targets",
               "DocumentMoniker": "C:\\Program Files\\dotnet\\packs\\Microsoft.Android.Sdk.Windows\\34.0.52\\targets\\Microsoft.Android.Sdk.Aot.targets",
               "ToolTip": "C:\\Program Files\\dotnet\\packs\\Microsoft.Android.Sdk.Windows\\34.0.52\\targets\\Microsoft.Android.Sdk.Aot.targets",
               "ViewState": "AQIAAFwAAAAAAAAAAAAewGYAAAAQAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2024-12-03T06:46:51.451Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T06:46:51.451Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 23,
               "Title": "applicationhost.config",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\.vs\\MauiAdmin\\config\\applicationhost.config",
               "RelativeDocumentMoniker": ".vs\\MauiAdmin\\config\\applicationhost.config",
@@ -1371,12 +1542,11 @@
               "RelativeToolTip": ".vs\\MauiAdmin\\config\\applicationhost.config",
               "ViewState": "AQIAABIAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2024-12-03T08:59:11.142Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:59:11.142Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 28,
               "Title": "MessagingPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Messaging\\Pages\\MessagingPageViewModel.cs",
@@ -1389,7 +1559,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 29,
               "Title": "NewsFeedService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Services\\Impls\\NewsFeedService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Services\\Impls\\NewsFeedService.cs",
@@ -1397,12 +1567,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Services\\Impls\\NewsFeedService.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:51:33.805Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:51:33.805Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 31,
               "Title": "SysMessage.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Models\\SysMessage.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Models\\SysMessage.cs",
@@ -1410,12 +1579,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Models\\SysMessage.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:48:54.254Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:48:54.254Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 30,
               "Title": "INewsFeedService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Services\\INewsFeedService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Services\\INewsFeedService.cs",
@@ -1423,25 +1591,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Services\\INewsFeedService.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T07:11:37.973Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T07:11:37.973Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "SignUpPageViewModel.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-17T06:58:06.803Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 32,
               "Title": "ForgotPasswordPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\ForgotPasswordPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\ForgotPasswordPageViewModel.cs",
@@ -1449,12 +1603,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Auth\\Pages\\ForgotPasswordPageViewModel.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-17T06:57:58.508Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-17T06:57:58.508Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 33,
               "Title": "AuthExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\AuthExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\AuthExtensions.cs",
@@ -1462,12 +1615,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Auth\\AuthExtensions.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-17T06:58:08.816Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-17T06:58:08.816Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 34,
               "Title": "HomeItemType.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Models\\HomeItemType.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Models\\HomeItemType.cs",
@@ -1475,12 +1627,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Models\\HomeItemType.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:48:55.323Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:48:55.323Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 35,
               "Title": "NewsFeedModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Models\\NewsFeedModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Models\\NewsFeedModel.cs",
@@ -1488,12 +1639,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Models\\NewsFeedModel.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:48:54.832Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:48:54.832Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 36,
               "Title": "HomeItemTypeHelper.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Utils\\HomeItemTypeHelper.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Utils\\HomeItemTypeHelper.cs",
@@ -1501,12 +1651,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\Utils\\HomeItemTypeHelper.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-03T08:48:44.655Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-03T08:48:44.655Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 38,
               "Title": "Admin.NET.Entity.csproj",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.Entity\\Admin.NET.Entity.csproj",
               "RelativeDocumentMoniker": "Admin.NET.Entity\\Admin.NET.Entity.csproj",
@@ -1519,7 +1668,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 40,
               "Title": "HomePage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\HomePage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\HomePage.xaml.cs",
@@ -1531,7 +1680,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 37,
               "Title": "HomeExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\HomeExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\HomeExtensions.cs",
@@ -1539,12 +1688,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Home\\HomeExtensions.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-12T07:05:17.195Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-12T07:05:17.195Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 39,
               "Title": "StoryView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\StoryView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\StoryView.xaml",
@@ -1556,7 +1704,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 41,
               "Title": "CoupleHeaderView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml",
@@ -1568,7 +1716,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 42,
               "Title": "launchSettings.json",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Properties\\launchSettings.json",
@@ -1580,7 +1728,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 44,
               "Title": "ReceiptApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\ReceiptApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\ReceiptApi.cs",
@@ -1592,19 +1740,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
-              "Title": "App.xaml",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\App.xaml",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\App.xaml",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\App.xaml",
-              "RelativeToolTip": "Admin.NET.MAUI\\App.xaml",
-              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-10-17T07:00:52.101Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 43,
               "Title": "AppShell.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppShell.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppShell.xaml",
@@ -1616,7 +1752,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 45,
               "Title": "HomePage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\HomePage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\HomePage.xaml",
@@ -1628,7 +1764,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 46,
               "Title": "DatePickerEntry.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\Views\\DatePickerEntry.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\Views\\DatePickerEntry.xaml.cs",
@@ -1640,7 +1776,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 47,
               "Title": "Styles.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\Styles.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\Styles.cs",
@@ -1652,7 +1788,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 48,
               "Title": "FontNames.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\FontNames.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\FontNames.cs",
@@ -1664,7 +1800,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 49,
               "Title": "Dimens.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\Dimens.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\Dimens.cs",
@@ -1676,7 +1812,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 50,
               "Title": "AppConverters.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\AppConverters.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\AppConverters.cs",
@@ -1688,7 +1824,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 51,
               "Title": "AppColors.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\AppColors.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\AppColors.cs",
@@ -1700,7 +1836,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 52,
               "Title": "MainPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\MainPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\MainPage.xaml",
@@ -1712,7 +1848,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 53,
               "Title": "Features_Profile_Pages_NotificationsPage.xaml.sg.cs [\u5DF2\u751F\u6210]",
               "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\AppData\\Local\\Temp\\VSGeneratedDocuments\\07d38860-0fd8-d312-5d5a-3f76bc075246\\Features_Profile_Pages_NotificationsPage.xaml.sg.cs",
               "ToolTip": "Features_Profile_Pages_NotificationsPage.xaml.sg.cs [\u7531 Microsoft.Maui.Controls.SourceGen.CodeBehindGenerator \u751F\u6210]",
@@ -1723,7 +1859,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 54,
               "Title": "DatePickerEntry.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\UI\\Views\\DatePickerEntry.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\UI\\Views\\DatePickerEntry.xaml",
@@ -1735,7 +1871,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 55,
               "Title": "colors.xml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Platforms\\Android\\Resources\\values\\colors.xml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Platforms\\Android\\Resources\\values\\colors.xml",
@@ -1747,7 +1883,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 56,
               "Title": "MainApplication.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Platforms\\Android\\MainApplication.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Platforms\\Android\\MainApplication.cs",
@@ -1759,7 +1895,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 57,
               "Title": "MainActivity.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Platforms\\Android\\MainActivity.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Platforms\\Android\\MainActivity.cs",
@@ -1771,7 +1907,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 58,
               "Title": "AndroidManifest.xml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Platforms\\Android\\AndroidManifest.xml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Platforms\\Android\\AndroidManifest.xml",
@@ -1782,7 +1918,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 59,
               "Title": "NotificationsPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPageViewModel.cs",
@@ -1794,7 +1930,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 62,
               "Title": "AppSettingsService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Shared\\Impls\\AppSettingsService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Shared\\Impls\\AppSettingsService.cs",
@@ -1806,7 +1942,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 61,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Windows\\App.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Windows\\App.xaml.cs",
@@ -1818,19 +1954,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
-              "Title": "MauiProgram.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MauiProgram.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\MauiProgram.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MauiProgram.cs",
-              "RelativeToolTip": "Admin.NET.MAUI2C\\MauiProgram.cs",
-              "ViewState": "AQIAAF4AAAAAAAAAAAAIwFoAAABIAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-20T05:26:36.021Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 64,
               "Title": "MainActivity.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Android\\MainActivity.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Android\\MainActivity.cs",
@@ -1842,7 +1966,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 63,
               "Title": "colors.xml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Android\\Resources\\values\\colors.xml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Android\\Resources\\values\\colors.xml",
@@ -1854,7 +1978,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 60,
               "Title": "App.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Windows\\App.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Windows\\App.xaml",
@@ -1866,7 +1990,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 65,
               "Title": "MainApplication.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Android\\MainApplication.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Android\\MainApplication.cs",
@@ -1878,7 +2002,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 66,
               "Title": "AppDelegate.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\iOS\\AppDelegate.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\iOS\\AppDelegate.cs",
@@ -1890,7 +2014,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 67,
               "Title": "Info.plist",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\iOS\\Info.plist",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\iOS\\Info.plist",
@@ -1901,7 +2025,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 69,
               "Title": "Info.plist",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Info.plist",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Info.plist",
@@ -1912,7 +2036,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 70,
               "Title": "Entitlements.plist",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Entitlements.plist",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Entitlements.plist",
@@ -1923,7 +2047,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 72,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Program.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\Program.cs",
@@ -1935,7 +2059,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 73,
               "Title": "app.manifest",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Windows\\app.manifest",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Windows\\app.manifest",
@@ -1947,7 +2071,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 68,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\iOS\\Program.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\iOS\\Program.cs",
@@ -1959,7 +2083,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 74,
               "Title": "Package.appxmanifest",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Windows\\Package.appxmanifest",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Windows\\Package.appxmanifest",
@@ -1970,7 +2094,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 71,
               "Title": "AppDelegate.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\AppDelegate.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\MacCatalyst\\AppDelegate.cs",
@@ -1982,7 +2106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 75,
               "Title": "tizen-manifest.xml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Tizen\\tizen-manifest.xml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Tizen\\tizen-manifest.xml",
@@ -1994,7 +2118,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 76,
               "Title": "Main.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Platforms\\Tizen\\Main.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Platforms\\Tizen\\Main.cs",
@@ -2006,7 +2130,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 77,
               "Title": "AppShell.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppShell.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppShell.xaml.cs",
@@ -2018,7 +2142,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 78,
               "Title": "AppShell.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppShell.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppShell.xaml",
@@ -2030,7 +2154,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 76,
+              "DocumentIndex": 79,
               "Title": "AppRoutes.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppRoutes.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppRoutes.cs",
@@ -2042,7 +2166,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 77,
+              "DocumentIndex": 80,
               "Title": "AppMessages.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppMessages.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppMessages.cs",
@@ -2054,7 +2178,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 78,
+              "DocumentIndex": 81,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\App.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\App.xaml.cs",
@@ -2066,7 +2190,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 79,
+              "DocumentIndex": 82,
               "Title": "App.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\App.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\App.xaml",
@@ -2078,7 +2202,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 80,
+              "DocumentIndex": 83,
               "Title": "MyWallHeaderView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml.cs",
@@ -2090,7 +2214,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 81,
+              "DocumentIndex": 84,
               "Title": "MyWallHeaderView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml",
@@ -2102,7 +2226,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 82,
+              "DocumentIndex": 85,
               "Title": "Usings.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Usings.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Usings.cs",
@@ -2114,7 +2238,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 83,
+              "DocumentIndex": 86,
               "Title": "MainPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MainPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\MainPage.xaml",
@@ -2126,7 +2250,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 85,
+              "DocumentIndex": 88,
               "Title": "HomePage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePage.xaml.cs",
@@ -2138,7 +2262,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 84,
+              "DocumentIndex": 87,
               "Title": "ProfilePageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePageViewModel.cs",
@@ -2150,7 +2274,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 86,
+              "DocumentIndex": 89,
               "Title": "CommunityToolkit.Mvvm.WindowsSdk.targets",
               "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\communitytoolkit.mvvm\\8.3.2\\buildTransitive\\CommunityToolkit.Mvvm.WindowsSdk.targets",
               "ToolTip": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\.nuget\\packages\\communitytoolkit.mvvm\\8.3.2\\buildTransitive\\CommunityToolkit.Mvvm.WindowsSdk.targets",
@@ -2160,7 +2284,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 89,
+              "DocumentIndex": 92,
               "Title": "MessagingPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPage.xaml.cs",
@@ -2172,7 +2296,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 87,
+              "DocumentIndex": 90,
               "Title": "ForgotPasswordFormModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Models\\ForgotPasswordFormModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Models\\ForgotPasswordFormModel.cs",
@@ -2184,7 +2308,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 88,
+              "DocumentIndex": 91,
               "Title": "HomePageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePageViewModel.cs",
@@ -2196,7 +2320,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 90,
+              "DocumentIndex": 93,
               "Title": "BaseFormModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseFormModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseFormModel.cs",
@@ -2208,7 +2332,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 91,
+              "DocumentIndex": 94,
               "Title": "BaseViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseViewModel.cs",
@@ -2220,7 +2344,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 92,
+              "DocumentIndex": 95,
               "Title": "Admin.NET.MAUI2C.csproj",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Admin.NET.MAUI2C.csproj",
@@ -2233,7 +2357,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 94,
+              "DocumentIndex": 97,
               "Title": "GamesPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPage.xaml.cs",
@@ -2245,7 +2369,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 95,
+              "DocumentIndex": 98,
               "Title": "PinCodeEntry.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\PinCodeEntry.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\PinCodeEntry.xaml.cs",
@@ -2257,7 +2381,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 93,
+              "DocumentIndex": 96,
               "Title": "NavigationAwareBaseViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Navigation\\NavigationAwareBaseViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Navigation\\NavigationAwareBaseViewModel.cs",
@@ -2269,7 +2393,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 96,
+              "DocumentIndex": 99,
               "Title": "CoupleHeaderView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml",
@@ -2281,7 +2405,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 97,
+              "DocumentIndex": 100,
               "Title": "SignUpFormModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Models\\SignUpFormModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Models\\SignUpFormModel.cs",
@@ -2293,7 +2417,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 98,
+              "DocumentIndex": 101,
               "Title": "SignInPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPageViewModel.cs",
@@ -2305,7 +2429,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 99,
+              "DocumentIndex": 102,
               "Title": "MyPartnerIdPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPageViewModel.cs",
@@ -2317,7 +2441,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 100,
+              "DocumentIndex": 103,
               "Title": "SignInFormModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Models\\SignInFormModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Models\\SignInFormModel.cs",
@@ -2329,7 +2453,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 101,
+              "DocumentIndex": 104,
               "Title": "NotificationsPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPage.xaml",
@@ -2341,7 +2465,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 102,
+              "DocumentIndex": 105,
               "Title": "RoundedEntry.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\RoundedEntry.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\RoundedEntry.xaml",
@@ -2353,7 +2477,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 103,
+              "DocumentIndex": 106,
               "Title": "SignInPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPage.xaml",
@@ -2365,7 +2489,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 104,
+              "DocumentIndex": 107,
               "Title": "HomePage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\HomePage.xaml",
@@ -2377,7 +2501,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 105,
+              "DocumentIndex": 108,
               "Title": "CoupleMilestoneCollapsedView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneCollapsedView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneCollapsedView.xaml",
@@ -2389,7 +2513,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 106,
+              "DocumentIndex": 109,
               "Title": "AsyncNetworkHttpClientNoToken.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\AsyncNetworkHttpClientNoToken.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\AsyncNetworkHttpClientNoToken.cs",
@@ -2401,7 +2525,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 107,
+              "DocumentIndex": 110,
               "Title": "AppConverters.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\AppConverters.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\AppConverters.cs",
@@ -2413,7 +2537,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 108,
+              "DocumentIndex": 111,
               "Title": "SettingsAndHelpPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPageViewModel.cs",
@@ -2425,7 +2549,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 109,
+              "DocumentIndex": 112,
               "Title": "WalkthroughPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPageViewModel.cs",
@@ -2437,7 +2561,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 110,
+              "DocumentIndex": 113,
               "Title": "PairingAcceptedPopupViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopupViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopupViewModel.cs",
@@ -2449,7 +2573,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 111,
+              "DocumentIndex": 114,
               "Title": "PartnerFoundPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPageViewModel.cs",
@@ -2461,7 +2585,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 112,
+              "DocumentIndex": 115,
               "Title": "GptApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\GptApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\GptApi.cs",
@@ -2473,7 +2597,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 113,
+              "DocumentIndex": 116,
               "Title": "AppNavigator.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Navigation\\AppNavigator.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Navigation\\AppNavigator.cs",
@@ -2485,7 +2609,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 114,
+              "DocumentIndex": 117,
               "Title": "MessagingPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPageViewModel.cs",
@@ -2497,7 +2621,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 115,
+              "DocumentIndex": 118,
               "Title": "NotificationsPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPageViewModel.cs",
@@ -2509,7 +2633,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 117,
+              "DocumentIndex": 120,
               "Title": "NewsFeedService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Services\\Impls\\NewsFeedService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Services\\Impls\\NewsFeedService.cs",
@@ -2521,7 +2645,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 116,
+              "DocumentIndex": 119,
               "Title": "AsyncNetworkHttpClient.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\AsyncNetworkHttpClient.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\AsyncNetworkHttpClient.cs",
@@ -2533,7 +2657,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 118,
+              "DocumentIndex": 121,
               "Title": "StoryView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\StoryView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\StoryView.xaml",
@@ -2545,7 +2669,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 119,
+              "DocumentIndex": 122,
               "Title": "PartnerFoundPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPage.xaml",
@@ -2557,7 +2681,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 120,
+              "DocumentIndex": 123,
               "Title": "MyPairingIdPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPageViewModel.cs",
@@ -2569,7 +2693,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 121,
+              "DocumentIndex": 124,
               "Title": "SettingsPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPageViewModel.cs",
@@ -2581,7 +2705,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 122,
+              "DocumentIndex": 125,
               "Title": "PairingAcceptedPopup.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopup.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopup.xaml.cs",
@@ -2593,7 +2717,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 123,
+              "DocumentIndex": 126,
               "Title": "PartnerFoundPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PartnerFoundPage.xaml.cs",
@@ -2605,7 +2729,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 124,
+              "DocumentIndex": 127,
               "Title": "PairPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPage.xaml.cs",
@@ -2617,7 +2741,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 125,
+              "DocumentIndex": 128,
               "Title": "MyPartnerIdPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPage.xaml.cs",
@@ -2629,7 +2753,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 126,
+              "DocumentIndex": 129,
               "Title": "MyPairingIdPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPage.xaml.cs",
@@ -2641,7 +2765,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 127,
+              "DocumentIndex": 130,
               "Title": "PlayerInfoManager.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\PlayerInfoManager.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\PlayerInfoManager.cs",
@@ -2653,7 +2777,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 128,
+              "DocumentIndex": 131,
               "Title": "NetworkMessage.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\NetworkMessage.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\NetworkMessage.cs",
@@ -2665,7 +2789,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 129,
+              "DocumentIndex": 132,
               "Title": "MessagingExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\MessagingExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\MessagingExtensions.cs",
@@ -2677,7 +2801,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 130,
+              "DocumentIndex": 133,
               "Title": "ASyncNetworkClient.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\ASyncNetworkClient.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\ASyncNetworkClient.cs",
@@ -2689,7 +2813,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 131,
+              "DocumentIndex": 134,
               "Title": "WalkthroughPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPage.xaml.cs",
@@ -2701,7 +2825,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 132,
+              "DocumentIndex": 135,
               "Title": "SignInPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignInPage.xaml.cs",
@@ -2713,7 +2837,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 133,
+              "DocumentIndex": 136,
               "Title": "ForgotPasswordPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPageViewModel.cs",
@@ -2725,7 +2849,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 134,
+              "DocumentIndex": 137,
               "Title": "ForgotPasswordPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml.cs",
@@ -2737,7 +2861,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 135,
+              "DocumentIndex": 138,
               "Title": "SharedExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Shared\\SharedExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Shared\\SharedExtensions.cs",
@@ -2749,7 +2873,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 136,
+              "DocumentIndex": 139,
               "Title": "IAppSettingsService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Shared\\IAppSettingsService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Shared\\IAppSettingsService.cs",
@@ -2761,7 +2885,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 137,
+              "DocumentIndex": 140,
               "Title": "ProfileExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\ProfileExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\ProfileExtensions.cs",
@@ -2773,7 +2897,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 138,
+              "DocumentIndex": 141,
               "Title": "IProfileService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Services\\IProfileService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Services\\IProfileService.cs",
@@ -2785,7 +2909,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 139,
+              "DocumentIndex": 142,
               "Title": "INotificationService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Services\\INotificationService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Services\\INotificationService.cs",
@@ -2797,7 +2921,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 140,
+              "DocumentIndex": 143,
               "Title": "ProfileService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Services\\Impls\\ProfileService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Services\\Impls\\ProfileService.cs",
@@ -2809,7 +2933,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 141,
+              "DocumentIndex": 144,
               "Title": "NotificationService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Services\\Impls\\NotificationService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Services\\Impls\\NotificationService.cs",
@@ -2821,7 +2945,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 142,
+              "DocumentIndex": 145,
               "Title": "SettingsPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPage.xaml.cs",
@@ -2833,7 +2957,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 143,
+              "DocumentIndex": 146,
               "Title": "SettingsPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsPage.xaml",
@@ -2845,7 +2969,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 144,
+              "DocumentIndex": 147,
               "Title": "SettingsAndHelpPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml.cs",
@@ -2857,7 +2981,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 145,
+              "DocumentIndex": 148,
               "Title": "SettingsAndHelpPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml",
@@ -2869,7 +2993,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 146,
+              "DocumentIndex": 149,
               "Title": "ProfilePage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePage.xaml.cs",
@@ -2881,7 +3005,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 147,
+              "DocumentIndex": 150,
               "Title": "ProfilePage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\ProfilePage.xaml",
@@ -2893,7 +3017,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 148,
+              "DocumentIndex": 151,
               "Title": "NotificationsPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Pages\\NotificationsPage.xaml.cs",
@@ -2905,7 +3029,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 149,
+              "DocumentIndex": 152,
               "Title": "NotificationModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Profile\\Models\\NotificationModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Profile\\Models\\NotificationModel.cs",
@@ -2917,7 +3041,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 150,
+              "DocumentIndex": 153,
               "Title": "PairingExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\PairingExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\PairingExtensions.cs",
@@ -2929,7 +3053,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 151,
+              "DocumentIndex": 154,
               "Title": "IPairingService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Services\\IPairingService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Services\\IPairingService.cs",
@@ -2941,7 +3065,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 152,
+              "DocumentIndex": 155,
               "Title": "PairingService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Services\\Impls\\PairingService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Services\\Impls\\PairingService.cs",
@@ -2953,7 +3077,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 153,
+              "DocumentIndex": 156,
               "Title": "PairingRejectedPopupViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopupViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopupViewModel.cs",
@@ -2965,7 +3089,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 154,
+              "DocumentIndex": 157,
               "Title": "PairingRejectedPopup.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopup.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopup.xaml.cs",
@@ -2977,7 +3101,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 155,
+              "DocumentIndex": 158,
               "Title": "PairingRejectedPopup.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopup.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingRejectedPopup.xaml",
@@ -2989,7 +3113,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 156,
+              "DocumentIndex": 159,
               "Title": "PairingAcceptedPopup.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopup.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Popups\\PairingAcceptedPopup.xaml",
@@ -3001,7 +3125,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 157,
+              "DocumentIndex": 160,
               "Title": "PairPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPageViewModel.cs",
@@ -3013,7 +3137,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 158,
+              "DocumentIndex": 161,
               "Title": "PairPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\PairPage.xaml",
@@ -3025,7 +3149,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 159,
+              "DocumentIndex": 162,
               "Title": "MyPartnerIdPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPartnerIdPage.xaml",
@@ -3037,7 +3161,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 160,
+              "DocumentIndex": 163,
               "Title": "MyPairingIdPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Pages\\MyPairingIdPage.xaml",
@@ -3049,7 +3173,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 161,
+              "DocumentIndex": 164,
               "Title": "PartnerModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Pairing\\Models\\PartnerModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Pairing\\Models\\PartnerModel.cs",
@@ -3061,7 +3185,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 162,
+              "DocumentIndex": 165,
               "Title": "MessagingPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\MessagingPage.xaml",
@@ -3073,7 +3197,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 163,
+              "DocumentIndex": 166,
               "Title": "HTMLPage1.html",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\HTMLPage1.html",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\Pages\\HTMLPage1.html",
@@ -3085,7 +3209,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 164,
+              "DocumentIndex": 167,
               "Title": "MessageModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Messaging\\Models\\MessageModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Messaging\\Models\\MessageModel.cs",
@@ -3097,7 +3221,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 165,
+              "DocumentIndex": 168,
               "Title": "LandingExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\LandingExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\LandingExtensions.cs",
@@ -3109,7 +3233,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 166,
+              "DocumentIndex": 169,
               "Title": "LandingService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Services\\LandingService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Services\\LandingService.cs",
@@ -3121,7 +3245,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 167,
+              "DocumentIndex": 170,
               "Title": "ILandingService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Services\\ILandingService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Services\\ILandingService.cs",
@@ -3133,7 +3257,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 168,
+              "DocumentIndex": 171,
               "Title": "WalkthroughPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\WalkthroughPage.xaml",
@@ -3145,7 +3269,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 169,
+              "DocumentIndex": 172,
               "Title": "LandingPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPageViewModel.cs",
@@ -3157,7 +3281,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 170,
+              "DocumentIndex": 173,
               "Title": "LandingPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPage.xaml.cs",
@@ -3169,7 +3293,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 171,
+              "DocumentIndex": 174,
               "Title": "LandingPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Pages\\LandingPage.xaml",
@@ -3181,7 +3305,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 172,
+              "DocumentIndex": 175,
               "Title": "WalkthroughItemModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Landing\\Models\\WalkthroughItemModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Landing\\Models\\WalkthroughItemModel.cs",
@@ -3193,7 +3317,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 173,
+              "DocumentIndex": 176,
               "Title": "HomeExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\HomeExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\HomeExtensions.cs",
@@ -3205,7 +3329,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 174,
+              "DocumentIndex": 177,
               "Title": "HomeItemTypeHelper.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Utils\\HomeItemTypeHelper.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Utils\\HomeItemTypeHelper.cs",
@@ -3217,7 +3341,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 175,
+              "DocumentIndex": 178,
               "Title": "INewsFeedService.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Services\\INewsFeedService.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Services\\INewsFeedService.cs",
@@ -3229,7 +3353,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 176,
+              "DocumentIndex": 179,
               "Title": "StoryView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\StoryView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\StoryView.xaml.cs",
@@ -3241,7 +3365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 177,
+              "DocumentIndex": 180,
               "Title": "HomeItemTemplateSeclector.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\HomeItemTemplateSeclector.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\HomeItemTemplateSeclector.cs",
@@ -3253,7 +3377,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 178,
+              "DocumentIndex": 181,
               "Title": "CoupleMilestoneExpandedView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml.cs",
@@ -3265,7 +3389,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 179,
+              "DocumentIndex": 182,
               "Title": "CoupleMilestoneExpandedView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml",
@@ -3277,7 +3401,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 180,
+              "DocumentIndex": 183,
               "Title": "CoupleMilestoneCollapsedView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneCollapsedView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleMilestoneCollapsedView.xaml.cs",
@@ -3289,7 +3413,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 181,
+              "DocumentIndex": 184,
               "Title": "CoupleHeaderView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Pages\\Views\\CoupleHeaderView.xaml.cs",
@@ -3301,7 +3425,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 182,
+              "DocumentIndex": 185,
               "Title": "SysMessage.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Models\\SysMessage.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Models\\SysMessage.cs",
@@ -3313,7 +3437,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 183,
+              "DocumentIndex": 186,
               "Title": "NewsFeedModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Models\\NewsFeedModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Models\\NewsFeedModel.cs",
@@ -3325,7 +3449,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 184,
+              "DocumentIndex": 187,
               "Title": "HomeItemType.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Home\\Models\\HomeItemType.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Home\\Models\\HomeItemType.cs",
@@ -3337,7 +3461,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 185,
+              "DocumentIndex": 188,
               "Title": "GamesExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Games\\GamesExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Games\\GamesExtensions.cs",
@@ -3349,7 +3473,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 187,
+              "DocumentIndex": 190,
               "Title": "GamesPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPageViewModel.cs",
@@ -3361,7 +3485,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 186,
+              "DocumentIndex": 189,
               "Title": "GamesPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Games\\Pages\\GamesPage.xaml",
@@ -3373,7 +3497,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 189,
+              "DocumentIndex": 192,
               "Title": "SignUpPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPageViewModel.cs",
@@ -3385,7 +3509,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 190,
+              "DocumentIndex": 193,
               "Title": "SignUpPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPage.xaml.cs",
@@ -3397,7 +3521,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 191,
+              "DocumentIndex": 194,
               "Title": "SignUpPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\SignUpPage.xaml",
@@ -3409,7 +3533,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 188,
+              "DocumentIndex": 191,
               "Title": "AuthExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\AuthExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\AuthExtensions.cs",
@@ -3421,7 +3545,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 192,
+              "DocumentIndex": 195,
               "Title": "ForgotPasswordPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml",
@@ -3433,7 +3557,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 193,
+              "DocumentIndex": 196,
               "Title": "SocialAccountType.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Features\\Auth\\Models\\SocialAccountType.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Features\\Auth\\Models\\SocialAccountType.cs",
@@ -3445,7 +3569,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 194,
+              "DocumentIndex": 197,
               "Title": "SystemApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\SystemApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\SystemApi.cs",
@@ -3457,7 +3581,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 195,
+              "DocumentIndex": 198,
               "Title": "ReceiptApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\ReceiptApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\ReceiptApi.cs",
@@ -3469,7 +3593,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 196,
+              "DocumentIndex": 199,
               "Title": "ChartApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\ChartApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\ChartApi.cs",
@@ -3481,7 +3605,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 197,
+              "DocumentIndex": 200,
               "Title": "BaseApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\BaseApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\BaseApi.cs",
@@ -3493,7 +3617,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 198,
+              "DocumentIndex": 201,
               "Title": "AppAuthApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\AppApis\\AppAuthApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\AppApis\\AppAuthApi.cs",
@@ -3505,7 +3629,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 199,
+              "DocumentIndex": 202,
               "Title": "PasswordAttribute.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Attributes\\PasswordAttribute.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Attributes\\PasswordAttribute.cs",
@@ -3517,7 +3641,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 200,
+              "DocumentIndex": 203,
               "Title": "FieldCompareAttribute.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Attributes\\FieldCompareAttribute.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Attributes\\FieldCompareAttribute.cs",
@@ -3529,7 +3653,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 201,
+              "DocumentIndex": 204,
               "Title": "RatioValueConverter.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Converters\\RatioValueConverter.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Converters\\RatioValueConverter.cs",
@@ -3541,7 +3665,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 202,
+              "DocumentIndex": 205,
               "Title": "FirstItemValueConverter.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Converters\\FirstItemValueConverter.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Converters\\FirstItemValueConverter.cs",
@@ -3553,7 +3677,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 203,
+              "DocumentIndex": 206,
               "Title": "BoolToOpacityValueConverter.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Converters\\BoolToOpacityValueConverter.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Converters\\BoolToOpacityValueConverter.cs",
@@ -3565,7 +3689,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 204,
+              "DocumentIndex": 207,
               "Title": "AllTrueValueConverter.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Converters\\AllTrueValueConverter.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Converters\\AllTrueValueConverter.cs",
@@ -3577,7 +3701,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 205,
+              "DocumentIndex": 208,
               "Title": "EdgeInsetsExtension.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\MarkupExtensions\\EdgeInsetsExtension.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\MarkupExtensions\\EdgeInsetsExtension.cs",
@@ -3589,7 +3713,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 206,
+              "DocumentIndex": 209,
               "Title": "DeviceEdgeExtension.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\MarkupExtensions\\DeviceEdgeExtension.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\MarkupExtensions\\DeviceEdgeExtension.cs",
@@ -3601,7 +3725,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 207,
+              "DocumentIndex": 210,
               "Title": "ColorExtension.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\MarkupExtensions\\ColorExtension.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\MarkupExtensions\\ColorExtension.cs",
@@ -3613,7 +3737,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 210,
+              "DocumentIndex": 213,
               "Title": "SettingItemView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\SettingItemView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\SettingItemView.xaml.cs",
@@ -3625,7 +3749,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 209,
+              "DocumentIndex": 212,
               "Title": "AppColors.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\AppColors.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\AppColors.cs",
@@ -3637,7 +3761,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 208,
+              "DocumentIndex": 211,
               "Title": "AsyncNetworkClient.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\AsyncNetworkClient.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\AsyncNetworkClient.cs",
@@ -3649,7 +3773,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 211,
+              "DocumentIndex": 214,
               "Title": "SettingItemView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\SettingItemView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\SettingItemView.xaml",
@@ -3661,7 +3785,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 212,
+              "DocumentIndex": 215,
               "Title": "RoundedEntry.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\RoundedEntry.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\RoundedEntry.xaml.cs",
@@ -3673,7 +3797,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 213,
+              "DocumentIndex": 216,
               "Title": "DatePickerEntry.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\DatePickerEntry.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\DatePickerEntry.xaml.cs",
@@ -3685,7 +3809,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 214,
+              "DocumentIndex": 217,
               "Title": "DatePickerEntry.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\DatePickerEntry.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\DatePickerEntry.xaml",
@@ -3697,7 +3821,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 215,
+              "DocumentIndex": 218,
               "Title": "PinCodeEntry.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Views\\PinCodeEntry.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Views\\PinCodeEntry.xaml",
@@ -3709,7 +3833,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 216,
+              "DocumentIndex": 219,
               "Title": "Dimens.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Dimens.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Dimens.cs",
@@ -3721,7 +3845,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 217,
+              "DocumentIndex": 220,
               "Title": "FontNames.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\FontNames.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\FontNames.cs",
@@ -3733,7 +3857,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 218,
+              "DocumentIndex": 221,
               "Title": "Styles.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\UI\\Styles.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\UI\\Styles.cs",
@@ -3745,7 +3869,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 219,
+              "DocumentIndex": 222,
               "Title": "HttpHeadersFilterAttribute.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Filter\\HttpHeadersFilterAttribute.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Filter\\HttpHeadersFilterAttribute.cs",
@@ -3757,7 +3881,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 220,
+              "DocumentIndex": 223,
               "Title": "BasePopup.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Mvvm\\BasePopup.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Mvvm\\BasePopup.cs",
@@ -3769,7 +3893,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 221,
+              "DocumentIndex": 224,
               "Title": "BasePage.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Mvvm\\BasePage.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Mvvm\\BasePage.cs",
@@ -3781,7 +3905,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 222,
+              "DocumentIndex": 225,
               "Title": "BaseModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Mvvm\\BaseModel.cs",
@@ -3793,7 +3917,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 223,
+              "DocumentIndex": 226,
               "Title": "UriHelper.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Navigation\\UriHelper.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Navigation\\UriHelper.cs",
@@ -3805,7 +3929,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 224,
+              "DocumentIndex": 227,
               "Title": "IAppNavigator.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\Navigation\\IAppNavigator.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\Navigation\\IAppNavigator.cs",
@@ -3817,7 +3941,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 225,
+              "DocumentIndex": 228,
               "Title": "EnumExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\EnumExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\EnumExtensions.cs",
@@ -3829,7 +3953,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 226,
+              "DocumentIndex": 229,
               "Title": "RequestUrl.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\RequestUrl.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\RequestUrl.cs",
@@ -3841,7 +3965,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 227,
+              "DocumentIndex": 230,
               "Title": "TaskHelpers.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\Utils\\TaskHelpers.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\Utils\\TaskHelpers.cs",
@@ -3853,7 +3977,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 228,
+              "DocumentIndex": 231,
               "Title": "MainPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI2C\\MainPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI2C\\MainPage.xaml.cs",
@@ -3865,7 +3989,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 229,
+              "DocumentIndex": 232,
               "Title": "Admin.NET.Services.csproj",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.Services\\Admin.NET.Services.csproj",
               "RelativeDocumentMoniker": "Admin.NET.Services\\Admin.NET.Services.csproj",
@@ -3878,7 +4002,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 232,
+              "DocumentIndex": 235,
               "Title": "NotificationsPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPage.xaml",
@@ -3890,7 +4014,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 231,
+              "DocumentIndex": 234,
               "Title": "ProfilePage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePage.xaml",
@@ -3898,12 +4022,11 @@
               "RelativeToolTip": "Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePage.xaml",
               "ViewState": "AQIAAFoAAAAAAAAAAAAQwGwAAAAbAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-10-12T09:06:35.822Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-12T09:06:35.822Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 230,
+              "DocumentIndex": 233,
               "Title": "MauiAdmin.csproj",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\MauiAdmin\\MauiAdmin.csproj",
               "RelativeDocumentMoniker": "MauiAdmin\\MauiAdmin.csproj",
@@ -3916,7 +4039,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 234,
+              "DocumentIndex": 237,
               "Title": "ProfilePageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePageViewModel.cs",
@@ -3929,7 +4052,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 233,
+              "DocumentIndex": 236,
               "Title": "WalkthroughPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Landing\\Pages\\WalkthroughPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Landing\\Pages\\WalkthroughPage.xaml",
@@ -3941,7 +4064,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 235,
+              "DocumentIndex": 238,
               "Title": "ProfilePage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\ProfilePage.xaml.cs",
@@ -3953,7 +4076,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 236,
+              "DocumentIndex": 239,
               "Title": "SignInPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPage.xaml",
@@ -3965,7 +4088,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 237,
+              "DocumentIndex": 240,
               "Title": "SignUpPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPage.xaml.cs",
@@ -3977,7 +4100,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 238,
+              "DocumentIndex": 241,
               "Title": "SignInFormModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Models\\SignInFormModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Models\\SignInFormModel.cs",
@@ -3989,7 +4112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 239,
+              "DocumentIndex": 242,
               "Title": "SignInPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignInPage.xaml.cs",
@@ -4001,7 +4124,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 241,
+              "DocumentIndex": 244,
               "Title": "GptApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\GptApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\GptApi.cs",
@@ -4013,7 +4136,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 240,
+              "DocumentIndex": 243,
               "Title": "SystemApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\SystemApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\SystemApi.cs",
@@ -4025,7 +4148,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 242,
+              "DocumentIndex": 245,
               "Title": "ChartApi.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\AppApis\\ChartApi.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\AppApis\\ChartApi.cs",
@@ -4037,7 +4160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 243,
+              "DocumentIndex": 246,
               "Title": "Colors.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Resources\\Styles\\Colors.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Resources\\Styles\\Colors.xaml",
@@ -4049,7 +4172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 244,
+              "DocumentIndex": 247,
               "Title": "AboutAssets.txt",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Resources\\Raw\\AboutAssets.txt",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Resources\\Raw\\AboutAssets.txt",
@@ -4061,7 +4184,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 245,
+              "DocumentIndex": 248,
               "Title": "Styles.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Resources\\Styles\\Styles.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Resources\\Styles\\Styles.xaml",
@@ -4073,7 +4196,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 246,
+              "DocumentIndex": 249,
               "Title": "ForgotPasswordPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\ForgotPasswordPage.xaml.cs",
@@ -4085,7 +4208,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 247,
+              "DocumentIndex": 250,
               "Title": "SettingsAndHelpPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPageViewModel.cs",
@@ -4097,7 +4220,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 248,
+              "DocumentIndex": 251,
               "Title": "SettingsPageViewModel.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPageViewModel.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPageViewModel.cs",
@@ -4109,7 +4232,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 249,
+              "DocumentIndex": 252,
               "Title": "SettingsPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPage.xaml.cs",
@@ -4121,7 +4244,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 250,
+              "DocumentIndex": 253,
               "Title": "SettingsAndHelpPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml.cs",
@@ -4133,7 +4256,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 251,
+              "DocumentIndex": 254,
               "Title": "SettingsAndHelpPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsAndHelpPage.xaml",
@@ -4145,7 +4268,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 252,
+              "DocumentIndex": 255,
               "Title": "HomeItemTemplateSeclector.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\HomeItemTemplateSeclector.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\HomeItemTemplateSeclector.cs",
@@ -4157,7 +4280,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 253,
+              "DocumentIndex": 256,
               "Title": "SettingsPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\SettingsPage.xaml",
@@ -4169,7 +4292,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 254,
+              "DocumentIndex": 257,
               "Title": "SignUpPage.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPage.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Auth\\Pages\\SignUpPage.xaml",
@@ -4181,7 +4304,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 255,
+              "DocumentIndex": 258,
               "Title": "MyWallHeaderView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\MyWallHeaderView.xaml",
@@ -4193,7 +4316,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 256,
+              "DocumentIndex": 259,
               "Title": "CoupleMilestoneExpandedView.xaml",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml",
@@ -4205,7 +4328,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 257,
+              "DocumentIndex": 260,
               "Title": "NotificationsPage.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPage.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Profile\\Pages\\NotificationsPage.xaml.cs",
@@ -4217,7 +4340,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 258,
+              "DocumentIndex": 261,
               "Title": "RequestUrl.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\RequestUrl.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\RequestUrl.cs",
@@ -4229,7 +4352,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 259,
+              "DocumentIndex": 262,
               "Title": "EnumExtensions.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\EnumExtensions.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\EnumExtensions.cs",
@@ -4241,20 +4364,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 261,
-              "Title": "AsyncNetworkHttpClient.cs",
-              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
-              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
-              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
-              "RelativeToolTip": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
-              "ViewState": "AQIAAJcAAAAAAAAAAABYwJwAAAAIAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-13T12:26:38.842Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 260,
+              "DocumentIndex": 263,
               "Title": "AsyncNetworkHttpClientNoToken.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClientNoToken.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClientNoToken.cs",
@@ -4266,7 +4376,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 262,
+              "DocumentIndex": 264,
               "Title": "App.g.i.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\obj\\Debug\\net8.0-windows10.0.19041.0\\win10-x64\\Platforms\\Windows\\App.g.i.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\obj\\Debug\\net8.0-windows10.0.19041.0\\win10-x64\\Platforms\\Windows\\App.g.i.cs",
@@ -4278,7 +4388,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 263,
+              "DocumentIndex": 265,
               "Title": "CoupleMilestoneExpandedView.xaml.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Home\\Pages\\Views\\CoupleMilestoneExpandedView.xaml.cs",
@@ -4290,7 +4400,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 264,
+              "DocumentIndex": 266,
               "Title": "Admin.NET.MAUI.SignInPageViewModel.SignInWithSocialAccountAsync.g.cs",
               "DocumentMoniker": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\AppData\\Local\\Temp\\VSGeneratedDocuments\\88addb09-1cc7-3f8c-de35-bf544a1978d1\\Admin.NET.MAUI.SignInPageViewModel.SignInWithSocialAccountAsync.g.cs",
               "ToolTip": "C:\\Users\\\u516C\u5B50\u5B50\u9E9F\\AppData\\Local\\Temp\\VSGeneratedDocuments\\88addb09-1cc7-3f8c-de35-bf544a1978d1\\Admin.NET.MAUI.SignInPageViewModel.SignInWithSocialAccountAsync.g.cs",
@@ -4300,7 +4410,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 265,
+              "DocumentIndex": 267,
               "Title": "AsyncNetworkClient.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
@@ -4312,7 +4422,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 266,
+              "DocumentIndex": 268,
               "Title": "ASyncNetworkClient.cs",
               "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Features\\Messaging\\ASyncNetworkClient.cs",
               "RelativeDocumentMoniker": "Admin.NET.MAUI\\Features\\Messaging\\ASyncNetworkClient.cs",

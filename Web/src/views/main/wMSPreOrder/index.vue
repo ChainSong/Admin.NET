@@ -370,13 +370,19 @@ const exportPreOrderFun = async () => {
     ids.push(a.id);
   });
   // 2,验证数据有没有勾选
-  if (ids.length < 1) {
-    ElMessage.error("请勾选订单");
-    return;
-  }
-  let res = await exportPreOrder(ids);
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if(ids.length >0){
+  let res = await exportPreOrder({ "ids": ids });
   var fileName = getFileName(res.headers);
   downloadByData(res.data as any, fileName);
+}else{
+  let res = await exportPreOrder(state.value.header);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 }
 
 

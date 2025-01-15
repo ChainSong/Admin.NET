@@ -11,7 +11,8 @@ enum Api {
 	ExportOrder = '/api/wMSOrder/ExportOrder',
 	PrintShippingList = '/api/wMSOrder/PrintShippingList',
 	ExportPackage = '/api/wMSOrder/ExportPackage',
-	
+	GetOrderLocation = '/api/wMSOrder/GetOrderLocation',
+
 }
 
 // 增加WMSOrder
@@ -22,7 +23,7 @@ export const addWMSOrder = (params?: any) =>
 		data: params,
 	});
 
-	// 导出包装清单
+// 导出包装清单
 export const exportPackage = (params?: any) =>
 	request({
 		url: Api.ExportPackage,
@@ -95,7 +96,7 @@ export const printShippingList = (params?: any) =>
 		data: params,
 	});
 
-	
+
 // 导出出库信息
 export const exportOrder = (params?: any) =>
 	request({
@@ -104,5 +105,9 @@ export const exportOrder = (params?: any) =>
 		data: params,
 		responseType: 'blob',
 	});
-
-	
+// 导出出库信息
+export const getOrderLocation = (params?: any) =>
+	request({
+		url: `${Api.GetOrderLocation}/${params}`,
+		method: 'get'
+	});

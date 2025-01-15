@@ -2,6 +2,7 @@
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
+using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using AutoMapper.Internal.Mappers;
@@ -82,11 +83,11 @@ public class WMSReceiptService : IDynamicApiController, ITransient
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => u.ReceiptNumber.Contains(input.ReceiptNumber.Trim()))
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
-                    .WhereIF(input.ReceiptStatus != 0, u => u.ReceiptStatus == input.ReceiptStatus)
+                    .WhereIF(input.ReceiptStatus.HasValue && input.ReceiptStatus != 0, u => u.ReceiptStatus == input.ReceiptStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptType), u => u.ReceiptType.Contains(input.ReceiptType.Trim()))
@@ -220,7 +221,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.ReceiptTime != null && input.ReceiptTime.Count > 0)
         {
             DateTime? start = input.ReceiptTime[0];
-            query = query.WhereIF(start.HasValue, u => u.ReceiptTime > start);
+            query = query.WhereIF(start.HasValue, u => u.ReceiptTime >= start);
             if (input.ReceiptTime.Count > 1 && input.ReceiptTime[1].HasValue)
             {
                 var end = input.ReceiptTime[1].Value.AddDays(1);
@@ -230,7 +231,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
             DateTime? start = input.CompleteTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime >= start);
             if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
                 var end = input.CompleteTime[1].Value.AddDays(1);
@@ -240,7 +241,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
             DateTime? start = input.CreationTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
                 var end = input.CreationTime[1].Value.AddDays(1);
@@ -250,7 +251,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
             DateTime? start = input.DateTime1[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
                 var end = input.DateTime1[1].Value.AddDays(1);
@@ -260,7 +261,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
             DateTime? start = input.DateTime2[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
                 var end = input.DateTime2[1].Value.AddDays(1);
@@ -270,7 +271,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
             DateTime? start = input.DateTime3[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
                 var end = input.DateTime3[1].Value.AddDays(1);
@@ -280,7 +281,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
             DateTime? start = input.DateTime4[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
                 var end = input.DateTime4[1].Value.AddDays(1);
@@ -290,7 +291,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
             DateTime? start = input.DateTime5[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
                 var end = input.DateTime5[1].Value.AddDays(1);
@@ -417,25 +418,35 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
-    public ActionResult ExportReceipt(List<long> input)
+    public ActionResult ExportReceipt(WMSReceiptInput input)
     {
-        //使用简单工厂定制化
-        IReceiptExcelInterface factory = ReceiptExportFactory.ExportReceipt();
-        factory._repReceipt = _rep;
-        factory._repReceiptDetail = _repReceiptDetail;
-        factory._userManager = _userManager;
-        factory._repTableColumns = _repTableColumns;
-        factory._repTableColumnsDetail = _repTableColumnsDetail;
-        //var receiptData = _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id));
-        var response = factory.Export(input);
-        IExporter exporter = new ExcelExporter();
-        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
-        var fs = new MemoryStream(result.Result);
-        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
-        return new FileStreamResult(fs, "application/octet-stream")
+        try
         {
-            FileDownloadName = "入库单.xlsx" // 配置文件下载显示名
-        };
+
+
+            //使用简单工厂定制化
+            //使用简单工厂定制化
+            IReceiptExcelInterface factory = ReceiptExportFactory.ExportReceipt();
+            factory._repReceipt = _rep;
+            factory._repReceiptDetail = _repReceiptDetail;
+            factory._userManager = _userManager;
+            factory._repTableColumns = _repTableColumns;
+            factory._repTableColumnsDetail = _repTableColumnsDetail;
+            //var receiptData = _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id));
+            var response = factory.Export(input);
+            IExporter exporter = new ExcelExporter();
+            var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+            var fs = new MemoryStream(result.Result);
+            //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+            return new FileStreamResult(fs, "application/octet-stream")
+            {
+                FileDownloadName = "入库单.xlsx" // 配置文件下载显示名
+            };
+        }
+        catch (Exception ex)
+        {
+            return new BadRequestObjectResult(ex.Message);
+        }
     }
 
 

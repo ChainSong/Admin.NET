@@ -132,7 +132,14 @@ public class WMSASNReceiptDetail : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? PoCode { get; set; }
-    
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? SoCode { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

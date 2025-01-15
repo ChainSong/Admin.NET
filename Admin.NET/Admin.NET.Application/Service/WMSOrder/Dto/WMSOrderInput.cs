@@ -286,7 +286,7 @@ namespace Admin.NET.Application;
         /// <summary>
         /// CustomerId
         /// </summary>
-        public long CustomerId { get; set; }
+        public long? CustomerId { get; set; }
         
         /// <summary>
         /// CustomerName
@@ -311,7 +311,7 @@ namespace Admin.NET.Application;
         /// <summary>
         /// OrderStatus
         /// </summary>
-        public int OrderStatus { get; set; }
+        public int? OrderStatus { get; set; }
         
         /// <summary>
         /// OrderTime
@@ -539,13 +539,16 @@ namespace Admin.NET.Application;
         /// Int5
         /// </summary>
         public int? Int5 { get; set; }
-        
-    }
 
-    /// <summary>
-    /// WMSOrder增加输入参数
-    /// </summary>
-    public class AddWMSOrderInput : WMSOrderBaseInput
+ 
+
+
+}
+
+/// <summary>
+/// WMSOrder增加输入参数
+/// </summary>
+public class AddWMSOrderInput : WMSOrderBaseInput
     {
     }
 

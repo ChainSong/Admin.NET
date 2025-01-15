@@ -40,6 +40,6 @@ namespace Admin.NET.Application.Interface
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Response<DataTable> Export(List<long> request);
+        Response<DataTable> Export(WMSPreOrderExcelInput request);
     }
 }

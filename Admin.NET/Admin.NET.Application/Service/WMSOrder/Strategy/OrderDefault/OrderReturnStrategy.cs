@@ -52,22 +52,22 @@ public class OrderReturnStrategy : IOrderReturnInterface
         //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
         //先判断状态是否正常 是否允许回退
         var ids = request.Select(b => b.Id);
-        var order = _repOrder.AsQueryable().Where(a => ids.Contains(a.Id));
-        await order.ForEachAsync(a =>
-        {
-            if (a.OrderStatus > (int)OrderStatusEnum.拣货中)
-            {
-                response.Data.Add(new OrderStatusDto()
-                {
-                    ExternOrder = a.ExternOrderNumber,
-                    SystemOrder = a.OrderNumber,
-                    Type = a.OrderType,
-                    StatusCode = StatusCode.Warning,
-                    Msg = "状态异常"
-                });
-            }
+        var order = await _repOrder.AsQueryable().Where(a => ids.Contains(a.Id)).ToListAsync();
+        order.ForEach(a =>
+       {
+           if (a.OrderStatus > (int)OrderStatusEnum.拣货中)
+           {
+               response.Data.Add(new OrderStatusDto()
+               {
+                   ExternOrder = a.ExternOrderNumber,
+                   SystemOrder = a.OrderNumber,
+                   Type = a.OrderType,
+                   StatusCode = StatusCode.Warning,
+                   Msg = "状态异常"
+               });
+           }
 
-        });
+       });
         if (response.Data != null && response.Data.Count > 0)
         {
             return response;
@@ -93,7 +93,7 @@ public class OrderReturnStrategy : IOrderReturnInterface
         .Where(p => ids.Contains(p.OrderId))
         .ExecuteCommandAsync();
 
-        var PreOrderIds = await order.Select(b => b.PreOrderId).ToListAsync();
+        var PreOrderIds = order.Select(b => b.PreOrderId).ToList();
         //先更新主表，在更新明细表
         //await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
 
@@ -128,17 +128,17 @@ public class OrderReturnStrategy : IOrderReturnInterface
         //}); 
         //先处理上架=>入库单
 
-        await order.ForEachAsync(a =>
-        {
-            response.Data.Add(new OrderStatusDto()
-            {
-                ExternOrder = a.ExternOrderNumber,
-                SystemOrder = a.OrderNumber,
-                Type = a.OrderType,
-                StatusCode = StatusCode.Success,
-                Msg = "操作成功"
-            });
-        });
+        order.ForEach(a =>
+       {
+           response.Data.Add(new OrderStatusDto()
+           {
+               ExternOrder = a.ExternOrderNumber,
+               SystemOrder = a.OrderNumber,
+               Type = a.OrderType,
+               StatusCode = StatusCode.Success,
+               Msg = "操作成功"
+           });
+       });
         response.Code = StatusCode.Success;
         response.Msg = "操作成功";
         //throw new NotImplementedException();

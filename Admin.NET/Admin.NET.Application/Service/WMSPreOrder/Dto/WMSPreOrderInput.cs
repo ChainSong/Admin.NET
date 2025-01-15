@@ -267,7 +267,7 @@ public class WMSPreOrderInput : BasePageInput
     /// <summary>
     /// CustomerId
     /// </summary>
-    public long CustomerId { get; set; }
+    public long? CustomerId { get; set; }
 
     /// <summary>
     /// CustomerName
@@ -277,7 +277,7 @@ public class WMSPreOrderInput : BasePageInput
     /// <summary>
     /// WarehouseId
     /// </summary>
-    public long WarehouseId { get; set; }
+    public long? WarehouseId { get; set; }
 
     /// <summary>
     /// WarehouseName
@@ -292,7 +292,7 @@ public class WMSPreOrderInput : BasePageInput
     /// <summary>
     /// PreOrderStatus
     /// </summary>
-    public int PreOrderStatus { get; set; }
+    public int? PreOrderStatus { get; set; }
 
     /// <summary>
     /// OrderTime
@@ -521,6 +521,8 @@ public class WMSPreOrderInput : BasePageInput
     /// Int5
     /// </summary>
     public int? Int5 { get; set; }
+
+    public virtual List<long> Ids { get; set; }
 
 }
 

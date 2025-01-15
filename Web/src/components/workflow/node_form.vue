@@ -11,8 +11,8 @@
             </div>
             <div class="ef-node-form-body">
                 <div class="form-info">
-                    <VolForm ref="form" :select2Count="2000" style="padding:0 10px;" :label-width="130" :loadKey="false" :formFields="node"
-                        :formRules="formRules" :disabled="disabled">
+                    <VolForm ref="form" :select2Count="2000" style="padding:0 10px;" :label-width="130" :loadKey="false"
+                        :formFields="node" :formRules="formRules" :disabled="disabled">
                     </VolForm>
                 </div>
                 <div>
@@ -35,9 +35,9 @@ export default {
         'node-filter': nodeFilter
     },
     props: {
-        disabled:{
-            typeof:Boolean,
-            default:false
+        disabled: {
+            typeof: Boolean,
+            default: false
         }
         // node: {
         //     type: Object,
@@ -101,7 +101,7 @@ export default {
                         required: true,
                         colSize: 12
                     }],
-                    [
+                [
                     {
                         title: '节点备注',
                         field: 'remark',
@@ -118,108 +118,95 @@ export default {
                         data: [
                             { key: 0, value: '普通流程' },
                             { key: 1, value: '定制化' },
-                            // { key: 2, value: '按角色审批' },
-                            // { key: 3, value: '按部门审批' }
+                            { key: 2, value: '按角色审批' },
+                            { key: 3, value: '按部门审批' }
                         ],
                         type: 'select',
                         onChange: this.nodeTypeChange,
                         colSize: 12
                     }
                 ]
-                // ,
-                // [
-                //     {
-                //         dataKey: 'users',
-                //         hidden: false,
-                //         title: '审批用户',
-                //         required: true,
-                //         field: 'userId',
-                //         data: [],
-                //         type: 'selectList',
-                //         colSize: 12
-                //     }
-                //     ,
-                //     {
-                //         dataKey: 'roles',
-                //         hidden: true,
-                //         title: '角色信息',
-                //         required: true,
-                //         field: 'roleId',
+                ,
+                [
+                    {
+                        dataKey: 'userInfo',
+                        hidden: false,
+                        title: '审批用户',
+                        required: true,
+                        field: 'userId',
+                        data: [],
+                        type: 'select',
+                        colSize: 6
+                    },{
+                        dataKey: 'roleInfo',
+                        hidden: false,
+                        title: '角色信息',
+                        required: true,
+                        field: 'roleId',
+                        data: [],
+                        type: 'select',
+                        colSize: 6
+                    }
+                ],
+                
+                  [
+                    {
+                        dataKey: '',
+                        title: '审批未通过',
+                        required: false,
+                        field: 'auditRefuse',
+                        hidden: false,
+                        data: [
+                            { key: 1, value: '返回上一节点' },
+                            { key: 2, value: '流程重新开始' },
+                            { key: 0, value: '流程结束' },
+                        ],
+                        type: 'select',
+                        colSize: 6
+                    }
+                    ,
+                    {
+                        dataKey: '',
+                        title: '审批驳回',
+                        required: false,
+                        hidden: false,
+                        field: 'auditBack',
+                        data: [
+                            { key: 1, value: '返回上一节点' },
+                            { key: 2, value: '流程重新开始' },
+                            { key: 0, value: '流程结束' },
+                        ],
+                        type: 'select',
+                        colSize: 6
 
-                //         data: [],
-                //         type: 'select',
-                //         colSize: 12
-                //     }
-                //     ,
-                //     {
-                //         dataKey: 'dept',
-                //         hidden: true,
-                //         title: '部门信息',
-                //         required: true,
-                //         field: 'deptId',
-                //         data: [],
-                //         type: 'select',
-                //         colSize: 12
-                //     }
-                // ]
-                // , [
-                //     {
-                //         dataKey: '',
-                //         title: '审批未通过',
-                //         required: false,
-                //         field: 'auditRefuse',
-                //         hidden: false,
-                //         data: [
-                //             { key: 1, value: '返回上一节点' },
-                //             { key: 2, value: '流程重新开始' },
-                //             { key: 0, value: '流程结束' },
-                //         ],
-                //         type: 'select',
-                //         colSize: 6
-                //     }
-                //     ,
-                //     {
-                //         dataKey: '',
-                //         title: '审批驳回',
-                //         required: false,
-                //         hidden: false,
-                //         field: 'auditBack',
-                //         data: [
-                //             { key: 1, value: '返回上一节点' },
-                //             { key: 2, value: '流程重新开始' },
-                //             { key: 0, value: '流程结束' },
-                //         ],
-                //         type: 'select',
-                //         colSize: 6
-
-                //     }
-                // ],
-                // [
-                //     {
-                //         dataKey: '',
-                //         title: '审核后发送邮件通知',
-                //         required: false,
-                //         hidden: false,
-                //         field: 'sendMail',
-                //         data: [
-                //             { key: 1, value: '是' },
-                //             { key: 0, value: '否' },
-                //         ],
-                //         type: 'switch'
-                //     },
-                //     {
-                //         dataKey: '',
-                //         title: '启用会签',
-                //         required: false,
-                //         hidden: false,
-                //         field: 'auditMethod',//审批方式
-                //         data: [
-                //             { key: 1, value: '是' },
-                //             { key: 0, value: '否' }
-                //         ],
-                //         type: 'switch'
-                //     }
-                // ],
+                    }
+                ],
+                [
+                    {
+                        dataKey: '',
+                        title: '审核后发送邮件通知',
+                        required: false,
+                        hidden: false,
+                        field: 'sendMail',
+                        data: [
+                            { key: 1, value: '是' },
+                            { key: 0, value: '否' },
+                        ],
+                        type: 'switch'
+                    },
+                    {
+                        dataKey: '',
+                        title: '启用会签',
+                        required: false,
+                        hidden: false,
+                        field: 'auditMethod',//审批方式
+                        data: [
+                            { key: 1, value: '是' },
+                            { key: 0, value: '否' }
+                        ],
+                        type: 'switch'
+                    }
+                ],
             ],
         }
     },
@@ -316,6 +303,7 @@ export default {
 
 <style lang="less" scoped>
 @import './index.css';
+
 .el-node-form-tag {
     position: absolute;
     top: 50%;

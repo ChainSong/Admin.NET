@@ -24,7 +24,9 @@ public class SysWorkFlow  //: EntityBase
     //[Required]
     [SugarColumn(ColumnDescription = "", Length = 200)]
     public string WorkName { get; set; }
-    
+
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -37,7 +39,15 @@ public class SysWorkFlow  //: EntityBase
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 200)]
     public string? WorkTableName { get; set; }
-    
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    //[Required]
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string WorkType { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

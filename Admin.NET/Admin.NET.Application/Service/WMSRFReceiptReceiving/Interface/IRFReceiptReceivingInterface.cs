@@ -34,6 +34,7 @@ public interface IRFReceiptReceivingInterface
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
 
     public SqlSugarRepository<WMSReceiptReceiving> _repReceiptReceiving { get; set; }
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; } 
 
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
 

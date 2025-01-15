@@ -38,6 +38,33 @@
 									</el-descriptions-item>
 								</template>
 							</el-descriptions>
+							<el-tabs v-model="activeName">
+				<el-tab-pane label="明细信息" name="DateilInfo">
+					<el-table :data="state.details" style="width: 100%" height="250">
+						<template v-for="(v, index) in state.tableColumnDetails">
+							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
+								width="150">
+								<template #default="scope">
+									<label v-text="scope.row[v.columnName]"></label>
+								</template>
+							</el-table-column>
+						</template>
+					</el-table>
+				</el-tab-pane>
+				<el-tab-pane label="分配信息" name="AllocationInfo">
+					<el-table :data="state.allocations" style="width: 100%" height="250">
+						<template v-for="(v, index) in state.tableColumnAllocations">
+							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
+								width="150">
+								<template #default="scope">
+									<label v-text="scope.row[v.columnName]"></label>
+								</template>
+							</el-table-column>
+						</template>
+					</el-table>
+				</el-tab-pane>
+			</el-tabs>
+
 							</el-tab-pane>
 							<el-tab-pane label="地址信息" name="AddressInfo">
 								<el-descriptions class="margin-top" :column="2" size="small" border>
@@ -71,38 +98,13 @@
 									</template>
 								</el-descriptions>
 							</el-tab-pane>
+
+							<el-tab-pane label="地图信息" name="MapInfo">
+								 <orderTrackAMap ref="orderTrackAMapRef" :value=state.header.id ></orderTrackAMap>
+							</el-tab-pane>
 					</el-tabs>
 				</el-main>
 			</el-container>
-
-			<el-tabs v-model="activeName">
-				<el-tab-pane label="明细信息" name="DateilInfo">
-					<el-table :data="state.details" style="width: 100%" height="250">
-						<template v-for="(v, index) in state.tableColumnDetails">
-							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
-								width="150">
-								<template #default="scope">
-									<label v-text="scope.row[v.columnName]"></label>
-								</template>
-							</el-table-column>
-						</template>
-					</el-table>
-				</el-tab-pane>
-				<el-tab-pane label="分配信息" name="AllocationInfo">
-					<el-table :data="state.allocations" style="width: 100%" height="250">
-						<template v-for="(v, index) in state.tableColumnAllocations">
-							<el-table-column v-if="v.isShowInList" :key="index" :fixed="false" :label="v.displayName"
-								width="150">
-								<template #default="scope">
-									<label v-text="scope.row[v.columnName]"></label>
-								</template>
-							</el-table-column>
-						</template>
-					</el-table>
-				</el-tab-pane>
-			</el-tabs>
-
-
 			<template #footer>
 				<span class="dialog-footer">
 					<!-- <el-button @click="cancel" size="default">取 消</el-button> -->
@@ -122,6 +124,7 @@ import { getByTableNameList } from "/@/api/main/tableColumns";
 import Header from "/@/entities/Order";
 import Detail from "/@/entities/OrderDetail";
 import allocations from "/@/entities/orderAllocation";
+import orderTrackAMap from '/@/views/main/aMap/orderTrackAMap.vue'
 
 import OrderAddress from "/@/entities/orderAddress";
 // import Dllocations from "/@/entities/customerDetail";
@@ -155,7 +158,7 @@ const state = ref({
 	tableColumnOrderAddresss: new Array<TableColumns>(),
 	// header: new Array<Details>(),
 })
-
+const orderTrackAMapRef = ref();
 // let headerRuleRef = ref<any>({});
 // let headerRule = ref({});
 // let detailRuleRef = ref<any>({});
@@ -179,10 +182,12 @@ const isShowDialog = ref(false);
 
 // 打开弹窗
 const openDialog = (row: any) => {
+	activeMainName = 'OrderInfo';
 	state.value.header = JSON.parse(JSON.stringify(row));
 	isShowDialog.value = true;
 	gettableColumn();
-	get()
+	get();
+	orderTrackAMapRef.value.openDialog(state.value.header);
 };
 
 // 关闭弹窗

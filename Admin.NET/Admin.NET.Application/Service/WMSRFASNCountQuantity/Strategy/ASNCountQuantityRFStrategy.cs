@@ -25,6 +25,8 @@ using SharpCompress.Common;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchResponse.Types;
 using System.Reflection.Emit;
 using Admin.NET.Core.Service;
+using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
+using System.Web;
 
 namespace Admin.NET.Application.Service;
 public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
@@ -47,7 +49,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
 
     //仓库用户关系仓储
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
- 
+
 
 
     /// <summary>
@@ -61,6 +63,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
         //判断扫描的是不是条形码（有两种条形码）
         if (!string.IsNullOrEmpty(request.ScanInput))
         {
+            //var skuInfo = request.Input.Split('|');
             //var skuInfo = request.Input.Split('|');
             if (request.ScanInput.Split(' ').Length > 1 || request.ScanInput.Split('|').Length > 1)
             {
@@ -76,7 +79,31 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
                 MatchCollection matchesLOT = Regex.Matches(request.ScanInput, lotRegex);
                 request.BatchCode = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.SKU = request.SKU;
-            };
+
+            }
+            //扫描的是HTTP 二维码，那么从中解析SKU
+            else if (request.ScanInput.Contains("http"))
+            {
+
+                Uri uri = new Uri(request.ScanInput);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    request.SKU = collection["p"].Split(':')[1];
+                    request.SnCode = collection["p"].Split(':')[0];
+                }
+            }
+            else
+            {
+                //判断是不是不需要解析，直接扫描的产品条码
+                var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.ScanInput).First();
+                if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                {
+                    request.SKU = checkProduct.SKU;
+                }
+            }
+            //request.CustomerId = request.CustomerId;
             //request.CustomerId = receipt.CustomerId;
         }
 
@@ -148,6 +175,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             wMSASNCountQuantityDetail.LotCode = "";
             //wMSASNCountQuantityDetail.Quantity = request.Quantity;
             wMSASNCountQuantityDetail.SKU = request.SKU;
+            wMSASNCountQuantityDetail.SnCode = request.SnCode;
             wMSASNCountQuantityDetail.GoodsName = goodsName;
             //wMSASNCountQuantityDetail.Creator = request.Creator;
             //wMSASNCountQuantityDetail.CreationTime = request.CreationTime;

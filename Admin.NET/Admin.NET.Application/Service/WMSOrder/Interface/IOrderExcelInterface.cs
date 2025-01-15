@@ -19,10 +19,10 @@ namespace Admin.NET.Application.Interface
 
         public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
         //public ISqlSugarClient _db { get; set; }
-        public UserManager _userManager { get; set; }
+        public  UserManager _userManager { get; set; }
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
-        public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+        public  SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
@@ -46,7 +46,7 @@ namespace Admin.NET.Application.Interface
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Response<DataTable> Export(List<long> request);
+        Response<DataTable> Export(WMSOrderExcellInput request);
         Response<DataTable> ExportPackage(List<long> request);
     }
     

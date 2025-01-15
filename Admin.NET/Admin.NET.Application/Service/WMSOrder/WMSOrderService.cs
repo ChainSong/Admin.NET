@@ -4,6 +4,7 @@ using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
+using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DatabaseAccessor;
@@ -98,12 +99,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
         var query = _rep.AsQueryable()
                     .WhereIF(input.PreOrderId > 0, u => u.PreOrderId == input.PreOrderId)
 
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
-                    .WhereIF(input.OrderStatus != 0, u => u.OrderStatus == input.OrderStatus)
+                    .WhereIF(input.OrderStatus.HasValue && input.OrderStatus != 0, u => u.OrderStatus == input.OrderStatus)
                      .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
@@ -221,7 +222,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.OrderTime != null && input.OrderTime.Count > 0)
         {
             DateTime? start = input.OrderTime[0];
-            query = query.WhereIF(start.HasValue, u => u.OrderTime > start);
+            query = query.WhereIF(start.HasValue, u => u.OrderTime >= start);
             if (input.OrderTime.Count > 1 && input.OrderTime[1].HasValue)
             {
                 var end = input.OrderTime[1].Value.AddDays(1);
@@ -231,7 +232,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
             DateTime? start = input.CompleteTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime >= start);
             if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
                 var end = input.CompleteTime[1].Value.AddDays(1);
@@ -241,7 +242,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
             DateTime? start = input.CreationTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
                 var end = input.CreationTime[1].Value.AddDays(1);
@@ -251,7 +252,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
             DateTime? start = input.DateTime1[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
                 var end = input.DateTime1[1].Value.AddDays(1);
@@ -261,7 +262,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
             DateTime? start = input.DateTime2[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
                 var end = input.DateTime2[1].Value.AddDays(1);
@@ -271,7 +272,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
             DateTime? start = input.DateTime3[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
                 var end = input.DateTime3[1].Value.AddDays(1);
@@ -281,7 +282,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
             DateTime? start = input.DateTime4[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
                 var end = input.DateTime4[1].Value.AddDays(1);
@@ -291,7 +292,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
             DateTime? start = input.DateTime5[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
                 var end = input.DateTime5[1].Value.AddDays(1);
@@ -327,10 +328,20 @@ public class WMSOrderService : IDynamicApiController, ITransient
     {
         //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
         //await _rep.DeleteAsync(entity);   //假删除
+        //根据id 获取订单信息
+        var order = await _rep.AsQueryable().Where(a => input.Id == (a.Id)).FirstAsync();
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == order.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+
+
         //使用简单工厂定制化  /
         List<DeleteWMSOrderInput> request = new List<DeleteWMSOrderInput>();
         request.Add(input);
-        IOrderReturnInterface factory = OrderReturnFactory.OrderReturn(0);
+        IOrderReturnInterface factory = OrderReturnFactory.OrderReturn(workflow, order.OrderType);
 
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
@@ -447,7 +458,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         //根据订单类型判断是否存在该流程
         var workflow = await _repWorkFlow.AsQueryable()
            .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == order.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+           .Where(a => a.WorkName == order.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
 
 
         //使用简单工厂定制化  / 
@@ -499,7 +510,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "ExportOrder")]
-    public ActionResult ExportOrder(List<long> input)
+    public ActionResult ExportOrder(WMSOrderExcellInput input)
     {
         //使用简单工厂定制化  /
         //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
@@ -533,6 +544,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         var response = factory.Export(input);
         IExporter exporter = new ExcelExporter();
+       
         var result = exporter.ExportAsByteArray<DataTable>(response.Data);
         var fs = new MemoryStream(result.Result);
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
@@ -610,7 +622,6 @@ public class WMSOrderService : IDynamicApiController, ITransient
         //使用PrintShippingList类种的打印方法  
 
         IPrintOrderInterface factory = PrintOrderFactory.PrintOrder();
-
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
@@ -635,5 +646,35 @@ public class WMSOrderService : IDynamicApiController, ITransient
         //return response;
         return response.Data;
     }
+
+
+
+    /// <summary>
+    /// 获取运输位置信息
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "GetOrderLocation")]
+    public async Task<Response<List<string>>> GetOrderLocation(long id)
+    {
+        Response<List<string>> response = new Response<List<string>>();
+        //获取位置信息
+        //1，仓库的位置信息
+        //2，订单的收件人位置信息
+        //3，RFID终端位置信息 
+        //查询出订单的信息
+        var order = await _rep.AsQueryable().Includes(a => a.OrderAddress).Where(a => a.Id == id).FirstAsync();
+        //根据订单中的仓库获取仓库的位置信息
+        var warehouse = await _repWarehouse.AsQueryable().Where(a => a.Id == order.WarehouseId).FirstAsync();
+        response.Data = new List<string>();
+        response.Data.Add(warehouse.Address);
+        response.Data.Add(order.OrderAddress.Province+"," + order.OrderAddress.City +","+ order.OrderAddress.Address);
+        response.Code = StatusCode.Success;
+        response.Msg = "获取位置信息成功";
+        return response;
+    }
+
 }
 

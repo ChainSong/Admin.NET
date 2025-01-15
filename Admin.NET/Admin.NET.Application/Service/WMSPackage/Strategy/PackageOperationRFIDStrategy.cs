@@ -79,6 +79,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
             };
 
+
+
         }
 
         response.Data.PickTaskNumber = request.PickTaskNumber;
@@ -258,7 +260,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
     public async Task<Response<ScanPackageOutput>> AddPackage(ScanPackageInput request)
     {
 
-
+        //var aa = await VerifyPackage(new ScanPackageRFIDInput() { RFIDStr = "000591703201100001674522,000591703201100001687266,000591703201100001698666,000591703201100001704611" });
+        //return null;
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
@@ -576,6 +579,17 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     PackageAcquisitions.AddRange(PackageAcquisition);
                 }
             }
+            //包装的时候，将RFID  状态修改成为10 标识RFID 已经拣货包装
+            //_repRFIDInfo.UpdateAsync(a => a.Status =(int)RFIDStatusEnum.包装).Where(a => request.RFIDs.Contains(a.RFID));
+            await _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
+               .SetColumns(p => p.Status == (int)RFIDStatusEnum.出库)
+               .SetColumns(p => p.OrderTime == DateTime.Now)
+               .SetColumns(p => p.OrderPerson == _userManager.Account)  
+               .SetColumns(p => p.OrderNumber == pickData.FirstOrDefault().PickTaskNumber)
+               //.SetColumns(p => p.ExternOrderNumber == pickData.FirstOrDefault().PickTaskNumber)
+               .Where(p => request.RFIDs.Contains(p.RFID))
+               .ExecuteCommandAsync();
+
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
@@ -635,23 +649,57 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
     /// <exception cref="NotImplementedException"></exception>
     public async Task<Response<ScanPackageOutput>> VerifyPackage(ScanPackageRFIDInput request)
     {
-        request.RFIDs = request.RFIDStr.Split(',').ToList();
+        //request.RFIDs = request.RFIDStr.Split(',').ToList();
+        //request.PickTaskNumber = "160615271544128";
+        //request.Input = "160615271544128";
+        List<string> rftds = new List<string>();
+        //Response<Dictionary<string, string>> response = new Response<Dictionary<string, string>>();
+        foreach (var item in request.RFIDStr.Split(',').ToList())
+        {
+            //校验位 以24位为基准，多于24位则截取前24位，少于24位则反馈错误信息
+            if (string.IsNullOrEmpty(item) || item.Length < 24)
+            {
+                //throw Oops.Oh(ErrorCodeEnum.D1002);
+                continue;
+            }
+            if (string.IsNullOrEmpty(item) || item.Length > 24)
+            {
+                //截取前24位
+                rftds.Add(item.Substring(0, 24));
+            }
+        }
+        request.RFIDs = rftds;
+
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
 
+
+        response.Data.PickTaskNumber = request.PickTaskNumber;
+        response.Data.SKU = request.SKU;
+        response.Data.SN = request.SN;
+        response.Data.Input = request.Input;
+        response.Data.AcquisitionData = request.AcquisitionData;
+
+
         //根据拣货任务号获取订单信息
-        var getOrderData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.Input).ToList();
+        var getOrderData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).ToList();
         //获取RFID的入库信息 getOrderData.Select(a => a.PoCode).Contains(a.PoCode) &&
         var getRFIDData = _repRFIDInfo.AsQueryable().Where(a => request.RFIDs.Contains(a.RFID) && a.Status == (int)RFIDStatusEnum.新增).ToList();
-
+        if (string.IsNullOrEmpty(request.PickTaskNumber))
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "请输入拣货任务号";
+            return response;
+        }
         //比较得到的RFID的数量和允许出库的数量是否一致  
         //如果一致，则将RFID的状态设置为出库中，并记录出库信息
         if (request.RFIDs.Count > getRFIDData.Count)
         {
             response.Code = StatusCode.Error;
             response.Msg = "有不合法的RFID";
+            response.Data.PackageDatas = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             return response;
         }
-
+     
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
@@ -663,6 +711,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
                 {
                     var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
+
+
                     response.Code = result.Code;
                     response.Msg = result.Msg;
                     return response;
@@ -696,6 +746,11 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             if (pickData != null && pickData.Count > 0)
             {
                 response.Data.PackageDatas = pickData;
+                //response.Data.PickTaskNumber = request.PickTaskNumber;
+                //response.Data.SKU = request.SKU;
+                //response.Data.SN = request.SN;
+                //response.Data.Input = request.Input;
+                //response.Data.AcquisitionData = request.AcquisitionData;
                 response.Code = StatusCode.Success;
                 return response;
             }
@@ -708,6 +763,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             .ToList();
             if (CheckPickData.Where(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成).Count() > 0)
             {
+
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单已经完成包装";
                 return response;
@@ -772,26 +828,25 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     pick.ScanPackageRFIDInput = new List<ScanPackageRFIDInput>();
                     pick.ScanPackageRFIDInput.Add(request);
                     _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
-
                     //判断是不是包装完成
-                    if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
-                    {
-                        var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
-                        response.Data.PackageDatas = pickData;
-                        response.Code = result.Code;
-                        response.Msg = result.Msg;
-                        return response;
-                    }
-                   
+                    //if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
+                    //{
+                    //    var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
+                    //    response.Data.PackageDatas = pickData;
+                    //    response.Code = result.Code;
+                    //    response.Msg = result.Msg;
+                    //    return response;
+                    //}
                 }
                 else
                 {
-                    response.Data.PackageDatas = pickData;
-                    response.Code = StatusCode.Error;
-                    response.Msg = "该SKU数量已满足";
-                    return response;
+                    var pick = pickData.Where(a => a.SKU == item.SKU).First();
+                    pick.ScanQty += 1;
+                    pick.RemainingQty -= 1;
+                    pick.ScanPackageRFIDInput = new List<ScanPackageRFIDInput>();
+                    pick.ScanPackageRFIDInput.Add(request);
+                    _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
                 }
-
             }
             else
             {
@@ -803,13 +858,31 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
         }
 
-        response.Data.PackageDatas = pickData;
-        response.Code = StatusCode.Success;
-        //return response;
+        //判断最终扫描的RFID 数量是否等于 允许出库的数量，如果一致，则将RFID的状态设置为出库中，并记录出库信息
 
+        if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
+        {
+            var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
+            response.Data.PackageDatas = pickData;
+            response.Code = result.Code;
+            response.Msg = result.Msg;
+            return response;
+        }
+        else
+        {
+            response.Data.PackageDatas = pickData;
+            response.Code = StatusCode.Warning;
+            response.Msg = "SKU数量有差异";
+            return response;
+        }
+
+        //response.Data.PackageDatas = pickData;
         //response.Code = StatusCode.Success;
-        response.Msg = "成功";
-        return response;
+        ////return response;
+
+        ////response.Code = StatusCode.Success;
+        //response.Msg = "成功";
+        //return response;
 
         //比较RFID出库信息是否合理
 

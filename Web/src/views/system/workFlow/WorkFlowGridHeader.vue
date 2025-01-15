@@ -127,8 +127,9 @@ export default {
       });
     },
     save() {
+      // this.$refs.flow.formFields.WorkType="审批流程";
       let mainData = JSON.parse(JSON.stringify(this.$refs.flow.formFields));
-
+      mainData.ataWorkType="审批流程";
       if (!mainData.WorkName) {
         this.$message.error('请填写左侧表单【流程名称】')
         return;

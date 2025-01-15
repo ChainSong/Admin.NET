@@ -28,6 +28,8 @@ using System.IO;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Service;
 using Admin.NET.Application.Enumerate;
+using Admin.NET.Common;
+using NewLife.Security;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -53,8 +55,9 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
     private readonly SqlSugarRepository<SysWorkFlowStep> _repWorkFlowStep;
+    private readonly SysWorkFlowService _repWorkFlowService;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlowStep> repWorkFlowStep)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlowStep> repWorkFlowStep, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         //_db = db;
@@ -71,6 +74,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repProduct = repProduct;
         _repRFIDInfo = repRFIDInfo;
         _repWorkFlowStep = repWorkFlowStep;
+        _repWorkFlowService = repWorkFlowService;
     }
 
     /// <summary>
@@ -86,11 +90,11 @@ public class WMSASNService : IDynamicApiController, ITransient
         var query = _rep.AsQueryable()
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
-                    .WhereIF(input.ASNStatus != 0, u => u.ASNStatus == input.ASNStatus)
+                    .WhereIF(input.ASNStatus.HasValue && input.ASNStatus > 0, u => u.ASNStatus == input.ASNStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptType), u => u.ReceiptType.Contains(input.ReceiptType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
@@ -195,7 +199,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.ExpectDate != null && input.ExpectDate.Count > 0)
         {
             DateTime? start = input.ExpectDate[0];
-            query = query.WhereIF(start.HasValue, u => u.ExpectDate > start);
+            query = query.WhereIF(start.HasValue, u => u.ExpectDate >= start);
             if (input.ExpectDate.Count > 1 && input.ExpectDate[1].HasValue)
             {
                 var end = input.ExpectDate[1].Value.AddDays(1);
@@ -205,7 +209,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
             DateTime? start = input.CompleteTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime >= start);
             if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
                 var end = input.CompleteTime[1].Value.AddDays(1);
@@ -215,7 +219,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
             DateTime? start = input.CreationTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
                 var end = input.CreationTime[1].Value.AddDays(1);
@@ -225,7 +229,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
             DateTime? start = input.DateTime1[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
                 var end = input.DateTime1[1].Value.AddDays(1);
@@ -235,7 +239,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
             DateTime? start = input.DateTime2[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
                 var end = input.DateTime2[1].Value.AddDays(1);
@@ -245,7 +249,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
             DateTime? start = input.DateTime3[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
                 var end = input.DateTime3[1].Value.AddDays(1);
@@ -255,7 +259,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
             DateTime? start = input.DateTime4[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
                 var end = input.DateTime4[1].Value.AddDays(1);
@@ -265,7 +269,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
             DateTime? start = input.DateTime5[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
                 var end = input.DateTime5[1].Value.AddDays(1);
@@ -301,13 +305,13 @@ public class WMSASNService : IDynamicApiController, ITransient
         }
         //使用简单工厂定制化修改和新增的方法
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
-
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
 
         //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(workflow, input.ReceiptType);
+        IASNInterface factory = ASNFactory.AddOrUpdate(workflow);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -373,13 +377,14 @@ public class WMSASNService : IDynamicApiController, ITransient
             return result;
         }
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == input.CustomerName+ InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
 
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
 
         //使用简单工厂定制化修改和新增的方法
-        IASNInterface factory = ASNFactory.AddOrUpdate(workflow, input.ReceiptType);
+        IASNInterface factory = ASNFactory.AddOrUpdate(workflow);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -472,13 +477,15 @@ public class WMSASNService : IDynamicApiController, ITransient
             //long CustomerId = _wms_asnRepository.GetAll().Where(a => a.ASNNumber == entityListDtos.First().ASNNumber).FirstOrDefault().CustomerId;
             //使用简单工厂定制化修改和新增的方法
             //根据订单类型判断是否存在该流程
-            var workflow = await _repWorkFlow.AsQueryable()
-               .Includes(a => a.SysWorkFlowSteps)
-               .Where(a => a.WorkName == ASNs.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+            //var workflow = await _repWorkFlow.AsQueryable()
+            //   .Includes(a => a.SysWorkFlowSteps)
+            //   .Where(a => a.WorkName == ASNs.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
 
+            var workflow = await _repWorkFlowService.GetSystemWorkFlow(ASNs.First().CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, ASNs.First().ReceiptType);
 
             //使用简单工厂定制化修改和新增的方法
-            IASNInterface factory = ASNFactory.AddOrUpdate(workflow, ASNs.First().ReceiptType);
+            IASNInterface factory = ASNFactory.AddOrUpdate(workflow);
+
             //factory._db = _db;
             factory._userManager = _userManager;
             factory._repASN = _rep;
@@ -513,13 +520,14 @@ public class WMSASNService : IDynamicApiController, ITransient
         }
 
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-            .Includes(a => a.SysWorkFlowSteps)
-            .Where(a => a.WorkName == asnData.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //    .Includes(a => a.SysWorkFlowSteps)
+        //    .Where(a => a.WorkName == asnData.First().CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(asnData.First().CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASNForReceiptALL, asnData.First().ReceiptType);
 
 
         //使用简单工厂定制化修改和新增的方法
-        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(workflow, asnData.First().ReceiptType);
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(workflow);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;
@@ -548,11 +556,12 @@ public class WMSASNService : IDynamicApiController, ITransient
     {
         var asnData = _rep.AsQueryable().Where(a => a.Id == input.First().ASNId).First();
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == asnData.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == asnData.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(asnData.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASNForReceiptPart, asnData.ReceiptType);
 
-        if (workflow == null || workflow.SysWorkFlowSteps.Where(a => a.StepName == InboundWorkFlowConst.Workflow_ASNForReceiptPart).Count() == 0)
+        if (string.IsNullOrEmpty(workflow))
         {
             throw Oops.Oh("该订单类型不支持部分转入库单");
         }
@@ -574,7 +583,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         //    customerId = input.First().CustomerId;
         //}
         //使用简单工厂定制化修改和新增的方法
-        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceipt(workflow, asnData.ReceiptType);
+        IASNForReceiptInterface factory = ASNForReceiptFactory.ASNForReceiptPart(workflow);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repASN = _rep;

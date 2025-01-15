@@ -2,6 +2,7 @@
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Strategy;
+using Admin.NET.Common;
 using Admin.NET.Core.Entity;
 using Newtonsoft.Json;
 using RulesEngine.Models;
@@ -19,11 +20,11 @@ namespace Admin.NET.Application.Factory
         {
             //ReceiptTypeEnum _ReceiptType = (ReceiptTypeEnum)Enum.Parse(typeof(ReceiptTypeEnum), ReceiptType, true);
 
-            string customName = ""
+            string workFlowName = ""
     ;            //判断是不是有定制化的流程
             if (workFlow != null)
             {
-                var customWorkFlow = workFlow.SysWorkFlowSteps.Where(p => p.StepName == InboundWorkFlowConst.Workflow_ASNForReceipt).ToList();
+                var customWorkFlow = workFlow.SysWorkFlowSteps.Where(p => p.StepName == OutboundWorkFlowConst.Workflow_PreOrderForOrderALL).ToList();
                 if (customWorkFlow.Count > 0)
                 {
                     //判断有没有子流程
@@ -31,23 +32,24 @@ namespace Admin.NET.Application.Factory
                     {
                         //将customWorkFlow[0].Filters 反序列化成List<SysWorkFlowFieldDto>
                         List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow[0].Filters);
-                        customName = sysWorkFlowFieldDtos.Where(p => p.Field == orderType).Select(p => p.Value).FirstOrDefault("");
+                        workFlowName = sysWorkFlowFieldDtos.Where(p => p.Field == orderType).Select(p => p.Value).FirstOrDefault("");
                     }
                     else
                     {
-                        customName = customWorkFlow[0].Remark;
+                        workFlowName = customWorkFlow[0].Remark;
                     }
                 }
 
             }
 
-            switch (customName)
+            switch (workFlowName)
             {
                 case "Hach":
                     return new PickTaskHachStrategy();
                 default:
                     return new PickTaskDefaultStrategy();
             }
+            //
         }
 
     }

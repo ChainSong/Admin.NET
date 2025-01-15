@@ -27,7 +27,7 @@ public interface IOrderPickRFInterface
     public SysCacheService _sysCacheService { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
-
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }

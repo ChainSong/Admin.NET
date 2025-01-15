@@ -12,9 +12,9 @@ const CONFIG = {
 	},
 	// 生产环境配置
 	production: {
-		assetsPath: 'https://wms.rbow-logistics.com.cn:8000/WebStatic', // 静态资源路径
-		baseUrl: 'https://wms.rbow-logistics.com.cn:8000', // 后台接口请求地址
-		filebaseUrl: 'https://wms.rbow-logistics.com.cn:8000', // 后台文件地址 
+		assetsPath: 'https://wms.rbow-logistics.com.cn:8074/WebStatic', // 静态资源路径
+		baseUrl: 'https://wms.rbow-logistics.com.cn:8074', // 后台接口请求地址
+		filebaseUrl: 'https://wms.rbow-logistics.com.cn:8074', // 后台文件地址 
 		hostUrl: '', // H5地址(前端运行地址)
 		websocketUrl: '', // websocket服务端地址
 		weixinAppId: '', // 微信公众号appid

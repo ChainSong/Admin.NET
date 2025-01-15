@@ -74,14 +74,14 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     public async Task<SqlSugarPagedList<WMSPickTaskOutput>> Page(WMSPickTaskInput input)
     {
         var query = _rep.AsQueryable()
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickTaskNumber), u => u.PickTaskNumber.Contains(input.PickTaskNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()))
-                    .WhereIF(input.PickStatus != 0, u => u.PickStatus == input.PickStatus)
+                    .WhereIF(input.PickStatus.HasValue && input.PickStatus != 0, u => u.PickStatus == input.PickStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickType), u => u.PickType.Contains(input.PickType.Trim()))
                     .WhereIF(input.PrintNum > 0, u => u.PrintNum == input.PrintNum)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PrintPersonnel), u => u.PrintPersonnel.Contains(input.PrintPersonnel.Trim()))
@@ -115,7 +115,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.StartTimeRange != null && input.StartTimeRange.Count > 0)
         {
             DateTime? start = input.StartTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.StartTime > start);
+            query = query.WhereIF(start.HasValue, u => u.StartTime >= start);
             if (input.StartTimeRange.Count > 1 && input.StartTimeRange[1].HasValue)
             {
                 var end = input.StartTimeRange[1].Value.AddDays(1);
@@ -125,7 +125,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.EndTimeRange != null && input.EndTimeRange.Count > 0)
         {
             DateTime? start = input.EndTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.EndTime > start);
+            query = query.WhereIF(start.HasValue, u => u.EndTime >= start);
             if (input.EndTimeRange.Count > 1 && input.EndTimeRange[1].HasValue)
             {
                 var end = input.EndTimeRange[1].Value.AddDays(1);
@@ -135,7 +135,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.PrintTimeRange != null && input.PrintTimeRange.Count > 0)
         {
             DateTime? start = input.PrintTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.PrintTime > start);
+            query = query.WhereIF(start.HasValue, u => u.PrintTime >= start);
             if (input.PrintTimeRange.Count > 1 && input.PrintTimeRange[1].HasValue)
             {
                 var end = input.PrintTimeRange[1].Value.AddDays(1);
@@ -145,7 +145,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
         {
             DateTime? start = input.CreationTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
             {
                 var end = input.CreationTimeRange[1].Value.AddDays(1);
@@ -155,7 +155,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
         {
             DateTime? start = input.DateTime1Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
             {
                 var end = input.DateTime1Range[1].Value.AddDays(1);
@@ -165,7 +165,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
         {
             DateTime? start = input.DateTime2Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
             {
                 var end = input.DateTime2Range[1].Value.AddDays(1);
@@ -175,7 +175,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
         {
             DateTime? start = input.DateTime3Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
             {
                 var end = input.DateTime3Range[1].Value.AddDays(1);
@@ -185,7 +185,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
         {
             DateTime? start = input.DateTime4Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
             {
                 var end = input.DateTime4Range[1].Value.AddDays(1);
@@ -195,7 +195,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
         {
             DateTime? start = input.DateTime5Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
             {
                 var end = input.DateTime5Range[1].Value.AddDays(1);

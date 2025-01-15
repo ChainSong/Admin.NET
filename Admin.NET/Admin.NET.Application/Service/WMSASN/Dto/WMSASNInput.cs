@@ -300,7 +300,7 @@ public class WMSASNInput : BasePageInput
     /// <summary>
     /// ASNStatus
     /// </summary>
-    public int ASNStatus { get; set; }
+    public int? ASNStatus { get; set; }
 
     /// <summary>
     /// ReceiptType

@@ -22,6 +22,7 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackLis
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
 using System.Text.RegularExpressions;
 using Admin.NET.Application.Service;
+using System.Web;
 
 namespace Admin.NET.Application;
 public class OrderPickRFStrategy : IOrderPickRFInterface
@@ -33,7 +34,7 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
-
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
@@ -96,7 +97,28 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
                 MatchCollection matchesLOT = Regex.Matches(request.ScanInput, lotRegex);
                 request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.SKU = request.SKU;
-            };
+            }
+            //扫描的是HTTP 二维码，那么从中解析SKU
+            else if (request.ScanInput.Contains("http"))
+            {
+
+                Uri uri = new Uri(request.ScanInput);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    request.SKU = collection["p"].Split(':')[1];
+                }
+            }
+            else
+            {
+                //判断是不是不需要解析，直接扫描的产品条码
+                var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.ScanInput).First();
+                if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                {
+                    request.SKU = checkProduct.SKU;
+                }
+            }
             //request.CustomerId = receipt.CustomerId;
         }
 

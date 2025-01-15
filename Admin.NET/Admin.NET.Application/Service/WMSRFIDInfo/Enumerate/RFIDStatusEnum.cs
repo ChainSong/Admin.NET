@@ -17,7 +17,7 @@ namespace Admin.NET.Application;
 public enum RFIDStatusEnum
 {
     新增 = 1,
+    包装 = 10,
     出库 = 99,
-
 
 }

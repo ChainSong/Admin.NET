@@ -8,6 +8,7 @@ using Admin.NET.Application.Service;
 using Admin.NET.Application.Service.Factory;
 using Admin.NET.Application.Service.WMSExpress.Factory;
 using Admin.NET.Application.Service.WMSExpress.Interface;
+using Admin.NET.Common;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -43,7 +44,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
 
-
+    private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+    private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
 
@@ -67,7 +69,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
 
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -87,6 +89,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repRFPackageAcquisition = repRFPackageAcquisition;
         _repWMSExpressFee = repWMSExpressFee;
         _repRFIDInfo = repRFIDInfo;
+        _repTableColumns = repTableColumns;
+        _repTableColumnsDetail = repTableColumnsDetail;
     }
 
     /// <summary>
@@ -105,9 +109,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickTaskNumber), u => u.PickTaskNumber.Contains(input.PickTaskNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PackageType), u => u.PackageType.Contains(input.PackageType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExpressCompany), u => u.ExpressCompany.Contains(input.ExpressCompany.Trim()))
@@ -115,7 +119,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .WhereIF(input.IsComposited > 0, u => u.IsComposited == input.IsComposited)
                     .WhereIF(input.IsHandovered > 0, u => u.IsHandovered == input.IsHandovered)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Handoveror), u => u.Handoveror.Contains(input.Handoveror.Trim()))
-                    .WhereIF(input.PackageStatus != 0, u => u.PackageStatus == input.PackageStatus)
+                    .WhereIF(input.PackageStatus.HasValue  && input.PackageStatus != 0, u => u.PackageStatus == input.PackageStatus)
                     .WhereIF(input.DetailCount > 0, u => u.DetailCount == input.DetailCount)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
@@ -149,83 +153,83 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
                     .Select<WMSPackageOutput>()
 ;
-        if (input.HandoverTimeRange != null && input.HandoverTimeRange.Count > 0)
+        if (input.HandoverTime != null && input.HandoverTime.Count > 0)
         {
-            DateTime? start = input.HandoverTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.HandoverTime > start);
-            if (input.HandoverTimeRange.Count > 1 && input.HandoverTimeRange[1].HasValue)
+            DateTime? start = input.HandoverTime[0];
+            query = query.WhereIF(start.HasValue, u => u.HandoverTime >= start);
+            if (input.HandoverTime.Count > 1 && input.HandoverTime[1].HasValue)
             {
-                var end = input.HandoverTimeRange[1].Value.AddDays(1);
+                var end = input.HandoverTime[1].Value.AddDays(1);
                 query = query.Where(u => u.HandoverTime < end);
             }
         }
-        if (input.PackageTimeRange != null && input.PackageTimeRange.Count > 0)
+        if (input.PackageTime != null && input.PackageTime.Count > 0)
         {
-            DateTime? start = input.PackageTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.PackageTime > start);
-            if (input.PackageTimeRange.Count > 1 && input.PackageTimeRange[1].HasValue)
+            DateTime? start = input.PackageTime[0];
+            query = query.WhereIF(start.HasValue, u => u.PackageTime >= start);
+            if (input.PackageTime.Count > 1 && input.PackageTime[1].HasValue)
             {
-                var end = input.PackageTimeRange[1].Value.AddDays(1);
+                var end = input.PackageTime[1].Value.AddDays(1);
                 query = query.Where(u => u.PackageTime < end);
             }
         }
-        if (input.CreationTimeRange != null && input.CreationTimeRange.Count > 0)
+        if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
-            DateTime? start = input.CreationTimeRange[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
-            if (input.CreationTimeRange.Count > 1 && input.CreationTimeRange[1].HasValue)
+            DateTime? start = input.CreationTime[0];
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
+            if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
-                var end = input.CreationTimeRange[1].Value.AddDays(1);
+                var end = input.CreationTime[1].Value.AddDays(1);
                 query = query.Where(u => u.CreationTime < end);
             }
         }
-        if (input.DateTime1Range != null && input.DateTime1Range.Count > 0)
+        if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
-            DateTime? start = input.DateTime1Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
-            if (input.DateTime1Range.Count > 1 && input.DateTime1Range[1].HasValue)
+            DateTime? start = input.DateTime1[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
+            if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
-                var end = input.DateTime1Range[1].Value.AddDays(1);
+                var end = input.DateTime1[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime1 < end);
             }
         }
-        if (input.DateTime2Range != null && input.DateTime2Range.Count > 0)
+        if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
-            DateTime? start = input.DateTime2Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
-            if (input.DateTime2Range.Count > 1 && input.DateTime2Range[1].HasValue)
+            DateTime? start = input.DateTime2[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
+            if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
-                var end = input.DateTime2Range[1].Value.AddDays(1);
+                var end = input.DateTime2[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime2 < end);
             }
         }
-        if (input.DateTime3Range != null && input.DateTime3Range.Count > 0)
+        if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
-            DateTime? start = input.DateTime3Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
-            if (input.DateTime3Range.Count > 1 && input.DateTime3Range[1].HasValue)
+            DateTime? start = input.DateTime3[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
+            if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
-                var end = input.DateTime3Range[1].Value.AddDays(1);
+                var end = input.DateTime3[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime3 < end);
             }
         }
-        if (input.DateTime4Range != null && input.DateTime4Range.Count > 0)
+        if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
-            DateTime? start = input.DateTime4Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
-            if (input.DateTime4Range.Count > 1 && input.DateTime4Range[1].HasValue)
+            DateTime? start = input.DateTime4[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
+            if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
-                var end = input.DateTime4Range[1].Value.AddDays(1);
+                var end = input.DateTime4[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime4 < end);
             }
         }
-        if (input.DateTime5Range != null && input.DateTime5Range.Count > 0)
+        if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
-            DateTime? start = input.DateTime5Range[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
-            if (input.DateTime5Range.Count > 1 && input.DateTime5Range[1].HasValue)
+            DateTime? start = input.DateTime5[0];
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
+            if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
-                var end = input.DateTime5Range[1].Value.AddDays(1);
+                var end = input.DateTime5[1].Value.AddDays(1);
                 query = query.Where(u => u.DateTime5 < end);
             }
         }
@@ -322,6 +326,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "ScanPackageData")]
+    [Idempotent]
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
 
@@ -369,6 +374,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //factory._db = _db;
         factory._repPackageDetail = _repPackageDetail;
         factory._sysCacheService = _sysCacheService;
+        factory._repRFIDInfo = _repRFIDInfo;
         factory._repOrder = _repOrder;
         factory._repOrderDetail = _repOrderDetail;
         var response = await factory.AddPackage(input);
@@ -523,5 +529,103 @@ public class WMSPackageService : IDynamicApiController, ITransient
         return response;
 
     }
+
+
+
+    /// <summary>
+    /// 根据RFID 获取RFID 信息
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "PrintPackageList")]
+    public async Task<Response<ScanPackageOutput>> PrintPackageList(ScanPackageRFIDInput input)
+    {
+
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
+
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.VerifyPackage(input);
+        return response;
+
+    }
+
+
+
+
+    /// <summary>
+    /// 导出
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ExportPackage")]
+    public ActionResult ExportPackage(WMSPackageInput input)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+
+        //private const string FileDir = "/File/ExcelTemp";
+        //string url = await ImprotExcel.WriteFile(file);
+        //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+        //1根据用户的角色 解析出Excel
+        IPackageExportInterface factory = PackageExportFactory.PackageOperation("");
+
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        //factory._repInstruction = _repInstruction;
+        //factory._repPreOrder = _repPreOrder;
+        //factory._reppreOrderDetail = _repPreOrderDetail;
+        //factory._repInventoryUsable = _repInventoryUsable;
+        //factory._repPickTask = _repPickTask;
+        //factory._repPickTaskDetail = _repPickTaskDetail;
+        //factory._repOrderAllocation = _repOrderAllocation;
+        factory._repPackage = _rep;
+        factory._repPackageDetail = _repPackageDetail;
+
+
+
+        var response = factory.ExportPackage(input);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "包装信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
+    }
+
+
 }
 

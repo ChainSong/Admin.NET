@@ -368,6 +368,11 @@ public class WMSRFIDInfoInput : BasePageInput
 
     public string PoCode { get; set; }
 
+
+    public string SoCode { get; set; }
+
+    public string SnCode { get; set; }
+
     /// <summary>
     /// Remark
     /// </summary>

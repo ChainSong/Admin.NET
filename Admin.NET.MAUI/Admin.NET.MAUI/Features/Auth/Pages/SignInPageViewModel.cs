@@ -27,73 +27,82 @@ public partial class SignInPageViewModel(
             return;
 
         }
-        //Login
-        AuthModel authModel = new AuthModel();
-        authModel.Account = Form.UserName;
-        authModel.Password = Form.Password;
-        //AuthServices authServices = new AuthServices();
-        var result = await new AsyncNetworkHttpClient(appSettingsService, appNavigator).PostAsync<BaseResponse<TokenModel>>(AppAuthApi._login, authModel);
-        //AddCookies(result.Result);
-        //var body = new StringContent($"{{\"account\": \"{Form.UserName}\", \"password\": \"{Form.Password}\" , \"codeId\": 0 , \"code\": ''  }}", Encoding.UTF8, "application/json");
-        await appSettingsService.SetAccessTokenAsync(
-                   //Convert.ToBase64String(
-                   //    System.Text.Encoding.UTF8.GetBytes(
-                   result.Result.AccessToken
-        //)
-        //)
-        );
+        try
+        {
 
-        await appSettingsService.SetRefreshTokenAsync(
-                  //Convert.ToBase64String(
-                  //    System.Text.Encoding.UTF8.GetBytes(
-                  result.Result.RefreshToken
-      //    )
-      //)
-      );
-        //var adasd = appSettingsService.GetAccessTokenAsync();
-        //var adasdaa = appSettingsService.GetRefreshTokenAsync();
-        await GoHomeAsync();
 
-        // 创建HttpContent对象  
-        //var content = new StringContent(body, Encoding.UTF8, "application/json");
+            //Login
+            AuthModel authModel = new AuthModel();
+            authModel.Account = Form.UserName;
+            authModel.Password = Form.Password;
+            //AuthServices authServices = new AuthServices();
+            var result = await new AsyncNetworkHttpClient(appSettingsService, appNavigator).PostAsync<BaseResponse<TokenModel>>(AppAuthApi._login, authModel);
+            //AddCookies(result.Result);
+            //var body = new StringContent($"{{\"account\": \"{Form.UserName}\", \"password\": \"{Form.Password}\" , \"codeId\": 0 , \"code\": ''  }}", Encoding.UTF8, "application/json");
+            await appSettingsService.SetAccessTokenAsync(
+                       //Convert.ToBase64String(
+                       //    System.Text.Encoding.UTF8.GetBytes(
+                       result.Result.AccessToken
+            //)
+            //)
+            );
 
-        //try
-        //{
-        //    // 发送POST请求  
-        //    var response = _httpClient.PostAsync("http://180.169.76.197:8070/api/sysAuth/login", body);
+            await appSettingsService.SetRefreshTokenAsync(
+                      //Convert.ToBase64String(
+                      //    System.Text.Encoding.UTF8.GetBytes(
+                      result.Result.RefreshToken
+          //    )
+          //)
+          );
+            //var adasd = appSettingsService.GetAccessTokenAsync();
+            //var adasdaa = appSettingsService.GetRefreshTokenAsync();
+            await GoHomeAsync();
 
-        //    // 确保HTTP成功状态值  
-        //    //response.EnsureSuccessStatusCode();
+            // 创建HttpContent对象  
+            //var content = new StringContent(body, Encoding.UTF8, "application/json");
 
-        //    // 读取响应内容  
-        //    string responseBody = response.Result.Content.ReadAsStringAsync().Result;
+            //try
+            //{
+            //    // 发送POST请求  
+            //    var response = _httpClient.PostAsync("http://180.169.76.197:8070/api/sysAuth/login", body);
 
-        //    // 输出响应内容  
-        //    //Console.WriteLine(responseBody);
-        //}
-        //catch (HttpRequestException e)
-        //{
-        //    Console.WriteLine("\nException Caught!");
-        //    Console.WriteLine("Message :{0} ", e.Message);
-        //}
-        ////var response =   _httpClient.PostAsync("http://localhost:5005/api/login", body);
-        ////response.EnsureSuccessStatusCode();
+            //    // 确保HTTP成功状态值  
+            //    //response.EnsureSuccessStatusCode();
 
-        ////var content = await response.Content.ReadAsStringAsync();
-        //// 假设返回的内容是JSON，且包含访问令牌
-        //// 你需要根据Furion的返回格式来解析具体的访问令牌
-        ////return content; // 返回包含访问令牌的字符串
-        //return Task.CompletedTask;
+            //    // 读取响应内容  
+            //    string responseBody = response.Result.Content.ReadAsStringAsync().Result;
 
-        //appSettingsService.SetAccessTokenAsync(
-        //    Convert.ToBase64String(
-        //        System.Text.Encoding.UTF8.GetBytes(
-        //            $"{Form.UserName}:{Form.Password}"
-        //        )
-        //    )
-        //);
+            //    // 输出响应内容  
+            //    //Console.WriteLine(responseBody);
+            //}
+            //catch (HttpRequestException e)
+            //{
+            //    Console.WriteLine("\nException Caught!");
+            //    Console.WriteLine("Message :{0} ", e.Message);
+            //}
+            ////var response =   _httpClient.PostAsync("http://localhost:5005/api/login", body);
+            ////response.EnsureSuccessStatusCode();
 
-        //return GoHomeAsync();
+            ////var content = await response.Content.ReadAsStringAsync();
+            //// 假设返回的内容是JSON，且包含访问令牌
+            //// 你需要根据Furion的返回格式来解析具体的访问令牌
+            ////return content; // 返回包含访问令牌的字符串
+            //return Task.CompletedTask;
+
+            //appSettingsService.SetAccessTokenAsync(
+            //    Convert.ToBase64String(
+            //        System.Text.Encoding.UTF8.GetBytes(
+            //            $"{Form.UserName}:{Form.Password}"
+            //        )
+            //    )
+            //);
+
+            //return GoHomeAsync();
+        }
+        catch (Exception ex)
+        {
+          
+        }
     }
 
 

@@ -321,10 +321,7 @@ namespace Admin.NET.Application.Strategy
         /// <returns></returns>
         private async Task<Response<List<OrderStatusDto>>> SaveRFID(List<WMSReceipt> receipts, List<WMSASN> entityASN)
         {
-
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
-
-
             //获取需要生成RFID序列的入库单明细信息
             var rfidReceiptDetails = _repReceiptDetail.AsQueryable()
                 .Where(a => receipts.Select(b => b.Id).Contains(a.ReceiptId)
@@ -347,6 +344,10 @@ namespace Admin.NET.Application.Strategy
                     var warehouseCode = item.WarehouseId;
                     long uniqueCode;
                     RedisCacheHelper.IncrementValue("RFID_UNIQUE_CODE", out uniqueCode);
+                    if (uniqueCode < 0)
+                    {
+                        return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "序列号生成失败" };
+                    }
                     var randomCode = new Random(Guid.NewGuid().GetHashCode()).Next(100, 999);
                     var rfidCode = skuId.ToString().PadLeft(7, '0') + "" + customerCode.ToString().PadLeft(3, '0') + "" + warehouseCode.ToString().PadLeft(3, '0') + "" + uniqueCode.ToString().PadLeft(7, '0') + "" + randomCode + "" + (randomCode % 10).ToString();
                     var rfidInfo = item.Adapt<WMSRFIDInfo>();

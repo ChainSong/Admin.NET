@@ -19,13 +19,16 @@
 						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="ASN单号" prop="aSNNumber">
-							{{ruleForm.aSNNumber}}
+						<el-form-item label="ASN单号" prop="saSNNumber">
+							{{ruleForm.asnNumber}}
 						</el-form-item>
 						
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						{{ruleForm.customerName}}
+						<el-form-item label="客户" prop="customerName">
+							{{ruleForm.customerName}}
+						</el-form-item>
+						<!-- {{ruleForm.customerName}} -->
 					</el-col>
 				
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
@@ -35,7 +38,7 @@
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="SKU" prop="sKU">
-							{{ruleForm.sKU}}
+							{{ruleForm.sku}}
 						</el-form-item>
 						
 					</el-col>
@@ -46,6 +49,14 @@
 						</el-form-item>
 						
 					</el-col>
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+						<el-form-item label="批次" prop="batchCode">
+							{{ruleForm.batchCode}}
+							
+						</el-form-item>
+						
+					</el-col>
+					
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="入库人" prop="receiptPerson">
 							{{ruleForm.receiptPerson}}
@@ -90,8 +101,7 @@
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="状态" prop="status">
-						{{ruleForm.status}}
-							
+						{{ruleForm.status==1?'未出库':'已出库'}}
 						</el-form-item>
 						
 					</el-col>

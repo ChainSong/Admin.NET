@@ -86,7 +86,32 @@ namespace Admin.NET.Application.Strategy
             await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.完成, CompleteTime = DateTime.Now }, a => orderData.Select(c => c.PreOrderId).Contains(a.Id));
             //_repPickTask.AsQueryable().Includes(a => a.Detail).Where(a => request.Contains(a.Id)).ToList();
             //await _repOrder.Context.InsertNav(pickTasks).Include(a => a.Details).ExecuteCommandAsync();
+            List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+            foreach (var item in orderData)
+            {
 
+
+                //插入反馈指令
+                WMSInstruction wMSInstruction = new WMSInstruction();
+                //wMSInstruction.OrderId = orderData[0].Id;
+                wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                wMSInstruction.InstructionType = "HACH出库反馈";
+                wMSInstruction.BusinessType = "HACH出库反馈";
+                //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                wMSInstruction.CustomerId = item.CustomerId;
+                wMSInstruction.CustomerName = item.CustomerName;
+                wMSInstruction.WarehouseId = item.WarehouseId;
+                wMSInstruction.WarehouseName = item.WarehouseName;
+                wMSInstruction.OperationId = item.Id;
+                wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
+                wMSInstruction.TableName = "WMS_Order";
+                wMSInstruction.InstructionPriority = 0;
+                wMSInstruction.Remark = "";
+
+
+                wMSInstructions.Add(wMSInstruction);
+            }
+            await _repInstruction.InsertRangeAsync(wMSInstructions);
             //获取分配的库存ID
 
             var InventoryIds = _repOrderAllocation.AsQueryable().Where(a => request.Contains(a.OrderId)).Select(a => a.InventoryId).ToList();

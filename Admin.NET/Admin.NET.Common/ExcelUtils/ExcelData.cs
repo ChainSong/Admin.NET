@@ -10,6 +10,7 @@
 //using Magicodes.ExporterAndImporter.Core;
 //using Magicodes.ExporterAndImporter.Excel;
 using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Core.Models;
 using Magicodes.ExporterAndImporter.Excel;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -63,7 +64,7 @@ namespace Admin.NET.Common.ExcelCommon
         private static string GetFullPath(string fileName)
         {
             fileName = Path.GetFileName(fileName);
-            var fullpath = Path.GetFullPath(Environment.CurrentDirectory + FileDir +"/"+ fileName);
+            var fullpath = Path.GetFullPath(Environment.CurrentDirectory + FileDir + "/" + fileName);
             return fullpath;
         }
 
@@ -199,7 +200,8 @@ namespace Admin.NET.Common.ExcelCommon
                         DataRow dataRow = data.NewRow();
                         for (int j = row.FirstCellNum; j < cellCount; ++j)
                         {
-                            if (j < 0) {
+                            if (j < 0)
+                            {
                                 continue;
                             }
                             if (row.GetCell(j) != null) //同理，没有数据的单元格都默认是null
@@ -217,6 +219,28 @@ namespace Admin.NET.Common.ExcelCommon
                 return null;
             }
         }
+
+
+
+
+        public static async Task<ImportResult<T>> ExcelToEntityCollection<T>(string fileName, string sheetName, bool isFirstRowColumn) where T : class, new()
+        {
+            var fullpath = GetFullPath(fileName);
+
+            try
+            {
+                IImporter Importer = new ExcelImporter();
+                return await Importer.Import<T>(fullpath);
+
+                //return import;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.Message);
+                return null;
+            }
+        }
+
 
         /// 给定文件的路径，读取文件的二进制数据，判断文件的编码类型
         /// <param name="FILE_NAME">文件路径</param>
@@ -301,5 +325,10 @@ namespace Admin.NET.Common.ExcelCommon
             }
             return true;
         }
+
+
+
+
+
     }
 }

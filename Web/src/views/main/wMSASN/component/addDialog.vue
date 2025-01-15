@@ -3,7 +3,6 @@
 		<el-dialog v-model="isShowDialog" :title="props.title" :width="1000" draggable="">
 			<el-tabs v-model="activeName">
 				<el-tab-pane label="页面创建" name="PageCreate">
-
 					<el-card>
 						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 							<el-row :gutter="35">
@@ -93,7 +92,7 @@
 														:columnData="v"
 														:key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
-														@select:model="data => { state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
+														@select:model="data => {console.log(data) ; state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
 												<template v-if="v.type == 'DatePicker'">
 													<el-date-picker v-model="state.details[scope.$index][v.columnName]"

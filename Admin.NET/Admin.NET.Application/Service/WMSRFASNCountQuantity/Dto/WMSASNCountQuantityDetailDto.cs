@@ -135,12 +135,14 @@ public class WMSASNCountQuantityDetailDto
     /// </summary>
     
     public string? PoCode { get; set; }
-    
+    public string? SoCode { get; set; }
+    public string? SnCode { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
-    
-    
+
+
     public double Weight { get; set; }
     
     /// <summary>

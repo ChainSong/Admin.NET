@@ -18,23 +18,24 @@ using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Dtos;
 using System.Data;
 using AngleSharp.Html.Dom;
+using XAct;
 
 namespace Admin.NET.Application;
 public class ExportBaseStrategy
 {
 
-    public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+    public virtual SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     //public readonly SqlSugarRepository<TableColumnsDetail> _repDetail { get; set; }
-    public UserManager _userManager { get; set; }
+    public virtual UserManager _userManager { get; set; }
 
 
     //public List<string> _tableNames { get; set; }
 
-    public ExportBaseStrategy(SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager)
+    public ExportBaseStrategy()
     {
         //this._tableNames = tableNames;
-        this._repTableColumns = repTableColumns;
-        this._userManager = userManager;
+        //this._repTableColumns = repTableColumns;
+        //this._userManager = userManager;
 
     }
 
@@ -47,7 +48,7 @@ public class ExportBaseStrategy
               a.TenantId == tenantId &&
               a.IsCreate == 1
             )
-            .GroupBy(a => new { a.DbColumnName, a.Associated, a.DisplayName, a.Type, a.Validation,  a.TenantId })
+            .GroupBy(a => new { a.DbColumnName, a.Associated,a.IsImportColumn, a.DisplayName, a.Type,a.IsCreate, a.Validation,  a.TenantId })
            .Select(a => new TableColumns
            {
                DisplayName = a.DisplayName,
@@ -57,7 +58,8 @@ public class ExportBaseStrategy
                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                DbColumnName = a.DbColumnName,
                Validation = a.Validation,
-               //IsImportColumn = a.IsImportColumn,
+               IsImportColumn = a.IsImportColumn,
+               IsCreate=a.IsCreate,
                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
                //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
                //.Select()

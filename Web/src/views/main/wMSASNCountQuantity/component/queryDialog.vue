@@ -93,6 +93,8 @@
 					</el-table-column>
 					<el-table-column prop="batchCode" label="批次">
 					</el-table-column>
+					<el-table-column prop="snCode" label="验证码">
+					</el-table-column>
 					<el-table-column prop="expirationDate" label="过期时间">
 					</el-table-column>
 				</el-table>

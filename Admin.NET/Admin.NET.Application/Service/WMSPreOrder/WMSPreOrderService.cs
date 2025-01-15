@@ -51,7 +51,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SqlSugarRepository<WMSOrderDetailBom> _repOrderDetailBom;
-    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSOrderDetailBom> repOrderDetailBom)
+    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSOrderDetailBom> repOrderDetailBom, SqlSugarRepository<SysWorkFlow> repWorkFlow)
     {
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
@@ -69,6 +70,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _repProduct = repProduct;
         _repProductBom = repProductBom;
         _repOrderDetailBom = repOrderDetailBom;
+        _repWorkFlow = repWorkFlow;
     }
 
 
@@ -86,12 +88,12 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         var query = _rep.AsQueryable()
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.PreOrderNumber), u => u.PreOrderNumber.Contains(input.PreOrderNumber.Trim()))
                     //.WhereIF(!string.IsNullOrWhiteSpace(input.ExternOrderNumber), u => u.ExternOrderNumber.Contains(input.ExternOrderNumber.Trim()))
-                    .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderType), u => u.OrderType.Contains(input.OrderType.Trim()))
-                    .WhereIF(input.PreOrderStatus != 0, u => u.PreOrderStatus == input.PreOrderStatus)
+                    .WhereIF(input.PreOrderStatus.HasValue && input.PreOrderStatus != 0, u => u.PreOrderStatus == input.PreOrderStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Po), u => u.Po.Contains(input.Po.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.So), u => u.So.Contains(input.So.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
@@ -194,7 +196,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.OrderTime != null && input.OrderTime.Count > 0)
         {
             DateTime? start = input.OrderTime[0];
-            query = query.WhereIF(start.HasValue, u => u.OrderTime > start);
+            query = query.WhereIF(start.HasValue, u => u.OrderTime >= start);
             if (input.OrderTime.Count > 1 && input.OrderTime[1].HasValue)
             {
                 var end = input.OrderTime[1].Value.AddDays(1);
@@ -204,7 +206,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.CompleteTime != null && input.CompleteTime.Count > 0)
         {
             DateTime? start = input.CompleteTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CompleteTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CompleteTime >= start);
             if (input.CompleteTime.Count > 1 && input.CompleteTime[1].HasValue)
             {
                 var end = input.CompleteTime[1].Value.AddDays(1);
@@ -214,7 +216,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.CreationTime != null && input.CreationTime.Count > 0)
         {
             DateTime? start = input.CreationTime[0];
-            query = query.WhereIF(start.HasValue, u => u.CreationTime > start);
+            query = query.WhereIF(start.HasValue, u => u.CreationTime >= start);
             if (input.CreationTime.Count > 1 && input.CreationTime[1].HasValue)
             {
                 var end = input.CreationTime[1].Value.AddDays(1);
@@ -224,7 +226,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.DateTime1 != null && input.DateTime1.Count > 0)
         {
             DateTime? start = input.DateTime1[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime1 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime1 >= start);
             if (input.DateTime1.Count > 1 && input.DateTime1[1].HasValue)
             {
                 var end = input.DateTime1[1].Value.AddDays(1);
@@ -234,7 +236,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.DateTime2 != null && input.DateTime2.Count > 0)
         {
             DateTime? start = input.DateTime2[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime2 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime2 >= start);
             if (input.DateTime2.Count > 1 && input.DateTime2[1].HasValue)
             {
                 var end = input.DateTime2[1].Value.AddDays(1);
@@ -244,7 +246,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.DateTime3 != null && input.DateTime3.Count > 0)
         {
             DateTime? start = input.DateTime3[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime3 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime3 >= start);
             if (input.DateTime3.Count > 1 && input.DateTime3[1].HasValue)
             {
                 var end = input.DateTime3[1].Value.AddDays(1);
@@ -254,7 +256,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.DateTime4 != null && input.DateTime4.Count > 0)
         {
             DateTime? start = input.DateTime4[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime4 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime4 >= start);
             if (input.DateTime4.Count > 1 && input.DateTime4[1].HasValue)
             {
                 var end = input.DateTime4[1].Value.AddDays(1);
@@ -264,7 +266,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         if (input.DateTime5 != null && input.DateTime5.Count > 0)
         {
             DateTime? start = input.DateTime5[0];
-            query = query.WhereIF(start.HasValue, u => u.DateTime5 > start);
+            query = query.WhereIF(start.HasValue, u => u.DateTime5 >= start);
             if (input.DateTime5.Count > 1 && input.DateTime5[1].HasValue)
             {
                 var end = input.DateTime5[1].Value.AddDays(1);
@@ -301,8 +303,15 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             return result;
         }
 
+        //var asnData = _rep.AsQueryable().Where(a => a.Id == input.).First();
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+
         //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, input.OrderType);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;
@@ -379,8 +388,14 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             return result;
         }
 
+        //var asnData = _rep.AsQueryable().Where(a => a.Id == input.).First();
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
         //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(input.CustomerId);
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, input.OrderType);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;
@@ -530,9 +545,17 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             {
                 customerId = customerData.CustomerId;
             }
+
+
+            //根据订单类型判断是否存在该流程
+            var workflow = await _repWorkFlow.AsQueryable()
+               .Includes(a => a.SysWorkFlowSteps)
+               .Where(a => a.WorkName == entityListDtos.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+
             //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
             //使用简单工厂定制化修改和新增的方法
-            IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(customerId);
+            IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, entityListDtos.First().OrderType);
             factory._repPreOrder = _rep;
             factory._reppreOrderDetail = _reppreOrderDetail;
             //factory._db = _db;
@@ -575,7 +598,17 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         {
             customerId = customerData.CustomerId;
         }
-        IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(customerId);
+
+        var orderData = _rep.AsQueryable().Where(a => input.Contains(a.Id)).First();
+
+        //根据订单类型判断是否存在该流程
+        var workflow = await _repWorkFlow.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == orderData.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+
+
+        IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(workflow, orderData.OrderType);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;
@@ -620,7 +653,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [DisplayName("导出预出库单")]
-    public ActionResult ExportPreOrder(List<long> input)
+    public ActionResult ExportPreOrder(WMSPreOrderExcelInput input)
     {
         //使用简单工厂定制化  /
         //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
@@ -634,7 +667,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         //var aaaaa = ExcelData.GetData<DataSet>(url);
         //1根据用户的角色 解析出Excel
         IPreOrderExcelInterface factoryExcel = PreOrderExcelFactory.GePreOrder();
-      
+
         factoryExcel._repPreOrder = _rep;
         factoryExcel._repWarehouseUser = _repWarehouseUser;
         //factoryExcel._db = _db;

@@ -42,8 +42,9 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysCacheService _sysCacheService;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
 
-    
+
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
 
     private readonly SqlSugarRepository<WMSASN> _repASN;
@@ -53,7 +54,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
 
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
-    public WMSRFReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SysCacheService sysCacheService)
+    public WMSRFReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SysCacheService sysCacheService, SqlSugarRepository<WMSProduct> repProduct)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -70,6 +71,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
         _repTableInventoryUsed = repTableInventoryUsed;
         _repTableInventoryUsable = repTableInventoryUsable;
         _sysCacheService = sysCacheService;
+        _repProduct = repProduct;
     }
 
     /// <summary>
@@ -90,7 +92,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
-                    .WhereIF(input.ReceiptStatus != 0, u => u.ReceiptStatus == input.ReceiptStatus)
+                    //.WhereIF(input.ReceiptStatus != 0, u => u.ReceiptStatus == input.ReceiptStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptType), u => u.ReceiptType.Contains(input.ReceiptType.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Contact), u => u.Contact.Contains(input.Contact.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ContactInfo), u => u.ContactInfo.Contains(input.ContactInfo.Trim()))
@@ -125,8 +127,8 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
                     .Where(a => a.ReceiptStatus >= (int)ReceiptStatusEnum.新增 && a.ReceiptStatus < (int)ReceiptStatusEnum.完成)
                     //.Where(a => _repCustomerUser.AsQueryable().Where(b => b.CustomerId == a.CustomerId).Count() > 0)
                     //.Where(a => _repWarehouseUser.AsQueryable().Where(b => b.WarehouseId == a.WarehouseId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                    //.Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    //.Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSReceiptOutput>()
 ;
@@ -247,6 +249,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
         factory._sysCacheService = _sysCacheService;
         factory._repLocation = _repLocation;
         factory._repReceiptReceiving = _repReceiptReceiving;
+        factory._repProduct = _repProduct;
 
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.RFReceiptReceivingSave(input, receiptReceivingData);

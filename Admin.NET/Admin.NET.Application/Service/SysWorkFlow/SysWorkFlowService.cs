@@ -12,6 +12,9 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Service.Dto;
 using XAct;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Common;
+using RulesEngine.Models;
+using Newtonsoft.Json;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -25,6 +28,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<SysPos> _repPos;
     private readonly SqlSugarRepository<SysRole> _repRole;
     private readonly SqlSugarRepository<SysUser> _repUser;
+     
     public SysWorkFlowService(SqlSugarRepository<SysWorkFlow> rep, UserManager userManager, SqlSugarRepository<SysPos> repPos, SqlSugarRepository<SysRole> repRole, SqlSugarRepository<SysUser> repUser)
     {
         _rep = rep;
@@ -313,6 +317,47 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<SysWorkFlowOutput>().ToListAsync();
     }
 
+
+
+    /// <summary>
+    /// 获取SysWorkFlow列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<string> GetSystemWorkFlow(string CustomerName, string WorkFlow, string WorkFlowStepName, string OrderType)
+    {
+
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        var workflow = await _rep.AsQueryable()
+           .Includes(a => a.SysWorkFlowSteps)
+           .Where(a => a.WorkName == CustomerName + WorkFlow).FirstAsync();
+
+        string workFlowStrategy = ""
+;            //判断是不是有定制化的流程
+        if (workflow != null)
+        {
+            var customWorkFlow = workflow.SysWorkFlowSteps.Where(p => p.StepName == WorkFlowStepName).ToList();
+            if (customWorkFlow.Count > 0)
+            {
+                //判断有没有子流程
+                if (!string.IsNullOrEmpty(customWorkFlow[0].Filters))
+                {
+                    //将customWorkFlow[0].Filters 反序列化成List<SysWorkFlowFieldDto>
+                    List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow[0].Filters);
+                    workFlowStrategy = sysWorkFlowFieldDtos.Where(p => p.Field == OrderType).Select(p => p.Value).FirstOrDefault("");
+                }
+                else
+                {
+                    workFlowStrategy = customWorkFlow[0].Remark;
+                }
+            }
+        }
+        return workFlowStrategy;
+        //return await _rep.AsQueryable().Select<SysWorkFlowOutput>().ToListAsync();
+    }
 
 
 

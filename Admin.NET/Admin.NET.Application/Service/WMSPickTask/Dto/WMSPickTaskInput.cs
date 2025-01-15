@@ -214,7 +214,7 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// CustomerId
     /// </summary>
-    public long CustomerId { get; set; }
+    public long? CustomerId { get; set; }
 
     /// <summary>
     /// CustomerName
@@ -224,7 +224,7 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// WarehouseId
     /// </summary>
-    public long WarehouseId { get; set; }
+    public long? WarehouseId { get; set; }
 
     /// <summary>
     /// WarehouseName
@@ -244,7 +244,7 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// PickStatus
     /// </summary>
-    public int PickStatus { get; set; }
+    public int? PickStatus { get; set; }
 
     /// <summary>
     /// PickType

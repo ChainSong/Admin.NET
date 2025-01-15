@@ -170,6 +170,12 @@ public class WMSRFIDInfo : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string PoCode { get; set; }
 
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string SoCode { get; set; }
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string SnCode { get; set; }
+
 
     [SugarColumn(ColumnDescription = "", Length = 80)]
     public string Remark { get; set; }

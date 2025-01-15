@@ -150,7 +150,11 @@ public class WMSReceiptDetail : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? PoCode { get; set; }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50, DefaultValue = "")]
+    public string? SoCode { get; set; }
     /// <summary>
     /// 
     /// </summary>

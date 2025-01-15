@@ -27,6 +27,7 @@ using XAct;
 using Furion.FriendlyException;
 using SqlSugar;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
@@ -77,6 +78,20 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                
             };
 
+            //扫描的是HTTP 二维码，那么从中解析SKU
+            if (request.Input.Contains("http"))
+            {
+
+                Uri uri = new Uri(request.Input);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    request.SKU = collection["p"].Split(':')[1];
+                    request.SN = collection["p"].Split(':')[0];
+                }
+            };
+
         }
 
         response.Data.PickTaskNumber = request.PickTaskNumber;
@@ -98,6 +113,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
                 {
                     var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
+                    response.Data.PackageDatas = pickData;
                     response.Code = result.Code;
                     response.Msg = result.Msg;
                     return response;
@@ -424,6 +440,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         p.PreOrderNumber = packageData.PreOrderNumber;
                         p.OrderNumber = packageData.OrderNumber;
                         p.PickTaskId = packageData.PickTaskId;
+                        //p.SN = item.;
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
                     }

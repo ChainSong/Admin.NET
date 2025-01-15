@@ -17,6 +17,6 @@ namespace Admin.NET.Application
         //public readonly SqlSugarRepository<TableColumnsDetail> _repDetail { get; set; }
         public UserManager _userManager { get; set; }
 
-        Response<DataTable> Strategy(long CustomerId, long TenantId);
+        Response<byte[]> Strategy(long CustomerId, long TenantId);
     }
 }

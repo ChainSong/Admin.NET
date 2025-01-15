@@ -338,14 +338,19 @@ const exportReceipts = async () => {
     ids.push(a.id);
   });
   // 2,验证数据有没有勾选
-  if (ids.length < 1) {
-    ElMessage.error("请勾选订单");
-    return;
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if (ids.length > 0) {
+    let res = await exportReceipt({ "ids": ids });
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  }else{
+    let res = await exportReceipt(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
   }
-  let res = await exportReceipt(ids);
-
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
 };
 
 //导出上架单

@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import FlowPanel from '/@/components/workflow/panel.vue'
+import FlowPanel from '/@/components/flow/panel.vue'
 import VolBox from '/@/components/basic/VolBox.vue';
 import { deleteSysWorkFlow,addSysWorkFlow } from '/@/api/main/sysWorkFlow';
 export default {
@@ -136,6 +136,7 @@ export default {
     },
     save() {
       let mainData = JSON.parse(JSON.stringify(this.$refs.flow.formFields));
+      mainData.WorkType="审批流程";
       console.log(mainData);
       if (!mainData.WorkName) {
         this.$message.error('请填写左侧表单【流程名称】')
