@@ -711,8 +711,6 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
                 {
                     var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
-
-
                     response.Code = result.Code;
                     response.Msg = result.Msg;
                     return response;

@@ -20,13 +20,14 @@ using Admin.NET.Application.Service;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Dtos.Enum;
 using Furion.FriendlyException;
+using Admin.NET.Common;
 
 namespace Admin.NET.Application.Service;
 public class PrintOrderStrategy : IPrintOrderInterface
 {
 
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
-
+    public SysWorkFlowService _repWorkFlowService { get; set; }
     public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
@@ -53,9 +54,9 @@ public class PrintOrderStrategy : IPrintOrderInterface
 
     }
     //处理打印发运单
-    public async Task<Response<List<WMSOrderPrintDto>>> PrintShippingList(List<long> request)
+    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> request)
     {
-        Response<List<WMSOrderPrintDto>> response = new Response<List<WMSOrderPrintDto>>();
+        Response<PrintBase<List<WMSOrderPrintDto>>> response = new Response<PrintBase<List<WMSOrderPrintDto>>>();
         //List<WMSOrderPrintDto> result = new List<WMSOrderPrintDto>();
         //获取订单信息
         //List<WMSOrder> orders = await _repOrder.GetListAsync(o => request.Contains(o.Id));
@@ -67,6 +68,13 @@ public class PrintOrderStrategy : IPrintOrderInterface
         {
             throw Oops.Oh("请选择同一个客户的订单进行打印！");
         }
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Order, orders.First().OrderType);
+
 
         //获取仓库信息
         WMSWarehouse warehouse = await _repWarehouse.AsQueryable().Where(o => o.Id == orders.First().WarehouseId).FirstAsync();
@@ -96,7 +104,11 @@ public class PrintOrderStrategy : IPrintOrderInterface
                 });
             });
 
-            response.Data = orderPrintDtos;
+            response.Data = new PrintBase<List<WMSOrderPrintDto>>()
+            {
+                PrintTemplate = string.IsNullOrEmpty(workflow) ? OutboundWorkFlowConst.Workflow_Print_Order : workflow,
+                Data = orderPrintDtos
+            };
             response.Code = StatusCode.Success;
             response.Msg = "获取成功";
         }

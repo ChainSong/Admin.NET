@@ -11,9 +11,6 @@
                 <el-button style="font-size:20px;" type="info" @click="shortagePackage">短包</el-button>
                 <!-- <el-button type="warning">换箱</el-button> -->
                 <el-button style="font-size:20px;" type="danger" @click="addPackage">新增箱</el-button>
-
-
-
               </el-row>
             </el-row>
           </el-row>
@@ -110,7 +107,6 @@
           </el-table-column>
         </el-table>
       </el-row>
-
       <printDialog ref="printDialogRef" :title="ptintTitle" />
     </el-card>
   </div>
@@ -169,11 +165,7 @@ const state = ref({
   tableColumnDetails: new Array<TableColumns>(),
   //自定义提示
   orderStatus: new Array<orderStatus>(),
-
   // expressList:
-
-
-
 });
 
 
@@ -212,10 +204,9 @@ onMounted(async () => {
   signalR.on('echo', (data: any) => {
     console.log("WebSocket data");
     console.log(data);
-
     state.value.vm.form.rfidStr = data;
-    console.log("state.value.vm.form");
-    console.log(state.value.vm.form);
+    // console.log("state.value.vm.form");
+    // console.log(state.value.vm.form);
     if (state.value.vm.form.rfidStr != "") {
       getRFIDInfoData();
     }
@@ -236,6 +227,8 @@ const getRFIDInfoData = async () => {
 
   } else if (res.data.result.code == 99) {
     allPackage(state.value.vm.form);
+    signalR.send("echo", 5);
+    signalR.send("echo", 9)
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     state.value.vm.form.pickTaskNumber = "";
@@ -254,6 +247,7 @@ const getRFIDInfoData = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else if (res.data.result.code == -1) {
+    signalR.send("echo", 5)
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
@@ -285,6 +279,8 @@ const shortagePackage = async () => {
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
   } else if (res.data.result.code == 99) {
+    signalR.send("echo", 5);
+    signalR.send("echo", 9);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
@@ -355,13 +351,15 @@ const addPackage = async (data: any) => {
 const scanPackage = async () => {
   // signalR.send('echo',1)
   // 判断webSocket是否连接
-  if (signalR.state != "Connected") {
-    signalR.start();
-    ElMessage.error("连接状态" + signalR.state);
+  // if (signalR.state != "Connected") {
+  //   signalR.start();
+  //   ElMessage.error("连接状态" + signalR.state);
 
-  }
-  ElMessage.error("连接状态" + signalR.state);
+  // }
+  // ElMessage.error("连接状态" + signalR.state);
   // alert("请扫描商品");
+  signalR.send('echo',1)
+  signalR.send("echo", 5);
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {

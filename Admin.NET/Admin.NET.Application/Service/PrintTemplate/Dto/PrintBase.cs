@@ -14,7 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application;
-public class PrintBase
+public class PrintBase<T>
 {
     public virtual string PrintTemplate { get; set; }
+
+    public virtual T Data { get; set; }
 }

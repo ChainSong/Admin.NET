@@ -55,11 +55,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
     private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    private readonly SysWorkFlowService _repWorkFlowService;
 
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -84,6 +85,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
         _repWorkFlow = repWorkFlow;
+        _repWorkFlowService = repWorkFlowService;
 
     }
 
@@ -544,7 +546,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         var response = factory.Export(input);
         IExporter exporter = new ExcelExporter();
-       
+
         var result = exporter.ExportAsByteArray<DataTable>(response.Data);
         var fs = new MemoryStream(result.Result);
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
@@ -616,10 +618,19 @@ public class WMSOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
 
-    [HttpPost]
-    public async Task<List<WMSOrderPrintDto>> PrintShippingList(List<long> input)
+    [HttpPost]//List<PackageData>
+    //public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> input)
+    public async Task<Response<List<WMSOrderPrintDto>>> PrintShippingList(List<long> input)
     {
+
+        Response<List<WMSOrderPrintDto>> data = new Response<List<WMSOrderPrintDto>>();
         //使用PrintShippingList类种的打印方法  
+
+        //根据id 获取订单信息
+        //var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
+
+
+
 
         IPrintOrderInterface factory = PrintOrderFactory.PrintOrder();
         factory._userManager = _userManager;
@@ -635,16 +646,19 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderAllocation = _repOrderAllocation;
         factory._repWarehouse = _repWarehouse;
         factory._repCustomer = _repCustomer;
-
-
+        factory._repWorkFlowService = _repWorkFlowService;
 
         var response = await factory.PrintShippingList(input);
+
         if (response.Code == StatusCode.Success)
         {
-            return response.Data;
+            data.Data = response.Data.Data;
+            data.Code = StatusCode.Success;
+            data.Msg = "打印成功";
+            return data;
+            //return response;
         }
-        //return response;
-        return response.Data;
+        return data;
     }
 
 
@@ -670,7 +684,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         var warehouse = await _repWarehouse.AsQueryable().Where(a => a.Id == order.WarehouseId).FirstAsync();
         response.Data = new List<string>();
         response.Data.Add(warehouse.Address);
-        response.Data.Add(order.OrderAddress.Province+"," + order.OrderAddress.City +","+ order.OrderAddress.Address);
+        response.Data.Add(order.OrderAddress.Province + "," + order.OrderAddress.City + "," + order.OrderAddress.Address);
         response.Code = StatusCode.Success;
         response.Msg = "获取位置信息成功";
         return response;

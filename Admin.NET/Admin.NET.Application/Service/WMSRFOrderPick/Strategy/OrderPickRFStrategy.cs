@@ -114,7 +114,7 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
             {
                 //判断是不是不需要解析，直接扫描的产品条码
                 var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.ScanInput).First();
-                if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                if (checkProduct != null && !string.IsNullOrEmpty(checkProduct.SKU))
                 {
                     request.SKU = checkProduct.SKU;
                 }
@@ -172,7 +172,8 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
 
         var orderPickTask = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskId == request.Id
            && a.SKU == request.SKU
-           && (a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode))
+           && ((a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode)) || string.IsNullOrEmpty(request.Lot))
+           
            && a.Location == request.Location
            && a.PickQty < a.Qty
         ).ToListAsync();

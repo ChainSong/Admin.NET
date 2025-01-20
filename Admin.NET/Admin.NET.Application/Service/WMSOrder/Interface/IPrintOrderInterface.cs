@@ -28,6 +28,7 @@ public interface IPrintOrderInterface
     public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
+    public SysWorkFlowService _repWorkFlowService { get; set; }
 
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WMSCustomer> _repCustomer { get; set; }
@@ -51,5 +52,5 @@ public interface IPrintOrderInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<Response<List<WMSOrderPrintDto>>> PrintShippingList(List<long> request);
+    Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> request);
 }

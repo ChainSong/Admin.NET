@@ -19,9 +19,7 @@
                       :label="item.name" :value="item.codeInt">
                     </el-option>
                   </el-select>
-
                 </el-form-item>
-
               </template>
               <template v-if="i.type == 'DropDownListStrRemote'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -448,15 +446,7 @@ const createPickTaskFun = () => {
         resultPopupShow.value = true;
       } else {
         ElMessage.info(result.data.result.msg);
-      }
-      // console.log(data.data.result);
-      // if (data.data.result[0].statusCode == 1) {
-      //   handleQuery();
-      //   ElMessage.success("转入库单成功");
-      // } else {
-      //   resultPopupShow.value=true;
-      //   state.value.orderStatus = data.data.result;
-      // }
+      } 
     })
     .catch(() => { });
 };
@@ -493,33 +483,29 @@ const completeOrderFun = () => {
     })
     .catch(() => { });
 };
-
-
 // ======================================发运单打印=======================================
-
 // 打开打印询页面
 const openPrint = async () => {
   ptintTitle.value = '发运单打印';
   // let ids = ref(Array<Number>);
   let ids = new Array<Number>();
-
-  console.log("ids");
+  // console.log("ids");
   multipleTableRef.value.getSelectionRows().forEach(a => {
     ids.push(a.id);
   });
 
-  console.log("ids");
-  console.log(ids);
+  // console.log("ids");
+  // console.log(ids);
   if (ids.length == 0) {
     ElMessage.error("请勾选需要打印的订单");
     return;
   }
   let printData = new Array<Header>();
   let result = await printShippingList(ids);
-  console.log("result");
-  console.log(result);
+  // console.log("result");
+  // console.log(result);
   if (result.data.result != null) {
-    printData = result.data.result;
+    printData = result.data.result.data;
     printData.forEach(a => {
       if (a.customerConfig != null) {
         a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
@@ -527,13 +513,16 @@ const openPrint = async () => {
     });
     // state.value.details = result.data.result.details;
   }
-  console.log("printData");
-  console.log(printData);
+  // console.log("printData");
+  // console.log(printData);
+  // console.log(printData[0].customerConfig);
+  // console.log(printData[0].customerConfig.printShippingTemplate);
 
   // 判断有没有配置客户自定义打印模板
-  if (result.data.result[0].customerConfig != null && result.data.result[0].customerConfig.printShippingTemplate != null) {
-    printDialogRef.value.openDialog({ "printData": printData, "templateName": result.data.result[0].customerConfig.printShippingTemplate });
+  if (printData[0].customerConfig != null && printData[0].customerConfig.printShippingTemplate != null) {
+    printDialogRef.value.openDialog({ "printData": printData, "templateName": printData[0].customerConfig.printShippingTemplate });
   } else {
+    // console.log("asdasdasdasds");
     printDialogRef.value.openDialog({ "printData": printData, "templateName": "发运单模板" });
     // printDialogRef.value.openDialog({ "printData": printData, "templateName": "四联发货单模板"
   }

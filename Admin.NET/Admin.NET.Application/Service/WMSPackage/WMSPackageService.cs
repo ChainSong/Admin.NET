@@ -48,7 +48,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
-
+    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    private readonly SysWorkFlowService _repWorkFlowService;
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
 
     private readonly SysCacheService _sysCacheService;
@@ -69,7 +70,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
 
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -91,6 +92,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repRFIDInfo = repRFIDInfo;
         _repTableColumns = repTableColumns;
         _repTableColumnsDetail = repTableColumnsDetail;
+        _repWorkFlow = repWorkFlow;
+        _repWorkFlowService = repWorkFlowService;
     }
 
     /// <summary>
@@ -326,7 +329,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "ScanPackageData")]
-    [Idempotent]
+    //[Idempotent("ms", 500)]
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
 
@@ -540,9 +543,20 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "PrintPackageList")]
-    public async Task<Response<ScanPackageOutput>> PrintPackageList(ScanPackageRFIDInput input)
+    public async Task<Response<dynamic>> PrintPackageList(WMSPackageInput input)
     {
+        Response<dynamic> response = new Response<dynamic>(); 
 
+        var getPackageList = await _rep.AsQueryable().Where(a => input.Ids.Contains(a.Id)).ToListAsync();
+
+
+
+
+
+
+
+        response.Data = new List<PackageData>();
+        response.Data.aaa= "aaa";
         //使用简单工厂定制化修改和新增的方法
         //根据订单类型判断是否存在该流程
         //var workflow = await _repWorkFlow.AsQueryable()
@@ -551,22 +565,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
 
 
-        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
-        factory._repPackage = _rep;
-        factory._repPickTask = _repPickTask;
-        factory._repPickTaskDetail = _repPickTaskDetail;
-        factory._repPickTaskDetail = _repPickTaskDetail;
-        factory._repWarehouseUser = _repWarehouseUser;
-        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._userManager = _userManager;
-        //factory._db = _db;
-        factory._repPackageDetail = _repPackageDetail;
-        factory._sysCacheService = _sysCacheService;
-        factory._repOrder = _repOrder;
-        factory._repRFIDInfo = _repRFIDInfo;
-        factory._repOrderDetail = _repOrderDetail;
-        var response = await factory.VerifyPackage(input);
+     
         return response;
 
     }
