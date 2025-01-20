@@ -71,7 +71,18 @@ namespace System.Data
                                         }
                                         else
                                         {
-                                            p.SetValue(model, Convert.ToDateTime(value), null);
+                                            //p.SetValue(model, Convert.ToDateTime(value), null);
+                                            DateTime parsedDate;
+                                            string[] dateFormats = { "dd-MMM-yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };  
+                                            if (DateTime.TryParseExact(value.ToString(), dateFormats, null, System.Globalization.DateTimeStyles.None, out parsedDate))
+                                            {
+                                                p.SetValue(model, parsedDate, null);
+                                            }
+                                            else
+                                            {
+                                                // 如果解析失败，可以抛出异常或处理为默认值
+                                                p.SetValue(model, null, null);  
+                                            }
                                         }
                                     }
                                     else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name == ("Double")).Count() > 0 || p.PropertyType.Name == "Double"))
@@ -111,6 +122,14 @@ namespace System.Data
                                     else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name.ToUpper() == ("Decimal").ToUpper()).Count() > 0 || p.PropertyType.Name.ToUpper() == "Decimal".ToUpper()))
                                     {
                                         p.SetValue(model, Convert.ToDecimal(value), null);
+                                    }
+                                    else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name.ToUpper() == ("float").ToUpper()).Count() > 0 || p.PropertyType.Name.ToUpper() == "float".ToUpper()))
+                                    {
+                                        p.SetValue(model, Convert.ToDecimal(value), null);
+                                    }
+                                    else if (p.PropertyType.GenericTypeArguments != null && (p.PropertyType.GenericTypeArguments.Where(a => a.Name.ToUpper() == ("Single").ToUpper()).Count() > 0 || p.PropertyType.Name.ToUpper() == "Single".ToUpper()))
+                                    {
+                                        p.SetValue(model, Convert.ToSingle(value), null);
                                     }
                                     else
                                     {
