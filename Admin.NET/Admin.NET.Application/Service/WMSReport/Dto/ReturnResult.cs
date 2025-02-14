@@ -81,4 +81,39 @@ public class ReturnResult
     //出库总金额
     public int OutTotalAmount { get; set; }
 
+
+
+    //二版本大屏实体
+    //左侧1大屏
+    public object LeftTable1 { get; set; }
+    //左侧2大屏
+    public object LeftTable2 { get; set; }
+    //左侧3大屏
+    public object LeftTable3 { get; set; }
+
+
+
+    //统计图大屏
+    //统计图1
+    public object pic1In { get; set; }
+    public object pic1Out { get; set; }
+    public object pic1All { get; set; }
+    public object pic1Name { get; set; }
+    //统计图2
+    public object pic2In { get; set; }
+    public object pic2Out { get; set; }
+    public object pic2All { get; set; }
+    public object pic2Name { get; set; }
+    //统计图3
+    public object pic3Now { get; set; }
+    public object pic3Last { get; set; }
+    public object pic3Name { get; set; }
+    //统计图4
+    public object pic4percentage { get; set; }
+    public object pic4Name { get; set; }
+    public object pic4NameVal { get; set; }
+
+
+    //上面8个数字
+    public object EightNum { get; set; }
 }

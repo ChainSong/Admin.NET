@@ -21,3 +21,6 @@ public class TopFiveOrderCountAmountDto
     public int OrderQty { get; set; }
     public int TotalMoney { get; set; }
 }
+
+
+
