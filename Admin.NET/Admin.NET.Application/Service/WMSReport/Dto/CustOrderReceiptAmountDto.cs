@@ -37,3 +37,66 @@ public class CustOrderReceiptAmountDto
     /// </summary>
     public int ReSumPrice { get; set; }
 }
+
+
+
+//二版本大屏实体
+
+//左侧1 table
+public class CustOrderReceiptAmountDtoTwo
+{
+    /// <summary>
+    /// 客户名称
+    /// </summary>
+    public string CustomerName { get; set; }
+    /// <summary>
+    /// 入库数量
+    /// </summary>
+    public int WoSumQty { get; set; }
+    /// <summary>
+    /// 入库金额
+    /// </summary>
+    public int WoSumPrice { get; set; }
+    /// <summary>
+    /// 出库数量
+    /// </summary>
+    public int ReSumQty { get; set; }
+    /// <summary>
+    /// 出库金额
+    /// </summary>
+    public int ReSumPrice { get; set; }
+
+    /// <summary>
+    /// 库存数量
+    /// </summary>
+    public int AllSumQty { get; set; }
+    /// <summary>
+    /// 库存金额
+    /// </summary>
+    public int AllSumPrice { get; set; }
+}
+
+//左侧2 table
+public class TopFiveOrderCountAmountDtoTwo
+{
+    //SKU OrderQty TotalMoney
+    public string CustomerName { get; set; }
+    public int countslast { get; set; }
+    public int countsnow { get; set; }
+}
+
+//左侧3 table
+public class TopThreeOrderCountAmountDtoTwo
+{
+    public string BigName { get; set; }
+    public int counts { get; set; }
+    public string Percentage { get; set; }
+}
+
+
+//顶部两个百分比
+public class TopNumTwo
+{
+    public string PricePercentage { get; set; }
+    public string QtyPercentage { get; set; }
+}
