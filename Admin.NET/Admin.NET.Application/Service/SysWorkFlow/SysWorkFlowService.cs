@@ -15,6 +15,9 @@ using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Common;
 using RulesEngine.Models;
 using Newtonsoft.Json;
+using NewLife.Reflection;
+using System.Linq.Expressions;
+using AngleSharp.Io;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -28,14 +31,16 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<SysPos> _repPos;
     private readonly SqlSugarRepository<SysRole> _repRole;
     private readonly SqlSugarRepository<SysUser> _repUser;
-     
-    public SysWorkFlowService(SqlSugarRepository<SysWorkFlow> rep, UserManager userManager, SqlSugarRepository<SysPos> repPos, SqlSugarRepository<SysRole> repRole, SqlSugarRepository<SysUser> repUser)
+    private readonly SqlSugarRepository<SysWorkFlowTable> _repWorkFlowTable;
+
+    public SysWorkFlowService(SqlSugarRepository<SysWorkFlow> rep, UserManager userManager, SqlSugarRepository<SysPos> repPos, SqlSugarRepository<SysRole> repRole, SqlSugarRepository<SysUser> repUser, SqlSugarRepository<SysWorkFlowTable> repWorkFlowTable)
     {
         _rep = rep;
         _userManager = userManager;
         _repPos = repPos;
         _repRole = repRole;
         _repUser = repUser;
+        _repWorkFlowTable = repWorkFlowTable;
     }
 
     /// <summary>
@@ -317,6 +322,34 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<SysWorkFlowOutput>().ToListAsync();
     }
 
+    /// <summary>
+    /// 获取SysWorkFlow列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "copyWorkFlow")]
+    public async Task<Response> CopyWorkFlow( SysWorkFlow input)
+    {
+        //先判断有没有这个流程
+        var entityCheck = await _rep.AsQueryable().Includes(a => a.SysWorkFlowSteps).Where(u => u.WorkName == input.WorkName).FirstAsync();
+        if (entityCheck != null && entityCheck.Id != 0)
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "流程名称已存在" };
+        }
+        var entity = await _rep.AsQueryable().Includes(a => a.SysWorkFlowSteps).Where(u => u.Id == input.Id).FirstAsync();
+        entity.Id = 0;
+        entity.WorkName = input.WorkName;
+        entity.WorkTable = input.WorkName;
+        foreach (var item in entity.SysWorkFlowSteps)
+        {
+            item.Id = 0;
+            item.WorkFlowId = 0;
+        }
+        await _rep.Context.InsertNav(entity).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+        return new Response() { Code = StatusCode.Success, Msg = "复制成功" };
+        //return await _rep.AsQueryable().Select<SysWorkFlowOutput>().ToListAsync();
+    }
 
 
     /// <summary>
@@ -360,7 +393,157 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     }
 
 
+    /// <summary>
+    /// 审核默认对应数据库字段为AuditId审核人ID ,AuditStatus审核状态,Auditor审核人,Auditdate审核时间,Auditreason审核原因
+    /// </summary>
+    /// <param name="keys"></param>
+    /// <param name="auditStatus"></param>
+    /// <param name="auditReason"></param>
+    /// <returns></returns>
+    public async Task<Response> Audit(object[] keys, int? auditStatus, string auditReason)
+    {
+        Response response = new Response();
+        if (keys == null || keys.Length == 0)
+        {
+            response.Msg = "请选择要审核的数据";
+            response.Code = StatusCode.Error;
+            return response;
+        }
+        return response;
+        //Expression<Func<T, bool>> whereExpression = typeof(T).GetKeyName().CreateExpression<T>(keys[0], LinqExpressionType.Equal);
+        //T entity = repository.FindAsIQueryable(whereExpression).FirstOrDefault();
 
+        ////进入流程审批
+        //if (WorkFlowManager.Exists<T>(entity))
+        //{
+        //    var auditProperty = TProperties.Where(x => x.Name.ToLower() == "auditstatus").FirstOrDefault();
+        //    if (auditProperty == null)
+        //    {
+        //        return Response.Error("表缺少审核状态字段：AuditStatus");
+        //    }
+
+        //    AuditStatus status = (AuditStatus)Enum.Parse(typeof(AuditStatus), auditStatus.ToString());
+        //    if (auditProperty.GetValue(entity).GetInt() != (int)AuditStatus.审核中)
+        //    {
+        //        return Response.Error("只能审批审核中的数据");
+        //    }
+        //    Response = repository.DbContextBeginTransaction(() =>
+        //    {
+        //        return WorkFlowManager.Audit<T>(entity, status, auditReason, auditProperty, AuditWorkFlowExecuting, AuditWorkFlowExecuted);
+        //    });
+        //    if (Response.Status)
+        //    {
+        //        return Response.OK(ResponseType.AuditSuccess);
+        //    }
+        //    return Response.Error(Response.Message ?? "审批失败");
+        //}
+
+
+        ////获取主键
+        //PropertyInfo property = TProperties.GetKeyProperty();
+        //if (property == null)
+        //    return Response.Error("没有配置好主键!");
+
+        //UserInfo userInfo = UserContext.Current.UserInfo;
+
+        ////表如果有审核相关字段，设置默认审核
+
+        //PropertyInfo[] updateFileds = TProperties.Where(x => auditFields.Contains(x.Name.ToLower())).ToArray();
+        //List<T> auditList = new List<T>();
+        //foreach (var value in keys)
+        //{
+        //    object convertVal = value.ToString().ChangeType(property.PropertyType);
+        //    if (convertVal == null) continue;
+
+        //    entity = Activator.CreateInstance<T>();
+        //    property.SetValue(entity, convertVal);
+        //    foreach (var item in updateFileds)
+        //    {
+        //        switch (item.Name.ToLower())
+        //        {
+        //            case "auditid":
+        //                item.SetValue(entity, userInfo.User_Id);
+        //                break;
+        //            case "auditstatus":
+        //                item.SetValue(entity, auditStatus);
+        //                break;
+        //            case "auditor":
+        //                item.SetValue(entity, userInfo.UserTrueName);
+        //                break;
+        //            case "auditdate":
+        //                item.SetValue(entity, DateTime.Now);
+        //                break;
+        //            case "auditreason":
+        //                item.SetValue(entity, auditReason);
+        //                break;
+        //        }
+        //    }
+        //    auditList.Add(entity);
+        //}
+        //if (base.AuditOnExecuting != null)
+        //{
+        //    Response = AuditOnExecuting(auditList);
+        //    if (CheckResponseResult()) return Response;
+        //}
+        //Response = repository.DbContextBeginTransaction(() =>
+        //{
+        //    repository.UpdateRange(auditList, updateFileds.Select(x => x.Name).ToArray(), true);
+        //    if (base.AuditOnExecuted != null)
+        //    {
+        //        Response = AuditOnExecuted(auditList);
+        //        if (CheckResponseResult()) return Response;
+        //    }
+        //    return Response.OK();
+        //});
+        //if (Response.Status)
+        //{
+        //    return Response.OK(ResponseType.AuditSuccess);
+        //}
+        //return Response.Error(Response.Message);
+    }
+
+
+    /// <summary>
+    /// 写入流程
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="entity"></param>
+    /// <param name="rewrite">是否重新生成流程</param>
+    /// <param name="changeTableStatus">是否修改原表的审批状态</param>
+    public static void AddProcese(SysWorkFlowTable workFlowTable, bool rewrite = false, bool changeTableStatus = true) 
+    {
+        //var workFlowTable_Id = Guid.NewGuid();
+        //SysWorkFlowTable workFlowTable = new SysWorkFlowTable()
+        //{
+        //    WorkFlowTable_Id = workFlowTable_Id,
+        //    AuditStatus = (int)AuditStatus.审核中,
+        //    CurrentOrderId = 1,
+        //    Enable = 1,
+        //    WorkFlow_Id = workFlow.WorkFlow_Id,
+        //    WorkName = workFlow.WorkName,
+        //    WorkTable = workTable,
+        //    WorkTableKey = typeof(T).GetKeyProperty().GetValue(entity).ToString(),
+        //    WorkTableName = workFlow.WorkTableName,
+        //    CreateID = userInfo.User_Id,
+        //    CreateDate = DateTime.Now,
+        //    Creator = userInfo.UserTrueName,
+        //    Sys_WorkFlowTableStep = workFlow.Sys_WorkFlowStep.OrderBy(x => x.OrderId).Select(s => new Sys_WorkFlowTableStep()
+        //    {
+        //        Sys_WorkFlowTableStep_Id = Guid.NewGuid(),
+        //        WorkFlowTable_Id = workFlowTable_Id,
+        //        WorkFlow_Id = s.WorkFlow_Id,
+        //        StepId = s.StepId,
+        //        StepName = s.StepName,
+        //        AuditId = s.StepType == (int)AuditType.用户审批 ? s.StepValue : null,
+        //        StepType = s.StepType,
+        //        StepValue = s.StepValue,
+        //        OrderId = s.OrderId,
+        //        Enable = 1,
+        //        CreateDate = DateTime.Now,
+        //    }).ToList()
+        //};
+       
+    }
 
 }
 

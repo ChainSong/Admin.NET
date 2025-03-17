@@ -269,7 +269,7 @@ namespace Admin.NET.Application.Strategy
             //1，构建主表需要的信息
             headerTableColumn.ForEach(a =>
           {
-              if (a.IsImportColumn == 1)
+              if (a.IsImportColumn == 1 || a.IsKey == 1)
               {
                   dc = dt.Columns.Add(a.DisplayName, typeof(string));
               }
@@ -277,7 +277,7 @@ namespace Admin.NET.Application.Strategy
             //2.构建明细需要的信息
             detailTableColumn.ForEach(a =>
           {
-              if (a.IsImportColumn == 1 && !dt.Columns.Contains(a.DisplayName))
+              if ((a.IsImportColumn == 1 || a.IsKey == 1) && !dt.Columns.Contains(a.DisplayName))
               {
                   dc = dt.Columns.Add(a.DisplayName, typeof(string));
               }
@@ -311,7 +311,7 @@ namespace Admin.NET.Application.Strategy
                     Type orderDetailType = c.GetType();
                     headerTableColumn.ForEach(h =>
                     {
-                        if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+                        if ((h.IsImportColumn == 1 || h.IsKey == 1) && dt.Columns.Contains(h.DisplayName))
                         {
                             PropertyInfo property = orderType.GetProperty(h.DbColumnName);
                             //如果该字段有下拉选项，则值取下拉选项中的值
@@ -373,12 +373,13 @@ namespace Admin.NET.Application.Strategy
             return _repTableColumns.AsQueryable()
                .Where(a => a.TableName == TableName &&
                  a.TenantId == _userManager.TenantId &&
-                 a.IsImportColumn == 1
+                 (a.IsImportColumn == 1 || a.IsKey == 1)
                )
               .Select(a => new TableColumns
               {
                   DisplayName = a.DisplayName,
                   Type = a.Type,
+                  IsKey = a.IsKey,
                   //由于框架约定大于配置， 数据库的字段首字母小写
                   //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
                   DbColumnName = a.DbColumnName,

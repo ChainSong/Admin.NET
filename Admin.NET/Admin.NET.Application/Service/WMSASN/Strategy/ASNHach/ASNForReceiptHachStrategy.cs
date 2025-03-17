@@ -360,6 +360,7 @@ namespace Admin.NET.Application.Strategy
                     rfidInfo.Qty = 1;
                     rfidInfo.Status = 1;
                     rfidInfo.Sequence = rfidCode;
+                    rfidInfo.SnCode = rfidCode;
                     rfidInfo.RFID = rfidCode;
                     rfidInfo.Link = "";
                     rfidInfo.Remark = "";

@@ -156,6 +156,7 @@ namespace Admin.NET.Application.ReceiptReceivingCore.Strategy
                         dto.Location = item.Location;
                         dto.ExpirationDate = item.ExpirationDate;
                         dto.ProductionDate = item.ProductionDate;
+                        dto.BatchCode = item.BatchCode;
                         dto.GoodsStatus = (int)GoodsStatusEnum.正常;
                         dto.ReceivedQty = item.ReceivedQty;
                         dto.ReceiptDetailId = receiptOrderLineData.Id;

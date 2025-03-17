@@ -13,16 +13,16 @@ namespace Admin.NET.Application.Factory
 {
     public class PrintOrderFactory
     {
-        public static IPrintOrderInterface PrintOrder()
+        public static IPrintOrderInterface PrintOrder(string workflow)
         {
             //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
-            //switch (CustomerId)
-            //{
-            //    case (long)OutboundEnum.OutboundDefault:
+            switch (workflow)
+            {
+                //case (long)OutboundEnum.OutboundDefault:
+                //    return new PrintOrderStrategy();
+                default:
                     return new PrintOrderStrategy();
-            //    default:
-            //        return new AutomatedAllocationDefaultStrategy();
-            //}
+            }
         }
     }
 }

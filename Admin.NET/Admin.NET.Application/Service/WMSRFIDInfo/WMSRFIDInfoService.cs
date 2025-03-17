@@ -302,6 +302,9 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         //await _rep.UpdateAsync(a => a.PrintTime = DateTime.Now, a.).Where(u => ids.Contains(u.Id)).ToListAsync();
         entity.ForEach(u =>
         {
+
+            //u.Link = "https://omstest.hachultra.com.cn:8081/webapp/s3.html?p="+ u.SnCode + ":"+u.SKU;
+            //u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;
             u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;
         });
         response.Data = entity.Adapt<List<WMSRFIDinfoPrinfDto>>();

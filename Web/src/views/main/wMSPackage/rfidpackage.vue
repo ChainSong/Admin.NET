@@ -223,6 +223,7 @@ const getRFIDInfoData = async () => {
   if (res.data.result.code == 1) {
     allPackage(state.value.vm.form);
     state.value.vm.form = res.data.result.data;
+    
     state.value.vm.tableData = res.data.result.data.packageDatas;
 
   } else if (res.data.result.code == 99) {
@@ -233,7 +234,7 @@ const getRFIDInfoData = async () => {
     state.value.vm.form.sku = "";
     state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
     input.value = true;
     input.value = false;

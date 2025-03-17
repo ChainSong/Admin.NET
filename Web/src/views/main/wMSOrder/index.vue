@@ -446,7 +446,7 @@ const createPickTaskFun = () => {
         resultPopupShow.value = true;
       } else {
         ElMessage.info(result.data.result.msg);
-      } 
+      }
     })
     .catch(() => { });
 };
@@ -501,32 +501,27 @@ const openPrint = async () => {
     return;
   }
   let printData = new Array<Header>();
+  printData.printTemplate = "";
   let result = await printShippingList(ids);
   // console.log("result");
   // console.log(result);
   if (result.data.result != null) {
     printData = result.data.result.data;
-    printData.forEach(a => {
+    printData.data.forEach(a => {
       if (a.customerConfig != null) {
         a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
       }
     });
-    // state.value.details = result.data.result.details;
   }
-  // console.log("printData");
-  // console.log(printData);
-  // console.log(printData[0].customerConfig);
-  // console.log(printData[0].customerConfig.printShippingTemplate);
 
   // 判断有没有配置客户自定义打印模板
-  if (printData[0].customerConfig != null && printData[0].customerConfig.printShippingTemplate != null) {
-    printDialogRef.value.openDialog({ "printData": printData, "templateName": printData[0].customerConfig.printShippingTemplate });
+  if (printData.printTemplate != "") {
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+  } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
   } else {
-    // console.log("asdasdasdasds");
-    printDialogRef.value.openDialog({ "printData": printData, "templateName": "发运单模板" });
-    // printDialogRef.value.openDialog({ "printData": printData, "templateName": "四联发货单模板"
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
   }
-  // printDialogRef.value.openDialog({ "printData": printData, "templateName": "四联发货单模板" });
 };
 
 

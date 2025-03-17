@@ -202,7 +202,7 @@ namespace Admin.NET.Application.Strategy
                 {
                     //获取产品信息
                     var productInfo = _repProduct.AsQueryable()
-                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .Where(b => b.SKU == a.SKU && b.CustomerId == customerId)
                        .First();
                     //校验产品信息
                     if (productInfo == null)
@@ -247,6 +247,13 @@ namespace Admin.NET.Application.Strategy
                 }
                 //item.OrderAddress.UpdateTime = DateTime.Now;
             });
+
+            if (response.Data.Count > 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "订单异常";
+                return response;
+            }
 
             //开始插入数据
             //await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
@@ -401,7 +408,7 @@ namespace Admin.NET.Application.Strategy
 
                     //获取产品信息
                     var productInfo = _repProduct.AsQueryable()
-                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .Where(b => b.SKU == a.SKU && b.CustomerId == customerId)
                        .First();
                     //校验产品信息
                     if (productInfo == null)

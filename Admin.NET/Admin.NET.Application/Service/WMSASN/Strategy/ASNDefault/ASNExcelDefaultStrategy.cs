@@ -57,7 +57,7 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in _tableNames)
             {
                 //var  tableColumns = GetColumns(item);
-                tableColumnList.AddRange(GetColumns(item));
+                tableColumnList.AddRange(GetImportColumns(item));
             }
             //判断模板是不是最新的
             //判断方法直接比较字段数量，如果数量不一致，则提示需要更新模板
@@ -156,9 +156,7 @@ namespace Admin.NET.Application.Strategy
                             }
                             else if (Column.Type == "DatePicker" || Column.Type == "DateTimePicker")
                             {
-                                //var date = new DateTime();
-                                var isDate = DateTime.TryParse(row[s].ToString(), out DateTime date);
-                                if (!isDate && date.Year < 2000)
+                                if (string.IsNullOrEmpty(row[s].ToString()))
                                 {
                                     statusDtos.Add(new OrderStatusDto()
                                     {
@@ -170,6 +168,24 @@ namespace Admin.NET.Application.Strategy
                                         //StatusMsg = (string)StatusCode.warning,
                                         Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不是有效的日期格式"
                                     });
+                                }
+                                else
+                                {
+                                    //var date = new DateTime();
+                                    var isDate = DateTime.TryParse(row[s].ToString(), out DateTime date);
+                                    if (!isDate && date.Year < 2000)
+                                    {
+                                        statusDtos.Add(new OrderStatusDto()
+                                        {
+                                            //Id = b.Id,
+                                            ExternOrder = "第" + flag + "行",
+                                            SystemOrder = "第" + flag + "行",
+                                            //Type = b.OrderType,
+                                            StatusCode = StatusCode.Warning,
+                                            //StatusMsg = (string)StatusCode.warning,
+                                            Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不是有效的日期格式"
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -231,7 +247,7 @@ namespace Admin.NET.Application.Strategy
             var detailTableColumn = GetColumns("WMS_ASNDetail");
 
 
-            var query = _repASN.AsQueryable().Includes(a=>a.Details)
+            var query = _repASN.AsQueryable().Includes(a => a.Details)
                     .WhereIF(!string.IsNullOrWhiteSpace(request.ASNNumber), u => u.ASNNumber.Contains(request.ASNNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(request.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(request.ExternReceiptNumber.Trim()))
                     .WhereIF(request.CustomerId > 0, u => u.CustomerId == request.CustomerId)
@@ -272,7 +288,7 @@ namespace Admin.NET.Application.Strategy
                     //.WhereIF(request.Int3 > 0, u => u.Int3 == request.Int3)
                     //.WhereIF(request.Int4 > 0, u => u.Int4 == request.Int4)
                     //.WhereIF(request.Int5 > 0, u => u.Int5 == request.Int5)
-                    .WhereIF(request.Ids!= null && request.Ids.Count > 0, u => request.Ids.Contains(u.Id))
+                    .WhereIF(request.Ids != null && request.Ids.Count > 0, u => request.Ids.Contains(u.Id))
                     //.Where(a=>_repCustomerUser.AsQueryable().Where(b=>b.CustomerId==a.CustomerId).Count()>0)
                     //.Where(a=>_repWarehouseUser.AsQueryable().Where(b=>b.WarehouseId==a.WarehouseId).Count()>0)
                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
@@ -368,7 +384,7 @@ namespace Admin.NET.Application.Strategy
             //1，构建主表需要的信息
             headerTableColumn.ForEach(a =>
             {
-                if (a.IsImportColumn == 1)
+                if (a.IsImportColumn == 1 || a.IsKey == 1)
                 {
                     dc = dt.Columns.Add(a.DisplayName, typeof(string));
                 }
@@ -376,7 +392,7 @@ namespace Admin.NET.Application.Strategy
             //2.构建明细需要的信息
             detailTableColumn.ForEach(a =>
             {
-                if (a.IsImportColumn == 1 && !dt.Columns.Contains(a.DisplayName))
+                if ((a.IsImportColumn == 1 || a.IsKey == 1) && !dt.Columns.Contains(a.DisplayName))
                 {
                     dc = dt.Columns.Add(a.DisplayName, typeof(string));
                 }
@@ -394,7 +410,7 @@ namespace Admin.NET.Application.Strategy
                     Type orderDetailType = c.GetType();
                     headerTableColumn.ForEach(h =>
                     {
-                        if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+                        if ((h.IsImportColumn == 1 || h.IsKey == 1) && dt.Columns.Contains(h.DisplayName))
                         {
                             PropertyInfo property = orderType.GetProperty(h.DbColumnName);
                             //如果该字段有下拉选项，则值取下拉选项中的值
@@ -431,7 +447,7 @@ namespace Admin.NET.Application.Strategy
 
                     detailTableColumn.ForEach(d =>
                     {
-                        if (d.IsImportColumn == 1 && dt.Columns.Contains(d.DisplayName))
+                        if ((d.IsImportColumn == 1 || d.IsKey == 1) && dt.Columns.Contains(d.DisplayName))
                         {
                             PropertyInfo property = orderDetailType.GetProperty(d.DbColumnName);
                             row[d.DisplayName] = property.GetValue(c);
@@ -449,13 +465,49 @@ namespace Admin.NET.Application.Strategy
             return response;
         }
 
+        private List<TableColumns> GetImportColumns(string TableName)
+        {
+
+            return _repTableColumns.AsQueryable()
+             .Where(a => a.TableName == TableName &&
+               a.TenantId == _userManager.TenantId &&
+               (a.IsImportColumn == 1)
+             )
+            .Select(a => new TableColumns
+            {
+                DisplayName = a.DisplayName,
+                //由于框架约定大于配置， 数据库的字段首字母小写
+                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+                DbColumnName = a.DbColumnName,
+                Type = a.Type,
+                IsKey = a.IsKey,
+                IsImportColumn = a.IsImportColumn,
+                Validation = a.Validation,
+                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
+                //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
+                //.Select()
+            }).ToList();
+            //return _repTableColumns.AsQueryable()
+            //   .Where(a => a.TableName == TableName &&
+            //     a.TenantId == _userManager.TenantId &&
+            //     a.IsImportColumn == 1
+            //   )
+            //  .Select(a => new TableColumns
+            //  {
+            //      DisplayName = a.DisplayName,
+            //      //由于框架约定大于配置， 数据库的字段首字母小写
+            //      //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
+            //      DbColumnName = a.DbColumnName,
+            //      IsImportColumn = a.IsImportColumn
+            //  }).ToList();
+        }
 
         public List<TableColumns> GetColumns(string TableName)
         {
             return _repTableColumns.AsQueryable()
                .Where(a => a.TableName == TableName &&
                  a.TenantId == _userManager.TenantId &&
-                 a.IsImportColumn == 1
+                 (a.IsImportColumn == 1 || a.IsKey == 1)
                )
               .Select(a => new TableColumns
               {

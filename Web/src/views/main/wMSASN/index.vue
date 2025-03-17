@@ -2,6 +2,15 @@
   <div class="wMSASN-container">
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
+
+        <el-row :gutter="[16, 15]">
+          <template v-for="o in state.presetQuery.presetQueryList ">
+            <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSASN:page'"> 查询 </el-button>
+
+          </template>
+
+
+        </el-row>
         <el-row :gutter="[16, 15]">
           <template v-for="i in state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
@@ -61,6 +70,7 @@
 
         <el-form-item>
           <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSASN:page'"> 查询 </el-button>
+          <el-button type="primary" icon="ele-Search" @click="saveQuery" v-auth="'wMSASN:page'"> 保存查询条件 </el-button>
 
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSASN:add'"> 新增
           </el-button>
@@ -107,14 +117,14 @@
               </template>
             </el-table-column>
             <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName"
-              max-height="50">
+              width="150" max-height="50">
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="320">
+        <el-table-column fixed="right" label="操作" width="340">
           <template #header>
             <el-select placeholder="请选择">
-           
+
               <el-option v-for="item in state.tableColumnHeaders.filter(a => a.isCreate == 1)" :key="item.value">
                 <el-checkbox @change="checked => showColumnOption(checked, item)" :true-label="1" :false-label="0"
                   :label="item.displayName" :key="item.columnName" v-model="item.isShowInList">{{ item.displayName
@@ -147,6 +157,13 @@
       <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
       </el-alert>
     </el-dialog>
+    <el-dialog title="提示" v-model="state.presetQuery.saveQueryVisible" width="30%">
+      <span><el-input v-model="state.presetQuery.queryName" placeholder="请输入内容"></el-input></span>
+      <span class="dialog-footer">
+        <el-button @click="state.presetQuery.saveQueryVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveQueryFun">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -163,6 +180,7 @@ import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDia
 import { pageWMSASN, deleteWMSASN, asnForReceipt, exportASN, cancelWMSASN } from '/@/api/main/wMSASN';
 import { addWMSASNCountQuantity } from '/@/api/main/wMSASNCountQuantity';
 import { getByTableNameList } from "/@/api/main/tableColumns";
+import { addSysPresetQuery, queryByUser } from "/@/api/main/sysPresetQuery";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/asn";
 import Details from "/@/entities/asnDetail";
@@ -170,6 +188,7 @@ import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
 import { downloadByData, getFileName } from '/@/utils/download';
+import { stringify } from "querystring";
 
 const state = ref({
   vm: {
@@ -180,6 +199,13 @@ const state = ref({
     // } as any,
   },
   visible: false,
+  presetQuery: {
+    saveQueryVisible: false,
+    queryName: "",
+    businessName: "ASN查询",
+    queryForm: "",
+  },
+  presetQueryList: new Array<any>(),
   loading: false,
   header: new Header(),
   headers: new Array<Header>(),
@@ -247,7 +273,7 @@ const openAdd = () => {
   addTitle.value = '添加';
   addDialogRef.value.openDialog({});
 };
- 
+
 
 // 打开转入库单页面
 const openAsnforReceipt = (row: any) => {
@@ -399,6 +425,36 @@ const exportASNFun = async () => {
   }
 }
 
+//保存查询条件弹框 
+const saveQuery = (val: number) => {
+  state.value.presetQuery.saveQueryVisible = true;
+};
+
+//保存查询条件弹框 
+const saveQueryFun = (val: number) => {
+  state.value.presetQuery.saveQueryVisible = false;
+  ElMessageBox.confirm(`确定要保存当前查询条件吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      state.value.presetQuery.queryForm = JSON.stringify(state.value.header);
+      let result = await addSysPresetQuery(state.value.presetQuery);
+      queryPresetQuery();
+      ElMessage.success("保存成功");
+    })
+    .catch(() => { });
+
+
+};
+
+//保存查询条件弹框 
+const queryPresetQuery = async () => {
+  var res = await queryByUser(state.value.presetQuery);
+  state.value.presetQuery.presetQueryList = res.data.result.data;
+};
+
 
 // 改变页面容量
 const handleSizeChange = (val: number) => {
@@ -410,6 +466,7 @@ const handleSizeChange = (val: number) => {
 const handleCurrentChange = (val: number) => {
   tableParams.value.page = val;
   handleQuery();
+  queryPresetQuery();
 };
 
 

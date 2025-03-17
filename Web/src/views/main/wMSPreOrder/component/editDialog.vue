@@ -143,7 +143,7 @@
 						<el-form ref="headerRuleRef" label-position="top" :model="state.orderAddress">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isUpdate == 0)"
+									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isCreate == 1)"
 									v-bind:key="i.id">
 									<el-form-item :label="i.displayName" v-if="i.isCreate"
 										style="width: 90%;height: 45px;" :prop="i.columnName">
@@ -229,6 +229,11 @@
 				</span>
 			</template>
 		</el-dialog>
+		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
+			</el-alert>
+		</el-dialog>
 	</div>
 </template>
 
@@ -246,6 +251,7 @@ import TableColumns from "/@/entities/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import OrderAddress from "/@/entities/orderAddress";
 import { Local, Session } from '/@/utils/storage';
+import OrderStatus from "/@/entities/orderStatus";
 //父级传递来的参数
 var props = defineProps({
 	title: {
@@ -293,11 +299,14 @@ const state = ref({
 
 	tableColumnExtend: new TableColumns(),
 	tableColumnExtends: new Array<TableColumns>(),
-
+	//导入提示
+	orderStatus: new Array<OrderStatus>(),
+	// header: new Array<Details>(),
 	// header: new Array<Details>(),
 })
 
-
+//导入弹框提示
+const resultPopupShow = ref(false);
 
 let headerRuleRef = ref<any>({});
 let headerRule = ref({});
@@ -359,11 +368,25 @@ const submit = async () => {
 				if (isValidDetail) {
 					let result = await updateWMSPreOrder(state.value.header);
 					if (result.data.result.code == "1") {
-						ElMessage.success("修改成功");
-						closeDialog();
-					} else {
-						ElMessage.error("修改失败:" + result.data.result.msg);
-					}
+								ElMessage.success("修改成功");
+								state.value.header = new Header();
+								state.value.orderAddress = new OrderAddress();
+								state.value.headers = new Array<Header>();
+								state.value.details = [new Detail()];
+								closeDialog();
+							} else {
+								//  ElMessage.error(result.data.result.msg);
+								state.value.orderStatus = result.data.result.data;
+								// console.log(state.value.orderStatus);
+								//导入弹框提醒
+								resultPopupShow.value = true;
+							}
+					// if (result.data.result.code == "1") {
+					// 	ElMessage.success("修改成功");
+					// 	closeDialog();
+					// } else {
+					// 	ElMessage.error("修改失败:" + result.data.result.msg);
+					// }
 				} else {
 					ElMessage({
 						message: `表单明细有${Object.keys(fieldsDetail).length}处验证失败，请修改后再提交`,

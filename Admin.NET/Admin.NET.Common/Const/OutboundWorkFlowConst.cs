@@ -18,14 +18,19 @@ public class OutboundWorkFlowConst
 {
     public const string Workflow_Outbound= "出库";
     public const string Workflow_PreOrder= "预出库单";
-    public const string Workflow_Order = "出库单";
+    public const string Workflow_PreOrder_Add = "新增预出库单";
+    public const string Workflow_PreOrder_Add_Excel = "新增预出库单";
+    public const string Workflow_PreOrder_Update = "修改预出库单";
+    public const string Workflow_Order = "出库单"; 
     public const string Workflow_Print_Order = "打印发运单";
     public const string Workflow_Pick = "拣货单";
     public const string Workflow_Package = "包装单";
-    public const string Workflow_PreOrderForOrder = "转出库单";
-    public const string Workflow_PreOrderForOrderALL = "全部转出库单";
-    public const string Workflow_PreOrderForOrderPart = "部分转出库单";
-    public const string Workflow_AutomatedOutbound = "自动分配";
-    public const string Workflow_OrderReturn = "出库单回退";
+    public const string Workflow_PreOrder_ForOrder = "转出库单";
+    public const string Workflow_PreOrder_ForOrder_ALL = "全部转出库单";
+    public const string Workflow_PreOrder_ForOrder_Part = "部分转出库单";
+    public const string Workflow_Automated_Outbound = "自动分配";
+    public const string Workflow_Order_Return = "出库单回退";
+    public const string Workflow_Print_Package_List = "出库打印装箱清单";
+    
     //public const string Workflow_ReceiptReceiving = "上架单";
 }

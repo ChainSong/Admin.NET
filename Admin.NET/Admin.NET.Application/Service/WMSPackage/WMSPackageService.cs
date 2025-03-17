@@ -22,17 +22,20 @@ using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
+using Microsoft.AspNetCore.Authorization;
 using NewLife.Reflection;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
 namespace Admin.NET.Application;
 /// <summary>
 /// WMSPackage服务
 /// </summary>
 [ApiDescriptionSettings(ApplicationConst.GroupName, Order = 100)]
+[AllowAnonymous]
 public class WMSPackageService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPackage> _rep;
@@ -68,9 +71,10 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSExpressFee> _repWMSExpressFee;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    private readonly SqlSugarRepository<WMSCustomerConfig> _repCustomerConfig;
 
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -94,6 +98,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repTableColumnsDetail = repTableColumnsDetail;
         _repWorkFlow = repWorkFlow;
         _repWorkFlowService = repWorkFlowService;
+        _repCustomerConfig = repCustomerConfig;
     }
 
     /// <summary>
@@ -122,7 +127,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                     .WhereIF(input.IsComposited > 0, u => u.IsComposited == input.IsComposited)
                     .WhereIF(input.IsHandovered > 0, u => u.IsHandovered == input.IsHandovered)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Handoveror), u => u.Handoveror.Contains(input.Handoveror.Trim()))
-                    .WhereIF(input.PackageStatus.HasValue  && input.PackageStatus != 0, u => u.PackageStatus == input.PackageStatus)
+                    .WhereIF(input.PackageStatus.HasValue && input.PackageStatus != 0, u => u.PackageStatus == input.PackageStatus)
                     .WhereIF(input.DetailCount > 0, u => u.DetailCount == input.DetailCount)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
@@ -290,7 +295,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     {
         var entity = input.Adapt<WMSPackage>();
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
-        return new Response() {  Code = StatusCode.Success, Msg = "更新成功" };
+        return new Response() { Code = StatusCode.Success, Msg = "更新成功" };
     }
 
 
@@ -442,6 +447,59 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
     /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "PrintBatchExpress")]
+    public async Task<Response<dynamic>> PrintBatchExpress(List<long> input)
+    {
+        var dataPackage = await _rep.GetListAsync(a => input.Contains(a.Id));
+        Response<dynamic> response = new Response<dynamic>();
+        IExpressInterface factory = ExpressFactory.GetExpress((ExpressEnum)Enum.Parse(typeof(ExpressEnum), dataPackage.First().ExpressCompany));
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAddress = _repOrderAddress;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repWarehouse = _repWarehouse;
+        factory._repExpressDelivery = _repExpressDelivery;
+        factory._repExpressConfig = _repExpressConfig;
+        factory._repWMSExpressFee = _repWMSExpressFee;
+        ScanPackageInput scanPackageInput = new ScanPackageInput();
+        scanPackageInput.PickTaskNumber = dataPackage.First().PickTaskNumber;
+        scanPackageInput.PackageNumber = dataPackage.First().PackageNumber;
+        //获取快递信息（包含快递单号）
+        var data = await factory.GetExpressDataList(scanPackageInput);
+        if (data.Code == StatusCode.Error)
+        {
+            response.Data = new OrderStatusDto()
+            {
+
+            };
+            response.Code = StatusCode.Error;
+            response.Msg = data.Msg;
+            return response;
+
+        }
+        //获取打印信息
+        return await factory.PrintBatchExpressDataByPackageId(input);
+        //获取Token 
+        //return await factory.TokenExpressData(input);
+
+        //response.Code = StatusCode.Error;
+        //response.Msg = "失败";
+        //return response;
+    }
+
+    /// <summary>
     /// 包装回退，清空重新扫描包装
     /// </summary>
     /// <param name="input"></param>
@@ -512,7 +570,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "GetRFIDInfo")]
     public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
     {
-     
+
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
@@ -536,27 +594,56 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
     /// <summary>
-    /// 根据RFID 获取RFID 信息
+    /// 打印包装清单
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "PrintPackageList")]
-    public async Task<Response<dynamic>> PrintPackageList(WMSPackageInput input)
+    public async Task<Response<PrintBase<dynamic>>> PrintPackageList(List<long> input)
     {
-        Response<dynamic> response = new Response<dynamic>(); 
+        Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
 
-        var getPackageList = await _rep.AsQueryable().Where(a => input.Ids.Contains(a.Id)).ToListAsync();
-
-
-
-
+        var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+        //获取订单状态
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
 
 
 
-        response.Data = new List<PackageData>();
-        response.Data.aaa= "aaa";
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List, getOrder.First().OrderType);
+
+
+        //使用简单工厂定制化修改和新增的方法
+        IPackagePrintInterface factory = PackagePrintFactory.PackagePrint(workflow);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repOrder = _repOrder;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repCustomerConfig = _repCustomerConfig;
+        //factory._repASNDetail = _repASNDetail;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repProduct = _repProduct;
+        //factory._userManager = _userManager;
+        //return await factory.AddStrategy(entityListDtos);
+        //string asdasd = response.Result.Msg;
+        //response.Data.PrintTemplate = workflow;
+        var response = await factory.Strategy(input);
+        //response.Data.PrintTemplate = workflow;
+        if (response.Code == StatusCode.Success)
+        {
+            response.Data.PrintTemplate = workflow;
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
+        }
+        return data;
+        //response.Data = new List<PackageData>();
+        //response.Data.aaa= "aaa";
         //使用简单工厂定制化修改和新增的方法
         //根据订单类型判断是否存在该流程
         //var workflow = await _repWorkFlow.AsQueryable()
@@ -565,8 +652,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
 
 
-     
-        return response;
+
+        //return response;
 
     }
 

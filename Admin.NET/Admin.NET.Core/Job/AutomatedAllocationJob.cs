@@ -37,10 +37,9 @@ public class AutomatedAllocationJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        //return;
+        return;
 
         using var serviceScope = _serviceProvider.CreateScope();
-
         // 获取指令仓储 
         var repWarehouse = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSWarehouse>>();
         var repInstruction = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSInstruction>>();
@@ -110,7 +109,7 @@ public class AutomatedAllocationJob : IJob
                             if (workflow.SysWorkFlowSteps.Count > 0)
                             {
                                 //从子流程中获取分配规则
-                                var customWorkFlow = workflow.SysWorkFlowSteps.Where(a => a.StepName == OutboundWorkFlowConst.Workflow_AutomatedOutbound).First();
+                                var customWorkFlow = workflow.SysWorkFlowSteps.Where(a => a.StepName == OutboundWorkFlowConst.Workflow_Automated_Outbound).FirstOrDefault();
                                 if (customWorkFlow != null && !string.IsNullOrEmpty(customWorkFlow.Filters))
                                 {
                                     List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow.Filters);

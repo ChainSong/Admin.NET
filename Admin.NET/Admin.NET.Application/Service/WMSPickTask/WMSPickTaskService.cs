@@ -322,6 +322,18 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     public async Task<List<WMSPickTask>> GetPickTasks(List<long> ids)
     {
         var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => ids.Contains(u.Id)).ToListAsync();
+        foreach (var item in entity) { 
+           item.Details = item.Details.GroupBy(a => new { a.SKU,a.GoodsName,a.GoodsType,a.Area,a.Location,a.BatchCode,a.PickTaskNumber,a.PickTaskId}).Select(a => new WMSPickTaskDetail { 
+                SKU=a.Key.SKU,
+                GoodsName=a.Key.GoodsName,
+                GoodsType=a.Key.GoodsType,
+                Area=a.Key.Area,
+                Location=a.Key.Location,
+                BatchCode=a.Key.BatchCode,
+                PickTaskNumber=a.Key.PickTaskNumber,
+                PickTaskId = a.Key.PickTaskId
+               , Qty=a.Sum(b=>b.Qty)}).ToList();
+        }
         return entity;
     }
     /// <summary>

@@ -324,7 +324,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
                 Type orderDetailType = c.GetType();
                 headerTableColumn.ForEach(h =>
                 {
-                    if (h.IsImportColumn == 1 && dt.Columns.Contains(h.DisplayName))
+                    if ((h.IsImportColumn == 1 || h.IsKey == 1) && dt.Columns.Contains(h.DisplayName))
                     {
                         PropertyInfo property = orderType.GetProperty(h.DbColumnName);
                         //如果该字段有下拉选项，则值取下拉选项中的值
@@ -361,7 +361,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
 
                 detailTableColumn.ForEach(d =>
                 {
-                    if (d.IsImportColumn == 1 && dt.Columns.Contains(d.DisplayName))
+                    if ((d.IsImportColumn == 1 || d.IsKey == 1) && dt.Columns.Contains(d.DisplayName))
                     {
                         PropertyInfo property = orderDetailType.GetProperty(d.DbColumnName);
                         row[d.DisplayName] = property.GetValue(c);
@@ -417,7 +417,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
         return _repTableColumns.AsQueryable()
             .Where(a => _tableNames.Contains(a.TableName) &&
               a.TenantId == tenantId &&
-              a.IsCreate == 1
+              (a.IsCreate == 1 || a.IsKey == 1)
             )
             .GroupBy(a => new { a.DbColumnName, a.Associated, a.IsImportColumn, a.DisplayName, a.Type, a.IsCreate, a.Validation, a.TenantId })
            .Select(a => new TableColumns
@@ -431,6 +431,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
                Validation = a.Validation,
                IsImportColumn = a.IsImportColumn,
                IsCreate = a.IsCreate,
+               IsKey = a.IsKey,
                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
                //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
                //.Select()
@@ -447,12 +448,13 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
         return _repTableColumns.AsQueryable()
             .Where(a => _tableNames.Contains(a.TableName) &&
               a.TenantId == tenantId &&
-              a.IsImportColumn == 1
+              (a.IsImportColumn == 1 || a.IsKey == 1)
             )
            .Select(a => new TableColumns
            {
                DisplayName = a.DisplayName,
                Type = a.Type,
+               IsKey = a.IsKey,
                TableName = a.TableName,
                //由于框架约定大于配置， 数据库的字段首字母小写
                //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)

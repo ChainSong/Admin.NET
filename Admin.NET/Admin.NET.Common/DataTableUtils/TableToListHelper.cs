@@ -73,15 +73,19 @@ namespace System.Data
                                         {
                                             //p.SetValue(model, Convert.ToDateTime(value), null);
                                             DateTime parsedDate;
-                                            string[] dateFormats = { "dd-MMM-yyyy", "yyyy-MM-dd", "MM/dd/yyyy" };  
+                                            string[] dateFormats = { "dd-MMM-yyyy", "yyyy-MM-dd", "yyyy-M-dd", "yyyy-M-d", "yyyy-MM-d", "MM/dd/yyyy" };
                                             if (DateTime.TryParseExact(value.ToString(), dateFormats, null, System.Globalization.DateTimeStyles.None, out parsedDate))
                                             {
                                                 p.SetValue(model, parsedDate, null);
                                             }
+                                            else if (Convert.ToDateTime(value.ToString()) is DateTime)
+                                            {
+                                                p.SetValue(model, Convert.ToDateTime(value), null);
+                                            }
                                             else
                                             {
                                                 // 如果解析失败，可以抛出异常或处理为默认值
-                                                p.SetValue(model, null, null);  
+                                                p.SetValue(model, null, null);
                                             }
                                         }
                                     }

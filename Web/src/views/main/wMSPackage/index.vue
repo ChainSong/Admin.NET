@@ -74,7 +74,7 @@
         </el-form-item>
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Printer" @click="printPackageList('')"
+            <el-button type="primary" icon="ele-Printer" @click="printPackageListFun('')"
               v-auth="'wMSPackage:printPackage'"> 打印箱清单
             </el-button>
           </el-button-group>
@@ -177,7 +177,7 @@ import queryDialog from '/@/views/main/wMSPackage/component/queryDialog.vue'
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
-import { pageWMSPackage, deleteWMSPackage, printExpressData, exportPackage } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, printExpressData, exportPackage, printPackageList } from '/@/api/main/wMSPackage';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "/@/entities/packageMain";
@@ -187,6 +187,8 @@ import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
 import sfExpress from "/@/api/expressInterface/sfExpress";
 import { downloadByData, getFileName } from '/@/utils/download';
+// 主体路径
+let baseURL = import.meta.env.VITE_API_URL;
 const state = ref({
   vm: {
     id: "",
@@ -311,7 +313,7 @@ const openQuery = (row: any) => {
 
 
 //打印箱唛
-const printPackageList = async (row: any) => {
+const printPackageListFun = async (row: any) => {
   console.log("row");
   console.log(row);
   ptintTitle.value = '打印';
@@ -336,7 +338,33 @@ const printPackageList = async (row: any) => {
   })
     .then(async () => {
 
-      printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
+      let printData = new Array<any>();
+      printData.printTemplate = "";
+      let result = await printPackageList(ids);
+      console.log("result");
+      console.log(result);
+      if (result.data.result != null) {
+        printData = result.data.result.data;
+
+        console.log("printData");
+        console.log(printData);
+        printData.data.forEach(a => {
+          if (a.customerConfig != null) {
+            a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+          }
+        });
+      }
+      console.log("result");
+      console.log(printData);
+      // 判断有没有配置客户自定义打印模板
+      if (printData.printTemplate != "") {
+        printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+      } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+        printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+      } else {
+        printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
+      }
+    
     })
     .catch(() => { });
 };

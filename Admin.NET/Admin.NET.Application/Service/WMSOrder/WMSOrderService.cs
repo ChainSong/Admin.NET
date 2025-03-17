@@ -54,13 +54,13 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
-    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    //private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
     private readonly SysWorkFlowService _repWorkFlowService;
 
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
 
 
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -84,7 +84,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repWarehouse = repWarehouse;
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
-        _repWorkFlow = repWorkFlow;
+        //_repWorkFlow = repWorkFlow;
         _repWorkFlowService = repWorkFlowService;
 
     }
@@ -334,16 +334,17 @@ public class WMSOrderService : IDynamicApiController, ITransient
         var order = await _rep.AsQueryable().Where(a => input.Id == (a.Id)).FirstAsync();
         //使用简单工厂定制化修改和新增的方法
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == order.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == order.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
 
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Order_Return, order.OrderType);
 
 
         //使用简单工厂定制化  /
         List<DeleteWMSOrderInput> request = new List<DeleteWMSOrderInput>();
         request.Add(input);
-        IOrderReturnInterface factory = OrderReturnFactory.OrderReturn(workflow, order.OrderType);
+        IOrderReturnInterface factory = OrderReturnFactory.OrderReturn(workflow);
 
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
@@ -458,13 +459,14 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         //使用简单工厂定制化修改和新增的方法
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == order.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == order.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
 
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Pick, order.First().OrderType);
 
         //使用简单工厂定制化  / 
-        IPickTaskInterface factory = PickTaskFactory.PickTask(workflow, order.First().OrderType);
+        IPickTaskInterface factory = PickTaskFactory.PickTask(workflow);
         //factory._db = _db;
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
@@ -611,6 +613,54 @@ public class WMSOrderService : IDynamicApiController, ITransient
         };
     }
 
+    /// <summary>
+    /// 打印发货单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    //[HttpPost]//List<PackageData>
+    ////public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> input)
+    //public async Task<Response<List<WMSOrderPrintDto>>> PrintShippingList1(List<long> input)
+    //{
+
+    //    Response<List<WMSOrderPrintDto>> data = new Response<List<WMSOrderPrintDto>>();
+    //    //使用PrintShippingList类种的打印方法  
+
+    //    //根据id 获取订单信息
+    //    //var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
+
+
+
+
+    //    IPrintOrderInterface factory = PrintOrderFactory.PrintOrder("");
+    //    factory._userManager = _userManager;
+    //    factory._repTableColumns = _repTableColumns;
+    //    factory._repTableColumnsDetail = _repTableColumnsDetail;
+    //    factory._repOrder = _rep;
+    //    factory._repOrderDetail = _repOrderDetail;
+    //    factory._repInstruction = _repInstruction;
+    //    factory._repPreOrder = _repPreOrder;
+    //    factory._reppreOrderDetail = _repPreOrderDetail;
+    //    factory._repPickTask = _repPickTask;
+    //    factory._repPickTaskDetail = _repPickTaskDetail;
+    //    factory._repOrderAllocation = _repOrderAllocation;
+    //    factory._repWarehouse = _repWarehouse;
+    //    factory._repCustomer = _repCustomer;
+    //    factory._repWorkFlowService = _repWorkFlowService;
+
+    //    var response = await factory.PrintShippingList(input);
+
+    //    if (response.Code == StatusCode.Success)
+    //    {
+    //        data.Data = response.Data.Data;
+    //        data.Code = StatusCode.Success;
+    //        data.Msg = "打印成功";
+    //        return data;
+    //        //return response;
+    //    }
+    //    return data;
+    //}
 
     /// <summary>
     /// 打印发货单
@@ -619,20 +669,25 @@ public class WMSOrderService : IDynamicApiController, ITransient
     /// <returns></returns>
 
     [HttpPost]//List<PackageData>
-    //public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> input)
-    public async Task<Response<List<WMSOrderPrintDto>>> PrintShippingList(List<long> input)
+    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> input)
+    //public async Task<Response<List<WMSOrderPrintDto>>> PrintShippingList(List<long> input)
     {
 
-        Response<List<WMSOrderPrintDto>> data = new Response<List<WMSOrderPrintDto>>();
+        Response<PrintBase<List<WMSOrderPrintDto>>> data = new Response<PrintBase<List<WMSOrderPrintDto>>>();
         //使用PrintShippingList类种的打印方法  
 
         //根据id 获取订单信息
-        //var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
+        var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
+
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Order, order.OrderType);
 
 
-
-
-        IPrintOrderInterface factory = PrintOrderFactory.PrintOrder();
+        IPrintOrderInterface factory = PrintOrderFactory.PrintOrder(workflow);
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
         factory._repTableColumnsDetail = _repTableColumnsDetail;
@@ -652,11 +707,12 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
         if (response.Code == StatusCode.Success)
         {
-            data.Data = response.Data.Data;
-            data.Code = StatusCode.Success;
-            data.Msg = "打印成功";
-            return data;
-            //return response;
+            response.Data.PrintTemplate = workflow;
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
         }
         return data;
     }

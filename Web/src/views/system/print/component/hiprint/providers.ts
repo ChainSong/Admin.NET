@@ -135,9 +135,13 @@ export const aProvider = function () {
 						[
 							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
 							{ title: '合同编号', align: 'center', field: 'poCode', width: 250 },
+							{ title: '产品代码', align: 'center', field: 'sku', width: 150 },
 							{ title: '产品名称', align: 'center', field: 'goodsName', width: 150 },
 							{ title: '订货号', align: 'center', field: 'sku', width: 150 },
 							{ title: '货号', align: 'center', field: 'sku' , width: 150 },
+							{ title: '装箱数量', align: 'center', field: 'boxQty' , width: 150 },
+							{ title: '单件箱数', align: 'center', field: 'pieces' , width: 150 },
+							{ title: '总箱数', align: 'center', field: 'totalBoxQty' , width: 150 },
 							{ title: '数量', align: 'center', field: 'allocatedQty' , width: 150 },
 							{ title: '单位', align: 'center', field: 'unitCode' , width: 150 },
 							{ title: '箱号', align: 'center', field: 'boxCode' , width: 150 },

@@ -7,12 +7,14 @@ enum Api {
   GetWMSPackage = '/api/wMSPackage/Query',
   ScanPackageData = '/api/wMSPackage/ScanPackageData',
   PrintExpress = '/api/wMSPackage/PrintExpress',
+  PrintBaatchExpress = '/api/wMSPackage/PrintBatchExpress',
   AllWMSPackage = '/api/wMSPackage/All',
   AddPackageData = '/api/wMSPackage/AddPackage',
   ShortagePackageData = '/api/wMSPackage/ShortagePackage',
   ResetPackageData = '/api/wMSPackage/resetPackage',
   GetRFIDInfo = '/api/wMSPackage/GetRFIDInfo',
   ExportPackage = '/api/wMSPackage/ExportPackage',
+  PrintPackageList = '/api/wMSPackage/PrintPackageList',
   
 }
 
@@ -96,6 +98,19 @@ request({
 	method: 'post',
 	data: params,
 });		
+// 导出一个名为 printBaatchExpress 的常量，它是一个函数
+export const printBatchExpress = (params?: any) => 
+	// 调用 request 函数，发送一个 HTTP 请求
+	request({
+		// 请求的 URL 地址，使用 Api.PrintBaatchExpress 常量
+		url: Api.PrintBaatchExpress,
+		// 请求的方法类型，这里使用 POST 方法
+		method: 'post',
+		// 请求的数据，传入的参数 params
+		data: params,
+	});		
+	
+
 //获取所有包装信息
 export const allWMSPackage = (params?: any) => 
 request({
@@ -121,4 +136,13 @@ export const exportPackage = (params?: any) =>
 		data: params,
 		responseType: 'blob',
 	});
+	
+
+//获取RFID信息
+export const printPackageList = (params?: any) => 
+	request({
+		url: Api.PrintPackageList,
+		method: 'post',
+		data: params,
+	});		
 	

@@ -50,7 +50,6 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
 
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
         List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
-
         try
         {
             tableColumnList = GetColumns(tableName);
@@ -79,10 +78,8 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
                     {
                         rule.ErrorMessage = item.DisplayName + "不能为空";
                         rule.Expression = "!string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
-
                         //判断是否包含空格
                         //rule.Expression = "string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
-
                     }
                     rules.Add(rule);
                 }

@@ -662,7 +662,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 //throw Oops.Oh(ErrorCodeEnum.D1002);
                 continue;
             }
-            if (string.IsNullOrEmpty(item) || item.Length > 24)
+            if (string.IsNullOrEmpty(item) || item.Length >= 24)
             {
                 //截取前24位
                 rftds.Add(item.Substring(0, 24));

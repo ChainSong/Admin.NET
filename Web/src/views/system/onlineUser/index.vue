@@ -104,12 +104,12 @@ onMounted(async () => {
 // 通知提示节流
 const notificationThrottle = throttle(
 	function () {
-		ElNotification({
-			title: '提示',
-			message: `${state.lastUserState.online ? `【${state.lastUserState.realName}】上线了` : `【${state.lastUserState.realName}】离开了`}`,
-			type: `${state.lastUserState.online ? 'info' : 'error'}`,
-			position: 'bottom-right',
-		});
+		// ElNotification({
+		// 	title: '提示',
+		// 	message: `${state.lastUserState.online ? `【${state.lastUserState.realName}】上线了` : `【${state.lastUserState.realName}】离开了`}`,
+		// 	type: `${state.lastUserState.online ? 'info' : 'error'}`,
+		// 	position: 'bottom-right',
+		// });
 	},
 	3000,
 	{

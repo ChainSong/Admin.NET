@@ -685,6 +685,87 @@ public class SFExpressStrategy : IExpressInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
+    public async Task<Response<dynamic>> PrintBatchExpressDataByPackageId(List<long> request)
+    {
+        Response<dynamic> response = new Response<dynamic>();
+        //request.PackageNumber = "126370824143168";
+        //获取包裹信息
+        var package = await _repPackage.AsQueryable().Includes(a => a.Details).Where(a => request.Contains(a.Id)).ToListAsync();
+        var result = package.Adapt<List<PrintSFExpressDto>>();
+
+        foreach (var item in package)
+        {
+            if (package != null && !string.IsNullOrEmpty(item.ExpressNumber))
+            {
+                //获取快递信息
+                var getExpressDelivery = _repExpressDelivery.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == item.CustomerId && a.WarehouseId == item.WarehouseId && a.OrderNumber == item.OrderNumber && a.ExpressNumber == item.ExpressNumber).First();
+
+                item.PrintNum = ((item.PrintNum ?? 0) + 1);
+                item.PrintPersonnel = _userManager.Account;
+                item.PrintTime = DateTime.Now;
+                await _repPackage.UpdateAsync(item);
+                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillType = getExpressDelivery.WaybillType;
+                result.Where(a => a.PackageNumber == item.PackageNumber).First().SumOrder = getExpressDelivery.SumOrder ?? 1;
+            }
+            else
+            {
+                response.Data = package;
+                response.Msg = "有包裹未获取到快递单号";
+                response.Code = StatusCode.Error;
+                return response;
+            }
+        }
+        response.Data = result;
+        response.Msg = "成功";
+        response.Code = StatusCode.Success;
+        return response;
+
+
+        ////获取快递信息
+        //var getExpressConfig = _repExpressConfig.AsQueryable().Where(a => a.ExpressCompany == "顺丰快递" && a.CustomerId == package.CustomerId && a.WarehouseId == package.WarehouseId && a.Status == 1).First();
+
+        //var Express = _repExpressDelivery.AsQueryable().Where(a => a.PackageNumber == request.PackageNumber).FirstAsync();
+
+        //SFExpressInput<SFRootobjectPrint> input = new SFExpressInput<SFRootobjectPrint>();
+
+
+        //if (Express.Result != null)
+        //{
+        //    input.Checkword = getExpressConfig.Checkword;
+        //    input.Url = getExpressConfig.Url;
+        //    input.PartnerId = getExpressConfig.PartnerId;
+        //    input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
+        //    input.Data = new SFRootobjectPrint()
+        //    {
+        //        templateCode = "fm_150_standard_HJSRJOEY88G9",
+        //        version = "2.0",
+        //        fileType = "pdf",
+        //        sync = "true",
+        //        documents = new List<Document>() { new Document() { masterWaybillNo = package.ExpressNumber } }
+        //    };
+        //    var ResultData = ExpressApplication.PrintExpress(input);
+
+        //    RootobjectPrint rootobjectPrint = ResultData.ToJsonEntity<RootobjectPrint>();
+        //    RootobjectPrint_obj RootobjectResult = rootobjectPrint.apiResultData.ToJsonEntity<RootobjectPrint_obj>();
+        //    //rootobjectPrint
+        //    response.Msg = "成功";
+        //    response.Code = StatusCode.Success;
+        //    response.Data = RootobjectResult.obj.files[0].token;
+        //    return response;
+        //}
+
+        //response.Msg = "快递单号不存在";
+        //response.Code = StatusCode.Error;
+        //return response;
+
+    }
+
+
+    /// <summary>
+    /// 打印快递信息
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     public async Task<Response<dynamic>> PrintExpressData(ScanPackageInput request)
     {
         Response<dynamic> response = new Response<dynamic>();

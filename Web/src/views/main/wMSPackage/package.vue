@@ -85,9 +85,18 @@
         </el-row>
 
       </div>
-
+      <div>
+        <el-button-group>
+          <el-button type="primary" icon="ele-Printer" @click="printExpressBatchFun('')">
+            批量打印
+          </el-button>
+        </el-button-group>
+      </div>
       <el-row style="top: 30px;">
-        <el-table :data="state.vm.packageData" style="width: 100%;height: 500px;;font-size:20px;">
+        <el-table :data="state.vm.packageData" ref="multipleTableRef"
+          style="width: 100%;height: 500px;;font-size:20px;">
+          <el-table-column type="selection" width="55">
+          </el-table-column>
           <el-table-column prop="orderNumber" label="出库单号">
           </el-table-column>
           <el-table-column prop="pickTaskNumber" label="拣货任务号">
@@ -121,7 +130,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData,resetPackageData } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -135,6 +144,7 @@ import sfExpress from "/@/api/expressInterface/sfExpress";
 // import SCPPrint from "";
 
 import { addWMSPickTask } from "/@/api/main/wMSPickTask";
+import { forEach } from "lodash-es";
 
 
 const state = ref({
@@ -174,7 +184,6 @@ const state = ref({
 
 });
 
-
 const expressOptions = ref([]);
 const expressValue = ref("");
 const printDialogRef = ref();
@@ -192,17 +201,6 @@ const token = ref("");
 const expressConfig = ref({});
 
 
-// --------------------顺丰快递打印-----------------------
-// 寮曞叆SDK鍚庡垵濮嬪寲瀹炰緥锛屼粎鎵ц涓€娆�
-// const sdkCallback = result => { };
-// let sdkParams = {
-//   env: expressConfig.value.env, // 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-//   partnerID: expressConfig.value.partnerId,
-//   callback: sdkCallback,
-//   notips: true
-// };
-// let printSdk = new SCPPrint(sdkParams);
-
 // 页面加载时
 onMounted(async () => {
   gettableColumn();
@@ -218,16 +216,10 @@ const getExpress = async () => {
     }
     expressOptions.value.push({ value: a.expressCompany, label: a.expressCompany })
   });
-  // = res.data.result;
-  // console.log("res");
-  // console.log(res);
-  // token.value=res.
 
 };
 const shortagePackage = async () => {
   let res = await shortagePackageData(state.value.vm.form);
-  // let res = await addPackageData(state.value.vm.form);
-  // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
@@ -236,7 +228,7 @@ const shortagePackage = async () => {
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+      state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
   } else {
@@ -263,11 +255,6 @@ const allPackage = async (data: any) => {
   state.value.vm.packageData = res.data.result;
 };
 
-// const shortagePackage = async (data: any) => {
-//   let res = await shortagePackageData(data);
-//   state.value.vm.packageData = res.data.result;
-
-// };
 
 const addPackage = async (data: any) => {
   state.value.vm.form.expressCompany = expressValue.value;
@@ -282,7 +269,7 @@ const addPackage = async (data: any) => {
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+      state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.success(res.data.result.msg);
   } else {
     state.value.vm.form = res.data.result.data;
@@ -300,19 +287,6 @@ const addPackage = async (data: any) => {
 
 
 const scanPackage = async () => {
-
-  // let acquisitionData = state.value.vm.form.scanInput.split('|');
-
-  // if (acquisitionData.length == 3) {
-  // 	state.value.vm.form.sku = acquisitionData[1];
-  // 	state.value.vm.form.sn = acquisitionData[2] ?? "";
-  // } else {
-
-  // 	state.value.vm.form.sku = acquisitionData[1];
-  // 	state.value.vm.form.lot = acquisitionData[2] ?? "";
-  // 	state.value.vm.form.expirationDate = acquisitionData[3] ?? "";
-  // 	state.value.vm.form.sn = acquisitionData[4] ?? "";
-  // }
 
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
@@ -375,113 +349,52 @@ const printExpress = async (row: any) => {
 
       console.log(row);
       if (row.expressCompany == "顺丰快递") {
-        // let resToken = await getExpressConfig(row);
-        // // console.log("resToken")
-        // if (resToken.data.result.code == 1) {
-        //   // console.log(resToken)
-        //   expressConfig.value = resToken.data.result.data;
-        // }
-
-        // console.log(row);
         let res = await printExpressData(row);
-        // alert(res.data.result.data.expressNumber);
-        // // console.log(expressConfig.value);
-        // sdkParams.env = expressConfig.value.env;// 鐢熶骇锛歱ro锛涙矙绠憋細sbox銆備笉浼犻粯璁ょ敓浜э紝杞敓浜ч渶瑕佷慨鏀硅繖閲�
-        // sdkParams.partnerID = expressConfig.value.partnerId;
-        // sdkParams.callback = sdkCallback;
-        // sdkParams.notips = true;
-        // printSdk = new SCPPrint(sdkParams);
-        // };
-        // print(res.data.result.data.expressNumber);
         sfExpress.print(res.data.result.data)
         allPackage(state.value.vm.form);
       }
     })
     .catch(() => { });
 
-  // token.value = res.data;
-
 };
 
-// Storage.prototype.setCanExpireLocal('userJson', JSON.stringify(obj), 0.1) 
-// Storage.prototype.getCanExpireLocal('userJson') 
-// // 打开打印页面
-// const openPrint = (row: any) => {
-//   ptintTitle.value = '打印';
-//   printDialogRef.value.openDialog(row);
-// };
 
+const printExpressBatchFun = async (row: any) => {
 
+  var ids = new Array<any>();
+  if (row == null || row == undefined || row == "") {
+    multipleTableRef.value.getSelectionRows().forEach(a => {
+      console.log("a");
+      console.log(a);
+      ids.push(a.id);
+    });
+  } else {
+    ids.push(row.id);
+  }
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
 
+      console.log(row);
+      // if (row.expressCompany == "顺丰快递") {
+      let res = await printBatchExpress(ids);
+      forEach(res.data.result.data, (item: any) => {
+        sfExpress.print(item);
+      });
 
-// // 鑾峰彇鎵撳嵃鏈哄垪琛�
-// const getPrintersCallback = result => {
-//   if (result.code === 1) {
-//     const printers = result.printers;
+      allPackage(state.value.vm.form);
+      // }
+    })
+    .catch(() => { });
 
-//     const selectElement = document.getElementById("printers");
-
-//     // 娓叉煋鎵撳嵃鏈洪€夋嫨妗嗕笅鎷夊€�
-//     for (let i = 0; i < printers.length; i++) {
-//       const item = printers[i];
-//       var option = document.createElement("option");
-//       option.innerHTML = item.name;
-//       option.value = item.index;
-//       selectElement.appendChild(option);
-//     }
-
-//     // 璁剧疆榛樿鎵撳嵃鏈�
-//     var printer = 0;
-//     selectElement.value = printer;
-//     printSdk.setPrinter(printer);
-//   }
-// };
-// printSdk.getPrinters(getPrintersCallback);
-
-// // 閫夋嫨鎵撳嵃鏈�
-// const selectPrinter = (e) => {
-//   // 璁剧疆鎵撳嵃鏈�
-//   printSdk.setPrinter(e.target.value);
-// }
-
-// // 鎵撳嵃
-// const print = (masterWaybillNo: string) => {
-//   // console.log(result);
-//   const data = {
-//     requestID: expressConfig.value.partnerId,
-//     accessToken: expressConfig.value.token,
-//     templateCode: expressConfig.value.templateCode,
-//     templateVersion: "",
-//     documents: [
-//       {
-//         masterWaybillNo: masterWaybillNo
-//       }
-//     ],
-//     extJson: {},
-//     customTemplateCode: ""
-//   };
-//   const callback = function (result) { };
-//   const options = {
-//     lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
-//   };
-//   console.log(printSdk);
-//   console.log(printSdk.print(data, callback, options));
-// };
-
-// // 改变页面容量
-// const handleSizeChange = (val: number) => {
-//   tableParams.value.pageSize = val;
-
-// };
-
-// // 改变页码序号
-// const handleCurrentChange = (val: number) => {
-//   tableParams.value.page = val;
-
-// };
-
-
-
+};
 </script>
 
 <style scoped>

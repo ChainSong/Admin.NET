@@ -120,8 +120,6 @@ namespace Admin.NET.Application.Strategy
                             .SetColumns(a => a.UpdateTime == DateTime.Now)
                             .Where(a => a.Id == receipt.Id)
                             .ExecuteCommandAsync();
-
-
                         //修改入库单明细中的入库数量
                         //_wms_receiptdetailRepository.GetDbContext().BulkUpdate();
                         var receiptDetailData = _repReceiptDetail.AsQueryable().Where(a => a.ReceiptId == receipt.Id).ToList();

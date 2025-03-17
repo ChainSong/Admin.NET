@@ -51,8 +51,10 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SqlSugarRepository<WMSOrderDetailBom> _repOrderDetailBom;
-    private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
-    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSOrderDetailBom> repOrderDetailBom, SqlSugarRepository<SysWorkFlow> repWorkFlow)
+    //private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    private readonly SysWorkFlowService _repWorkFlowService;
+
+    public WMSPreOrderService(SqlSugarRepository<WMSPreOrder> rep, SqlSugarRepository<WMSPreOrderDetail> reppreOrderDetail, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPreOrderExtend> repPreOrderExtend, SqlSugarRepository<UploadMappingLog> repUploadMapping, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSOrderDetailBom> repOrderDetailBom, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _reppreOrderDetail = reppreOrderDetail;
@@ -70,7 +72,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         _repProduct = repProduct;
         _repProductBom = repProductBom;
         _repOrderDetailBom = repOrderDetailBom;
-        _repWorkFlow = repWorkFlow;
+        _repWorkFlowService = repWorkFlowService;
     }
 
 
@@ -305,13 +307,14 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
         //var asnData = _rep.AsQueryable().Where(a => a.Id == input.).First();
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
 
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_PreOrder_Add, input.OrderType);
 
         //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, input.OrderType);
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;
@@ -390,12 +393,15 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
 
         //var asnData = _rep.AsQueryable().Where(a => a.Id == input.).First();
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_PreOrder_Update, input.OrderType);
+
 
         //使用简单工厂定制化修改和新增的方法
-        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, input.OrderType);
+        IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;
@@ -515,6 +521,11 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             var entityDetailListDtos = data.Data.TableToList<WMSPreOrderDetail>();
             var entityAddressListDtos = data.Data.TableToList<WMSOrderAddress>();
 
+
+            //List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
+            //entityListDtos.Add(input);
+
+      
             //将散装的主表和明细表 组合到一起 
             List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
             foreach (var item in preOrders)
@@ -546,16 +557,26 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
                 customerId = customerData.CustomerId;
             }
 
+            //验证字段是否正确
+            ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+            checkColumnsDefault._repTableColumns = _repTableColumns;
+            checkColumnsDefault._userManager = _userManager;
+            var resultColumns = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSPreOrderInput>(entityListDtos, "WMS_PreOrder");
+            if (resultColumns.Code == StatusCode.Error)
+            {
+                return resultColumns;
+            }
 
             //根据订单类型判断是否存在该流程
-            var workflow = await _repWorkFlow.AsQueryable()
-               .Includes(a => a.SysWorkFlowSteps)
-               .Where(a => a.WorkName == entityListDtos.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+            //var workflow = await _repWorkFlow.AsQueryable()
+            //   .Includes(a => a.SysWorkFlowSteps)
+            //   .Where(a => a.WorkName == entityListDtos.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+            var workflow = await _repWorkFlowService.GetSystemWorkFlow(entityListDtos.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_PreOrder_Add_Excel, entityListDtos.First().OrderType);
 
 
             //long CustomerId = _wms_PreOrderRepository.GetAll().Where(a => a.PreOrderNumber == entityListDtos.First().PreOrderNumber).FirstOrDefault().CustomerId;
             //使用简单工厂定制化修改和新增的方法
-            IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow, entityListDtos.First().OrderType);
+            IPreOrderInterface factory = PreOrderFactory.AddOrUpdate(workflow);
             factory._repPreOrder = _rep;
             factory._reppreOrderDetail = _reppreOrderDetail;
             //factory._db = _db;
@@ -602,13 +623,14 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         var orderData = _rep.AsQueryable().Where(a => input.Contains(a.Id)).First();
 
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == orderData.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == orderData.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(orderData.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_PreOrder_ForOrder_ALL, orderData.OrderType);
 
 
-
-        IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(workflow, orderData.OrderType);
+        IPreOrderForOrderInterface factory = PreOrderForOrderFactory.PreOrderForOrder(workflow);
         factory._repPreOrder = _rep;
         factory._reppreOrderDetail = _reppreOrderDetail;
         //factory._db = _db;

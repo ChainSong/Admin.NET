@@ -37,6 +37,8 @@ using FastExpressionCompiler;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 using Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
 using System.Web;
+using System.Globalization;
+using Microsoft.AspNetCore.Http;
 
 namespace Admin.NET.Application;
 public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
@@ -243,7 +245,21 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             var packageData = mapper.Map<WMSReceiptReceiving>(receiptReceiving);
             packageData.ReceivedQty = 1;
             packageData.BatchCode = !string.IsNullOrEmpty(request.Lot) ? request.Lot : receiptReceiving.BatchCode;
-            packageData.ExpirationDate = !string.IsNullOrEmpty(request.ExpirationDate) ? Convert.ToDateTime(request.ExpirationDate) : receiptReceiving.ExpirationDate;
+
+            if (!string.IsNullOrEmpty(request.ExpirationDate))
+            {
+                CultureInfo culture = new CultureInfo("en-US");
+
+                DateTime dateTime;
+                DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", culture, DateTimeStyles.None, out dateTime);
+                packageData.ExpirationDate = dateTime;
+
+            }
+            else
+            {
+                packageData.ExpirationDate = receiptReceiving.ExpirationDate;
+            }
+
             orderCheckData.Add(packageData);
             _sysCacheService.Set("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber, orderCheckData, timeSpan);
             _sysCacheService.Set("RFReceiptReceivingOrder:" + request.CustomerId + ":" + request.ReceiptNumber, orderData, timeSpan);

@@ -27,6 +27,7 @@ using System.Reflection.Emit;
 using Admin.NET.Core.Service;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
 using System.Web;
+using System.Globalization;
 
 namespace Admin.NET.Application.Service;
 public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
@@ -70,6 +71,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
 
                 string skuRegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
                 string lotRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+               
                 string expirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
                 MatchCollection matchesSKU = Regex.Matches(request.ScanInput, skuRegex);
                 request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
@@ -159,7 +161,6 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
                 response.Code = StatusCode.Error;
                 response.Msg = "该SKU数量已超过订单中数量";
             }
-
             var mapper = new Mapper(config);
             string goodsName = await _repProduct.AsQueryable().Where(m => m.SKU == request.SKU).Select(m => m.GoodsName).FirstAsync();
             //使用Mapper将ASN信息转为ASNCountQuantity信息
@@ -170,7 +171,21 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             wMSASNCountQuantityDetail.Qty = 1;
             wMSASNCountQuantityDetail.ASNId = request.ASNId;
             wMSASNCountQuantityDetail.BatchCode = request.BatchCode;
-            wMSASNCountQuantityDetail.ExpirationDate = string.IsNullOrEmpty(request.ExpirationDate) ? null : DateTime.Parse(request.ExpirationDate);
+
+            if (!string.IsNullOrEmpty(request.ExpirationDate))
+            {
+                CultureInfo culture = new CultureInfo("en-US");
+
+                DateTime dateTime;
+                DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", culture, DateTimeStyles.None, out dateTime);
+                wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+
+            }
+            else
+            {
+                wMSASNCountQuantityDetail.ExpirationDate = null;
+            }
+            //wMSASNCountQuantityDetail.ExpirationDate = string.IsNullOrEmpty(request.ExpirationDate) ? null : DateTime.Parse(request.ExpirationDate);
             //wMSASNCountQuantityDetail.Input = request.ScanInput;
             wMSASNCountQuantityDetail.LotCode = "";
             //wMSASNCountQuantityDetail.Quantity = request.Quantity;
@@ -182,7 +197,6 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             //wMSASNCountQuantityDetail.Id = SnowFlakeHelper.GetSnowInstance().NextId();
             await _repASNCountQuantityDetail.InsertAsync(wMSASNCountQuantityDetail);
             //response.Data.Add(Mapper.Map<WMSRFPickTaskDetailOutput>(wMSASNCountQuantityDetail));
-
             var responseList = await _repASNCountQuantityDetail.AsQueryable()
                 .WhereIF(!string.IsNullOrEmpty(request.BatchCode), m => m.BatchCode.Contains(request.BatchCode))
                 .Where(m => m.ASNId == request.ASNId

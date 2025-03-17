@@ -203,7 +203,12 @@ namespace Admin.NET.Application.Strategy
 
             });
 
-
+            if (response.Data.Count > 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "订单异常";
+                return response;
+            }
             ////开始插入订单
             await _repASN.Context.InsertNav(asnData).Include(a => a.Details).ExecuteCommandAsync();
 
@@ -308,7 +313,7 @@ namespace Admin.NET.Application.Strategy
 
                     //获取产品信息
                     var productInfo = _repProduct.AsQueryable()
-                       .Where(a => a.SKU == a.SKU && a.CustomerId == customerId)
+                       .Where(b => b.SKU == a.SKU && a.CustomerId == customerId)
                        .First();
                     //校验产品信息
                     if (productInfo == null)

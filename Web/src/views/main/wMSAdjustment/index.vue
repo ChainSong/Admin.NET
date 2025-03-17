@@ -5,7 +5,6 @@
         <el-row :gutter="[16, 15]">
           <template v-for="i in  state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
-
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
@@ -19,9 +18,7 @@
                       :label="item.name" :value="item.codeInt">
                     </el-option>
                   </el-select>
-
                 </el-form-item>
-
               </template>
               <template v-if="i.type == 'DropDownListStrRemote'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -30,8 +27,6 @@
                     @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
                 </el-form-item>
               </template>
-
-
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
@@ -61,14 +56,12 @@
             </el-col>
           </template>
         </el-row>
-
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSAdjustment:page'"> 查询
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSAdjustment:add'"> 新增
@@ -77,7 +70,6 @@
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
         style="width: 100%">
         <el-table-column type="selection" width="55">
@@ -117,19 +109,16 @@
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
-
-            <el-button @click="cxecute(scope.row)" v-if="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" size="small">完成</el-button>
-            <el-button @click="cancel(scope.row)" v-if="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" size="small">取消</el-button>
+            <el-button @click="cxecute(scope.row)" v-show="scope.row.adjustmentStatus==1"  class="el-icon-edit" type="text" v-auth="'wMSAdjustment:complete'" size="small">完成</el-button>
+            <el-button @click="cancel(scope.row)" v-show="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" v-auth="'wMSAdjustment:cancel'" size="small">取消</el-button>
             <!-- <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="cxecute(scope.row)" title="确定完成吗？">
                 <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
                   size="small">完成</el-button>
               </el-popconfirm>  -->
-
           </template>
         </el-table-column>
       </el-table>
-
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
         :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
         @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
@@ -166,28 +155,18 @@ import orderStatus from "/@/entities/orderStatus";
 const state = ref({
   vm: {
     id: "",
-
-    // form: {
-    //     customerDetails: []
-    // } as any,
   },
   visible: false,
   loading: false,
   header: new Header(),
   headers: new Array<Header>(),
   details: new Array<Details>(),
-  // header: new Array<Details>(),
-
   tableColumnHeader: new TableColumns(),
   tableColumnHeaders: new Array<TableColumns>(),
   tableColumnDetail: new TableColumns(),
   tableColumnDetails: new Array<TableColumns>(),
   //自定义提示
   orderStatus: new Array<orderStatus>(),
-  // tableColumn: new TableColumns(),
-  // tableColumns: new Array<TableColumns>(),
-  // tableColumnsDetails: new Array<TableColumnsDetails>(),
-  //   tableColumnsDetail = ref();
 });
 
 const editDialogRef = ref();

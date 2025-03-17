@@ -5,7 +5,7 @@
             <el-option v-for="item in options" :key="item.value" @change="getChildrenVal" :label="item.label" :value="item">
             </el-option>
         </el-select> -->
-    <el-select v-model="modelValue" style="width: 90%;" :key="modelValue" clearable remote filterable
+    <el-select v-model="modelValue" style="width: 90%;" :key="modelValue" clearable remote filterable 
         :disabled="props.isDisabled==0" handleChange :placeholder="props.placeholder" allowClear show-search
         @change="valueChange" :remote-method="getDropDownListRemoteData">
         <el-option v-for="item in list" :key="item" :value="item.value" :label="item.text">{{ item.text }}</el-option>

@@ -48,7 +48,8 @@ public interface IExpressInterface
 
     //云打印需要的方法
     Task<Response<dynamic>> PrintExpressData(ScanPackageInput request);
-
+    Task<Response<dynamic>> PrintBatchExpressDataByPackageId(List<long> request);
+    
     //获取token
     Task<Response<dynamic>> GetExpressConfig(ScanPackageInput request);
 
