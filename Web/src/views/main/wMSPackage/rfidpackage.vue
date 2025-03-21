@@ -117,7 +117,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo,scanPackageData_RFID } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -362,7 +362,7 @@ const scanPackage = async () => {
   signalR.send('echo',1)
   signalR.send("echo", 5);
   state.value.vm.form.expressCompany = expressValue.value;
-  let res = await scanPackageData(state.value.vm.form);
+  let res = await scanPackageData_RFID(state.value.vm.form);
   if (res.data.result.code == 1) {
     allPackage(state.value.vm.form);
     state.value.vm.form = res.data.result.data;

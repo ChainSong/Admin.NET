@@ -19,6 +19,7 @@ public class ScanPackageInput
 {
     public string Input { get; set; }
     public string SKU { get; set; }
+    public string RFID { get; set; }
     public string SN { get; set; }
     public string Lot { get; set; }
     public string AcquisitionData { get; set; }
@@ -66,5 +67,8 @@ public class ScanPackageInput
     /// 重量
     /// </summary>
     public double Weight { get; set; }
+
+    public List<string> RFIDs { get; set; } = new List<string>();
+    public string RFIDStr { get; set; }
 
 }

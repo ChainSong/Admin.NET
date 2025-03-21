@@ -313,7 +313,7 @@ namespace Admin.NET.Application.Strategy
 
                     //获取产品信息
                     var productInfo = _repProduct.AsQueryable()
-                       .Where(b => b.SKU == a.SKU && a.CustomerId == customerId)
+                       .Where(b => b.SKU == a.SKU && b.CustomerId == customerId)
                        .First();
                     //校验产品信息
                     if (productInfo == null)

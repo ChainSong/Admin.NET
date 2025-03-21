@@ -359,6 +359,41 @@ public class WMSPackageService : IDynamicApiController, ITransient
     }
 
 
+
+    /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ScanPackageData_RFID")]
+    //[Idempotent("ms", 500)]
+    public async Task<Response<ScanPackageOutput>> ScanPackageData_RFID(ScanPackageInput input)
+    {
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder; 
+        factory._repRFIDInfo = _repRFIDInfo; 
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.GetPackage(input);
+        return response;
+
+        //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
+    }
+
+
     /// <summary>
     /// 获取WMSPackage列表
     /// </summary>

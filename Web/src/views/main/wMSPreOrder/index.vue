@@ -118,8 +118,8 @@
                 </template>
               </template>
             </el-table-column>
-            <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName"
-              width="150" max-height="50">
+            <el-table-column v-else v-bind:key="v.id" :fixed="false" :prop="v.columnName" :label="v.displayName" 
+              min-width="200" max-height="50">
             </el-table-column>
           </template>
         </template>

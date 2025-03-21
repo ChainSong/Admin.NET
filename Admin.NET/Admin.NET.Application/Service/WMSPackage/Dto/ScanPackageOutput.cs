@@ -24,6 +24,7 @@ public class ScanPackageOutput
 
     public string SN { get; set; }
     public string Lot { get; set; }
+    public string RFID { get; set; }
     public string AcquisitionData { get; set; }
     public List<PackageData> PackageDatas { get; set; }
 
@@ -44,6 +45,7 @@ public class PackageData
 
     public string GoodsName { get; set; }
     public string GoodsType { get; set; }
+    public List<string> RFIDs { get; set; } = new List<string>();
 
     public List<ScanPackageInput> ScanPackageInput { get; set; }
     public List<ScanPackageRFIDInput> ScanPackageRFIDInput { get; set; }

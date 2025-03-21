@@ -6,12 +6,13 @@ enum Api {
   PageWMSPackage = '/api/wMSPackage/page',
   GetWMSPackage = '/api/wMSPackage/Query',
   ScanPackageData = '/api/wMSPackage/ScanPackageData',
+  ScanPackageData_RFID = '/api/wMSPackage/ScanPackageData_RFID',
   PrintExpress = '/api/wMSPackage/PrintExpress',
   PrintBaatchExpress = '/api/wMSPackage/PrintBatchExpress',
   AllWMSPackage = '/api/wMSPackage/All',
   AddPackageData = '/api/wMSPackage/AddPackage',
   ShortagePackageData = '/api/wMSPackage/ShortagePackage',
-  ResetPackageData = '/api/wMSPackage/resetPackage',
+  ResetPackageData = '/api/wMSPackage/ResetPackageData',
   GetRFIDInfo = '/api/wMSPackage/GetRFIDInfo',
   ExportPackage = '/api/wMSPackage/ExportPackage',
   PrintPackageList = '/api/wMSPackage/PrintPackageList',
@@ -57,6 +58,14 @@ export const scanPackageData = (params?: any) =>
 			data: params,
 		});		
 
+		// 分页查询WMSPackage
+export const scanPackageData_RFID = (params?: any) => 
+	request({
+			url: Api.ScanPackageData_RFID,
+			method: 'post',
+			data: params,
+		});		
+		
 		// 分页查询WMSPackage
 export const shortagePackageData = (params?: any) => 
 	request({
