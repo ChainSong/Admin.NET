@@ -525,7 +525,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
             //List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
             //entityListDtos.Add(input);
 
-      
+
             //将散装的主表和明细表 组合到一起 
             List<AddOrUpdateWMSPreOrderInput> preOrders = entityListDtos.GroupBy(x => x.ExternOrderNumber).Select(x => x.First()).ToList();
             foreach (var item in preOrders)
