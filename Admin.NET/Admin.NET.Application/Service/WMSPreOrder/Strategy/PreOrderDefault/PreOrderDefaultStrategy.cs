@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Furion.FriendlyException;
+using Admin.NET.Common.AMap;
+using NewLife;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -30,7 +32,6 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-
         //注入产品仓储
         public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
@@ -40,6 +41,7 @@ namespace Admin.NET.Application.Strategy
 
         }
 
+        AMap aMap = new AMap();
         //处理预出库单业务
         public async Task<Response<List<OrderStatusDto>>> AddStrategy(List<AddOrUpdateWMSPreOrderInput> request)
         {
@@ -105,6 +107,26 @@ namespace Admin.NET.Application.Strategy
                     //response.Msg = "电话号码格式不正确";
                     //return response;
                 }
+                #region 请求高德地图 地理编码API  返回省市区
+
+                if (item.OrderAddress != null)
+                {
+                    //调用高德地图api
+                    var Georesponse = await aMap.RequestGeoCode(item.OrderAddress.Province + item.OrderAddress.City + item.OrderAddress.County + item.OrderAddress.Address, item.OrderAddress.City);
+                    if (Georesponse != null && Georesponse.status == "1")
+                    {
+                        item.OrderAddress.Province = Georesponse.geocodes[0].province;
+                        item.OrderAddress.City = Georesponse.geocodes[0].city;
+                        item.OrderAddress.County = Georesponse.geocodes[0].district;
+                    }
+                    else
+                    {
+                        return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
+                    }
+                }
+
+                #endregion
+
             }
 
 
@@ -184,7 +206,7 @@ namespace Admin.NET.Application.Strategy
 
             var orderData = mapper.Map<List<WMSPreOrder>>(request);
 
-            orderData.ForEach(item =>
+            orderData.ForEach(async(item) =>
             {
                 int lineNumber = 1;
                 var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;

@@ -12,6 +12,9 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using System.Reflection;
 using XAct;
+using Microsoft.AspNetCore.Components.Forms;
+using Nest;
+using System.Globalization;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -168,7 +171,6 @@ namespace Admin.NET.Application.Strategy
                                 }
                                 else
                                 {
-                                    //var date = new DateTime();
                                     var isDate = DateTime.TryParse(row[s].ToString(), out DateTime date);
                                     if (!isDate && date.Year < 2000)
                                     {
@@ -615,7 +617,7 @@ namespace Admin.NET.Application.Strategy
             return _repTableColumns.AsQueryable()
              .Where(a => a.TableName == TableName &&
                a.TenantId == _userManager.TenantId &&
-               (a.IsImportColumn == 1 )
+               (a.IsImportColumn == 1)
              )
             .Select(a => new TableColumns
             {
