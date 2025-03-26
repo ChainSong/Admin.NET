@@ -235,6 +235,10 @@ public class SFExpressStrategy : IExpressInterface
         packageData.RecipientsCity = receiver.City;
         packageData.RecipientsCountry = receiver.Country;
         packageData.RecipientsCounty = receiver.County;
+        //packageData.ExpressNumber = Waybillnoinfolist[sfexpressflag].waybillNo; //sfexpress.WaybillNo;
+        packageData.WaybillOrder = 1;
+        packageData.WaybillType = "1"; //sfexpress.waybillType;
+        packageData.SumOrder = 1; //sfexpress.waybillType;
         packageData.RecipientsCompany = receiver.ExpressCompany;
         packageData.ExpressNumber = sfexpress.WaybillNo;
         packageData.RecipientsContact = receiver.Name;
@@ -444,6 +448,7 @@ public class SFExpressStrategy : IExpressInterface
             item.RecipientsCounty = receiver.County;
             item.RecipientsCompany = receiver.ExpressCompany;
             item.ExpressNumber = Waybillnoinfolist[sfexpressflag].waybillNo; //sfexpress.WaybillNo;
+            item.WaybillOrder = sfexpressflag;
             item.WaybillType = Waybillnoinfolist[sfexpressflag].waybillType.ToString(); //sfexpress.waybillType;
             item.SumOrder = Waybillnoinfolist.Length; //sfexpress.waybillType;
             item.RecipientsContact = receiver.Name;
@@ -783,6 +788,7 @@ public class SFExpressStrategy : IExpressInterface
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
             result.WaybillType = getExpressDelivery.WaybillType;
+            result.WaybillOrder = getExpressDelivery.WaybillOrder??1;
             result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
             response.Data = result;

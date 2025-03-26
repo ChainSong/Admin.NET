@@ -97,6 +97,12 @@ public class WMSExpressDelivery : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
+    public int? WaybillOrder { get; set; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
     public int? SumOrder { get; set; }
     
 

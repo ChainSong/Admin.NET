@@ -76,9 +76,9 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ASNNumber), u => u.ASNNumber.Contains(input.ASNNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptNumber), u => u.ReceiptNumber.Contains(input.ReceiptNumber.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ExternReceiptNumber), u => u.ExternReceiptNumber.Contains(input.ExternReceiptNumber.Trim()))
-                    .WhereIF(input.CustomerId.HasValue &&input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                    .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
-                    .WhereIF( input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                    .WhereIF(input.WarehouseId.HasValue && input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
                     .WhereIF(input.ReceiptStatus.HasValue && input.ReceiptStatus != 0, u => u.ReceiptStatus == input.ReceiptStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.ReceiptType), u => u.ReceiptType.Contains(input.ReceiptType.Trim()))
@@ -281,53 +281,60 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
     {
-
-
-        //FileDir是存储临时文件的目录，相对路径
-        //private const string FileDir = "/File/ExcelTemp";
-        string url = await ImprotExcel.WriteFile(file);
-        var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
-        //1根据用户的角色 解析出Excel
-        IReceiptReceivingExcelInterface factoryExcel = ReceiptReceivingExcelFactory.GetReceipt();
-        //factoryExcel._db = _db;
-        factoryExcel._repReceipt = _rep;
-        factoryExcel._repReceiptDetail = _repReceiptDetail;
-        factoryExcel._repReceiptReceiving = _repReceiptReceiving;
-        factoryExcel._repTableColumns = _repTableColumns;
-        factoryExcel._userManager = _userManager;
-        //factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
-        var data = factoryExcel.Strategy(dataExcel);
-
-
-        var entityListDtos = data.Data.TableToList<WMSReceiptReceiving>();
-        //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
-
-        //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
-        var customer = _rep.AsQueryable().Where(a => a.ReceiptNumber == entityListDtos.First().ReceiptNumber).First();
-        long customerId = 0;
-        if (customer != null)
+        try
         {
-            customerId = customer.CustomerId;
+
+
+
+            //FileDir是存储临时文件的目录，相对路径
+            //private const string FileDir = "/File/ExcelTemp";
+            string url = await ImprotExcel.WriteFile(file);
+            var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+            //1根据用户的角色 解析出Excel
+            IReceiptReceivingExcelInterface factoryExcel = ReceiptReceivingExcelFactory.GetReceipt();
+            //factoryExcel._db = _db;
+            factoryExcel._repReceipt = _rep;
+            factoryExcel._repReceiptDetail = _repReceiptDetail;
+            factoryExcel._repReceiptReceiving = _repReceiptReceiving;
+            factoryExcel._repTableColumns = _repTableColumns;
+            factoryExcel._userManager = _userManager;
+            //factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
+            var data = factoryExcel.Strategy(dataExcel);
+
+
+            var entityListDtos = data.Data.TableToList<WMSReceiptReceiving>();
+            //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
+
+            //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+            var customer = _rep.AsQueryable().Where(a => a.ReceiptNumber == entityListDtos.First().ReceiptNumber).First();
+            long customerId = 0;
+            if (customer != null)
+            {
+                customerId = customer.CustomerId;
+            }
+            else
+            {
+                return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "数据错误" };
+            }
+            //使用简单工厂定制化修改和新增的方法
+            IReceiptReceivingInterface factory = ReceiptReceivingFactory.GetReceiptReceiving(customerId);
+            //factory._db = _db;
+            factory._repReceipt = _rep;
+            factory._repReceiptDetail = _repReceiptDetail;
+            factory._repReceiptReceiving = _repReceiptReceiving;
+            factory._repTableColumns = _repTableColumns;
+            factory._repLocation = _repLocation;
+            factory._repCustomerUser = _repCustomerUser;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._userManager = _userManager;
+            var response = await factory.Strategy(entityListDtos);
+
+            return response;
         }
-        else
+        catch (Exception ex)
         {
-            return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "数据错误" };
+            throw Oops.Oh(ex);
         }
-        //使用简单工厂定制化修改和新增的方法
-        IReceiptReceivingInterface factory = ReceiptReceivingFactory.GetReceiptReceiving(customerId);
-        //factory._db = _db;
-        factory._repReceipt = _rep;
-        factory._repReceiptDetail = _repReceiptDetail;
-        factory._repReceiptReceiving = _repReceiptReceiving;
-        factory._repTableColumns = _repTableColumns;
-        factory._repLocation = _repLocation;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._repWarehouseUser = _repWarehouseUser;
-        factory._userManager = _userManager;
-        var response = await factory.Strategy(entityListDtos);
-
-        return response;
-
     }
 
 
@@ -432,4 +439,4 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     }
 }
 
-    
+

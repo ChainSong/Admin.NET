@@ -104,7 +104,7 @@ export const print = async (express: any) => {
       documents: [
         {
           masterWaybillNo: express.expressNumber,
-          seq: express.waybillType,
+          seq: express.waybillOrder,
           sum: express.sumOrder,
         }
       ],

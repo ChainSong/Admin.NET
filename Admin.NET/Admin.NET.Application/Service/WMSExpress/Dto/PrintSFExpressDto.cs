@@ -172,6 +172,7 @@ public class PrintSFExpressDto
 
     public DateTime? PrintTime { get; set; }
     public string WaybillType { get; set; }
+    public int WaybillOrder { get; set; }
     //默认是子单}
     public int SumOrder { get; set; }
 

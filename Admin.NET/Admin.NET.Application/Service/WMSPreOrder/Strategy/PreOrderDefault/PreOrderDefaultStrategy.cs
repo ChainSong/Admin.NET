@@ -117,11 +117,18 @@ namespace Admin.NET.Application.Strategy
                     {
                         item.OrderAddress.Province = Georesponse.geocodes[0].province;
                         item.OrderAddress.City = Georesponse.geocodes[0].city;
-                        item.OrderAddress.County = Georesponse.geocodes[0].district;
+                        //item.OrderAddress.County = Georesponse.geocodes[0].district;
                     }
                     else
                     {
-                        return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
+                        response.Data.Add(new OrderStatusDto()
+                        {
+                            ExternOrder = item.ExternOrderNumber,
+                            SystemOrder = item.PreOrderNumber,
+                            Type = item.OrderType,
+                            Msg = "获取省区市失败"
+                        });
+                        //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
                     }
                 }
 
