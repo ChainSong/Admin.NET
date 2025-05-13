@@ -28,11 +28,14 @@ using Furion.FriendlyException;
 using SqlSugar;
 using System.Text.RegularExpressions;
 using System.Web;
+using Admin.NET.Common.TextCommon;
+using System.Text.Json;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 {
 
+    public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
@@ -95,7 +98,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
 
         }
-      
+
 
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
@@ -172,8 +175,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 return response;
             }
 
-        
-       
+
+
 
             var CheckPickData = _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber)
                 .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
@@ -207,7 +210,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
               .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
               .ToList();
 
-            
+
             if (pickData.Count > 0)
             {
 
@@ -231,7 +234,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             }
             response.Data.SKU = request.SKU;
             //判断RFID 是否重复
-          
+
             //判断有没有SN,有SN 就记录出库SN
             //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
             //wMSRF.
@@ -241,7 +244,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             {
                 if (PickSKUData.Sum(a => (a.ScanQty + a.PackageQty)) + 1 <= PickSKUData.First().PickQty)
                 {
-                     
+
                     var pick = pickData.Where(a => a.SKU == request.SKU && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                     if (pick.RFIDs.Contains(request.RFID))
                     {
@@ -264,7 +267,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                         {
                             request.RFIDs.AddRange(item.RFIDs);
                         }
-                  
+
                         var result = await PackingRFIDComplete_Scan(pickData, request, PackageBoxTypeEnum.正常);
                         response.Data.PackageDatas = pickData;
                         response.Code = result.Code;
@@ -577,7 +580,10 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                   //添加
                   .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
             });
-
+            TextHelper.WrittxtFor("准备更新RFID +request", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            TextHelper.WrittxtFor(JsonSerializer.Serialize(pickData.First().RFIDs), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
 
             var mapper = new Mapper(config);
             var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
@@ -624,38 +630,55 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     PackageAcquisitions.AddRange(PackageAcquisition);
                 }
             }
+
+            var result = await _repRFIDInfo.AsQueryable().Where(p => request.RFIDs.Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增
+            && packageData.CustomerId == packageData.CustomerId
+            ).ToListAsync();
+
+            foreach (var item in result)
+            {
+                //item.Status = (int)RFIDStatusEnum.出库;
+                item.Sequence = request.RFIDInfo.Where(a => a.RFID.Contains(item.RFID)).FirstOrDefault().Sequence;
+                item.ExternOrderNumber = packageData.ExternOrderNumber;
+                item.PickTaskNumber = packageData.PickTaskNumber;
+                item.OrderTime = DateTime.Now;
+                item.OrderPerson = _userManager.Account;
+                item.PickTaskNumber = pickData.FirstOrDefault().PickTaskNumber;
+                item.OrderNumber = packageData.OrderNumber;
+            }
+            await _repRFIDInfo.UpdateRangeAsync(result);
+
             //包装的时候，将RFID  状态修改成为10 标识RFID 已经拣货包装
-            //_repRFIDInfo.UpdateAsync(a => a.Status =(int)RFIDStatusEnum.包装).Where(a => request.RFIDs.Contains(a.RFID));
+            //_repRFIDInfo.UpdateAsync(a => a.Status = (int)RFIDStatusEnum.包装).Where(a => request.RFIDs.Contains(a.RFID));
             await _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
-               .SetColumns(p => p.Status == (int)RFIDStatusEnum.出库)
-               .SetColumns(p => p.OrderTime == DateTime.Now)
-               .SetColumns(p => p.OrderPerson == _userManager.Account)  
-               .SetColumns(p => p.OrderNumber == pickData.FirstOrDefault().PickTaskNumber)
-               //.SetColumns(p => p.ExternOrderNumber == pickData.FirstOrDefault().PickTaskNumber)
-               .Where(p => request.RFIDs.Contains(p.RFID))
-               .ExecuteCommandAsync();
+         .SetColumns(p => p.Status == (int)RFIDStatusEnum.出库)
+         .SetColumns(p => p.OrderTime == DateTime.Now)
+         .SetColumns(p => p.OrderPerson == _userManager.Account)
+         //.SetColumns(p => p.OrderNumber == request.RFIDInfo.Where(a=>a.RFID.Contains(p.RFID)).FirstOrDefault().Sequence)
+         .SetColumns(p => p.ExternOrderNumber == packageData.ExternOrderNumber)
+         //.SetColumns(p => p.Sequence == packageData.ExternOrderNumber)
+         //.SetColumns(p => p.PreOrderId == packageData.PreOrderId)
+         .SetColumns(p => p.PickTaskNumber == pickData.FirstOrDefault().PickTaskNumber)
+         //.SetColumns(p => p.ExternOrderNumber == pickData.FirstOrDefault().PickTaskNumber)
+         .Where(p => request.RFIDs.Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增)
+         .ExecuteCommandAsync();
 
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
-            //try
-            //{
+
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
             await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
             //await _repPackage.InsertAsync();
-            //}
-            //catch (Exception asdas)
-            //{
-            //    throw;
-            //}
+
             //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
             pickData.ForEach(a =>
-            {
+                {
 
-                a.PackageQty += a.ScanQty;
-                a.ScanQty = 0;
-            });
+                    a.PackageQty += a.ScanQty;
+                    a.ScanQty = 0;
+                });
             _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
             //判断是否包装完成
             var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
@@ -785,9 +808,12 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                .SetColumns(p => p.Status == (int)RFIDStatusEnum.出库)
                .SetColumns(p => p.OrderTime == DateTime.Now)
                .SetColumns(p => p.OrderPerson == _userManager.Account)
-               .SetColumns(p => p.OrderNumber == pickData.FirstOrDefault().PickTaskNumber)
+               .SetColumns(p => p.OrderNumber == packageData.OrderNumber)
+               .SetColumns(p => p.ExternOrderNumber == packageData.ExternOrderNumber)
+               //.SetColumns(p => p.PreOrderId == packageData.PreOrderId)
+               .SetColumns(p => p.PickTaskNumber == pickData.FirstOrDefault().PickTaskNumber)
                //.SetColumns(p => p.ExternOrderNumber == pickData.FirstOrDefault().PickTaskNumber)
-               .Where(p => request.RFIDs.Contains(p.RFID))
+               .Where(p => request.RFIDs.Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增)
                .ExecuteCommandAsync();
 
             packageData.ExpressCompany = request.ExpressCompany;
@@ -856,6 +882,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         //Response<Dictionary<string, string>> response = new Response<Dictionary<string, string>>();
         foreach (var item in request.RFIDStr.Split(',').ToList())
         {
+
             //校验位 以24位为基准，多于24位则截取前24位，少于24位则反馈错误信息
             if (string.IsNullOrEmpty(item) || item.Length < 24)
             {
@@ -878,6 +905,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         response.Data.SN = request.SN;
         response.Data.Input = request.Input;
         response.Data.AcquisitionData = request.AcquisitionData;
+        response.Data.WMSRFIDInfos = request.RFIDInfo;
 
 
         //根据拣货任务号获取订单信息
@@ -899,7 +927,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             response.Data.PackageDatas = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             return response;
         }
-     
+
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {

@@ -84,45 +84,54 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
                     rules.Add(rule);
                 }
             }
-            workflowRules[0] = (new WorkflowRules() { Rules = rules, WorkflowName = "UserInputWorkflow" });
-            //反序列化Json格式规则字符串
-            //var workflowRuless = JsonConvert.DeserializeObject<List<WorkflowRules>>(workflowRules);
-
-            //初始化规则引擎
-            var rulesEngine = new RulesEngine.RulesEngine(workflowRules);
-            //List<RuleResultTree> resultList = new List<RuleResultTree>();
-            int flag = 1;
-            foreach (var item in collection)
+            if (rules.Count > 0)
             {
-                //使用规则进行判断，并返回结果
-                var result = await rulesEngine.ExecuteAllRulesAsync("UserInputWorkflow", item);
+                workflowRules[0] = (new WorkflowRules() { Rules = rules, WorkflowName = "UserInputWorkflow" });
+                //反序列化Json格式规则字符串
+                //var workflowRuless = JsonConvert.DeserializeObject<List<WorkflowRules>>(workflowRules);
 
-                foreach (var rule in result.Where(a => a.IsSuccess == false))
+                //初始化规则引擎
+                var rulesEngine = new RulesEngine.RulesEngine(workflowRules);
+                //List<RuleResultTree> resultList = new List<RuleResultTree>();
+                int flag = 1;
+                foreach (var item in collection)
                 {
-                    statusDtos.Add(new OrderStatusDto()
-                    {
-                        StatusCode = StatusCode.Warning,
-                        Msg = rule.Rule.ErrorMessage,
-                        ExternOrder = "第" + flag + "行",
-                        SystemOrder = "第" + flag + "行",
-                    });
-                }
-                flag++;
-            } 
-            //验证数据
-            if (statusDtos.Count > 0)
-            {
-                response.Code = StatusCode.Error;
-            }
-            else
-            {
-                response.Code = StatusCode.Success;
-            }
-            //response.Result = statusDtos;
-            response.Data = statusDtos;
+                    //使用规则进行判断，并返回结果
+                    var result = await rulesEngine.ExecuteAllRulesAsync("UserInputWorkflow", item);
 
-            //throw new NotImplementedException();
-            return response;
+                    foreach (var rule in result.Where(a => a.IsSuccess == false))
+                    {
+                        statusDtos.Add(new OrderStatusDto()
+                        {
+                            StatusCode = StatusCode.Warning,
+                            Msg = rule.Rule.ErrorMessage,
+                            ExternOrder = "第" + flag + "行",
+                            SystemOrder = "第" + flag + "行",
+                        });
+                    }
+                    flag++;
+                }
+                //验证数据
+                if (statusDtos.Count > 0)
+                {
+                    response.Code = StatusCode.Error;
+                }
+                else
+                {
+                    response.Code = StatusCode.Success;
+                }
+                //response.Result = statusDtos;
+                response.Data = statusDtos;
+
+                //throw new NotImplementedException();
+                return response;
+            }
+            else {
+                response.Code = StatusCode.Success;
+                response.Data = statusDtos;
+                response.Msg = "无需验证";
+                return response;
+            }
 
         }
         catch (Exception ex)

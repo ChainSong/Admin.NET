@@ -1,10 +1,12 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using AutoMapper;
 using AutoMapper.Internal.Mappers;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
@@ -17,6 +19,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using XAct;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -39,16 +42,19 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     //private readonly ISqlSugarClient _db;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
+    private readonly WMSReceiptReceivingService _repReceiptReceivingService;
 
-
+    private readonly SysWorkFlowService _repWorkFlowService;
 
     private readonly SqlSugarRepository<WMSASN> _repASN;
     //注入ASNDetail仓储
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
-    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlow> repWorkFlow)
+    public WMSReceiptService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, WMSReceiptReceivingService repReceiptReceivingService, SqlSugarRepository<WMSLocation> repLocation, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -65,6 +71,10 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         _repASNDetail = repASNDetail;
         _repRFIDInfo = repRFIDInfo;
         _repWorkFlow = repWorkFlow;
+        _repProduct = repProduct;
+        _repReceiptReceivingService = repReceiptReceivingService;
+        _repLocation = repLocation;
+        _repWorkFlowService = repWorkFlowService;
         //this._repTableInventoryUsable = repTableInventoryUsable;
 
     }
@@ -331,15 +341,17 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     {
         var entity = await _rep.GetByIdAsync(input.Id);
         //根据订单类型判断是否存在该流程
-        var workflow = await _repWorkFlow.AsQueryable()
-           .Includes(a => a.SysWorkFlowSteps)
-           .Where(a => a.WorkName == entity.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == entity.CustomerName + InboundWorkFlowConst.Workflow_ReceiptReturn).FirstAsync();
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(entity.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ReceiptReturn, entity.ReceiptType);
 
 
         //使用简单工厂定制化  /
         List<DeleteWMSReceiptInput> request = new List<DeleteWMSReceiptInput>();
         request.Add(input);
-        IReceiptReturnInterface factory = ReceiptReturnFactory.ReturnReceipt(workflow, entity.ReceiptType);
+        IReceiptReturnInterface factory = ReceiptReturnFactory.ReturnReceipt(workflow);
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;
         factory._userManager = _userManager;
@@ -347,6 +359,7 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         factory._repTableColumnsDetail = _repTableColumnsDetail;
         factory._repASN = _repASN;
         factory._repASNDetail = _repASNDetail;
+        factory._repRFIDInfo = _repRFIDInfo;
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.Strategy(request);
 
@@ -366,6 +379,41 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
 
+    /// <summary>
+    /// 更新WMSReceipt
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "SaveRFID")]
+    public async Task<Response<List<OrderStatusDto>>> SaveRFID(UpdateWMSReceiptInput input)
+    {
+        var entity = await _rep.GetByIdAsync(input.Id);
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == entity.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(entity.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_CreateRFID, entity.ReceiptType);
+
+
+        //使用简单工厂定制化  /
+        //List<DeleteWMSReceiptInput> request = new List<DeleteWMSReceiptInput>();
+        //request.Add(input);
+        IReceiptRFIDInterface factory = ReceiptRFIDFactory.RFIDReceipt(workflow);
+        factory._repReceipt = _rep;
+        factory._repReceiptDetail = _repReceiptDetail;
+        factory._userManager = _userManager;
+        factory._repProduct = _repProduct;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repASN = _repASN;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repASNDetail = _repASNDetail;
+        //factory._repTableColumns = _repTableInventoryUsed;
+        return await factory.SaveRFID(input);
+    }
 
 
 
@@ -422,8 +470,6 @@ public class WMSReceiptService : IDynamicApiController, ITransient
     {
         try
         {
-
-
             //使用简单工厂定制化
             //使用简单工厂定制化
             IReceiptExcelInterface factory = ReceiptExportFactory.ExportReceipt();
@@ -478,6 +524,63 @@ public class WMSReceiptService : IDynamicApiController, ITransient
         {
             FileDownloadName = "上架单.xlsx" // 配置文件下载显示名
         };
+    }
+
+
+
+    [HttpPost]
+    [UnitOfWork]
+    public async Task<Response<List<OrderStatusDto>>> QuickInventory(List<long> input)
+    {
+        Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>();
+        //根据id 获取入库单数据，
+        //通过入库单数据构建上架数据，
+        var receiptData = await _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id)).ToListAsync();
+        List<WMSReceiptReceiving> receiptReceivingList = new List<WMSReceiptReceiving>();
+
+        //快捷入库，获取第一个库位信息
+
+        var location = await _repLocation.AsQueryable().Where(a => a.LocationStatus == (int)LocationStatusEnum.可用 && a.WarehouseId == receiptData.First().WarehouseId).OrderBy(a => a.Id).ToListAsync();
+        if (location.Count == 0)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "没有可用库位";
+            response.Data = new List<OrderStatusDto>();
+            return response;
+        }
+
+
+        var config = new MapperConfiguration(cfg => cfg.CreateMap<WMSReceiptDetail, WMSReceiptReceiving>()
+         .ForMember(a => a.ReceiptDetailId, opt => opt.MapFrom(c => c.Id))
+         .ForMember(a => a.Area, opt => opt.MapFrom(c => location.First().AreaName))
+         .ForMember(a => a.Location, opt => opt.MapFrom(c => location.First().Location))
+         .ForMember(a => a.Updator, opt => opt.Ignore())
+         .ForMember(a => a.UpdateTime, opt => opt.Ignore())
+         .ForMember(a => a.CreationTime, opt => opt.Ignore())
+         .ForMember(a => a.Creator, opt => opt.Ignore())
+         .ForMember(a => a.Id, opt => opt.Ignore())
+        //.ForMember(a => a.ReceiptDetailId, opt => opt.MapFrom(c => c.Id))
+        );
+       
+       
+
+        var mapper = new Mapper(config);
+        foreach (var item in receiptData)
+        {
+            var receiptReceiving = mapper.Map<List<WMSReceiptReceiving>>(item.Details);
+            receiptReceivingList.AddRange(receiptReceiving);
+
+        }
+        var addReceiptReceiving = await _repReceiptReceivingService.Add(receiptReceivingList);
+        if (addReceiptReceiving.Code == StatusCode.Success)
+        {
+            return await _repReceiptReceivingService.AddInventory(input);
+        }
+
+        response.Code = StatusCode.Error;
+        response.Msg = "上架单生成失败";
+        response.Data = new List<OrderStatusDto>();
+        return response;
     }
 
 }

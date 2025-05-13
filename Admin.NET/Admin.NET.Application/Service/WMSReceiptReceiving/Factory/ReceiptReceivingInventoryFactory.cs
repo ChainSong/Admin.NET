@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application.ReceiptCore.Factory
 {
-    public class ReceiptInventoryFactory
+    public class ReceiptReceivingInventoryFactory
     {
-        public static IReceiptInventoryInterface AddInventory(long CustomerId)
+        public static IReceiptReceivingInventoryInterface AddInventory(long CustomerId)
         {
              //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
             switch (CustomerId)

@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Data;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
 
 namespace Admin.NET.Application.Service;
 public class ProductExcelStrategy : IProductExcelInterface
@@ -41,7 +42,7 @@ public class ProductExcelStrategy : IProductExcelInterface
 
         var headerTableColumn = GetColumns("WMS_Product");
         //var detailTableColumn = GetColumns("WMS_ASNDetail");
-
+        List<OrderStatusDto> statusDtos = new List<OrderStatusDto>();
 
         //循环datatable
         for (int i = 0; i < request.Columns.Count; i++)
@@ -57,12 +58,119 @@ public class ProductExcelStrategy : IProductExcelInterface
             {
                 continue;
             }
+            //验证数据
+            if (Column.Validation == "Required")
+            {
+                int flag = 1;
+
+
+                foreach (DataRow row in request.Rows)
+                {
+
+                    flag++;
+                    // 如果该值是下拉的，那么必须使用下拉列表中的数据
+                    if (string.IsNullOrEmpty(row[s].ToString()))
+                    {
+                        statusDtos.Add(new OrderStatusDto()
+                        {
+                            //Id = b.Id,
+                            ExternOrder = "第" + flag + "行",
+                            SystemOrder = "第" + flag + "行",
+                            //Type = b.OrderType,
+                            StatusCode = StatusCode.Warning,
+                            //StatusMsg = (string)StatusCode.warning,
+                            Msg = Column.DisplayName + ":数据不能为空"
+                        });
+
+                    }
+                    else
+                    {
+                        if (Column.Type == "DropDownListInt" && Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).Count() == 0)
+                        {
+                            //mag = "数据错误,内容不能为空，或者不在系统提供范围内";
+                            statusDtos.Add(new OrderStatusDto()
+                            {
+                                //Id = b.Id,
+                                ExternOrder = "第" + flag + "行",
+                                SystemOrder = "第" + flag + "行",
+                                //Type = b.OrderType,
+                                StatusCode = StatusCode.Warning,
+                                //StatusMsg = (string)StatusCode.warning,
+                                Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不在系统提供范围内"
+                            });
+                        }
+                        else if (Column.Type == "DropDownListStr" && Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).Count() == 0)
+                        {
+                            statusDtos.Add(new OrderStatusDto()
+                            {
+                                //Id = b.Id,
+                                ExternOrder = "第" + flag + "行",
+                                SystemOrder = "第" + flag + "行",
+                                //Type = b.OrderType,
+                                StatusCode = StatusCode.Warning,
+                                //StatusMsg = (string)StatusCode.warning,
+                                Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不在系统提供范围内"
+                            });
+                        }
+                        else if (Column.Type == "DatePicker" || Column.Type == "DateTimePicker")
+                        {
+                            if (string.IsNullOrEmpty(row[s].ToString()))
+                            {
+                                statusDtos.Add(new OrderStatusDto()
+                                {
+                                    //Id = b.Id,
+                                    ExternOrder = "第" + flag + "行",
+                                    SystemOrder = "第" + flag + "行",
+                                    //Type = b.OrderType,
+                                    StatusCode = StatusCode.Warning,
+                                    //StatusMsg = (string)StatusCode.warning,
+                                    Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不是有效的日期格式"
+                                });
+                            }
+                            else
+                            {
+                                //var date = new DateTime();
+                                var isDate = DateTime.TryParse(row[s].ToString(), out DateTime date);
+                                if (!isDate && date.Year < 2000)
+                                {
+                                    statusDtos.Add(new OrderStatusDto()
+                                    {
+                                        //Id = b.Id,
+                                        ExternOrder = "第" + flag + "行",
+                                        SystemOrder = "第" + flag + "行",
+                                        //Type = b.OrderType,
+                                        StatusCode = StatusCode.Warning,
+                                        //StatusMsg = (string)StatusCode.warning,
+                                        Msg = Column.DisplayName + ":数据错误,“" + row[s].ToString() + "”不是有效的日期格式"
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+
+            //替换下拉数据
+            foreach (DataRow row in request.Rows)
+            {
+                if (Column.Type == "DropDownListInt" && Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).Count() > 0)
+                {
+                    row[s]= Column.tableColumnsDetails.Where(a => a.Name == row[s].ToString()).FirstOrDefault().CodeInt;
+                }
+            }
+
             //判断标头与key是否相等
             if (s.Equals(Column.DisplayName))
             {
                 //相等替换掉原来的表头
                 request.Columns[i].ColumnName = Column.DbColumnName;
             }
+
+
+
             //var config = new MapperConfiguration(cfg => cfg.CreateMap<DataTable, WMS_ASN>() );
             //var mapper = new Mapper(config);
             //var asnData = mapper.Map<List<WMS_ASN>>(request);
@@ -73,20 +181,25 @@ public class ProductExcelStrategy : IProductExcelInterface
         return response;
 
     }
-    private List<TableColumns> GetColumns(string TableName)
+    public List<TableColumns> GetColumns(string TableName)
     {
         return _repTableColumns.AsQueryable()
            .Where(a => a.TableName == TableName &&
              a.TenantId == _userManager.TenantId &&
-             a.IsImportColumn == 1
+             (a.IsImportColumn == 1 || a.IsKey == 1)
            )
           .Select(a => new TableColumns
           {
               DisplayName = a.DisplayName,
+              Type = a.Type,
               //由于框架约定大于配置， 数据库的字段首字母小写
               //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
               DbColumnName = a.DbColumnName,
-              IsImportColumn = a.IsImportColumn
+              Validation = a.Validation,
+              IsImportColumn = a.IsImportColumn,
+              tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
+              //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
+              //.Select()
           }).ToList();
     }
 }

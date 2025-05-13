@@ -272,7 +272,7 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// PrintNum
     /// </summary>
-    public int PrintNum { get; set; }
+    public int? PrintNum { get; set; }
 
     /// <summary>
     /// PrintTime

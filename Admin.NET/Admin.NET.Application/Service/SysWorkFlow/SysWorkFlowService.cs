@@ -121,11 +121,11 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         //如果存在，就先删除在插入
         if (MainData.Id != 0)
         {
-            await _rep.Context.UpdateNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+            var oldData = await _rep.Context.UpdateNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
         }
         else
         {
-            await _rep.Context.InsertNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
+            var oldData = await _rep.Context.InsertNav(MainData).Include(a => a.SysWorkFlowSteps).ExecuteCommandAsync();
 
         }
         response.Code = StatusCode.Success;
@@ -329,7 +329,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "copyWorkFlow")]
-    public async Task<Response> CopyWorkFlow( SysWorkFlow input)
+    public async Task<Response> CopyWorkFlow(SysWorkFlow input)
     {
         //先判断有没有这个流程
         var entityCheck = await _rep.AsQueryable().Includes(a => a.SysWorkFlowSteps).Where(u => u.WorkName == input.WorkName).FirstAsync();
@@ -510,7 +510,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
     /// <param name="entity"></param>
     /// <param name="rewrite">是否重新生成流程</param>
     /// <param name="changeTableStatus">是否修改原表的审批状态</param>
-    public static void AddProcese(SysWorkFlowTable workFlowTable, bool rewrite = false, bool changeTableStatus = true) 
+    public static void AddProcese(SysWorkFlowTable workFlowTable, bool rewrite = false, bool changeTableStatus = true)
     {
         //var workFlowTable_Id = Guid.NewGuid();
         //SysWorkFlowTable workFlowTable = new SysWorkFlowTable()
@@ -542,7 +542,7 @@ public class SysWorkFlowService : IDynamicApiController, ITransient
         //        CreateDate = DateTime.Now,
         //    }).ToList()
         //};
-       
+
     }
 
 }

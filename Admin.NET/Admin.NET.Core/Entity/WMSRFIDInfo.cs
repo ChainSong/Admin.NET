@@ -113,6 +113,13 @@ public class WMSRFIDInfo : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? ExternOrderNumber { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PickTaskNumber { get; set; }
+    
     
     /// <summary>
     /// 

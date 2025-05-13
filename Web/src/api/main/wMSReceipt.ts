@@ -8,6 +8,8 @@ enum Api {
 	ExportReceipt = '/api/wMSReceipt/ExportReceipt',
 	ExportReceiptReceiving = '/api/wMSReceipt/ExportReceiptReceiving',
 	GetReceipts = '/api/wMSReceipt/GetReceipts',
+	SaveRFID = '/api/wMSReceipt/SaveRFID',
+	QuickInventory = '/api/wMSReceipt/QuickInventory',
 	// GetPrintRFIDData = '/api/wMSReceipt/GetPrintRFIDData',
 }
 
@@ -27,6 +29,15 @@ export const deleteWMSReceipt = (params?: any) =>
 		data: params,
 	});
 
+
+// 删除WMSReceipt
+export const saveRFID = (params?: any) =>
+	request({
+		url: Api.SaveRFID,
+		method: 'post',
+		data: params,
+	});	
+	
 // 编辑WMSReceipt
 export const updateWMSReceipt = (params?: any) =>
 	request({
@@ -51,7 +62,17 @@ export const getReceipts = (params?: any) =>
 		data: params,
 	});
 
-
+// 导出一个名为 quickInventory 的常量，它是一个函数
+	export const quickInventory = (params?: any) =>
+// 调用 request 函数，发送一个 HTTP 请求
+		request({
+    // 请求的 URL，使用 Api.QuickInventory 常量
+			url: Api.QuickInventory,
+			method: 'post',
+			data: params,
+		});
+	
+	
 // 单条查询WMSReceipt
 export const getWMSReceipt = (params?: any) =>
 	request({

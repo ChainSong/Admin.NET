@@ -154,7 +154,7 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder+':'+ i.msg"
 				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>

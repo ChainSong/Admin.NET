@@ -29,11 +29,15 @@ namespace Admin.NET.Application
                 case "WMS_Product":
                     return new ImportExcelTemplateProductDefault();
 
+                case "WMS_Location":
+                    return new ImportExcelTemplateLocationDefault();
+
                 case "WMS_ProductBom":
                     return new ImportExcelTemplateProductBomDefault();
 
                 case "RFID":
                     return new ImportExcelTemplateRFIDHach();
+
 
                 default:
                     return new ImportExcelTemplateASNDefault();

@@ -10,8 +10,9 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application.ReceiptCore.Interface
 {
-   public  interface IReceiptInventoryInterface
+   public  interface IReceiptReceivingInventoryInterface
     {
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         public SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
         public SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail { get; set; }

@@ -98,6 +98,7 @@
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
         style="width: 100%">
         <el-table-column type="selection" width="55">
+          
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
@@ -398,4 +399,14 @@ const handleCurrentChange = (val: number) => {
 handleQuery();
 </script>
 
+<style scoped>
+.el-table .el-checkbox {
+  transform: scale(3.5); /* 调整复选框的缩放比例 */
+  margin-right: 2px; /* 调整复选框与文字的间距 */
+}
 
+::v-deep(.el-table .el-checkbox__input) {
+  height: 24px; /* 调整复选框的高度 */
+  width: 24px; /* 调整复选框的宽度 */
+}
+</style>

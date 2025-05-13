@@ -83,7 +83,8 @@
           </el-button>
           <el-button type="primary" icon="ele-Fold" @click="printRFID" v-auth="'wMSReceipt:printRFID'">
             打印RFID</el-button>
-
+          <el-button type="primary" icon="ele-Fold" @click="quickInventoryFun">
+            快速入库</el-button>
         </el-form-item>
 
       </el-form>
@@ -123,7 +124,7 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="250">
           <template #header>
             <el-select placeholder="请选择">
               <template v-for="item in state.tableColumnHeaders">
@@ -137,6 +138,8 @@
           </template>
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
+            </el-button>
+            <el-button @click="createRFID(scope.row)" class="el-icon-s-comment" type="text" size="small">生成RFID
             </el-button>
             <el-button @click="del(scope.row)" class="el-icon-delete" type="text" size="small">删除
             </el-button>
@@ -166,7 +169,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSReceipt/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSReceipt/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSReceipt/component/queryDialog.vue'
-import { pageWMSReceipt, deleteWMSReceipt, exportReceipt, exportReceiptReceiving, getReceipts } from '/@/api/main/wMSReceipt';
+import { pageWMSReceipt, deleteWMSReceipt, exportReceipt, exportReceiptReceiving, getReceipts, saveRFID, quickInventory } from '/@/api/main/wMSReceipt';
 import { getPrinrRFIDInfoByReceiptId } from '/@/api/main/wMSRFIDInfo';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import printDialog from '/@/views/tools/printDialog.vue';
@@ -329,7 +332,34 @@ const handleSizeChange = (val: number) => {
   handleQuery();
 };
 
-
+const quickInventoryFun = async () => {
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 判断是否勾选订单
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要加入库存吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      let result = await quickInventory(ids);
+      console.log("result");
+      console.log(result);
+      if (result.data.result.code == 1) {
+        // await signalR.send("Echo", result.data.result.data);
+        ElMessage.success("操作成功");
+      } else {
+        ElMessage.success("操作失败");
+      }
+    })
+    .catch(() => { });
+}
 const exportReceipts = async () => {
 
   //1 获取选中的订单ID
@@ -346,7 +376,7 @@ const exportReceipts = async () => {
     let res = await exportReceipt({ "ids": ids });
     var fileName = getFileName(res.headers);
     downloadByData(res.data as any, fileName);
-  }else{
+  } else {
     let res = await exportReceipt(state.value.header);
     var fileName = getFileName(res.headers);
     downloadByData(res.data as any, fileName);
@@ -370,6 +400,28 @@ const exportReceiptReceivingfun = async () => {
   downloadByData(res.data as any, fileName);
 }
 
+
+//-----------------------------生成RFID------------------------------------------------
+
+// 生成RFID
+const createRFID = async (row: any) => {
+  ElMessageBox.confirm(`确定要创建RFID吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      //根据传过来的参数调用保存RFID的接口
+      let res = await saveRFID(row);
+      if (res.data.result.code == "1") {
+        ElMessage.success(res.data.result.msg);
+      } else {
+        ElMessage.error(res.data.result.msg);
+      }
+    })
+    .catch(() => { });
+
+};
 
 //-----------------打印上架--------------------------------------------------------- 
 

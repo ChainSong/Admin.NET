@@ -544,6 +544,7 @@ public class AddOrUpdateWMSASNInput : WMSASNBaseInput
     public long? Id { get; set; }
 
     public List<WMSASNDetail> Details { get; set; }
+    public List<WMSRFIDInfo> RFIDDetails { get; set; }
 }
 
 /// <summary>

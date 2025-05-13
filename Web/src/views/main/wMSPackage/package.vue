@@ -20,7 +20,7 @@
         </div>
         <el-row :gutter="[8, 24]">
           <div>
-            <table style="height:350px;width: 450px;">
+            <table style="height:350px;width: 400px;">
               <tr>
                 <th style="padding-left:5px;font-size:20px" rowspan="1">快递公司:</th>
                 <td>
@@ -63,6 +63,14 @@
                   class="form-control" style="width:100%" /> -->
                 </td>
               </tr>
+              <tr>
+                <th style="padding-left:5px;font-size:20px">备注:</th>
+                <td>
+                  <div >
+                   <label style="font-size:20px;">{{ state.vm.form.remark }}</label>
+                  </div>
+                </td>
+              </tr>
             </table>
           </div>
 
@@ -71,14 +79,15 @@
               <el-table :data="state.vm.tableData" style="width: 100%;font-size:20px;">
                 <el-table-column prop="sku" label="SKU" width="200">
                 </el-table-column>
-                <el-table-column prop="pickQty" label="拣货数量" width="150">
+                <el-table-column prop="pickQty" label="拣货数量" width="120">
                 </el-table-column>
-                <el-table-column prop="scanQty" label="扫描数量" width="150">
+                <el-table-column prop="scanQty" label="扫描数量" width="120">
                 </el-table-column>
-                <el-table-column prop="remainingQty" label="剩余数量" width="150">
+                <el-table-column prop="remainingQty" label="剩余数量" width="120">
                 </el-table-column>
-                <el-table-column prop="packageQty" label="包装数量" width="150">
+                <el-table-column prop="packageQty" label="包装数量" width="120">
                 </el-table-column>
+              
               </el-table>
             </el-row>
           </div>
@@ -183,7 +192,11 @@ const state = ref({
 
 
 });
-
+ // 生明失败的音频文件
+ const audio_error = new Audio('/audio/error.mp3'); // 替换为实际的音频文件路径
+  // 生明成功的音频文件
+ const audio_success = new Audio('/audio/success.mp3'); // 替换为实际的音频文件路径
+   
 const expressOptions = ref([]);
 const expressValue = ref("");
 const printDialogRef = ref();
@@ -221,9 +234,13 @@ const getExpress = async () => {
 const shortagePackage = async () => {
   let res = await shortagePackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
+    audio_success.play(); // 播放音频
+ 
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
   } else if (res.data.result.code == 99) {
+    audio_success.play(); // 播放音频
+    
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
@@ -291,11 +308,15 @@ const scanPackage = async () => {
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
+ 
+    audio_success.play(); // 播放音频
+    
     allPackage(state.value.vm.form);
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
 
   } else if (res.data.result.code == 99) {
+    audio_success.play(); // 播放音频
     allPackage(state.value.vm.form);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
@@ -305,6 +326,7 @@ const scanPackage = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else {
+    audio_error.play(); // 播放音频
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);

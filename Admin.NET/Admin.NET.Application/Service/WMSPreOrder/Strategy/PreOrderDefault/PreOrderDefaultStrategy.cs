@@ -35,8 +35,7 @@ namespace Admin.NET.Application.Strategy
         //注入产品仓储
         public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
-        public PreOrderDefaultStrategy(
-            )
+        public PreOrderDefaultStrategy()
         {
 
         }
@@ -79,6 +78,40 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in request)
             {
 
+                #region 请求高德地图 地理编码API  返回省市区
+
+                if (item.OrderAddress != null)
+                {
+                    try
+                    {
+                        //调用高德地图api
+                        var Georesponse = await aMap.RequestGeoCode(item.OrderAddress.Province + item.OrderAddress.City + item.OrderAddress.County + item.OrderAddress.Address, item.OrderAddress.City);
+                        if (Georesponse != null && Georesponse.status == "1")
+                        {
+                            item.OrderAddress.Province = Georesponse.geocodes[0].province;
+                            item.OrderAddress.City = Georesponse.geocodes[0].city;
+                            //item.OrderAddress.County = Georesponse.geocodes[0].district;
+                        }
+                        else
+                        {
+                            //response.Data.Add(new OrderStatusDto()
+                            //{
+                            //    ExternOrder = item.ExternOrderNumber,
+                            //    SystemOrder = item.PreOrderNumber,
+                            //    Type = item.OrderType,
+                            //    Msg = "获取省区市失败"
+                            //});
+                            //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+                }
+
+                #endregion
                 //if (string.IsNullOrEmpty(item.OrderType))
                 //{
                 //    response.Data.Add(new OrderStatusDto()
@@ -107,32 +140,7 @@ namespace Admin.NET.Application.Strategy
                     //response.Msg = "电话号码格式不正确";
                     //return response;
                 }
-                #region 请求高德地图 地理编码API  返回省市区
 
-                if (item.OrderAddress != null)
-                {
-                    //调用高德地图api
-                    var Georesponse = await aMap.RequestGeoCode(item.OrderAddress.Province + item.OrderAddress.City + item.OrderAddress.County + item.OrderAddress.Address, item.OrderAddress.City);
-                    if (Georesponse != null && Georesponse.status == "1")
-                    {
-                        item.OrderAddress.Province = Georesponse.geocodes[0].province;
-                        item.OrderAddress.City = Georesponse.geocodes[0].city;
-                        //item.OrderAddress.County = Georesponse.geocodes[0].district;
-                    }
-                    else
-                    {
-                        response.Data.Add(new OrderStatusDto()
-                        {
-                            ExternOrder = item.ExternOrderNumber,
-                            SystemOrder = item.PreOrderNumber,
-                            Type = item.OrderType,
-                            Msg = "获取省区市失败"
-                        });
-                        //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
-                    }
-                }
-
-                #endregion
 
             }
 
@@ -213,7 +221,7 @@ namespace Admin.NET.Application.Strategy
 
             var orderData = mapper.Map<List<WMSPreOrder>>(request);
 
-            orderData.ForEach(async(item) =>
+            orderData.ForEach(async (item) =>
             {
                 int lineNumber = 1;
                 var customerId = _repCustomerUser.AsQueryable().Where(b => b.CustomerName == item.CustomerName).First().CustomerId;
@@ -243,7 +251,7 @@ namespace Admin.NET.Application.Strategy
                             Type = item.OrderType,
                             StatusCode = StatusCode.Error,
                             //StatusMsg = StatusCode.warning.ToString(),
-                            Msg = "产品信息不存在"
+                            Msg = a.SKU +"产品信息不存在"
                         });
                         return;
                     }
@@ -359,24 +367,25 @@ namespace Admin.NET.Application.Strategy
             //    response.Msg = "用户缺少仓库操作权限";
             //    return response;
             //}
-            //var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber));
-            //if (asnCheck != null && asnCheck.ToList().Count > 0)
-            //{
-            //    asnCheck.ToList().ForEach(b =>
-            //    {
-            //        response.Data.Add(new OrderStatusDto()
-            //        {
-            //            ExternOrder = b.ExternOrderNumber,
-            //            SystemOrder = b.PreOrderNumber,
-            //            Type = b.OrderType,
-            //            Msg = "订单已存在"
-            //        });
+            var asnCheck = _repPreOrder.AsQueryable().Where(a => request.Select(r => r.ExternOrderNumber).ToList().Contains(a.ExternOrderNumber) &&
+            a.PreOrderStatus > (int)PreOrderStatusEnum.新增);
+            if (asnCheck != null && asnCheck.ToList().Count > 0)
+            {
+                asnCheck.ToList().ForEach(b =>
+                {
+                    response.Data.Add(new OrderStatusDto()
+                    {
+                        ExternOrder = b.ExternOrderNumber,
+                        SystemOrder = b.PreOrderNumber,
+                        Type = b.OrderType,
+                        Msg = "订单状态异常"
+                    });
 
-            //    });
-            //    response.Code = StatusCode.error;
-            //    response.Msg = "订单异常";
-            //    return response;
-            //}
+                });
+                response.Code = StatusCode.Error;
+                response.Msg = "订单异常";
+                return response;
+            }
 
 
 
@@ -502,7 +511,7 @@ namespace Admin.NET.Application.Strategy
                     Type = b.OrderType,
                     StatusCode = StatusCode.Success,
                     //StatusMsg = StatusCode.warning.ToString(),
-                    Msg = "订单新增成功"
+                    Msg = "订单修改成功"
                 });
 
             });

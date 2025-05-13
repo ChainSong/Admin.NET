@@ -6,6 +6,10 @@ using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using System.Collections.Generic;
+using Admin.NET.Application.Service;
+using Admin.NET.Common.ExcelCommon;
+using Microsoft.AspNetCore.Http;
+using System.Data;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -15,13 +19,19 @@ namespace Admin.NET.Application;
 public class WMSLocationService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSLocation> _rep;
+    private readonly SqlSugarRepository<WMSWarehouse> _repWarehouse;
+    private readonly SqlSugarRepository<WMSArea> _repArea;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly UserManager _userManager;
-    public WMSLocationService(SqlSugarRepository<WMSLocation> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager)
+    private readonly SqlSugarRepository<TableColumns> _repTableColumns;
+    public WMSLocationService(SqlSugarRepository<WMSLocation> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSArea> repArea)
     {
         _rep = rep;
         _repWarehouseUser = repWarehouseUser;
         _userManager = userManager;
+        _repTableColumns = repTableColumns;
+        _repWarehouse = repWarehouse;
+        _repArea = repArea;
     }
 
     /// <summary>
@@ -161,6 +171,37 @@ public class WMSLocationService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<WMSLocationOutput>().ToListAsync();
     }
 
+
+
+    /// <summary>
+    /// UploadExcelFile
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "UploadExcelFile")]
+    public async Task<Response<List<OrderStatusDto>>> UploadExcelFile(IFormFile file)
+    {
+        //FileDir是存储临时文件的目录，相对路径
+        //private const string FileDir = "/File/ExcelTemp";
+        string path = await ImprotExcel.WriteFile(file);
+
+        var dataExcel = await ExcelData.ExcelToEntityCollection<WMSLocationImportExport>(path, null, true);
+        List<WMSLocationImportExport> ImportImports = new List<WMSLocationImportExport>();
+        ImportImports = dataExcel.Data.Adapt<List<WMSLocationImportExport>>();
+        //使用简单工厂定制化修改和新增的方法
+        ILocationInterface factory = LocationFactory.AddOrUpdate();
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repLocation = _rep;
+        factory._repArea = _repArea;
+        factory._repWarehouse = _repWarehouse;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        var response = factory.Import(ImportImports);
+        return await response;
+
+    }
 
 
 

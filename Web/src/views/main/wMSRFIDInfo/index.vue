@@ -24,7 +24,10 @@
           <el-input v-model="queryParams.rfid" clearable="" placeholder="请输入RFID" />
 
         </el-form-item>
+        <el-form-item label="SKU">
+          <el-input v-model="queryParams.sku" clearable="" placeholder="请输入SKU" />
 
+        </el-form-item>
         <el-form-item label="验证码">
           <el-input v-model="queryParams.snCode" clearable="" placeholder="请输入验证码" />
         </el-form-item>
@@ -56,9 +59,9 @@
         <el-table-column prop="externReceiptNumber" label="入库外部单号" width="150" show-overflow-tooltip="" />
         <el-table-column prop="asnNumber" label="ASN单号" width="150" show-overflow-tooltip="" />
         <el-table-column prop="customerName" label="客户" show-overflow-tooltip="" />
-        <el-table-column prop="warehouseName" label="仓库" show-overflow-tooltip="" />
-        <el-table-column prop="sku" label="SKU" show-overflow-tooltip="" />
-        <el-table-column prop="goodsType" label="产品品级" show-overflow-tooltip="" />
+        <el-table-column prop="warehouseName" label="仓库" show-overflow-tooltip="" width="150"/>
+        <el-table-column prop="sku" label="SKU" show-overflow-tooltip="" width="200" />
+        <el-table-column prop="goodsType" label="产品品级" show-overflow-tooltip=""  width="150"/>
         <el-table-column prop="batchCode" label="批次" show-overflow-tooltip="" />
         <el-table-column prop="receiptPerson" label="入库人" width="150" show-overflow-tooltip="" />
         <el-table-column prop="receiptTime" label="入库时间" width="150" show-overflow-tooltip="" />
@@ -69,6 +72,7 @@
         <el-table-column prop="status" label="状态" show-overflow-tooltip="" >
           <template #default="scope">
             <el-tag v-if="scope.row.status === 1" type="success">未出库</el-tag>
+            <el-tag v-else-if="scope.row.status === 0" type="warning">待入库</el-tag>
             <el-tag v-else  type="danger">已出库</el-tag>
           </template>
         </el-table-column>

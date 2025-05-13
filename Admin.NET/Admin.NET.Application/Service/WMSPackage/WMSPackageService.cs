@@ -10,6 +10,7 @@ using Admin.NET.Application.Service.WMSExpress.Factory;
 using Admin.NET.Application.Service.WMSExpress.Interface;
 using Admin.NET.Common;
 using Admin.NET.Common.SnowflakeCommon;
+using Admin.NET.Common.TextCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
@@ -23,11 +24,15 @@ using Furion.FriendlyException;
 using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using NewLife.Reflection;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
 namespace Admin.NET.Application;
@@ -39,6 +44,7 @@ namespace Admin.NET.Application;
 public class WMSPackageService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPackage> _rep;
+    private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
 
     private readonly SqlSugarRepository<WMSPickTask> _repPickTask;
@@ -74,7 +80,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSCustomerConfig> _repCustomerConfig;
 
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig, SqlSugarRepository<WMSPreOrder> repPreOrder)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -91,6 +97,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repExpressConfig = repExpressConfig;
         _repOrderDetail = repOrderDetail;
         _repOrder = repOrder;
+        _repPreOrder = repPreOrder;
         _repRFPackageAcquisition = repRFPackageAcquisition;
         _repWMSExpressFee = repWMSExpressFee;
         _repRFIDInfo = repRFIDInfo;
@@ -340,6 +347,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("");
         factory._repPackage = _rep;
+        factory._repPreOrder = _repPreOrder;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
@@ -384,8 +392,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //factory._db = _db;
         factory._repPackageDetail = _repPackageDetail;
         factory._sysCacheService = _sysCacheService;
-        factory._repOrder = _repOrder; 
-        factory._repRFIDInfo = _repRFIDInfo; 
+        factory._repOrder = _repOrder;
+        factory._repRFIDInfo = _repRFIDInfo;
         factory._repOrderDetail = _repOrderDetail;
         var response = await factory.GetPackage(input);
         return response;
@@ -455,7 +463,16 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repExpressDelivery = _repExpressDelivery;
         factory._repExpressConfig = _repExpressConfig;
         factory._repWMSExpressFee = _repWMSExpressFee;
+        //先校验包装的信息是不是和拣货的信息一致
+        var packageCheck = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        var pickCheck = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
 
+        if (packageCheck.Sum(a => a.Qty) > pickCheck.Sum(a => a.PickQty))
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "包装数量大于拣货数量请核对";
+            return response;
+        }
         //获取快递信息（包含快递单号）
         var data = await factory.GetExpressDataList(input);
         if (data.Code == StatusCode.Error)
@@ -556,8 +573,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
             return new Response() { Code = StatusCode.Error, Msg = "任务号不能为空" };
         }
         //获取任务号明细信息
-        var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
-        if (pickTaskDetailList.Count > 1)
+        var pickTaskList = await _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        if (pickTaskList.Count > 1)
         {
             return new Response() { Code = StatusCode.Error, Msg = "找到多条任务号信息" };
         }
@@ -583,16 +600,52 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
         //修改任务号明细信息
         //var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
-        foreach (var item in pickTaskDetailList)
+        foreach (var item in pickTaskList)
         {
             item.PickStatus = (int)PickTaskStatusEnum.拣货完成;
             //item.pa = 0;
         }
         _sysCacheService.Set(_userManager.Account + "_Package_" + input.PickTaskNumber, null);
-
+        var aaa = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + input.PickTaskNumber);
         return new Response() { Code = StatusCode.Success, Msg = "清理成功" };
         //_sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
     }
+
+    //// 生成请求指纹（核心方法）
+    //private string GenerateRequestFingerprint(ScanPackageRFIDInput request)
+    //{
+    //    var fingerprintBuilder = new StringBuilder();
+
+    //    // 组合关键特征
+    //    fingerprintBuilder.Append(_userManager.Account);          // 用户标识
+    //    fingerprintBuilder.Append(request.Input);        // 请求路径
+    //    fingerprintBuilder.Append(request.PickTaskNumber);       // HTTP方法
+
+    //    // 请求体特征（适用于POST/PUT）
+    //    if (request.ContentLength > 0)
+    //    {
+    //        using var reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true);
+    //        string body = reader.ReadToEndAsync().Result;
+    //        request.Body.Position = 0; // 重置流位置供后续读取
+    //        fingerprintBuilder.Append(ComputeHash(body));
+    //    }
+
+    //    // 关键查询参数（如订单号）
+    //    if (request.Query.TryGetValue("refId", out var refId))
+    //    {
+    //        fingerprintBuilder.Append(refId);
+    //    }
+
+    //    return ComputeHash(fingerprintBuilder.ToString());
+    //}
+
+    //// SHA256哈希计算
+    //private static string ComputeHash(string input)
+    //{
+    //    using var sha256 = SHA256.Create();
+    //    byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+    //    return BitConverter.ToString(bytes).Replace("-", "");
+    //}
 
 
     /// <summary>
@@ -603,8 +656,61 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "GetRFIDInfo")]
+    [Idempotent("s", 6)]
+    [UnitOfWork]
     public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
     {
+
+
+
+        // 1. 生成请求唯一标识
+        string requestFingerprint = "GetRFIDInfo" + input.PickTaskNumber + input.Input;
+
+        // 2. 设置Redis键（格式：防重:用户:路径:指纹）
+        string redisKey = $"antidupe:{_userManager.Account}:{"GetRFIDInfo"}:{requestFingerprint}";
+
+        // 3. 原子性防重检查（SETNX + EXPIRE）
+        bool isNewRequest = _sysCacheService.ExistKey(redisKey);
+        _sysCacheService.Set(
+        redisKey,
+        "1",
+        TimeSpan.FromSeconds(50)  // 根据业务需求调整过期时间
+    );
+
+        if (isNewRequest)
+        {
+            return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "你操作频率过快，请稍后重试！" };
+        }
+        // 3. 原子性防重检查（SETNX + EXPIRE）
+        _sysCacheService.Set(
+        redisKey,
+        "1",
+        TimeSpan.FromSeconds(5)  // 根据业务需求调整过期时间
+      );
+
+        TextHelper.WrittxtFor("请求记录第一步", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+        TextHelper.WrittxtFor(JsonSerializer.Serialize(input), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+
+        //新流程，都见RFID 数据
+        //得到rfid数据 里面包含rfid  和tid
+        var rfidInfo = input.RFIDStr;
+        input.RFIDInfo = new List<WMSRFIDInfo>();
+
+        foreach (var item in rfidInfo.Split(","))
+        {
+            if (item.Split(":").Length > 1)
+            {
+                if (!string.IsNullOrEmpty(item.Split(":")[0]))
+                {
+                    input.RFIDInfo.Add(new WMSRFIDInfo() { RFID = item.Split(":")[0], Sequence = item.Split(":")[1] });
+                }
+            }
+            else
+            {
+                return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "请使用最新的RFID小程序" };
+            }
+        }
+        input.RFIDStr = string.Join(",", input.RFIDInfo.Select(item => item.RFID)).TrimEnd(',');
 
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
         factory._repPackage = _rep;

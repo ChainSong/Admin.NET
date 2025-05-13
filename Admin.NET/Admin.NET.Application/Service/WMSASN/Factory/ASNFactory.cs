@@ -45,8 +45,8 @@ namespace Admin.NET.Application.Factory
             //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
             switch (workflow)
             {
-                case "Hach":
-                    return new ASNAddOrUpdateDefaultStrategy();
+                case "HachAPIByRFID":
+                    return new ASNAddOrUpdateHachAPIByRFIDStrategy();
                 default:
                     return new ASNAddOrUpdateDefaultStrategy();
             }

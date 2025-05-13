@@ -328,4 +328,6 @@ public class WMSASN : ITenantIdFilter
     [Navigate(NavigateType.OneToMany, nameof(WMSASNDetail.ASNId))]
     public virtual List<WMSASNDetail> Details { get; set; }
 
+
+
 }

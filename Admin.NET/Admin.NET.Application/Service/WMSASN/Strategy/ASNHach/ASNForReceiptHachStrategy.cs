@@ -281,7 +281,7 @@ namespace Admin.NET.Application.Strategy
                       .Where(p => entityASN.Select(b => b.Id).Contains(p.Id))
                       .ExecuteCommandAsync();
                 }
-                await SaveRFID(receipts, entityASN);
+                //await SaveRFID(receipts, entityASN);
             }
             else
             {

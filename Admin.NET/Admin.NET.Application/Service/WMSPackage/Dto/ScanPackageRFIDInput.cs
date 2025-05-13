@@ -1,4 +1,5 @@
 ﻿using Admin.NET.Core;
+using Admin.NET.Core.Entity;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -60,6 +61,7 @@ public class ScanPackageRFIDInput
     public double Weight { get; set; }
 
     public List<string> RFIDs { get; set; }
+    public List<WMSRFIDInfo> RFIDInfo { get; set; }
     public string RFIDStr { get; set; }
 
 

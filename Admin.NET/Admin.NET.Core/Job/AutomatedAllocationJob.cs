@@ -22,7 +22,9 @@ namespace Admin.NET.Core;
 /// 清理在线用户作业任务
 /// </summary>
 [JobDetail("AutomatedAllocationJobJob", Description = "自动分配", GroupName = "default", Concurrent = false)]
-[Daily(TriggerId = "AutomatedAllocationJobJob", Description = "自动分配")]
+//[Daily(TriggerId = "AutomatedAllocationJobJob", Description = "自动分配")]
+[PeriodSeconds(2, TriggerId = "AutomatedAllocationJobJob", Description = "自动分配", MaxNumberOfRuns = 1, RunOnStart = false)]
+
 public class AutomatedAllocationJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;
@@ -37,7 +39,7 @@ public class AutomatedAllocationJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        //return;
+        return;
 
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
@@ -117,7 +119,10 @@ public class AutomatedAllocationJob : IJob
                                 }
                                 else
                                 {
-                                    procedureName = customWorkFlow.Remark;
+                                    if (customWorkFlow != null)
+                                    {
+                                        procedureName = customWorkFlow.Remark;
+                                    }
                                 }
                             }
                         }

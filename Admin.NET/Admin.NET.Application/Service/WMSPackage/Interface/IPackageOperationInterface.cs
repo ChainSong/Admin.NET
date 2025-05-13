@@ -24,6 +24,7 @@ public interface IPackageOperationInterface
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
 
 
+    public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 

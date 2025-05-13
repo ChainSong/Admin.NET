@@ -16,8 +16,10 @@ using System.Threading.Tasks;
 namespace Admin.NET.Application;
 public enum RFIDStatusEnum
 {
+    初始化 = 0,
     新增 = 1,
-    包装 = 10,
+    拣货 = 40,
+    包装 = 50,
     出库 = 99,
 
 }

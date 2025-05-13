@@ -13,11 +13,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchResponse.Types;
+using XAct;
 
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ReceiptInventoryFGFHStrategy : IReceiptInventoryInterface
+    public class ReceiptReceivingInventoryFGFHStrategy : IReceiptReceivingInventoryInterface
     {
 
         public SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
@@ -41,11 +42,12 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         //public ISqlSugarClient _db { get; set; }
 
 
-        public ReceiptInventoryFGFHStrategy()
+        public ReceiptReceivingInventoryFGFHStrategy()
         {
 
         }
@@ -139,10 +141,21 @@ namespace Admin.NET.Application.Strategy
                         await _repReceiptDetail.UpdateRangeAsync(receiptDetailData);
 
                         //_repReceiptDetail.AsUpdateable(receiptDetailData).ExecuteCommandAsync();
-
+                        //修改RFID状态
+                        await _repRFIDInfo.AsUpdateable()
+                            .SetColumns(a => a.Status == (int)RFIDStatusEnum.新增)
+                            .SetColumns(a => a.ReceiptNumber == receipt.ReceiptNumber)
+                            .SetColumns(a => a.ReceiptId == receipt.Id)
+                            .SetColumns(a => a.ReceiptPerson == _userManager.Account)
+                            .SetColumns(a => a.ReceiptTime == DateTime.Now)
+                            .SetColumns(a => a.Updator == _userManager.Account)
+                            .SetColumns(a => a.UpdateTime == DateTime.Now)
+                            .Where(a => receipt.ExternReceiptNumber == a.ExternReceiptNumber && receipt.CustomerId == a.CustomerId && a.Status == (int)RFIDStatusEnum.初始化)
+                            .ExecuteCommandAsync();
                         //修改上架表中的状态
                         await _repReceiptReceiving.AsUpdateable()
                             .SetColumns(a => a.ReceiptReceivingStatus == (int)ReceiptStatusEnum.完成)
+                             .SetColumns(a => a.Updator == _userManager.Account)
                             .SetColumns(a => a.UpdateTime == DateTime.Now)
                             .Where(a => request.Contains(a.ReceiptDetailId))
                             .ExecuteCommandAsync();

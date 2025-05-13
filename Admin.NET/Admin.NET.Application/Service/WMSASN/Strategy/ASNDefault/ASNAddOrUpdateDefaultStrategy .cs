@@ -25,16 +25,24 @@ namespace Admin.NET.Application.Strategy
 
         //注入权限仓储
         public UserManager _userManager { get; set; }
+
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
         //注入ASN仓储
 
         public SqlSugarRepository<WMSASN> _repASN { get; set; }
         //注入ASNDetail仓储
         public SqlSugarRepository<WMSASNDetail> _repASNDetail { get; set; }
+
+        //产品仓储
+        //SqlSugarRepository<WMSProduct> _repProduct { get; set; }
         //注入仓库关系仓储
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         //注入客户关系仓储
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+
+        public SqlSugarRepository<WMSCustomer> _repCustomer { get; set; }
+        public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
 
         //注入产品仓储
         public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
@@ -184,7 +192,7 @@ namespace Admin.NET.Application.Strategy
                             Type = item.ReceiptType,
                             StatusCode = StatusCode.Error,
                             //StatusMsg = StatusCode.warning.ToString(),
-                            Msg = "产品信息不存在"
+                            Msg = a.SKU + "产品信息未维护"
                         });
                         return;
                     }

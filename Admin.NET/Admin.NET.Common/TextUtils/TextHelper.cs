@@ -8,6 +8,7 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 
+using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,6 +32,44 @@ public static class TextHelper
     {
 
         FileStream fileStream = new FileStream(Path.GetFullPath(Environment.CurrentDirectory + FileDir + "/" + file), FileMode.Append);
+        StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.Default);
+        streamWriter.Write(html + "\r\n");
+        streamWriter.Flush();
+        streamWriter.Close();
+        fileStream.Close();
+        return Path.GetFullPath(Environment.CurrentDirectory + FileDir + "/" + file);
+
+    }
+    /// <summary>
+    /// 保存成功之后返回地址
+    /// </summary>
+    /// <param name="html"></param>
+    /// <param name="file"></param>
+    /// <returns></returns>
+    public static string WrittxtFor(string html,string FileDir, string file)
+    {
+        string filePath = Path.GetFullPath(Environment.CurrentDirectory + FileDir + "/" + file);
+        try
+        {
+
+            // 1. 提取目录路径并创建文件夹
+            string directoryPath = Path.GetFullPath(Environment.CurrentDirectory + FileDir);
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath); // 自动创建所有缺失的父级目录
+            }
+
+            if (!File.Exists(filePath))
+            {
+                File.WriteAllText(filePath, "Initial content"); // 自动创建文件并写入内容
+            }
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+      
+        FileStream fileStream = new FileStream(filePath, FileMode.Append);
         StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.Default);
         streamWriter.Write(html + "\r\n");
         streamWriter.Flush();

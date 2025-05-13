@@ -44,7 +44,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
-    public WMSReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable)
+    private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    public WMSReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -60,6 +61,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         _repASN = repASN;
         _repTableInventoryUsed = repTableInventoryUsed;
         _repTableInventoryUsable = repTableInventoryUsable;
+        _repRFIDInfo = repRFIDInfo;
     }
 
     /// <summary>
@@ -209,13 +211,13 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    [HttpPost]
-    [ApiDescriptionSettings(Name = "Add")]
-    public async Task Add(AddWMSReceiptInput input)
-    {
-        var entity = input.Adapt<WMSReceipt>();
-        await _rep.InsertAsync(entity);
-    }
+    //[HttpPost]
+    //[ApiDescriptionSettings(Name = "Add")]
+    //public async Task Add(AddWMSReceiptInput input)
+    //{
+    //    var entity = input.Adapt<WMSReceipt>();
+    //    await _rep.InsertAsync(entity);
+    //}
 
     /// <summary>
     /// 删除WMSReceipt
@@ -338,6 +340,70 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     }
 
 
+    /*请在此扩展应用服务实现*/
+    /// <summary>
+    /// 接收上传文件方法
+    /// </summary>
+    /// <param name="file">文件内容</param>
+    /// <returns>文件名称</returns>
+    [UnitOfWork]
+    public async Task<Response<List<OrderStatusDto>>> Add(List<WMSReceiptReceiving> input)
+    {
+        try
+        {
+
+
+
+            //FileDir是存储临时文件的目录，相对路径
+            //private const string FileDir = "/File/ExcelTemp";
+            //string url = await ImprotExcel.WriteFile(file);
+            //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+            ////1根据用户的角色 解析出Excel
+            //IReceiptReceivingExcelInterface factoryExcel = ReceiptReceivingExcelFactory.GetReceipt();
+            ////factoryExcel._db = _db;
+            //factoryExcel._repReceipt = _rep;
+            //factoryExcel._repReceiptDetail = _repReceiptDetail;
+            //factoryExcel._repReceiptReceiving = _repReceiptReceiving;
+            //factoryExcel._repTableColumns = _repTableColumns;
+            //factoryExcel._userManager = _userManager;
+            ////factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
+            //var data = factoryExcel.Strategy(dataExcel);
+
+            var entityListDtos = input;
+            //var entityListDtos = data.Data.TableToList<WMSReceiptReceiving>();
+            //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
+
+            //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
+            var customer = _rep.AsQueryable().Where(a => a.ReceiptNumber == entityListDtos.First().ReceiptNumber).First();
+            long customerId = 0;
+            if (customer != null)
+            {
+                customerId = customer.CustomerId;
+            }
+            else
+            {
+                return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "数据错误" };
+            }
+            //使用简单工厂定制化修改和新增的方法
+            IReceiptReceivingInterface factory = ReceiptReceivingFactory.GetReceiptReceiving(customerId);
+            //factory._db = _db;
+            factory._repReceipt = _rep;
+            factory._repReceiptDetail = _repReceiptDetail;
+            factory._repReceiptReceiving = _repReceiptReceiving;
+            factory._repTableColumns = _repTableColumns;
+            factory._repLocation = _repLocation;
+            factory._repCustomerUser = _repCustomerUser;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._userManager = _userManager;
+            var response = await factory.Strategy(entityListDtos);
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            throw Oops.Oh(ex);
+        }
+    }
     /// <summary>
     /// 状态回退
     /// </summary>
@@ -364,7 +430,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repReceiptDetail = _repReceiptDetail;
         factory._repReceiptReceiving = _repReceiptReceiving;
         factory._repTableColumns = _repTableColumns;
-        factory._userManager = _userManager;
+        factory._userManager = _userManager; 
         factory._repLocation = _repLocation;
         return await factory.Strategy(input);
 
@@ -415,8 +481,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
             customerId = customerData.CustomerId;
         }
         //使用简单工厂定制化修改和新增的方法
-        IReceiptInventoryInterface factory = ReceiptInventoryFactory.AddInventory(customerData.CustomerId);
-        //factory._db = _db;
+        IReceiptReceivingInventoryInterface factory = ReceiptReceivingInventoryFactory.AddInventory(customerData.CustomerId);
+        //factory._db = _db 
         factory._repASN = _repASN;
         factory._repASNDetail = _repASNDetail;
         factory._repReceipt = _rep;
@@ -428,6 +494,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._userManager = _userManager;
+        factory._repRFIDInfo = _repRFIDInfo;
 
         //List<long> ids = new List<long>();
         //ids.Add(input);

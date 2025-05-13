@@ -91,6 +91,7 @@ namespace Admin.NET.Application.Strategy
                      .ForMember(a => a.InstructionType, opt => opt.MapFrom(c => "分配"))
 
                      .ForMember(a => a.BusinessType, opt => opt.MapFrom(c => "自动分配"))
+                     .ForMember(a => a.OrderNumber, opt => opt.MapFrom(c => c.ExternOrderNumber))
 
                      .ForMember(a => a.InstructionStatus, opt => opt.MapFrom(c => InstructionStatusEnum.新增))
 

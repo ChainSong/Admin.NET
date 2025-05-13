@@ -26,7 +26,9 @@ public class ScanPackageOutput
     public string Lot { get; set; }
     public string RFID { get; set; }
     public string AcquisitionData { get; set; }
+    public string Remark { get; set; }
     public List<PackageData> PackageDatas { get; set; }
+    public List<WMSRFIDInfo>  WMSRFIDInfos { get; set; }
 
 }
 
@@ -42,6 +44,7 @@ public class PackageData
     public double ScanQty { get; set; }
     public double RemainingQty { get; set; }
 
+    public int Order { get; set; }
 
     public string GoodsName { get; set; }
     public string GoodsType { get; set; }

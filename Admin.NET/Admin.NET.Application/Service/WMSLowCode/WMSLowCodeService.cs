@@ -300,20 +300,21 @@ public class WMSLowCodeService : IDynamicApiController, ITransient
             }
             //获取总数和列名称
 
-            DataTable dt = _rep.Context.Ado.GetDataTable(strSql.ToString().Replace("select ", "SELECT TOP 1 COUNT(*) Total, "));
-            if (dt.Rows.Count > 0)
-            {
-                response.Result = Convert.ToInt32(dt.Rows[0]["Total"]);
-                strSql.Append(" ORDER BY ");
+            //DataTable dt = _rep.Context.Ado.GetDataTable(strSql.ToString().Replace("select ", "SELECT TOP 1 COUNT(*) Total, "));
+            //DataTable dt = _rep.Context.Ado.GetDataTable(strSql.ToString());
+            //if (dt.Rows.Count > 0)
+            //{
+            //    response.Result = Convert.ToInt32(dt.Rows[0]["Total"]);
+            //    strSql.Append(" ORDER BY ");
 
-                //strSql.Append("ORDER BY ");
+            //    //strSql.Append("ORDER BY ");
 
-                strSql.Append(string.Join(",", dt.Columns.Cast<DataColumn>().Where(c => c.ColumnName != "Total").Select(c => "'" + c.ColumnName + "'").ToArray()));
-                //foreach (DataColumn dc in dt.Columns)
-                //{
-                //    strSql.Append("" + dc.ColumnName);
-                //}
-            }
+            //    strSql.Append(string.Join(",", dt.Columns.Cast<DataColumn>().Where(c => c.ColumnName != "Total").Select(c => "'" + c.ColumnName + "'").ToArray()));
+            //    //foreach (DataColumn dc in dt.Columns)
+            //    //{
+            //    //    strSql.Append("" + dc.ColumnName);
+            //    //}
+            //}
             var data = _rep.Context.Ado.GetDataTable(strSql.ToString());
             response.Data = data;
         }

@@ -9,6 +9,7 @@ namespace Admin.NET.Application.Enumerate
     public enum OrderStatusEnum
     {
 
+        取消 = -1,
         新增 = 1,
         分配中 = 5,
         库存不足 = 10,

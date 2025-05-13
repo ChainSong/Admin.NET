@@ -56,6 +56,7 @@ public class ProductAddOrUpdateStrategy : IProductInterface
         var customerCheck = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId && request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
         if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
         {
+            //var sss = request.GroupBy(a => a.CustomerName).Count();
             response.Code = StatusCode.Error;
             response.Msg = "用户缺少客户操作权限";
             return response;

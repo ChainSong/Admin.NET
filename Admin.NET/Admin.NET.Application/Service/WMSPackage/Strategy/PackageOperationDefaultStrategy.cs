@@ -44,6 +44,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     public SysCacheService _sysCacheService { get; set; }
 
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
+    public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
@@ -76,7 +77,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
                 request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.Input = request.SKU;
-               
+
             };
 
             //扫描的是HTTP 二维码，那么从中解析SKU
@@ -94,7 +95,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             };
 
         }
+        if (!string.IsNullOrEmpty(request.Input) &&  string.IsNullOrEmpty(request.PickTaskNumber))
+        {
+              
+        }
+        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
+        {
 
+        }
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
@@ -149,6 +157,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         //    }
         //}
         //缓存没数据， 判断订单是不是完成
+
 
 
         //判断是不是第一次加载，要是缓存中有数据，直接取缓存
@@ -211,6 +220,23 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
         }
 
+        //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
+        //1，先获取拣货任务号，判断是一个还是多个
+        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => a.PreOrderNumber).Distinct();
+        if (preOrderNumbers.Count() > 1)
+        {
+            response.Data.Remark = "该拣货任务为合并订单，请前往查看";
+        }
+        else
+        {
+            var preOrderNumber = preOrderNumbers.First();
+            //2,根据获取，获取订单号，获取订单备注
+            response.Data.Remark = await _repPreOrder.AsQueryable().Where(a => a.PreOrderNumber == preOrderNumber).Select(a => a.Remark).FirstAsync();
+
+        }
+
+
+
         //2，判断扫描数据是不是SKU
         if (pickData != null && pickData.Count > 0)
         {
@@ -223,6 +249,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             var PickSKUData = pickData.Where(a => a.SKU == request.Input);
             if (PickSKUData.Count() > 0)
             {
+                foreach (var item in pickData)
+                {
+                    item.Order = 99;
+                    if (item.SKU == response.Data.SKU)
+                    {
+                        item.Order = 1;
+                    }
+                }
                 if (PickSKUData.Sum(a => (a.ScanQty + a.PackageQty)) + 1 <= PickSKUData.First().PickQty)
                 {
                     var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
@@ -236,18 +270,18 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
                     {
                         var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
-                        response.Data.PackageDatas = pickData;
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                         response.Code = result.Code;
                         response.Msg = result.Msg;
                         return response;
                     }
-                    response.Data.PackageDatas = pickData;
+                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                     response.Code = StatusCode.Success;
                     return response;
                 }
                 else
                 {
-                    response.Data.PackageDatas = pickData;
+                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                     response.Code = StatusCode.Error;
                     response.Msg = "该SKU数量已满足";
                     return response;

@@ -152,6 +152,8 @@ namespace Admin.NET.Application.Strategy
             //先删除明细表，再删除主表
             _repReceiptDetail.Delete(a => request.Select(a => a.Id).Contains(a.ReceiptId));
             _repReceipt.Delete(a => request.Select(a => a.Id).Contains(a.Id));
+            var receiptList = receipt.Select(a => a.ASNNumber).ToList();
+            _repRFIDInfo.Delete(a => receiptList.Contains(a.ASNNumber));
 
             //_wms_asndetailRepository.GetAll().Where(a => receipt.Select(b => b.ASNId).Contains(a.ASNId)).ToList().ForEach(c =>
             //{

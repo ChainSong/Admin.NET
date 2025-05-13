@@ -81,6 +81,13 @@ public class WMSInstruction : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
+    public string OrderNumber { get; set; }
+
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
     public string InstructionTaskNo { get; set; }
 
 

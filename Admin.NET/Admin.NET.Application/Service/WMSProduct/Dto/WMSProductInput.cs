@@ -164,15 +164,15 @@ public class WMSProductBaseInput
     /// </summary>
     public virtual int ExpirationDate { get; set; }
 
-    public int IsNFC { get; set; }
+    public virtual int IsNFC { get; set; }
     /// <summary>
     /// 是否RFID
     /// </summary>
-    public int IsRFID { get; set; }
+    public virtual int IsRFID { get; set; }
     /// <summary>
     ///  是否质检
     /// </summary>
-    public int IsQC { get; set; }
+    public virtual int IsQC { get; set; }
 
     /// <summary>
     /// Remark

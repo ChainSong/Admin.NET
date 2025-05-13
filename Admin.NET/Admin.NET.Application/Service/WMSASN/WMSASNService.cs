@@ -30,6 +30,7 @@ using Admin.NET.Application.Service;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Common;
 using NewLife.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -44,6 +45,7 @@ public class WMSASNService : IDynamicApiController, ITransient
 
     //private readonly ISqlSugarClient _db;
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
+    private readonly SqlSugarRepository<WMSWarehouse> _repWarehouse;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
@@ -57,7 +59,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<SysWorkFlowStep> _repWorkFlowStep;
     private readonly SysWorkFlowService _repWorkFlowService;
 
-    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlowStep> repWorkFlowStep, SysWorkFlowService repWorkFlowService)
+    public WMSASNService(SqlSugarRepository<WMSASN> rep, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<SysWorkFlowStep> repWorkFlowStep, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSWarehouse> repWarehouse)
     {
         _rep = rep;
         //_db = db;
@@ -75,6 +77,8 @@ public class WMSASNService : IDynamicApiController, ITransient
         _repRFIDInfo = repRFIDInfo;
         _repWorkFlowStep = repWorkFlowStep;
         _repWorkFlowService = repWorkFlowService;
+        _repWarehouse = repWarehouse;
+
     }
 
     /// <summary>
@@ -323,6 +327,82 @@ public class WMSASNService : IDynamicApiController, ITransient
         return await factory.AddStrategy(entityListDtos);
         //string asdasd = response.Result.Msg;
         //await _rep.InsertAsync(entity);
+    }
+
+
+    /// <summary>
+    /// 增加WMSASN
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "AddByRFID")]
+    [UnitOfWork]
+    [AllowAnonymous]
+    public async Task<Response<List<OrderStatusDto>>> AddByRFID(AddOrUpdateWMSASNInput input)
+    {
+        try
+        {
+
+            //根据联系公司名称补充公司名称
+            var customer = await _repCustomer.AsQueryable().Where(a => a.CustomerName == input.CustomerName).FirstAsync();
+            //根据发货地址获取仓库信息
+            var warehouse = await _repWarehouse.AsQueryable().Where(a => a.Address == input.WarehouseName).FirstAsync();
+
+            input.WarehouseId = warehouse.Id;
+            input.WarehouseName = warehouse.WarehouseName;
+            input.CustomerId = customer.Id;
+            input.CustomerName = customer.CustomerName;
+            foreach (var item in input.Details)
+            {
+                item.WarehouseId= warehouse.Id;
+                item.WarehouseName= warehouse.WarehouseName;
+                item.CustomerId = customer.Id;
+                item.CustomerName = customer.CustomerName;
+            }
+
+            //Response<List<OrderStatusDto>> response= new Response<List<OrderStatusDto>>();
+            //var entity = input.Adapt<WMSASN>();
+            List<AddOrUpdateWMSASNInput> entityListDtos = new List<AddOrUpdateWMSASNInput>();
+            entityListDtos.Add(input);
+
+            ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
+            checkColumnsDefault._repTableColumns = _repTableColumns;
+            checkColumnsDefault._userManager = _userManager;
+            var result = await checkColumnsDefault.CheckColumns<AddOrUpdateWMSASNInput>(entityListDtos, "WMS_ASN");
+            if (result.Code == StatusCode.Error)
+            {
+                return result;
+            }
+            //使用简单工厂定制化修改和新增的方法
+            //根据订单类型判断是否存在该流程
+            //var workflow = await _repWorkFlow.AsQueryable()
+            //   .Includes(a => a.SysWorkFlowSteps)
+            //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+            var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
+
+            //使用简单工厂定制化修改和新增的方法
+            IASNInterface factory = ASNFactory.AddOrUpdate("HachAPIByRFID");
+            //factory._db = _db;
+            factory._userManager = _userManager;
+            factory._repASN = _rep;
+            factory._repASNDetail = _repASNDetail;
+            factory._repRFIDInfo = _repRFIDInfo;
+            factory._repCustomerUser = _repCustomerUser;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._repCustomer = _repCustomer;
+            factory._repWarehouse = _repWarehouse;
+            factory._repWarehouseUser = _repWarehouseUser;
+            factory._repProduct = _repProduct;
+            //factory._userManager = _userManager;
+            return await factory.AddStrategy(entityListDtos);
+            //string asdasd = response.Result.Msg;
+            //await _rep.InsertAsync(entity);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
 
     /// <summary>

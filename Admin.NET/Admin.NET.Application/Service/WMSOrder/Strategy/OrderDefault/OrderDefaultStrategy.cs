@@ -54,7 +54,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a=>a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
             if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
@@ -90,28 +90,58 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in orderData)
             {
 
-
-                //插入反馈指令
-                WMSInstruction wMSInstruction = new WMSInstruction();
-                //wMSInstruction.OrderId = orderData[0].Id;
-                wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstruction.InstructionType = "HACH出库反馈";
-                wMSInstruction.BusinessType = "HACH出库反馈";
-                //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                wMSInstruction.CustomerId = item.CustomerId;
-                wMSInstruction.CustomerName = item.CustomerName;
-                wMSInstruction.WarehouseId = item.WarehouseId;
-                wMSInstruction.WarehouseName = item.WarehouseName;
-                wMSInstruction.OperationId = item.Id;
-                wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
-                wMSInstruction.TableName = "WMS_Order";
-                wMSInstruction.InstructionPriority = 0;
-                wMSInstruction.Remark = "";
-
-
-                wMSInstructions.Add(wMSInstruction);
+                //if (item.CustomerName != "哈希")
+                //{
+                    //插入反馈指令
+                    WMSInstruction wMSInstruction = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstruction.InstructionType = "HACH出库反馈";
+                    wMSInstruction.BusinessType = "HACH出库反馈";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstruction.CustomerId = item.CustomerId;
+                    wMSInstruction.CustomerName = item.CustomerName;
+                    wMSInstruction.WarehouseId = item.WarehouseId;
+                    wMSInstruction.WarehouseName = item.WarehouseName;
+                    wMSInstruction.OperationId = item.Id;
+                    wMSInstruction.OrderNumber = item.ExternOrderNumber;
+                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstruction.TableName = "WMS_Order";
+                    wMSInstruction.InstructionPriority = 0;
+                    wMSInstruction.Remark = "";
+                    wMSInstructions.Add(wMSInstruction);
+                //}
+                if (item.OrderAddress.CompanyType == "分销商" && item.CustomerName=="哈希")
+                {
+                    //插入反馈指令
+                    WMSInstruction wMSInstructionIssue = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionIssue.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionIssue.InstructionType = "HACH出库同步下发";
+                    wMSInstructionIssue.BusinessType = "HACH出库同步下发"; 
+                    wMSInstructionIssue.OrderNumber =item.ExternOrderNumber; 
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstructionIssue.CustomerId = item.CustomerId;
+                    wMSInstructionIssue.CustomerName = item.CustomerName;
+                    wMSInstructionIssue.WarehouseId = item.WarehouseId;
+                    wMSInstructionIssue.WarehouseName = item.WarehouseName;
+                    wMSInstructionIssue.OperationId = item.Id;
+                    wMSInstructionIssue.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionIssue.Creator = _userManager.Account;
+                    wMSInstructionIssue.CreationTime = DateTime.Now;
+                    wMSInstructionIssue.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionIssue.TableName = "WMS_Order";
+                    wMSInstructionIssue.InstructionPriority = 0;
+                    wMSInstructionIssue.Remark = "";
+                    wMSInstructions.Add(wMSInstructionIssue);
+                }
             }
-            await _repInstruction.InsertRangeAsync(wMSInstructions);
+            if (wMSInstructions.Count > 0)
+            {
+                await _repInstruction.InsertRangeAsync(wMSInstructions);
+            }
             //获取分配的库存ID
 
             var InventoryIds = _repOrderAllocation.AsQueryable().Where(a => request.Contains(a.OrderId)).Select(a => a.InventoryId).ToList();

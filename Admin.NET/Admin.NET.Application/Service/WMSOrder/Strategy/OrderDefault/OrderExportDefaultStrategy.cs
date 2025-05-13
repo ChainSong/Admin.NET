@@ -400,7 +400,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
             left join WMS_OrderAddress
             on WMS_Package.PreOrderNumber=WMS_OrderAddress.PreOrderNumber
            ");
-        sql.Append("where WMS_Package.Id in (" + string.Join(",", request) + ")");
+        sql.Append("where WMS_Package.OrderId in (" + string.Join(",", request) + ")");
         var data = _repOrder.Context.Ado.GetDataTable(sql.ToString());
         response.Data = data;
         response.Code = StatusCode.Success;
@@ -419,7 +419,7 @@ public class OrderExportDefaultStrategy :  IOrderExcelInterface //ExportBaseStra
               a.TenantId == tenantId &&
               (a.IsCreate == 1 || a.IsKey == 1)
             )
-            .GroupBy(a => new { a.DbColumnName, a.Associated, a.IsImportColumn, a.DisplayName, a.Type, a.IsCreate, a.Validation, a.TenantId })
+            .GroupBy(a => new { a.DbColumnName, a.Associated, a.IsImportColumn, a.DisplayName, a.IsKey,a.Type, a.IsCreate, a.Validation, a.TenantId })
            .Select(a => new TableColumns
            {
                DisplayName = a.DisplayName,

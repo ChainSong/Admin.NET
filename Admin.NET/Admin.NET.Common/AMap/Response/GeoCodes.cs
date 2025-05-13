@@ -45,7 +45,8 @@ public class GeoCodes
     /// <summary>
     /// 街道
     /// </summary>
-    public string street { get; set; }
+    [JsonConverter(typeof(NumberConverter))]
+    public object street { get; set; }
 
     /// <summary>
     /// 门牌

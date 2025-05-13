@@ -110,7 +110,8 @@ namespace Admin.NET.Application;
         /// WarehouseName
         /// </summary>
         public string? WarehouseName { get; set; }
-        
+        public string? OrderNumber { get; set; }
+    
         /// <summary>
         /// TableName
         /// </summary>

@@ -6,10 +6,7 @@
         <el-row :gutter="[16, 15]">
           <template v-for="o in state.presetQuery.presetQueryList ">
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSASN:page'"> 查询 </el-button>
-
           </template>
-
-
         </el-row>
         <el-row :gutter="[16, 15]">
           <template v-for="i in state.tableColumnHeaders">

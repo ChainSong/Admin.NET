@@ -16,6 +16,8 @@ namespace Admin.NET.Application.Interface
         //ISqlSugarClient _db { get; set; }
         //用户仓储
         UserManager _userManager { get; set; }
+
+        SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
         //asn仓储
         SqlSugarRepository<WMSASN> _repASN { get; set; }
         //ASNDetail 仓储
@@ -25,6 +27,8 @@ namespace Admin.NET.Application.Interface
         SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         //产品仓储
         SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+        SqlSugarRepository<WMSCustomer> _repCustomer { get; set; }
+        SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; } 
 
         //仓库用户关系仓储
         SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser{ get; set; } 

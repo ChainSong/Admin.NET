@@ -24,6 +24,7 @@ public class OutboundWorkFlowConst
     public const string Workflow_Order = "出库单"; 
     public const string Workflow_Print_Order = "打印发运单";
     public const string Workflow_Pick = "拣货单";
+    public const string Workflow_Complete = "完成出库";
     public const string Workflow_Package = "包装单";
     public const string Workflow_PreOrder_ForOrder = "转出库单";
     public const string Workflow_PreOrder_ForOrder_ALL = "全部转出库单";

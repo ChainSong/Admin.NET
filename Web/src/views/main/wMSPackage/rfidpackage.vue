@@ -117,7 +117,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo,scanPackageData_RFID } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -146,6 +146,7 @@ const state = ref({
       lot: "",
       sn: "",
       rfidStr: "",
+      rfidInfo: [],
     },
     tableData: [],
     rfidData: [],
@@ -184,6 +185,10 @@ const queryTitle = ref("");
 const ptintTitle = ref("");
 const token = ref("");
 const expressConfig = ref({});
+// 生明失败的音频文件
+const audio_error = new Audio('/audio/error.mp3'); // 替换为实际的音频文件路径
+// 生明成功的音频文件
+const audio_success = new Audio('/audio/success.mp3'); // 替换为实际的音频文件路径
 
 
 // --------------------顺丰快递打印-----------------------
@@ -204,10 +209,13 @@ onMounted(async () => {
   signalR.on('echo', (data: any) => {
     console.log("WebSocket data");
     console.log(data);
+
     state.value.vm.form.rfidStr = data;
+    // state.value.vm.form.rfidInfo = data.rfidinfo;
     // console.log("state.value.vm.form");
     // console.log(state.value.vm.form);
     if (state.value.vm.form.rfidStr != "") {
+
       getRFIDInfoData();
     }
   });
@@ -219,21 +227,26 @@ onMounted(async () => {
 const getRFIDInfoData = async () => {
   console.log("getRFIDInfoData");
   console.log(state.value.vm.form);
+  // ElMessage.warning("getRFIDInfoData");
   let res = await getRFIDInfo(state.value.vm.form);
   if (res.data.result.code == 1) {
+    audio_success.play(); // 播放音频
+
     allPackage(state.value.vm.form);
     state.value.vm.form = res.data.result.data;
-    
+
     state.value.vm.tableData = res.data.result.data.packageDatas;
 
   } else if (res.data.result.code == 99) {
+    audio_success.play(); // 播放音频
+
     allPackage(state.value.vm.form);
-    signalR.send("echo", 5);
+    // signalR.send("echo", 5);
     signalR.send("echo", 9)
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     state.value.vm.form.pickTaskNumber = "";
-    state.value.vm.form.weight = 0,
+    state.value.vm.form.weight = 0;
     state.value.vm.tableData = res.data.result.data.packageDatas;
 
     input.value = true;
@@ -248,7 +261,9 @@ const getRFIDInfoData = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else if (res.data.result.code == -1) {
-    signalR.send("echo", 5)
+
+    audio_error.play(); // 播放音频
+    // signalR.send("echo", 5)
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
@@ -277,16 +292,20 @@ const shortagePackage = async () => {
   // let res = await addPackageData(state.value.vm.form);
   // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
+    audio_success.play(); // 播放音频
+
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
   } else if (res.data.result.code == 99) {
-    signalR.send("echo", 5);
+    audio_success.play(); // 播放音频
+
+    // signalR.send("echo", 5);
     signalR.send("echo", 9);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
-    state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.form.weight = 0;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
   } else {
@@ -331,8 +350,8 @@ const addPackage = async (data: any) => {
     state.value.vm.form.sku = "";
     // signalR.send('echo',99)
     // state.value.vm.form.pickTaskNumber = "";
-    state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.form.weight = 0;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.success(res.data.result.msg);
   } else {
     state.value.vm.form = res.data.result.data;
@@ -350,17 +369,22 @@ const addPackage = async (data: any) => {
 
 
 const scanPackage = async () => {
-  // signalR.send('echo',1)
-  // 判断webSocket是否连接
-  // if (signalR.state != "Connected") {
-  //   signalR.start();
-  //   ElMessage.error("连接状态" + signalR.state);
-
-  // }
-  // ElMessage.error("连接状态" + signalR.state);
-  // alert("请扫描商品");
   signalR.send('echo',1)
+  // 判断webSocket是否连接
+  if (signalR.state != "Connected") {
+    signalR.start();
+    ElMessage.error("连接状态" + signalR.state);
+
+  }
+  ElMessage.error("连接状态" + signalR.state);
+  // alert("请扫描商品");
+
+  // signalR.send('echo', 1)
   signalR.send("echo", 5);
+  if (state.value.vm.form.pickTaskNumber != '') {
+    ElMessage.error("请使用RFID扫描");
+    return;
+  }
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData_RFID(state.value.vm.form);
   if (res.data.result.code == 1) {
@@ -373,8 +397,8 @@ const scanPackage = async () => {
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
-    state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.form.weight = 0;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
   } else {
@@ -402,6 +426,14 @@ const reset = async (row: any) => {
     .then(async () => {
       let res = await resetPackageData(state.value.vm.form);
       console.log(row);
+      if (res.data.result.code == 1) {
+        state.value.vm.form.sku = "";
+        state.value.vm.form.pickTaskNumber = "";
+        state.value.vm.form.weight = 0;
+        state.value.vm.tableData = [];
+        ElMessage.success(res.data.result.msg);
+        scanPackage();
+      }
     })
     .catch(() => { });
 }

@@ -102,7 +102,7 @@ public class WMSAdjustmentDetail : ITenantIdFilter
     /// 货品名称
     /// </summary>
     [SugarColumn(ColumnDescription = "货品名称", Length = 100)]
-    public string? GoodsName { get; set; }
+    public string GoodsName { get; set; }
 
 
 
@@ -110,23 +110,23 @@ public class WMSAdjustmentDetail : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? LotCode { get; set; }
+    public string LotCode { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string? PoCode { get; set; }
+    public string PoCode { get; set; }
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public float? Weight { get; set; }
+    public float Weight { get; set; }
     /// <summary>
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public float? Volume { get; set; }
+    public float Volume { get; set; }
     /// <summary>
     /// 
     /// </summary>
