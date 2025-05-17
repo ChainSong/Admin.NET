@@ -50,6 +50,7 @@ public class PackageData
     public string GoodsType { get; set; }
     public List<string> RFIDs { get; set; } = new List<string>();
 
+    public List<WMSRFIDInfo> RFIDInfo { get; set; }
     public List<ScanPackageInput> ScanPackageInput { get; set; }
     public List<ScanPackageRFIDInput> ScanPackageRFIDInput { get; set; }
 

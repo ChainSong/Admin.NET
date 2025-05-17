@@ -117,7 +117,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, addRFIDPackageData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -241,8 +241,8 @@ const getRFIDInfoData = async () => {
     audio_success.play(); // 播放音频
 
     allPackage(state.value.vm.form);
-    // signalR.send("echo", 5);
-    signalR.send("echo", 9)
+    signalR.send("echo", 5);
+    signalR.send("echo", 9);
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     state.value.vm.form.pickTaskNumber = "";
@@ -261,6 +261,13 @@ const getRFIDInfoData = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else if (res.data.result.code == -1) {
+
+    audio_error.play(); // 播放音频
+    // signalR.send("echo", 5)
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.error(res.data.result.msg);
+  } else if (res.data.result.code == 5) {
 
     audio_error.play(); // 播放音频
     // signalR.send("echo", 5)
@@ -340,9 +347,10 @@ const allPackage = async (data: any) => {
 const addPackage = async (data: any) => {
   state.value.vm.form.expressCompany = expressValue.value;
   // allPackage(state.value.vm.form);
-  let res = await addPackageData(state.value.vm.form);
+  let res = await addRFIDPackageData(state.value.vm.form);
   // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
+    signalR.send("echo", 5);
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
   } else if (res.data.result.code == 99) {
@@ -369,22 +377,34 @@ const addPackage = async (data: any) => {
 
 
 const scanPackage = async () => {
-  signalR.send('echo',1)
+  signalR.send('echo', 1)
   // 判断webSocket是否连接
   if (signalR.state != "Connected") {
     signalR.start();
-    ElMessage.error("连接状态" + signalR.state);
-
+    // ElMessage.error("连接状态" + signalR.state);
   }
-  ElMessage.error("连接状态" + signalR.state);
+
+  if (signalR.state == "Connected") {
+    ElMessage.success("RFID 连接成功");
+  } else {
+    ElMessage.error("RFID 连接失败，请重新连接");
+  }
+
   // alert("请扫描商品");
 
   // signalR.send('echo', 1)
   signalR.send("echo", 5);
   if (state.value.vm.form.pickTaskNumber != '') {
+    if (state.value.vm.form.weight == 0) {
+      ElMessage.error("请输入重量");
+      return;
+    }
+  }
+  if (state.value.vm.form.pickTaskNumber != '') {
     ElMessage.error("请使用RFID扫描");
     return;
   }
+
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData_RFID(state.value.vm.form);
   if (res.data.result.code == 1) {

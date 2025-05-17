@@ -18,9 +18,19 @@ namespace Admin.NET.Application.Service;
 public class WMSRFIDImportExport
 {
 
-    [ImporterHeader(Name = "外部单号")]
-    [ExporterHeader(DisplayName = "外部单号", IsAutoFit = true)]
+    [ImporterHeader(Name = "入库外部单号")]
+    [ExporterHeader(DisplayName = "入库外部单号", IsAutoFit = true)]
     public string ExternReceiptNumber { get; set; }
+
+
+    [ImporterHeader(Name = "入库单号")]
+    [ExporterHeader(DisplayName = "入库单号", IsAutoFit = true)]
+    public string ReceiptNumber { get; set; }
+
+    [ImporterHeader(Name = "预入库单号")]
+    [ExporterHeader(DisplayName = "预入库单号", IsAutoFit = true)]
+    public string ASNNumber { get; set; }
+
 
 
     [ImporterHeader(Name = "合同单号")]
@@ -34,4 +44,19 @@ public class WMSRFIDImportExport
     [ImporterHeader(Name = "SnCode")]
     [ExporterHeader(DisplayName = "SnCode", IsAutoFit = true)]
     public string SnCode { get; set; }
+    [ImporterHeader(Name = "出库外部单号")]
+    [ExporterHeader(DisplayName = "出库外部单号", IsAutoFit = true)]
+    public string ExternOrderNumber { get; set; }
+
+    [ImporterHeader(Name = "RFID")]
+    [ExporterHeader(DisplayName = "RFID", IsAutoFit = true)]
+    public string RFID { get; set; }
+
+    [ImporterHeader(Name = "出库单号")]
+    [ExporterHeader(DisplayName = "出库单号", IsAutoFit = true)]
+    public string OrderNumber { get; set; }
+
+    [ImporterHeader(Name = "拣货单号")]
+    [ExporterHeader(DisplayName = "拣货单号", IsAutoFit = true)]
+    public string PickTaskNumber { get; set; }
 }

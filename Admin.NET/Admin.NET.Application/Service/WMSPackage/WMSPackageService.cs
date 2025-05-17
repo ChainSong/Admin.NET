@@ -442,6 +442,39 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [UnitOfWork]
+    [ApiDescriptionSettings(Name = "AddRFIDPackageData")]
+    public async Task<Response<ScanPackageOutput>> AddRFIDPackageData(ScanPackageInput input)
+    {
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.AddPackage(input);
+        return response;
+
+        //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
+    }
+
+
+    /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "PrintExpress")]
     public async Task<Response<dynamic>> PrintExpress(ScanPackageInput input)
     {

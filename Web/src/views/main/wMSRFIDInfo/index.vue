@@ -12,7 +12,7 @@
         <el-form-item label="出库单号">
           <el-input v-model="queryParams.orderNumber" clearable="" placeholder="请输入出库单号" />
         </el-form-item>
-        <el-form-item label="入库外部单号">
+        <el-form-item label="出库外部单号">
           <el-input v-model="queryParams.externOrderNumber" clearable="" placeholder="请输入出库外部单号" />
         </el-form-item>
 
@@ -40,6 +40,9 @@
             </el-button>
             <el-button type="primary" icon="ele-Fold" @click="printRFID" v-auth="'wMSReceipt:printRFID'">
               打印RFID</el-button>
+              <el-button type="primary" icon="ele-Fold" @click="exportRFIDFun" v-auth="'wMSReceipt:printRFID'">
+                导出RFID</el-button>
+              
             <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button>
           </el-button-group>
         </el-form-item>
@@ -113,9 +116,10 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSRFIDInfo/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSRFIDInfo/component/addDialog.vue'
 import { pageWMSRFIDInfo, deleteWMSRFIDInfo } from '/@/api/main/wMSRFIDInfo';
-import { getPrinrRFIDInfoByReceiptId,getPrinrRFIDInfoById } from '/@/api/main/wMSRFIDInfo';
+import { getPrinrRFIDInfoByReceiptId,getPrinrRFIDInfoById,exportRFID } from '/@/api/main/wMSRFIDInfo';
 import { signalR } from '/@/utils/signalRCustom';
 import { stringify } from "querystring";
+import { downloadByData, getFileName } from '/@/utils/download';
 
 const editDialogRef = ref();
 const addDialogRef = ref();
@@ -175,7 +179,15 @@ const delWMSRFIDInfo = (row: any) => {
     .catch(() => { });
 };
 
-// 打开转入库单页面
+//导出
+const exportRFIDFun= async () => {
+  console.log("exportRFIDFun");
+  let res = await exportRFID(Object.assign(queryParams.value, tableParams.value));
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+}
+
+// 打印
 const printRFID = () => {
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {

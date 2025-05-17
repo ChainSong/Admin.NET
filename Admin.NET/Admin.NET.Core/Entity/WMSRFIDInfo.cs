@@ -119,7 +119,13 @@ public class WMSRFIDInfo : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? PickTaskNumber { get; set; }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PackageNumber { get; set; }
+
     
     /// <summary>
     /// 
