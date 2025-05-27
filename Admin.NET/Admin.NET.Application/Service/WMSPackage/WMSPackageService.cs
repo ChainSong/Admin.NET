@@ -685,14 +685,24 @@ public class WMSPackageService : IDynamicApiController, ITransient
     //    return ComputeHash(fingerprintBuilder.ToString());
     //}
 
-    //// SHA256哈希计算
-    //private static string ComputeHash(string input)
-    //{
-    //    using var sha256 = SHA256.Create();
-    //    byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-    //    return BitConverter.ToString(bytes).Replace("-", "");
-    //}
-
+    // SHA256哈希计算
+    private static string ComputeHash(string input)
+    {
+        using var sha256 = SHA256.Create();
+        byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        return BitConverter.ToString(bytes).Replace("-", "");
+    }
+    ///   <summary>
+    ///   给一个字符串进行MD5加密
+    ///   </summary>
+    ///   <param   name="strText">待加密字符串</param>
+    ///   <returns>加密后的字符串</returns>
+    public static string MD5Encrypt(string strText)
+    {
+        MD5 md5 = new MD5CryptoServiceProvider();
+        byte[] result = md5.ComputeHash(System.Text.Encoding.Default.GetBytes(strText));
+        return System.Text.Encoding.Default.GetString(result);
+    }
 
     /// <summary>
     /// 根据RFID 获取RFID 信息
@@ -706,11 +716,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
     {
-
-
-
+          
         // 1. 生成请求唯一标识
-        string requestFingerprint = "GetRFIDInfo" + input.PickTaskNumber + input.Input;
+        string requestFingerprint = "GetRFIDInfo" + input.PickTaskNumber+ MD5Encrypt(input.Input);
 
         // 2. 设置Redis键（格式：防重:用户:路径:指纹）
         string redisKey = $"antidupe:{_userManager.Account}:{"GetRFIDInfo"}:{requestFingerprint}";

@@ -78,7 +78,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
                 request.Input = request.SKU;
 
-            };
+            }
+            ;
 
             //扫描的是HTTP 二维码，那么从中解析SKU
             if (request.Input.Contains("http"))
@@ -92,7 +93,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     request.SKU = collection["p"].Split(':')[1];
                     request.SN = collection["p"].Split(':')[0];
                 }
-            };
+            }
+            ;
 
         }
         if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
@@ -265,7 +267,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                         pick.ScanQty += 1;
                         pick.RemainingQty -= 1;
+<<<<<<< HEAD
+                        if (pick.ScanPackageInput == null)
+                        {
+                            pick.ScanPackageInput = new List<ScanPackageInput>();
+                        }
+=======
                         pick.ScanPackageInput = new List<ScanPackageInput>();
+>>>>>>> 5c83cb3 (提交最新代码)
                         pick.ScanPackageInput.Add(request);
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
@@ -325,7 +334,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                         pick.ScanQty += Qty;
                         pick.RemainingQty -= Qty;
+<<<<<<< HEAD
+                        if (pick.ScanPackageInput == null)
+                        {
+                            pick.ScanPackageInput = new List<ScanPackageInput>();
+                        }
+=======
                         pick.ScanPackageInput = new List<ScanPackageInput>();
+>>>>>>> 5c83cb3 (提交最新代码)
                         pick.ScanPackageInput.Add(request);
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
@@ -537,10 +553,11 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         p.WarehouseName = packageData.WarehouseName;
                         p.OrderId = packageData.OrderId;
                         p.ExternOrderNumber = packageData.ExternOrderNumber;
+                        p.PackageNumber = packageNumber;
                         p.PreOrderNumber = packageData.PreOrderNumber;
                         p.OrderNumber = packageData.OrderNumber;
                         p.PickTaskId = packageData.PickTaskId;
-                        //p.SN = item.;
+                        //p.SN = item;
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
                     }

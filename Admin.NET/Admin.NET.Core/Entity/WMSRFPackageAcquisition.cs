@@ -63,6 +63,13 @@ public class WMSRFPackageAcquisition : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? ExternOrderNumber { get; set; }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PackageNumber { get; set; }
     
     /// <summary>
     /// 

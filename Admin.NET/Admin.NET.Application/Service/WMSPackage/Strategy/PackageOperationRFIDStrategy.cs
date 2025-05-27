@@ -93,7 +93,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     request.SKU = collection["p"].Split(':')[1];
                     request.RFID = collection["p"].Split(':')[0];
                 }
-            };
+            }
+            ;
 
 
 
@@ -835,6 +836,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                         p.OrderId = packageData.OrderId;
                         p.ExternOrderNumber = packageData.ExternOrderNumber;
                         p.PreOrderNumber = packageData.PreOrderNumber;
+                        p.PackageNumber = packageNumber;
                         p.OrderNumber = packageData.OrderNumber;
                         p.PickTaskId = packageData.PickTaskId;
                         p.Creator = _userManager.Account;
@@ -1154,6 +1156,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 //判断有没有扫描数据
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
                 {
+
                     var result = await PackingRFIDComplete(pickData, request, PackageBoxTypeEnum.正常);
                     response.Code = result.Code;
                     response.Msg = result.Msg;
@@ -1243,11 +1246,28 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
 
         }
+<<<<<<< HEAD
+        foreach (var item in getRFIDData)
+        {
+            var Sequence = request.RFIDInfo.Where(a => a.RFID == item.RFID).FirstOrDefault();
+            if (Sequence != null)
+            {
+                item.Sequence = Sequence.Sequence;
+            }
+        }
+
         List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
 
         rfidInfos.AddRange(getRFIDData);
         if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
         {
+=======
+        List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
+
+        rfidInfos.AddRange(getRFIDData);
+        if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
+        {
+>>>>>>> 5c83cb3 (提交最新代码)
             rfidInfos.AddRange(pickData.First().RFIDInfoOld);
         }
         var lookup = rfidInfos.ToLookup(a => a.RFID);

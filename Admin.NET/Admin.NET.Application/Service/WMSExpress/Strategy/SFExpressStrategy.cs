@@ -157,7 +157,14 @@ public class SFExpressStrategy : IExpressInterface
 
         //SFExpressServiceStrategy strategy = new SFExpressServiceStrategy();
         SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>() { Data = new SFRootobject() };
-
+        //判断客户需不需要回单
+        //1,先判断基础配置需不需要回单
+        var IsSignBack = getExpressConfig.IsSignBack == 1 ? 1 : 0;
+        //基础配置不需要回单，则判断用户订单需不需要回单
+        if (IsSignBack != 1)
+        {
+            IsSignBack = receiver.IsSignBack == 1 ? 1 : 0;
+        }
         input.Data = new SFRootobject()
         {
             orderId = package.PackageNumber,
@@ -168,11 +175,12 @@ public class SFExpressStrategy : IExpressInterface
             totalWeight = package.GrossWeight.Value,//订单货物总重量（郑州空港海关必填）， 若为子母件必填， 单位千克， 精确到小数点后3位，如果提供此值， 必须>0 (子母件需>6)
             isOneselfPickup = 1,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
             customsInfo = new SFCustomsinfo(),
+            isSignBack = IsSignBack,// 是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
             expressTypeId = 2, //https://open.sf-express.com/developSupport/734349?activeIndex=324604
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
-            contactInfoList = sFContactinfolists
-
+            contactInfoList = sFContactinfolists,
+            remark = package.ExternOrderNumber
         };
         input.Checkword = getExpressConfig.Checkword;
         input.Url = getExpressConfig.Url;
@@ -362,6 +370,14 @@ public class SFExpressStrategy : IExpressInterface
 
         //SFExpressServiceStrategy strategy = new SFExpressServiceStrategy();
         SFExpressInput<SFRootobject> input = new SFExpressInput<SFRootobject>() { Data = new SFRootobject() };
+        //判断客户需不需要回单
+        //1,先判断基础配置需不需要回单
+        var IsSignBack = getExpressConfig.IsSignBack == 1 ? 1 : 0;
+        //基础配置不需要回单，则判断用户订单需不需要回单
+        if (IsSignBack != 1)
+        {
+            IsSignBack = receiver.IsSignBack == 1 ? 1 : 0;
+        }
 
         input.Data = new SFRootobject()
         {
@@ -373,11 +389,12 @@ public class SFExpressStrategy : IExpressInterface
             totalWeight = package.Sum(a => a.GrossWeight).Value,//订单货物总重量（郑州空港海关必填）， 若为子母件必填， 单位千克， 精确到小数点后3位，如果提供此值， 必须>0 (子母件需>6)
             isOneselfPickup = 0,//快件自取，支持以下值： 1：客户同意快件自取 0：客户不同意快件自取
             customsInfo = new SFCustomsinfo(),
-            //isSignBack = receiver.IsSignBack == 1 ? 1 : 0,// 是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
+            isSignBack = IsSignBack,// 是否返回签回单 （签单返还）的运单号， 支持以下值： 1：要求 0：不要求
             expressTypeId = 2, //快件产品类别表 https://open.sf-express.com/developSupport/734349?activeIndex=324604
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
-            contactInfoList = sFContactinfolists
+            contactInfoList = sFContactinfolists,
+            remark = packageOrder.ExternOrderNumber
         };
 
         input.Checkword = getExpressConfig.Checkword;
@@ -788,7 +805,7 @@ public class SFExpressStrategy : IExpressInterface
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
             result.WaybillType = getExpressDelivery.WaybillType;
-            result.WaybillOrder = getExpressDelivery.WaybillOrder??1;
+            result.WaybillOrder = getExpressDelivery.WaybillOrder ?? 1;
             result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
             response.Data = result;

@@ -132,6 +132,14 @@ public class WMSExpressConfig : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsSignBack { get; set; }
+    
+
+    /// <summary>
+    /// 
+    /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Env { get; set; }
 

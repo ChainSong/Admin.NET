@@ -67,6 +67,9 @@ public class SFRootobject
     public int parcelQty { get; set; }
     public int payMethod { get; set; }
     public double totalWeight { get; set; }
+    public string remark { get; set; }
+
+    
 }
 
 public class SFCustomsinfo
