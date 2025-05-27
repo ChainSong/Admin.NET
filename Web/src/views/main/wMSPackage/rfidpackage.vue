@@ -15,7 +15,7 @@
             </el-row>
           </el-row>
         </div>
-        <el-row :gutter="[8, 24]">
+        <el-row :gutter="[10, 24]">
           <div>
             <table style="height:350px;width: 450px;">
               <tr>
@@ -225,10 +225,11 @@ onMounted(async () => {
 
 // 获取RFID信息
 const getRFIDInfoData = async () => {
-  console.log("getRFIDInfoData");
-  console.log(state.value.vm.form);
+ 
+  state.value.vm.form.expressCompany = expressValue.value;
   // ElMessage.warning("getRFIDInfoData");
   let res = await getRFIDInfo(state.value.vm.form);
+
   if (res.data.result.code == 1) {
     audio_success.play(); // 播放音频
 
@@ -247,11 +248,12 @@ const getRFIDInfoData = async () => {
     state.value.vm.form.sku = "";
     state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0;
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+    // state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData =[];
 
     input.value = true;
     input.value = false;
-    allPackage(state.value.vm.form);
+    // allPackage(state.value.vm.form);
     nextTick(() => {
       input.value.focus();
       input.value.select();
@@ -274,6 +276,10 @@ const getRFIDInfoData = async () => {
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
+  } else if (res.data.result.code == -1) {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.warning(res.data.result.msg);
   } else {
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
@@ -295,6 +301,7 @@ const getExpress = async () => {
 };
 
 const shortagePackage = async () => {
+  state.value.vm.form.expressCompany = expressValue.value;
   let res = await shortagePackageData(state.value.vm.form);
   // let res = await addPackageData(state.value.vm.form);
   // let res = await scanPackageData(state.value.vm.form);

@@ -68,7 +68,7 @@ namespace Admin.NET.Application.Strategy
             var rfidReceiptDetails = _repReceiptDetail.AsQueryable()
                 .Where(a => receipts.Select(b => b.Id).Contains(a.ReceiptId)
                  && SqlFunc.Subqueryable<WMSProduct>().Where(c => c.SKU == a.SKU && c.IsRFID == 1 && c.CustomerId == a.CustomerId).Any()
-            ).ToList();
+            ).OrderBy(a=>a.LineNumber).ToList();
 
             //获取product
             var products = _repProduct.AsQueryable().Where(a => a.IsRFID == 1 && rfidReceiptDetails.Select(b => b.SKU).Contains(a.SKU)).ToList();

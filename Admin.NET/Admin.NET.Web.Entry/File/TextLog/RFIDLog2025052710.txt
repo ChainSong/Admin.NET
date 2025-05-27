@@ -1,0 +1,10 @@
+Initial content请求记录第一步
+{"Input":"20250517001","SKU":"","SN":"","Lot":"","AcquisitionData":null,"GoodsName":null,"GoodsType":null,"BoxType":null,"PickTaskNumber":"20250517001","PackageNumber":null,"CustomerId":0,"CustomerName":null,"WarehouseId":0,"WarehouseName":null,"ExpressCompany":"\u987A\u4E30\u5FEB\u9012","ExpressNumber":null,"Weight":0,"RFIDs":null,"RFIDInfo":null,"RFIDStr":"004370503201100126004611:E280119120008DCCED32037F,:"}
+请求记录第一步
+请求记录第一步
+{"Input":"173686322956608","SKU":"","SN":"","Lot":"","AcquisitionData":null,"GoodsName":null,"GoodsType":null,"BoxType":null,"PickTaskNumber":"173686322956608","PackageNumber":null,"CustomerId":0,"CustomerName":null,"WarehouseId":0,"WarehouseName":null,"ExpressCompany":"\u987A\u4E30\u5FEB\u9012","ExpressNumber":null,"Weight":0,"RFIDs":null,"RFIDInfo":null,"RFIDStr":"004370503201100126004611:E280119120008DCCED32037F,:"}
+{"Input":"20250517001","SKU":"","SN":"","Lot":null,"AcquisitionData":null,"GoodsName":null,"GoodsType":null,"BoxType":null,"PickTaskNumber":"20250517001","PackageNumber":null,"CustomerId":0,"CustomerName":null,"WarehouseId":0,"WarehouseName":null,"ExpressCompany":"\u987A\u4E30\u5FEB\u9012","ExpressNumber":null,"Weight":0,"RFIDs":null,"RFIDInfo":null,"RFIDStr":"004370503201100126004611:E280119120008DCCED32037F,:"}
+请求记录第一步
+{"Input":"","SKU":"","SN":"","Lot":"","AcquisitionData":null,"GoodsName":null,"GoodsType":null,"BoxType":null,"PickTaskNumber":"","PackageNumber":null,"CustomerId":0,"CustomerName":null,"WarehouseId":0,"WarehouseName":null,"ExpressCompany":"\u987A\u4E30\u5FEB\u9012","ExpressNumber":null,"Weight":0,"RFIDs":null,"RFIDInfo":[],"RFIDStr":"004370503201100126004611:E280119120008DCCED32037F,:"}
+请求记录第一步
+{"Input":"173686322956608","SKU":"","SN":"","Lot":"","AcquisitionData":null,"GoodsName":null,"GoodsType":null,"BoxType":null,"PickTaskNumber":"173686322956608","PackageNumber":null,"CustomerId":0,"CustomerName":null,"WarehouseId":0,"WarehouseName":null,"ExpressCompany":"\u987A\u4E30\u5FEB\u9012","ExpressNumber":null,"Weight":0,"RFIDs":null,"RFIDInfo":null,"RFIDStr":"004370503201100126004611:E280119120008DCCED32037F,:"}

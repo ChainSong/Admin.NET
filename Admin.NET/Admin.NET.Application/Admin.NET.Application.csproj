@@ -95,6 +95,12 @@
     <Folder Include="Service\WMSASN\Mapper\" />
     <Folder Include="Service\WMSCustomer\Enumerate\" />
     <Folder Include="Service\WMSInventoryReport\Enumerate\" />
+    <Folder Include="Service\WMSOrderReport\Abstract\" />
+    <Folder Include="Service\WMSOrderReport\Dto\" />
+    <Folder Include="Service\WMSOrderReport\Enumerate\" />
+    <Folder Include="Service\WMSOrderReport\Factory\" />
+    <Folder Include="Service\WMSOrderReport\Interface\" />
+    <Folder Include="Service\WMSOrderReport\Strategy\OrderDefault\" />
     <Folder Include="Service\WMSOrder\Abstract\" />
     <Folder Include="Service\WMSReceiptReceiving\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Dto\" />

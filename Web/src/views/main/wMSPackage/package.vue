@@ -64,6 +64,15 @@
                 </td>
               </tr>
               <tr>
+                <th style="padding-left:5px;font-size:20px">数量:</th>
+                <td>
+                  <el-input style="font-size:20px;" v-model="state.vm.form.scanQty"
+                    onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')" placeholder="请输入数量"></el-input>
+                  <!-- <input id="netweight" type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
+                  class="form-control" style="width:100%" /> -->
+                </td>
+              </tr>
+              <tr>
                 <th style="padding-left:5px;font-size:20px">备注:</th>
                 <td>
                   <div >

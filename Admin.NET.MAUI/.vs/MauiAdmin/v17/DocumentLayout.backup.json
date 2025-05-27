@@ -1,0 +1,235 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\utils\\asyncnetworkhttpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.maui\\utils\\asyncnetworkclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6328DEB2-7DC7-419A-A307-6EE54998B25C}|Admin.NET.MAUI\\Admin.NET.MAUI.csproj|solutionrelative:admin.net.maui\\utils\\asyncnetworkclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93FB8C18-A906-459A-B33F-D827ED5B34AB}|Admin.NET.Common\\Admin.NET.Common.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\admin.net.common\\httphelper\\httphelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{93FB8C18-A906-459A-B33F-D827ED5B34AB}|Admin.NET.Common\\Admin.NET.Common.csproj|solutionrelative:admin.net.common\\httphelper\\httphelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin\\MauiAdmin.csproj|e:\\obj\\admin.net-next\\admin.net.maui\\mauiadmin\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0C481DEB-CD19-4534-8FCD-A7EEC6B0DB29}|MauiAdmin\\MauiAdmin.csproj|solutionrelative:mauiadmin\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 33,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:139:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:140:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:141:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:137:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:155:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:156:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:157:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:154:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:153:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:152:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:151:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:150:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:149:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:148:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:144:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:143:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:142:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:158:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:159:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{7f40df72-066b-4810-a08b-c0fbed76c948}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AsyncNetworkHttpClient.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Utils\\AsyncNetworkHttpClient.cs",
+              "ViewState": "AgIAAPcAAAAAAAAAAAAowAMBAABRAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-22T16:49:09.737Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AsyncNetworkClient.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
+              "RelativeDocumentMoniker": "Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
+              "RelativeToolTip": "Admin.NET.MAUI\\Utils\\AsyncNetworkClient.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-22T16:49:07.282Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "HttpHelper.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.Common\\HttpHelper\\HttpHelper.cs",
+              "RelativeDocumentMoniker": "Admin.NET.Common\\HttpHelper\\HttpHelper.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\Admin.NET.Common\\HttpHelper\\HttpHelper.cs",
+              "RelativeToolTip": "Admin.NET.Common\\HttpHelper\\HttpHelper.cs",
+              "ViewState": "AQIAABEBAAAAAAAAAAApwLsAAAA2AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-22T16:47:44.554Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MauiProgram.cs",
+              "DocumentMoniker": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\MauiAdmin\\MauiProgram.cs",
+              "RelativeDocumentMoniker": "MauiAdmin\\MauiProgram.cs",
+              "ToolTip": "E:\\Obj\\Admin.NET-next\\Admin.NET.MAUI\\MauiAdmin\\MauiProgram.cs",
+              "RelativeToolTip": "MauiAdmin\\MauiProgram.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-22T16:47:36.013Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 135,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -292,4 +292,9 @@ public class WMSPickTask : ITenantIdFilter
     [Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickTaskId))]
     public List<WMSPickTaskDetail> Details { get; set; }
 
+    //[Navigate(NavigateType.OneToOne, nameof(WMSOrderAddress.PreOrderId), nameof(PreOrderId))]
+    //[Navigate()]
+    //public  List<WMSOrderAddress> OrderAddress { get; set; }
+
+
 }

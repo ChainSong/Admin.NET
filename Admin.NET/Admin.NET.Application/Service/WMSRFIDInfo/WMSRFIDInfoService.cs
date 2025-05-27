@@ -273,7 +273,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     public async Task<Response<List<WMSRFIDinfoPrinfDto>>> GetPrinrRFIDInfoByReceiptId(List<long> receiptIds)
     {
         Response<List<WMSRFIDinfoPrinfDto>> response = new Response<List<WMSRFIDinfoPrinfDto>>() { Data = new List<WMSRFIDinfoPrinfDto>() };
-        var entity = await _rep.AsQueryable().Where(u => receiptIds.Contains(u.ReceiptId.Value)).ToListAsync();
+        var entity = await _rep.AsQueryable().Where(u => receiptIds.Contains(u.ReceiptId.Value)).OrderBy(a=>a.Id).ToListAsync();
         entity.ForEach(u =>
         {
             u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;

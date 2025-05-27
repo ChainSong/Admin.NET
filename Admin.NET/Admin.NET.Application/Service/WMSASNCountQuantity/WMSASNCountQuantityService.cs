@@ -89,6 +89,8 @@ public class WMSASNCountQuantityService : IDynamicApiController, ITransient
                     .WhereIF(input.Int1 > 0, u => u.Int1 == input.Int1)
                     .WhereIF(input.Int2 > 0, u => u.Int2 == input.Int2)
                     .WhereIF(input.Int3 > 0, u => u.Int3 == input.Int3)
+                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
 
                     .Select<WMSASNCountQuantityOutput>()
 ;

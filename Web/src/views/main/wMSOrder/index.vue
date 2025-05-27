@@ -83,7 +83,6 @@
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
-
         </el-form-item>
         <!-- <el-form-item>
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSOrder:add'"> 新增
@@ -105,6 +104,10 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="openPrint" v-auth="'wMSOrder:page'"> 打印
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun" v-auth="'wMSOrder:exportWMSOrderByRFID'"> 导出RFID
           </el-button>
         </el-form-item>
       </el-form>
@@ -164,7 +167,7 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100,300]" small="" background=""
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper" />
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
@@ -190,7 +193,7 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder, exportPackage } from '/@/api/main/wMSOrder';
+import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder, exportPackage,exportWMSOrderByRFID } from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import printDialog from '/@/views/tools/printDialog.vue';
@@ -333,6 +336,27 @@ const del = (row: any) => {
 //     })
 //     .catch(() => { });
 // };
+
+
+
+
+ 
+const exportWMSOrderByRFIDFun = async () => { 
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  let res = await exportWMSOrderByRFID(ids);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
+
 
 
 

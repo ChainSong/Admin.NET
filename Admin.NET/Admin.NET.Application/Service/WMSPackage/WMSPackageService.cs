@@ -606,20 +606,13 @@ public class WMSPackageService : IDynamicApiController, ITransient
             return new Response() { Code = StatusCode.Error, Msg = "任务号不能为空" };
         }
         //获取任务号明细信息
-        var pickTaskList = await _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        var pickTaskList = await _repPickTask.AsQueryable().Includes(a=>a.Details).Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         if (pickTaskList.Count > 1)
         {
             return new Response() { Code = StatusCode.Error, Msg = "找到多条任务号信息" };
         }
         //根据任务号获取包装信息
         var packageList = await _rep.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
-        if (packageList.Count > 1)
-        {
-            //删除包装信息
-            await _rep.DeleteAsync(packageList);
-            //return new Response() { Code = StatusCode.Error, Msg = "找到多条包裹信息" };
-        }
-
         //根据任务号获取包装明细信息
         var packageDetailList = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         if (packageDetailList.Count > 1)
@@ -629,15 +622,35 @@ public class WMSPackageService : IDynamicApiController, ITransient
             //return new Response() { Code = StatusCode.Error, Msg = "未找到包装信息" };
         }
 
-
+        if (packageList.Count > 0)
+        {
+            //删除包装信息
+            await _rep.DeleteAsync(packageList);
+            //return new Response() { Code = StatusCode.Error, Msg = "找到多条包裹信息" };
+        }
 
         //修改任务号明细信息
         //var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         foreach (var item in pickTaskList)
         {
             item.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+            foreach (var details in item.Details)
+            {
+                details.PickStatus=(int)PickTaskStatusEnum.拣货完成;
+            }
+            await _repPickTask.UpdateRangeAsync(pickTaskList);
+            await _repPickTaskDetail.UpdateRangeAsync(item.Details);
             //item.pa = 0;
         }
+        _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
+               .SetColumns(p => p.Status == (int)RFIDStatusEnum.新增)
+               .SetColumns(p => p.PickTaskNumber == "")
+               .SetColumns(p => p.OrderNumber == "")
+               .SetColumns(p => p.ExternOrderNumber == "")
+               .SetColumns(p => p.PackageNumber == "")
+               .Where(p => pickTaskList.Select(e => e.PickTaskNumber).Contains(p.PickTaskNumber))
+               .ExecuteCommand();
+
         _sysCacheService.Set(_userManager.Account + "_Package_" + input.PickTaskNumber, null);
         var aaa = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + input.PickTaskNumber);
         return new Response() { Code = StatusCode.Success, Msg = "清理成功" };
@@ -689,7 +702,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "GetRFIDInfo")]
-    [Idempotent("s", 6)]
+    [Idempotent("s", 3)]
     [UnitOfWork]
     public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
     {
@@ -707,7 +720,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _sysCacheService.Set(
         redisKey,
         "1",
-        TimeSpan.FromSeconds(50)  // 根据业务需求调整过期时间
+        TimeSpan.FromSeconds(20)  // 根据业务需求调整过期时间
     );
 
         if (isNewRequest)
@@ -718,7 +731,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _sysCacheService.Set(
         redisKey,
         "1",
-        TimeSpan.FromSeconds(5)  // 根据业务需求调整过期时间
+        TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
       );
 
         TextHelper.WrittxtFor("请求记录第一步", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");

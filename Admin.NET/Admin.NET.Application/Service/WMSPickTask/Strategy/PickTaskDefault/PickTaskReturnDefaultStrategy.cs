@@ -32,6 +32,7 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
 
 
+    public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
@@ -67,7 +68,16 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
         var orderIds = pickTaskDetailData.Select(a => a.OrderId).Distinct().ToList();
         await _repPackageDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
         await _repPackage.DeleteAsync(a => orderIds.Contains(a.OrderId));
-
+        //删除RFID 信息
+        //await _repRFIDInfo;
+        _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
+                   .SetColumns(p => p.Status == (int)RFIDStatusEnum.新增)
+                   .SetColumns(p => p.PickTaskNumber == "")
+                   .SetColumns(p => p.OrderNumber == "")
+                   .SetColumns(p => p.ExternOrderNumber == "")
+                   .SetColumns(p => p.PackageNumber == "")
+                   .Where(p => repOrder.Select(e => e.OrderNumber).Contains(p.OrderNumber))
+                   .ExecuteCommand();
         await _repPickTaskDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
         await _repPickTask.DeleteAsync(a => request.Select(b => b.Id).Contains(a.Id));
 

@@ -1,4 +1,7 @@
-﻿namespace Admin.NET.Application;
+﻿using Admin.NET.Core.Entity;
+using System.Collections.Generic;
+
+namespace Admin.NET.Application;
 
 /// <summary>
 /// WMSPickTask输出参数
@@ -47,6 +50,7 @@ public class WMSPickTaskOutput
     /// PickType
     /// </summary>
     public string PickType { get; set; }
+    public string Remark { get; set; }
 
     /// <summary>
     /// StartTime
@@ -202,6 +206,14 @@ public class WMSPickTaskOutput
     /// Int5
     /// </summary>
     public int? Int5 { get; set; }
+
+
+    //[Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickTaskId))]
+    public List<WMSPickTaskDetail> Details { get; set; }
+
+    //[Navigate(NavigateType.OneToOne, nameof(WMSOrderAddress.PreOrderId), nameof(PreOrderId))]
+    //[Navigate()]
+    public WMSOrderAddress OrderAddress { get; set; }
 
 }
 

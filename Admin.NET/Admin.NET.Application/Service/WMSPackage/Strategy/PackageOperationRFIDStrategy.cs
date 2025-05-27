@@ -443,7 +443,14 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             TextHelper.WrittxtFor(JsonSerializer.Serialize(pickData.First().RFIDs), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
-
+            foreach (var item in pickData)
+            {
+                if (item.RFIDInfoOld == null)
+                {
+                    item.RFIDInfoOld = new List<WMSRFIDInfo>();
+                }
+                item.RFIDInfoOld.AddRange(item.RFIDInfo);
+            }
             var mapper = new Mapper(config);
             var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
@@ -717,6 +724,26 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         {
             request.Weight = 1;
         }
+        //foreach (var item in pickData.Select(a=>a.SKU))
+        //{
+
+        //}
+        List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
+
+        rfidInfos.AddRange(pickData.First().RFIDInfo);
+        if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
+        {
+            rfidInfos.AddRange(pickData.First().RFIDInfoOld);
+        }
+        var lookup = rfidInfos.ToLookup(a => a.RFID);
+        var distinctRFID = lookup.Select(g => g.First()).ToList();
+        //判断需要包装的数量和RFID的数量
+        if (pickData.Sum(a => a.PickQty) < distinctRFID.Count)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "RFID数量超出拣货数量";
+            return response;
+        }
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
@@ -757,6 +784,15 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                   //添加
                   .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
             });
+
+            foreach (var item in pickData)
+            {
+                if (item.RFIDInfoOld == null)
+                {
+                    item.RFIDInfoOld = new List<WMSRFIDInfo>();
+                }
+                item.RFIDInfoOld.AddRange(item.RFIDInfo);
+            }
             TextHelper.WrittxtFor("准备更新RFID +request", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
@@ -1208,11 +1244,11 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
         }
         List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
-       
+
         rfidInfos.AddRange(getRFIDData);
-        if (pickData.First() != null && pickData.First().RFIDInfo != null)
+        if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
         {
-            rfidInfos.AddRange(pickData.First().RFIDInfo);
+            rfidInfos.AddRange(pickData.First().RFIDInfoOld);
         }
         var lookup = rfidInfos.ToLookup(a => a.RFID);
         var distinctRFID = lookup.Select(g => g.First()).ToList();
@@ -1220,9 +1256,17 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         {
             a.RemainingQty = a.PickQty - distinctRFID.Where(p => p.SKU == a.SKU && p.Status == (int)RFIDStatusEnum.新增).Count();
             a.ScanQty = getRFIDData.Where(p => p.SKU == a.SKU && p.Status == (int)RFIDStatusEnum.新增).Count();
-            a.RFIDInfo = distinctRFID;
+            a.RFIDInfo = getRFIDData;
         });
         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
+
+        if (pickData.Sum(a => a.PickQty) < distinctRFID.Count())
+        {
+            response.Code = StatusCode.Warning;
+            response.Msg = "有不合法的RFID";
+            response.Data.PackageDatas = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+            return response;
+        }
 
         foreach (var item in getRFIDData)
         {
@@ -1287,7 +1331,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         else
         {
             response.Data.PackageDatas = pickData;
-            response.Code = StatusCode.Warning;
+            response.Code = StatusCode.Error;
             response.Msg = "SKU数量有差异";
             return response;
         }

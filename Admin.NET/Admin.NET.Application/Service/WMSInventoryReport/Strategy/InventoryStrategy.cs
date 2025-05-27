@@ -240,6 +240,8 @@ public class InventoryStrategy : IInvrntoryInterface
                          a.ExpirationDate
                         ,
                          a.Remark
+                         ,
+                         a.InventoryTime
                      })
                     .Select(a => new WMSInventoryUsableReport
                     {
@@ -294,6 +296,7 @@ public class InventoryStrategy : IInvrntoryInterface
                         ExpirationDate = a.ExpirationDate
                      ,
                         Remark = a.Remark,
+                        InventoryTime = a.InventoryTime,
                         //,
                         //Id = SqlFunc.AggregateMax(a.Id)
 
@@ -478,7 +481,8 @@ public class InventoryStrategy : IInvrntoryInterface
                         ,
                          a.ExpirationDate
                         ,
-                         a.Remark
+                         a.Remark,
+                         a.InventoryTime
                      })
                     .Select(a => new WMSInventoryUsableReport
                     {
@@ -533,6 +537,7 @@ public class InventoryStrategy : IInvrntoryInterface
                         ExpirationDate = a.ExpirationDate
                      ,
                         Remark = a.Remark,
+                        InventoryTime = a.InventoryTime,
                         //,
                         //Id = SqlFunc.AggregateMax(a.Id)
 

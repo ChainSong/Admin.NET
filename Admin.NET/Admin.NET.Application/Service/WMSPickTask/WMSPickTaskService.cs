@@ -30,6 +30,7 @@ namespace Admin.NET.Application.Service;
 public class WMSPickTaskService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSPickTask> _rep;
+    private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
 
 
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
@@ -48,7 +49,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SysCacheService _sysCacheService;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress)
     {
         _rep = rep;
         _userManager = userManager;
@@ -61,6 +62,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repPackageDetail = repPackageDetail;
         _sysCacheService = sysCacheService;
         _repRFIDInfo = repRFIDInfo;
+        _repOrderAddress = repOrderAddress;
 
     }
 
@@ -83,7 +85,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderNumber), u => u.OrderNumber.Contains(input.OrderNumber.Trim()))
                     .WhereIF(input.PickStatus.HasValue && input.PickStatus != 0, u => u.PickStatus == input.PickStatus)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickType), u => u.PickType.Contains(input.PickType.Trim()))
-                    .WhereIF(input.PrintNum !=null, u => u.PrintNum == input.PrintNum)
+                    .WhereIF(input.PrintNum != null, u => u.PrintNum == input.PrintNum)
                     //.WhereIF(input.PrintNum > 0, u => u.PrintNum == input.PrintNum)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PrintPersonnel), u => u.PrintPersonnel.Contains(input.PrintPersonnel.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PickPlanPersonnel), u => u.PickPlanPersonnel.Contains(input.PickPlanPersonnel.Trim()))
@@ -248,6 +250,8 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPackage = _repPackage;
         factory._repPackageDetail = _repPackageDetail;
+        factory._repRFIDInfo = _repRFIDInfo;
+
         //factory._repTableColumns = _repTableInventoryUsed;
         return await factory.PickTaskReturn(request);
     }
@@ -320,22 +324,32 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "GetPickTasks")]
-    public async Task<List<WMSPickTask>> GetPickTasks(List<long> ids)
+    public async Task<List<WMSPickTaskOutput>> GetPickTasks(List<long> ids)
     {
         var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => ids.Contains(u.Id)).ToListAsync();
-        foreach (var item in entity) { 
-           item.Details = item.Details.GroupBy(a => new { a.SKU,a.GoodsName,a.GoodsType,a.Area,a.Location,a.BatchCode,a.PickTaskNumber,a.PickTaskId}).Select(a => new WMSPickTaskDetail { 
-                SKU=a.Key.SKU,
-                GoodsName=a.Key.GoodsName,
-                GoodsType=a.Key.GoodsType,
-                Area=a.Key.Area,
-                Location=a.Key.Location,
-                BatchCode=a.Key.BatchCode,
-                PickTaskNumber=a.Key.PickTaskNumber,
-                PickTaskId = a.Key.PickTaskId
-               , Qty=a.Sum(b=>b.Qty)}).ToList();
+        var data = entity.Adapt<List<WMSPickTaskOutput>>();
+        foreach (var item in data)
+        {
+            var order = await _repOrder.AsQueryable().Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
+            var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
+            item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetail
+            {
+                SKU = a.Key.SKU,
+                GoodsName = a.Key.GoodsName,
+                GoodsType = a.Key.GoodsType,
+                Area = a.Key.Area,
+                Location = a.Key.Location,
+                BatchCode = a.Key.BatchCode,
+                PickTaskNumber = a.Key.PickTaskNumber,
+                PickTaskId = a.Key.PickTaskId,
+                Qty = a.Sum(b => b.Qty)
+            }).ToList();
+            item.PrintTime = DateTime.Now;
+            //item.OrderAddress=new WMSOrderAddress();
+            item.OrderAddress = orderadrress;
+            item.Remark = order.Remark;
         }
-        return entity;
+        return data;
     }
     /// <summary>
     /// 获取WMSPickTask列表

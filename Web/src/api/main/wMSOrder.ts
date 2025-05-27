@@ -12,6 +12,7 @@ enum Api {
 	PrintShippingList = '/api/wMSOrder/PrintShippingList',
 	ExportPackage = '/api/wMSOrder/ExportPackage',
 	GetOrderLocation = '/api/wMSOrder/GetOrderLocation',
+	ExportWMSOrderByRFID = '/api/WMSOrderReport/ExportWMSOrderByRFID',
 
 }
 
@@ -111,3 +112,13 @@ export const getOrderLocation = (params?: any) =>
 		url: `${Api.GetOrderLocation}/${params}`,
 		method: 'get'
 	});
+
+// 导出出库信息
+export const exportWMSOrderByRFID = (params?: any) =>
+	request({
+		url: Api.ExportWMSOrderByRFID,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
+	

@@ -14,20 +14,19 @@ namespace Admin.NET.Core;
 /// <summary>
 /// 清理日志作业任务
 /// </summary>
-[JobDetail("job_log", Description = "清理操作日志", GroupName = "default", Concurrent = false)]
-[Daily(TriggerId = "trigger_log", Description = "清理操作日志")]
-public class LogJob : IJob
+[JobDetail("BackInventoryJob_log", Description = "备份库存", GroupName = "default", Concurrent = false)]
+[Daily(TriggerId = "trigger_BackInventoryJob_log", Description = "备份库存")]
+public class BackInventoryJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public LogJob(IServiceProvider serviceProvider)
+    public BackInventoryJob(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-
         //return;
         using var serviceScope = _serviceProvider.CreateScope();
         var logVisRep = serviceScope.ServiceProvider.GetService<SqlSugarRepository<SysLogVis>>();

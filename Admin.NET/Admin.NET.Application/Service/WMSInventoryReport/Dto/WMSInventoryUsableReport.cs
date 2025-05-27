@@ -139,4 +139,7 @@ public class WMSInventoryUsableReport
     /// Remark
     /// </summary>
     public string Remark { get; set; }
+    public DateTime? InventoryTime { get; set; }
+
+    
 }
