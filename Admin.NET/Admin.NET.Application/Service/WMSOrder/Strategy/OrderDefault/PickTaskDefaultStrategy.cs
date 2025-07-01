@@ -121,6 +121,7 @@ namespace Admin.NET.Application.Strategy
                         //StartTime
                         //EndTime
                         PrintNum = 0,
+                        SerialNumber = "1",
                         Str1 = (data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim(),
                         //PrintTime
                         //PrintPersonnel

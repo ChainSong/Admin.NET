@@ -63,7 +63,7 @@ public class PackagePrintDefaultStrategy : IPackagePrintInterface
         WMS_Order.CustomerId,--客户单号
         WMS_Order.CustomerName,--客户单号
         WMS_Order.ExternOrderNumber,--客户单号
-        WMS_Order.Po,--客户合同号
+        (select top 1 PoCode from WMS_PickTaskDetail where PickTaskNumber =WMS_Package.PickTaskNumber) Po,--客户合同号
         OrderAllocation.BoxCode,--箱号
         OrderAllocation.Str1,--箱号
         WMS_Order.CompleteTime,--交货时间
@@ -71,6 +71,7 @@ public class PackagePrintDefaultStrategy : IPackagePrintInterface
         WMS_OrderAddress.CompanyName,--客户代码
         WMS_OrderAddress.Address,--客户地址
         WMS_OrderAddress.Name,--客户联系人
+        WMS_OrderAddress.Phone,--客户电话
         WMS_Package.PackageNumber --装箱清单编号
         from WMS_Package  
         outer apply (select top 1 *  from WMS_Order where WMS_Order.Id=WMS_Package.OrderId) WMS_Order

@@ -139,11 +139,8 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
 				(select COUNT(1) from WMS_Package where ExternOrderNumber = WMS_Order.ExternOrderNumber)  'JOB号总箱数',	
 				Package.ExpressCompany '承运人',
 				WMS_OrderDetail.GoodsName '品名',
-<<<<<<< HEAD
 				Package.ExpressNumber '顺丰单号',	
-=======
 				Package.ExpressCompany '顺丰单号',	
->>>>>>> 5c83cb3 (提交最新代码)
 				RFIDInfo.RFID '防伪码',
 				OrderAddress.CompanyName '最终用户名称'
 				from

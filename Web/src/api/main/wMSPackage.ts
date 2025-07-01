@@ -17,6 +17,8 @@ enum Api {
 	GetRFIDInfo = '/api/wMSPackage/GetRFIDInfo',
 	ExportPackage = '/api/wMSPackage/ExportPackage',
 	PrintPackageList = '/api/wMSPackage/PrintPackageList',
+	ScanSNPackage = '/api/wMSPackage/ScanSNPackage',
+
 
 }
 
@@ -163,3 +165,14 @@ export const printPackageList = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+
+
+//记录SN获取RFID信息
+export const scanSNPackage = (params?: any) =>
+	request({
+		url: Api.ScanSNPackage,
+		method: 'post',
+		data: params,
+	});
+
+	

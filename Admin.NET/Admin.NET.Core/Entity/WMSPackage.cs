@@ -145,7 +145,13 @@ public class WMSPackage : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "快递单号", Length = 50)]
     public string? ExpressNumber { get; set; }
-    
+
+    /// <summary>
+    /// 序号
+    /// </summary>
+    [SugarColumn(ColumnDescription = "序号", Length = 50)]
+    public string? SerialNumber { get; set; }
+
     /// <summary>
     /// 是否主单
     /// </summary>

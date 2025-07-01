@@ -92,7 +92,10 @@ namespace Admin.NET.Application.Strategy
                 //得到出库单，开始根据明细拆单子
                 //1，根据是否RFID拆单
                 //2，根据POCode拆单
-                foreach (var allocation in data.Allocation.GroupBy(a => new { a.PoCode, a.OrderId, a.Str1 }))
+                //新功能，新增任务序号
+                //1，声明任务序号
+                int pickTaskSerialNumber = 1;
+                foreach (var allocation in data.Allocation.GroupBy(a => new { a.PoCode, a.Onwer, a.OrderId, a.Str1 }))
                 {
                     var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                     //将需要分配的订单发送到分配队列
@@ -114,7 +117,7 @@ namespace Admin.NET.Application.Strategy
                     });
 
                     var mapper = new Mapper(config);
-                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation.Where(a => a.PoCode == allocation.Key.PoCode && a.OrderId == allocation.Key.OrderId && a.Str1 == allocation.Key.Str1));
+                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation.Where(a => a.PoCode == allocation.Key.PoCode && a.Onwer == allocation.Key.Onwer && a.OrderId == allocation.Key.OrderId && a.Str1 == allocation.Key.Str1));
 
                     pickTasks.Add(new WMSPickTask
                     {
@@ -130,6 +133,7 @@ namespace Admin.NET.Application.Strategy
                         //StartTime
                         //EndTime
                         PrintNum = 0,
+                        SerialNumber = pickTaskSerialNumber.ToString(),
                         //PrintTime
                         //PrintPersonnel
                         //PickPlanPersonnel
@@ -140,9 +144,9 @@ namespace Admin.NET.Application.Strategy
                         CreationTime = DateTime.Now,
                         Details = detaildata,
 
-                    }); ;
+                    });
                 }
-
+                pickTaskSerialNumber++;
             });
 
             //_repPickTask.AsQueryable().Includes(a => a.Detail).Where(a => request.Contains(a.Id)).ToList();

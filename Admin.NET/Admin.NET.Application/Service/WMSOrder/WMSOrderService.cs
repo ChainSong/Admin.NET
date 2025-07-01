@@ -485,7 +485,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "CompleteOrder")]
     public async Task<Response<List<OrderStatusDto>>> CompleteOrder(List<long> input)
     {
-        //根据id 获取订单信息
+        //1根据id 获取订单信息
         var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
         //只允许同客户，同仓库同订单类型的订单进行拣货任务创建
         if (order.GroupBy(a => new { a.CustomerId, a.WarehouseId, a.OrderType }).Count() > 1)
@@ -515,6 +515,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
         factory._repOrderAllocation = _repOrderAllocation;
+        factory._repPackage = _repPackage;
+        factory._repPickTaskDetail = _repPickTaskDetail;
         //factory._reprf = _reprf;
         factory._repInventoryUsable = _repInventoryUsable;
 

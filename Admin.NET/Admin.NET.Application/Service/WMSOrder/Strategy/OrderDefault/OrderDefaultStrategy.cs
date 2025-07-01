@@ -33,7 +33,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
         public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
-
+        public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
@@ -54,7 +54,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a=>a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
             if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
@@ -79,6 +79,23 @@ namespace Admin.NET.Application.Strategy
                     return response;
                 }
             }
+            //判断有没有包装信息
+            var package = await _repPickTaskDetail.AsQueryable().Where(a => request.Contains(a.OrderId)).ToListAsync();
+            if (package.Count() == 0)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "订单异常:没有拣货信息";
+                return response;
+            }
+            foreach (var item in request)
+            {
+                if (package.Where(a => a.PickStatus != (int)PickTaskStatusEnum.包装完成).Count() > 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "订单异常:没有完成包装信息";
+                    return response;
+                }
+            }
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime = DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));
             //await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime=DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));
@@ -92,36 +109,36 @@ namespace Admin.NET.Application.Strategy
 
                 //if (item.CustomerName != "哈希")
                 //{
-                    //插入反馈指令
-                    WMSInstruction wMSInstruction = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstruction.InstructionType = "HACH出库反馈";
-                    wMSInstruction.BusinessType = "HACH出库反馈";
-                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstruction.CustomerId = item.CustomerId;
-                    wMSInstruction.CustomerName = item.CustomerName;
-                    wMSInstruction.WarehouseId = item.WarehouseId;
-                    wMSInstruction.WarehouseName = item.WarehouseName;
-                    wMSInstruction.OperationId = item.Id;
-                    wMSInstruction.OrderNumber = item.ExternOrderNumber;
-                    wMSInstruction.Creator = _userManager.Account;
-                    wMSInstruction.CreationTime = DateTime.Now;
-                    wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
-                    wMSInstruction.TableName = "WMS_Order";
-                    wMSInstruction.InstructionPriority = 0;
-                    wMSInstruction.Remark = "";
-                    wMSInstructions.Add(wMSInstruction);
+                //插入反馈指令
+                WMSInstruction wMSInstruction = new WMSInstruction();
+                //wMSInstruction.OrderId = orderData[0].Id;
+                wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                wMSInstruction.InstructionType = "HACH出库反馈";
+                wMSInstruction.BusinessType = "HACH出库反馈";
+                //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                wMSInstruction.CustomerId = item.CustomerId;
+                wMSInstruction.CustomerName = item.CustomerName;
+                wMSInstruction.WarehouseId = item.WarehouseId;
+                wMSInstruction.WarehouseName = item.WarehouseName;
+                wMSInstruction.OperationId = item.Id;
+                wMSInstruction.OrderNumber = item.ExternOrderNumber;
+                wMSInstruction.Creator = _userManager.Account;
+                wMSInstruction.CreationTime = DateTime.Now;
+                wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
+                wMSInstruction.TableName = "WMS_Order";
+                wMSInstruction.InstructionPriority = 0;
+                wMSInstruction.Remark = "";
+                wMSInstructions.Add(wMSInstruction);
                 //}
-                if (item.OrderAddress.CompanyType == "分销商" && item.CustomerName=="哈希")
+                if (item.OrderAddress.CompanyType == "分销商" && item.CustomerName == "哈希")
                 {
                     //插入反馈指令
                     WMSInstruction wMSInstructionIssue = new WMSInstruction();
                     //wMSInstruction.OrderId = orderData[0].Id;
                     wMSInstructionIssue.InstructionStatus = (int)InstructionStatusEnum.新增;
                     wMSInstructionIssue.InstructionType = "HACH出库同步下发";
-                    wMSInstructionIssue.BusinessType = "HACH出库同步下发"; 
-                    wMSInstructionIssue.OrderNumber =item.ExternOrderNumber; 
+                    wMSInstructionIssue.BusinessType = "HACH出库同步下发";
+                    wMSInstructionIssue.OrderNumber = item.ExternOrderNumber;
                     //wMSInstruction.InstructionTaskNo = DateTime.Now;
                     wMSInstructionIssue.CustomerId = item.CustomerId;
                     wMSInstructionIssue.CustomerName = item.CustomerName;

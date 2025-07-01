@@ -346,9 +346,24 @@ public class WMSASNService : IDynamicApiController, ITransient
 
             //根据联系公司名称补充公司名称
             var customer = await _repCustomer.AsQueryable().Where(a => a.CustomerName == input.CustomerName).FirstAsync();
+            if (customer == null)
+            {
+                Response<List<OrderStatusDto>> data = new Response<List<OrderStatusDto>>();
+                //data.Data = response.Data.Data;
+                data.Code = StatusCode.Error;
+                data.Msg = "客户不存在";
+                return data; 
+            }
             //根据发货地址获取仓库信息
             var warehouse = await _repWarehouse.AsQueryable().Where(a => a.Address == input.WarehouseName).FirstAsync();
-
+            if (customer == null)
+            {
+                Response<List<OrderStatusDto>> data = new Response<List<OrderStatusDto>>();
+                //data.Data = response.Data.Data;
+                data.Code = StatusCode.Error;
+                data.Msg = "仓库不存在";
+                return data;
+            }
             input.WarehouseId = warehouse.Id;
             input.WarehouseName = warehouse.WarehouseName;
             input.CustomerId = customer.Id;

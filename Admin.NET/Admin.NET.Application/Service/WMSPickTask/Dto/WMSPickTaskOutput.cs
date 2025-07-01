@@ -1,4 +1,5 @@
-﻿using Admin.NET.Core.Entity;
+﻿using Admin.NET.Application.Service;
+using Admin.NET.Core.Entity;
 using System.Collections.Generic;
 
 namespace Admin.NET.Application;
@@ -209,7 +210,7 @@ public class WMSPickTaskOutput
 
 
     //[Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickTaskId))]
-    public List<WMSPickTaskDetail> Details { get; set; }
+    public List<WMSPickTaskDetailOutput> Details { get; set; }
 
     //[Navigate(NavigateType.OneToOne, nameof(WMSOrderAddress.PreOrderId), nameof(PreOrderId))]
     //[Navigate()]

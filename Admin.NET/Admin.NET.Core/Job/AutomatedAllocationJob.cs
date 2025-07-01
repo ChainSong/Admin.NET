@@ -39,7 +39,7 @@ public class AutomatedAllocationJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        //return;
+        return;
 
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
@@ -127,6 +127,7 @@ public class AutomatedAllocationJob : IJob
                             }
                         }
                         var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
+                        db.Ado.CommandTimeOut = 1800;
                         DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync(procedureName, sugarParameter);
                         if (infoData != null && infoData.Rows.Count > 0)
                         {

@@ -11,6 +11,7 @@
                 <el-button style="font-size:20px;" type="info" @click="shortagePackage">短包</el-button>
                 <!-- <el-button type="warning">换箱</el-button> -->
                 <el-button style="font-size:20px;" type="danger" @click="addPackage">新增箱</el-button>
+                <el-button style="font-size:20px;" type="danger" @click="state.dialogVisible = true">扫描SN</el-button>
               </el-row>
             </el-row>
           </el-row>
@@ -65,7 +66,7 @@
 
           <div style="padding-left: 100px;padding-top: 30px;">
             <el-row>
-              <el-table :data="state.vm.tableData" style="width: 100%;font-size:20px;">
+              <el-table show-summary :data="state.vm.tableData" height="350" style="width: 100%;font-size:20px;">
                 <el-table-column prop="sku" label="SKU" width="200">
                 </el-table-column>
                 <el-table-column prop="pickQty" label="拣货数量" width="150">
@@ -108,6 +109,29 @@
         </el-table>
       </el-row>
       <printDialog ref="printDialogRef" :title="ptintTitle" />
+
+      <el-dialog title="扫描SN" v-model="state.dialogVisible" width="50%">
+
+        <div>
+          <table style="height:350px;width: 450px;">
+            <tr>
+              <th style="padding-left:5px;font-size:20px" rowspan="1">扫描框:</th>
+              <td>
+                <el-input style="width: 80%;font-size:20px" v-model="state.sndata.pickTaskNumber"
+                  v-on:keyup.enter="scanPickNumber" placeholder="请输入拣货任务号"></el-input>
+              </td>
+            </tr>
+            <tr>
+              <th style="padding-left:5px;font-size:20px">拣货任务号:</th>
+              <td>
+                <el-input style="width: 80%; font-size:20px" v-model="state.sndata.snCode"
+                  v-on:keyup.enter="scanSNPickNumber" placeholder="请输入SN"></el-input>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -117,7 +141,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, addRFIDPackageData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, addRFIDPackageData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID, scanSNPackage } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -152,6 +176,11 @@ const state = ref({
     rfidData: [],
     packageData: [],
   },
+  sndata: {
+    snCode: "",
+    pickTaskNumber: ""
+  },
+  dialogVisible: false,
   visible: false,
   loading: false,
   header: new Header(),
@@ -225,7 +254,8 @@ onMounted(async () => {
 
 // 获取RFID信息
 const getRFIDInfoData = async () => {
- 
+
+
   state.value.vm.form.expressCompany = expressValue.value;
   // ElMessage.warning("getRFIDInfoData");
   let res = await getRFIDInfo(state.value.vm.form);
@@ -249,7 +279,7 @@ const getRFIDInfoData = async () => {
     state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0;
     // state.value.vm.tableData = res.data.result.data.packageDatas;
-    state.value.vm.tableData =[];
+    state.value.vm.tableData = [];
 
     input.value = true;
     input.value = false;
@@ -341,6 +371,23 @@ const gettableColumn = async () => {
   state.value.tableColumnHeaders = res.data.result;
 };
 
+const scanPickNumber = async () => {
+  let res = await scanSNPackage(state.value.sndata);
+  if (res.data.result.code == 1) {
+    ElMessage.success(res.data.result.msg);
+  } else {
+    ElMessage.error(res.data.result.msg);
+  }
+};
+
+const scanSNPickNumber = async () => {
+  let res = await scanSNPackage(state.value.sndata);
+  if (res.data.result.code == 1) {
+    ElMessage.success(res.data.result.msg);
+  } else {
+    ElMessage.error(res.data.result.msg);
+  }
+};
 const allPackage = async (data: any) => {
   let res = await allWMSPackage(data);
   state.value.vm.packageData = res.data.result;
@@ -382,7 +429,32 @@ const addPackage = async (data: any) => {
   allPackage(state.value.vm.form);
 };
 
+// const getSummaries = async (param:any) => {
+//   const { columns, data } = param;
+//   const sums = [];
+//   columns.forEach((column, index) => {
+//     if (index === 0) {
+//       sums[index] = '总数';
+//       return;
+//     }
+//     const values = data.map(item => Number(item[column.property]));
+//     if (!values.every(value => isNaN(value))) {
+//       sums[index] = values.reduce((prev, curr) => {
+//         const value = Number(curr);
+//         if (!isNaN(value)) {
+//           return prev + curr;
+//         } else {
+//           return prev;
+//         }
+//       }, 0);
+//       sums[index] += ' 件';
+//     } else {
+//       sums[index] = 'N/A';
+//     }
+//   });
 
+//   return sums;
+// }
 const scanPackage = async () => {
   signalR.send('echo', 1)
   // 判断webSocket是否连接
@@ -429,8 +501,8 @@ const scanPackage = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else {
-    state.value.vm.form = res.data.result.data;
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+    // state.value.vm.form = res.data.result.data;
+    // state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
   }
   input.value = true;

@@ -174,11 +174,37 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
 
             if (!string.IsNullOrEmpty(request.ExpirationDate))
             {
-                CultureInfo culture = new CultureInfo("en-US");
+                //CultureInfo culture = new CultureInfo("en-US");
 
-                DateTime dateTime;
-                DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", culture, DateTimeStyles.None, out dateTime);
-                wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                //DateTime dateTime;
+                //DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", culture, DateTimeStyles.None, out dateTime);
+                //wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                //判断解析出来的日期的格式
+                string dataformat = "MMddyy";
+                if (!string.IsNullOrEmpty(request.ExpirationDate) && Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+                {
+                    dataformat = "ddMMMyy";
+                    if (request.ExpirationDate.Length == 7)
+                    {
+                        CultureInfo culture = new CultureInfo("en-US");
+                        DateTime dateTime;
+                        DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                        wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                    }
+                    if (request.ExpirationDate.Length == 9)
+                    {
+                        dataformat = "ddMMyyyy";
+                        DateTime date = DateTime.ParseExact(request.ExpirationDate, dataformat, CultureInfo.InvariantCulture);
+                        wMSASNCountQuantityDetail.ExpirationDate = date;
+                    }
+                }
+                else
+                {
+                    CultureInfo culture = new CultureInfo("en-US");
+                    DateTime dateTime;
+                    DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                    wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                }
 
             }
             else

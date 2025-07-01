@@ -7,30 +7,28 @@
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
 			<view class="cu-form-group ">
 				<input :adjust-position="false" confirm-type="search" id="scanInput" :focus="focusflag"
-					v-model="form.scanInput" v-focus="input" v-select="input" ref="input" name="input"
-					@confirm="scanAcquisition()" clearable="" placeholder="请扫描" selection-start="0"
-					:selection-end="selectendlength"></input>
+					v-model="form.scanInput" ref="input" name="input" @confirm="scanAcquisition()" clearable=""
+					placeholder="请扫描" selection-start="0" :selection-end="selectendlength"></input>
 			</view>
 			<view v-if="this.list.length>0">
 				<view class="cu-list menu-avatar">
 					<view v-for="(item, index)  in this.list" :key="index" class="cu-item">
-						<view class="cu-avatar round lg text-black"
-				 			>{{item.scanQty}}
-				 		</view>
+						<view class="cu-avatar round lg text-black">{{item.scanQty}}
+						</view>
 						<view class="content">
 							<view class="text-grey">{{item.sku}}</view>
 							<view class="text-gray text-sm flex">
-				 				<view class="text-cut">
-				 					<text class="cuIcon-selection text-red  margin-right-xs">订单数量:</text>
+								<view class="text-cut">
+									<text class="cuIcon-selection text-red  margin-right-xs">订单数量:</text>
 									{{item.receivedQty}}
-				 					<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
-				 				</view>
+									<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
+								</view>
 								<view class="text-cut">
 									<text class="cuIcon-selection text-red  margin-right-xs">已上架数量:</text>
 									{{item.receiptQty}}
 									<!-- 我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。我已天理为凭，踏入这片荒芜，不再受凡人的枷锁遏制。 -->
 								</view>
-				 			</view>
+							</view>
 							<!-- <view class="action">
 								<view class="text-grey text-xs">22:20</view>
 								<view class="cu-tag round bg-grey sm">5</view>
@@ -111,11 +109,12 @@
 			},
 			async scanAcquisition() {
 				this.lpnSearchSet();
-				let that=this;
+				let that = this;
 				let res = await scanReceiptReceivingApi(this.form);
-				console.log(res.data.result.data)
-				that.list=res.data.result.data;
-				if (res.data.result.code == "1") {
+				// console.log(res.data.result.data)
+
+				if (res.data.result.code == 1) {
+					that.list = res.data.result.data;
 					uni.showToast({
 						title: "操作成功",
 						icon: 'success'

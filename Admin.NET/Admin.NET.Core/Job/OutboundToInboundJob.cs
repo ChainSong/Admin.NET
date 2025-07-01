@@ -92,7 +92,7 @@ public class OutboundToInboundJob : IJob
                 db.DbMaintenance.CreateDatabase();
                 //db.DbMaintenance.c
                 //var dasd = db.Queryable<WMSInstruction>();
-                var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct CustomerName,Creator,OperationId  from WMS_Instruction where \r\n BusinessType ='HACH出库同步下发'  and InstructionStatus = 1 \r\n  group by CustomerName,Creator,OperationId");
+                var data = db.Ado.SqlQuery<WMSInstruction>(" select distinct CustomerName,Creator,OperationId from WMS_Instruction where  InstructionStatus=1 and InstructionType='HACH出库同步下发' group by CustomerName,Creator,OperationId");
 
                 if (data != null && data.Count > 0)
                 {
@@ -206,7 +206,7 @@ public class OutboundToInboundJob : IJob
                                     }
                                 }
                                 else { 
-                                        await db.Updateable<WMSInstruction>().SetColumns(it => new WMSInstruction() { InstructionStatus = 20, Message = "500" }).Where(it => it.OperationId == item.OperationId && it.BusinessType == "HACH出库同步下发").ExecuteCommandAsync();
+                                        await db.Updateable<WMSInstruction>().SetColumns(it => new WMSInstruction() { InstructionStatus = 20, Message = "500"+response.Message }).Where(it => it.OperationId == item.OperationId && it.BusinessType == "HACH出库同步下发").ExecuteCommandAsync();
 
                                 }
                             }

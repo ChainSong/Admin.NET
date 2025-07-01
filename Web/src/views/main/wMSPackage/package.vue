@@ -75,8 +75,8 @@
               <tr>
                 <th style="padding-left:5px;font-size:20px">备注:</th>
                 <td>
-                  <div >
-                   <label style="font-size:20px;">{{ state.vm.form.remark }}</label>
+                  <div>
+                    <label style="font-size:20px;">{{ state.vm.form.remark }}</label>
                   </div>
                 </td>
               </tr>
@@ -85,7 +85,7 @@
 
           <div style="padding-left: 100px;padding-top: 30px;">
             <el-row>
-              <el-table :data="state.vm.tableData" style="width: 100%;font-size:20px;">
+              <el-table show-summary :data="state.vm.tableData" height="350" style="width: 100%;font-size:20px;">
                 <el-table-column prop="sku" label="SKU" width="200">
                 </el-table-column>
                 <el-table-column prop="pickQty" label="拣货数量" width="120">
@@ -96,7 +96,7 @@
                 </el-table-column>
                 <el-table-column prop="packageQty" label="包装数量" width="120">
                 </el-table-column>
-              
+
               </el-table>
             </el-row>
           </div>
@@ -201,11 +201,11 @@ const state = ref({
 
 
 });
- // 生明失败的音频文件
- const audio_error = new Audio('/audio/error.mp3'); // 替换为实际的音频文件路径
-  // 生明成功的音频文件
- const audio_success = new Audio('/audio/success.mp3'); // 替换为实际的音频文件路径
-   
+// 生明失败的音频文件
+const audio_error = new Audio('/audio/error.mp3'); // 替换为实际的音频文件路径
+// 生明成功的音频文件
+const audio_success = new Audio('/audio/success.mp3'); // 替换为实际的音频文件路径
+
 const expressOptions = ref([]);
 const expressValue = ref("");
 const printDialogRef = ref();
@@ -244,12 +244,12 @@ const shortagePackage = async () => {
   let res = await shortagePackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
     audio_success.play(); // 播放音频
- 
+
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
   } else if (res.data.result.code == 99) {
     audio_success.play(); // 播放音频
-    
+
     state.value.vm.form.input = "";
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
@@ -317,9 +317,9 @@ const scanPackage = async () => {
   state.value.vm.form.expressCompany = expressValue.value;
   let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
- 
+
     audio_success.play(); // 播放音频
-    
+
     allPackage(state.value.vm.form);
     state.value.vm.form = res.data.result.data;
     state.value.vm.tableData = res.data.result.data.packageDatas;
@@ -381,8 +381,14 @@ const printExpress = async (row: any) => {
       console.log(row);
       if (row.expressCompany == "顺丰快递") {
         let res = await printExpressData(row);
-        sfExpress.print(res.data.result.data)
-        allPackage(state.value.vm.form);
+        if (res.data.result.code == "1") {
+          ElMessage.success("打印成功");
+          sfExpress.print(res.data.result.data)
+          allPackage(state.value.vm.form);
+        } else {
+          ElMessage.error("打印失败:" + res.data.result.msg);
+        }
+
       }
     })
     .catch(() => { });
@@ -416,11 +422,19 @@ const printExpressBatchFun = async (row: any) => {
       console.log(row);
       // if (row.expressCompany == "顺丰快递") {
       let res = await printBatchExpress(ids);
-      forEach(res.data.result.data, (item: any) => {
-        sfExpress.print(item);
-      });
+      console.log("res");
+      console.log(res);
+      if (res.data.result.code == "1") {
+        ElMessage.success("打印成功");
+        forEach(res.data.result.data, (item: any) => {
+          sfExpress.print(item);
+        });
 
-      allPackage(state.value.vm.form);
+        allPackage(state.value.vm.form);
+      } else {
+        ElMessage.error("打印失败:" + res.data.result.msg);
+      }
+
       // }
     })
     .catch(() => { });

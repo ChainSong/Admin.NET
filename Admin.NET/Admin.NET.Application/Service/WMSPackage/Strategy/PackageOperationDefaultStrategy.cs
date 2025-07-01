@@ -52,7 +52,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
     public async Task<Response<ScanPackageOutput>> GetPackage(ScanPackageInput request)
     {
-
+        request.SN = "";
+        request.Lot = "";
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
         //if (request.PickTaskNumber == request.Input)
         //{
@@ -71,6 +72,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
                 MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
                 request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
+                //request.Input = request.SKU;
 
                 MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
                 request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
@@ -92,19 +94,25 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 {
                     request.SKU = collection["p"].Split(':')[1];
                     request.SN = collection["p"].Split(':')[0];
+                    request.Input = request.SKU;
                 }
             }
             ;
 
         }
-        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
+        if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
-
+            request.SKU = request.Input;
+            //response.Data.SKU = request.Input;
         }
         if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
         {
 
         }
+        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
+        {
+
+        } 
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
@@ -112,6 +120,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
         response.Data.AcquisitionData = request.AcquisitionData;
+       
 
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
@@ -217,9 +226,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
                 return response;
-            }
-
-
+            } 
         }
 
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
@@ -245,12 +252,28 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             response.Data.SKU = request.Input;
             if (request.ScanQty <= 1)
             {
+                //判断唯一码是不是重复扫描
+                foreach (var item in pickData)
+                {
+                    if (item.ScanPackageInput != null)
+                    {
+                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                        if (count != null && !string.IsNullOrEmpty(count.SN))
+                        {
+                            response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                            response.Code = StatusCode.Error;
+                            response.Msg = "不能重复扫描同一个条码";
+                            return response;
+                        }
+                    }
+                }
+
 
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.
                 //_repRFPackageAcquisition
-                var PickSKUData = pickData.Where(a => a.SKU == request.Input);
+                var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
                 if (PickSKUData.Count() > 0)
                 {
 
@@ -267,14 +290,11 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                         pick.ScanQty += 1;
                         pick.RemainingQty -= 1;
-<<<<<<< HEAD
                         if (pick.ScanPackageInput == null)
                         {
                             pick.ScanPackageInput = new List<ScanPackageInput>();
                         }
-=======
-                        pick.ScanPackageInput = new List<ScanPackageInput>();
->>>>>>> 5c83cb3 (提交最新代码)
+                        //pick.ScanPackageInput = new List<ScanPackageInput>();
                         pick.ScanPackageInput.Add(request);
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
@@ -334,14 +354,11 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
                         pick.ScanQty += Qty;
                         pick.RemainingQty -= Qty;
-<<<<<<< HEAD
                         if (pick.ScanPackageInput == null)
                         {
                             pick.ScanPackageInput = new List<ScanPackageInput>();
                         }
-=======
-                        pick.ScanPackageInput = new List<ScanPackageInput>();
->>>>>>> 5c83cb3 (提交最新代码)
+                        //pick.ScanPackageInput = new List<ScanPackageInput>();
                         pick.ScanPackageInput.Add(request);
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 

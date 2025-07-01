@@ -849,7 +849,13 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             var result = await _repRFIDInfo.AsQueryable().Where(p => pickData.First().RFIDInfo.Select(q => q.RFID).Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增
             && packageData.CustomerId == packageData.CustomerId
             ).ToListAsync();
-
+            //判断需要包装的数量和RFID的数量
+            if (pickData.Sum(a => a.PickQty) < result.Count)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "RFID数量超出拣货数量";
+                return response;
+            }
             foreach (var item in result)
             {
                 item.Status = (int)RFIDStatusEnum.出库;
@@ -883,18 +889,18 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
-
+            //packageData.SerialNumber=,
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
             await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
             //await _repPackage.InsertAsync();
 
             //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
             pickData.ForEach(a =>
-                {
+            {
 
-                    a.PackageQty += a.ScanQty;
-                    a.ScanQty = 0;
-                });
+                a.PackageQty += a.ScanQty;
+                a.ScanQty = 0;
+            });
             _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
             //判断是否包装完成
             var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
@@ -1246,7 +1252,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
 
         }
-<<<<<<< HEAD
+        //<<<<<<< HEAD
         foreach (var item in getRFIDData)
         {
             var Sequence = request.RFIDInfo.Where(a => a.RFID == item.RFID).FirstOrDefault();
@@ -1258,16 +1264,16 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
 
         List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
 
-        rfidInfos.AddRange(getRFIDData);
-        if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
-        {
-=======
-        List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
+        //        rfidInfos.AddRange(getRFIDData);
+        //        if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
+        //        {
+        //=======
+        //        List<WMSRFIDInfo> rfidInfos = new List<WMSRFIDInfo>();
 
         rfidInfos.AddRange(getRFIDData);
         if (pickData.First() != null && pickData.First().RFIDInfoOld != null)
         {
->>>>>>> 5c83cb3 (提交最新代码)
+            //>>>>>>> 5c83cb3 (提交最新代码)
             rfidInfos.AddRange(pickData.First().RFIDInfoOld);
         }
         var lookup = rfidInfos.ToLookup(a => a.RFID);

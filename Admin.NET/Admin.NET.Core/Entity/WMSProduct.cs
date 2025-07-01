@@ -245,6 +245,13 @@ public class WMSProduct : ITenantIdFilter
     public int IsQC { get; set; }
 
     /// <summary>
+    ///  是否序列号管理
+    /// </summary>
+    [Required]
+    [SugarColumn(ColumnDescription = "")]
+    public int IsSN { get; set; }
+
+    /// <summary>
     ///  是否组合件
     /// </summary>
     [Required]

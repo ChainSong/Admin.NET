@@ -26,6 +26,7 @@ using Magicodes.ExporterAndImporter.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using NewLife.Reflection;
+using NewLife.Serialization.Json;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -33,6 +34,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Web;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
 namespace Admin.NET.Application;
@@ -606,7 +609,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
             return new Response() { Code = StatusCode.Error, Msg = "任务号不能为空" };
         }
         //获取任务号明细信息
-        var pickTaskList = await _repPickTask.AsQueryable().Includes(a=>a.Details).Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
+        var pickTaskList = await _repPickTask.AsQueryable().Includes(a => a.Details).Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         if (pickTaskList.Count > 1)
         {
             return new Response() { Code = StatusCode.Error, Msg = "找到多条任务号信息" };
@@ -636,10 +639,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
             item.PickStatus = (int)PickTaskStatusEnum.拣货完成;
             foreach (var details in item.Details)
             {
-                details.PickStatus=(int)PickTaskStatusEnum.拣货完成;
+                details.PickStatus = (int)PickTaskStatusEnum.拣货完成;
             }
-            await _repPickTask.UpdateRangeAsync(pickTaskList);
             await _repPickTaskDetail.UpdateRangeAsync(item.Details);
+            await _repPickTask.UpdateRangeAsync(pickTaskList);
+
             //item.pa = 0;
         }
         _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
@@ -716,9 +720,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [UnitOfWork]
     public async Task<Response<ScanPackageOutput>> GetRFIDInfo(ScanPackageRFIDInput input)
     {
-          
+
         // 1. 生成请求唯一标识
-        string requestFingerprint = "GetRFIDInfo" + input.PickTaskNumber+ MD5Encrypt(input.Input);
+        string requestFingerprint = "GetRFIDInfo" + input.PickTaskNumber + MD5Encrypt(input.Input);
 
         // 2. 设置Redis键（格式：防重:用户:路径:指纹）
         string redisKey = $"antidupe:{_userManager.Account}:{"GetRFIDInfo"}:{requestFingerprint}";
@@ -805,7 +809,15 @@ public class WMSPackageService : IDynamicApiController, ITransient
         var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
 
 
-
+        //foreach (var item in getOrder)
+        //{
+        //    if (item.OrderStatus == (int)OrderStatusEnum.已包装)
+        //    {
+        //        data.Code = StatusCode.Error;
+        //        data.Msg = "请完成所有包装再打印快递面单";
+        //        return data;
+        //    }
+        //}
 
         var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List, getOrder.First().OrderType);
 
@@ -905,6 +917,94 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             FileDownloadName = "包装信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
         };
+    }
+
+    /// <summary>
+    /// 导出
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ScanSNPackage")]
+    public async Task<Response> ScanSNPackage(ScanPackageInput request)
+    {
+        request.Input = request.snCode;
+        if (!string.IsNullOrEmpty(request.Input))
+        {
+            //var skuInfo = request.Input.Split('|');
+            if (request.Input.Split(' ').Length > 1 || request.Input.Split('|').Length > 1)
+            {
+
+                string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+                //string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+                string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+                string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+                MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
+                request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
+                //request.Input = request.SKU;
+
+                MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
+                request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
+                MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
+                request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+                request.Input = request.SKU;
+
+            }
+            ;
+
+            //扫描的是HTTP 二维码，那么从中解析SKU
+            if (request.Input.Contains("http"))
+            {
+
+                Uri uri = new Uri(request.Input);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    request.SKU = collection["p"].Split(':')[1];
+                    request.SN = collection["p"].Split(':')[0];
+                    request.Input = request.SKU;
+                }
+            }
+            ;
+
+        }
+        if (string.IsNullOrEmpty(request.SKU))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "二维码没有SN" };
+        }
+        //查看任务号存不存在
+        var checkPickTaskNumber = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber== request.PickTaskNumber).FirstAsync();
+        if (checkPickTaskNumber.Result == null || string.IsNullOrEmpty(checkPickTaskNumber.Result.PickTaskNumber))
+        {
+            return new Response() { Code = StatusCode.Error,Msg="任务号不存在" };
+        }
+        var sndata = _sysCacheService.Get<string>(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber+ request.snCode);
+        //判断是不是已经扫描过了 
+        if (!string.IsNullOrEmpty(sndata))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "已扫描" };
+        }
+
+        var packahe = _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
+        if (packahe.Result==null || string.IsNullOrEmpty(packahe.Result.PackageNumber))
+        {
+            return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };
+        }
+
+        WMSRFPackageAcquisition packageAcquisition = new WMSRFPackageAcquisition();
+        packageAcquisition = packahe.Result.Adapt<WMSRFPackageAcquisition>();
+        packageAcquisition.SKU = request.SKU;
+        packageAcquisition.SN = request.SN;
+        packageAcquisition.Qty = 1;
+        packageAcquisition.Creator = _userManager.Account;
+        packageAcquisition.CreationTime = DateTime.Now;
+        await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
+        _sysCacheService.Set(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.snCode, request.SN);
+        return new Response() { Code= StatusCode.Success,  Msg = "操作成功" };
+
     }
 
 

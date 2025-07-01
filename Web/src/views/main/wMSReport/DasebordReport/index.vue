@@ -2,7 +2,7 @@
 	<div style=" width:100%;height: 100%;">
 		<div id="topOutdiv">
 			<p style="position: absolute;top: 0px;left: 0px;z-index: 999;margin-top: 1%;margin-left: 35%;font-size: 30px;color: white;font-weight: 600;"
-				@click="getTable123()">哈希LTP{{state.MonthNow}}月出入库数据分析看板 </p>
+				@click="getTable123()">哈希{{state.MonthNow}}月出入库数据分析看板 </p>
 
 		</div>
 		<div id="middleOutdiv">

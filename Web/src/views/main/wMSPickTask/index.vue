@@ -3,7 +3,7 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
         <el-row :gutter="[16, 15]">
-          <template v-for="i in  state.tableColumnHeaders">
+          <template v-for="i in state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -98,7 +98,7 @@
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
         style="width: 100%">
         <el-table-column type="selection" width="55">
-          
+
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
@@ -152,8 +152,9 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
@@ -339,16 +340,40 @@ const openPrint = async () => {
     ElMessage.error("请勾选需要打印的订单");
     return;
   }
+
   let printData = new Array<Header>();
-  let result = await getPickTasks(ids.value);
-  // console.log("result");
-  // console.log(result);
-  if (result.data.result != null) {
-    printData = result.data.result;
-    // state.value.details = result.data.result.details;
+  var flag = 0;
+  //判断列表中有没有打印次数大于0的数据
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    if (a.printNum > 0) {
+      flag = 1;
+    }
+  })
+  if (flag == 0) {
+    let result = await getPickTasks(ids.value);
+    if (result.data.result != null) {
+      printData = result.data.result;
+    }
+    printDialogRef.value.openDialog({ "printData": printData, "templateName": "拣货单打印模板" });
+  } else {
+    ElMessageBox.confirm(`存在已经打印过的拣货单，是否继续打印?`, "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    })
+      .then(async () => {
+        let result = await getPickTasks(ids.value);
+        if (result.data.result != null) {
+          printData = result.data.result;
+        }
+        printDialogRef.value.openDialog({ "printData": printData, "templateName": "拣货单打印模板" });
+      })
+      .catch(() => { });
   }
-  printDialogRef.value.openDialog({ "printData": printData, "templateName": "拣货单打印模板" });
+
+
 };
+
 
 
 //打印
@@ -401,12 +426,16 @@ handleQuery();
 
 <style scoped>
 .el-table .el-checkbox {
-  transform: scale(3.5); /* 调整复选框的缩放比例 */
-  margin-right: 2px; /* 调整复选框与文字的间距 */
+  transform: scale(3.5);
+  /* 调整复选框的缩放比例 */
+  margin-right: 2px;
+  /* 调整复选框与文字的间距 */
 }
 
 ::v-deep(.el-table .el-checkbox__input) {
-  height: 24px; /* 调整复选框的高度 */
-  width: 24px; /* 调整复选框的宽度 */
+  height: 24px;
+  /* 调整复选框的高度 */
+  width: 24px;
+  /* 调整复选框的宽度 */
 }
 </style>

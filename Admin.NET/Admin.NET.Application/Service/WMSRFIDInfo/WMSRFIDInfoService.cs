@@ -14,6 +14,7 @@ using Magicodes.ExporterAndImporter.Core;
 using Magicodes.ExporterAndImporter.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Nest;
 using ServiceStack.Text;
 using System.Collections.Generic;
 using System.Data;
@@ -65,7 +66,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
                     .WhereIF(input.PreOrderDetailId > 0, u => u.PreOrderDetailId == input.PreOrderDetailId)
                     .WhereIF(input.OrderDetailId > 0, u => u.OrderDetailId == input.OrderDetailId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.OrderPerson), u => u.OrderPerson.Contains(input.OrderPerson.Trim()))
-                    .WhereIF(input.Status > 0, u => u.Status == input.Status)
+                    .WhereIF(input.Status != null, u => u.Status == input.Status)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PoCode), u => u.PoCode.Contains(input.PoCode.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SoCode), u => u.SoCode.Contains(input.SoCode.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.SnCode), u => u.SnCode.Contains(input.SnCode.Trim()))
@@ -273,7 +274,14 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     public async Task<Response<List<WMSRFIDinfoPrinfDto>>> GetPrinrRFIDInfoByReceiptId(List<long> receiptIds)
     {
         Response<List<WMSRFIDinfoPrinfDto>> response = new Response<List<WMSRFIDinfoPrinfDto>>() { Data = new List<WMSRFIDinfoPrinfDto>() };
-        var entity = await _rep.AsQueryable().Where(u => receiptIds.Contains(u.ReceiptId.Value)).OrderBy(a=>a.Id).ToListAsync();
+
+        var entity = await _rep.AsQueryable().Where(u => receiptIds.Contains(u.ReceiptId.Value)).OrderBy(a => a.Id).ToListAsync();
+        await _rep.Context.Updateable<WMSRFIDInfo>()
+    .SetColumns(p => p.PrintTime == DateTime.Now)
+    .SetColumns(p => p.PrintPerson == _userManager.Account)
+    .SetColumns(p => p.PrintNum == p.PrintNum + 1)
+   .Where(u => receiptIds.Contains(u.ReceiptId.Value))
+    .ExecuteCommandAsync();
         entity.ForEach(u =>
         {
             u.Link = "https://oms.hachchina.com.cn/webapp/s.html?p=" + u.SnCode + ":" + u.SKU + "&code=" + u.RFID;

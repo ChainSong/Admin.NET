@@ -75,7 +75,8 @@
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Printer" @click="printPackageListFun('')"
-              v-auth="'wMSPackage:printPackage'"> 打印箱清单
+              v-auth="'wMSPackage:printPackage'">
+              打印箱清单
             </el-button>
           </el-button-group>
         </el-form-item>
@@ -148,7 +149,7 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100, 500, 1000]" backgroundsmall="" background=""
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
@@ -331,7 +332,19 @@ const printPackageListFun = async (row: any) => {
     ElMessage.error("请勾选需要打印的订单");
     return;
   }
-  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+
+  var flag = 0;
+  var printMessage = "是否要打印？";
+  //判断列表中有没有打印次数大于0的数据
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    if (a.printNum > 0) {
+      flag = 1;
+    }
+  })
+  if (flag == 1) {
+    printMessage = "勾选的订单存在已经打印过的数据，是否继续打印?";
+  }
+  ElMessageBox.confirm(printMessage, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -364,7 +377,7 @@ const printPackageListFun = async (row: any) => {
       } else {
         printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
       }
-    
+
     })
     .catch(() => { });
 };
@@ -389,7 +402,7 @@ const printPackageNumber = async (row: any) => {
     return;
   }
 
-  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+  ElMessageBox.confirm("是否要打印？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -405,7 +418,16 @@ const printPackageNumber = async (row: any) => {
 
 // 打印快递单
 const printExpress = async (row: any) => {
-  ElMessageBox.confirm(`确定要打印吗?`, "提示", {
+
+  // var flag = 0;
+  var printMessage = "是否要打印？";
+  //判断列表中有没有打印次数大于0的数据
+
+  if (row.printNum > 0) {
+    printMessage = "勾选的订单存在已经打印过的数据，是否继续打印?";
+  }
+
+  ElMessageBox.confirm(printMessage, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

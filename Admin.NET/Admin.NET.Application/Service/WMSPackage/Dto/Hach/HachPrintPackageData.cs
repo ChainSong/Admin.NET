@@ -27,6 +27,7 @@ public class HachPrintPackageData
     public string CompanyName { get; set; }
     public string Address { get; set; }
     public string Name { get; set; }
+    public string Phone { get; set; }
     public string PackageNumber { get; set; }
     public List<HachPrintPackageDataDetail> Detail { get; set; }
 

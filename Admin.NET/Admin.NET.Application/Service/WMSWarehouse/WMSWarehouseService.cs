@@ -202,9 +202,27 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "SelectWarehouse")]
     public async Task<List<SelectListItem>> SelectWarehouse(dynamic input)
     {
-        //获取可以使用的仓库权限
-        var warehouse = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.WarehouseName).ToList();
-        return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
+
+        try
+        {
+            string warehouseInput = input.inputData;
+            // 获取可以使用的仓库权限
+            var warehouse = _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.WarehouseName).ToList();
+            if (!string.IsNullOrEmpty(warehouseInput))
+            {
+                return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName) && a.WarehouseName.Contains(warehouseInput)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
+                //return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().Take(6).ToListAsync();
+            }
+            else
+            {
+                return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
+            }
+        }
+        catch (Exception)
+        {
+            throw Oops.Oh("请选择仓库");
+        }
+       
     }
 
 

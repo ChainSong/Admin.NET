@@ -38,6 +38,8 @@ service.interceptors.request.use(
 	(config) => {
 		// 获取本地的 token
 		const accessToken = uni.getStorageSync(accessTokenKey);
+		    // 是否需要防止数据重复提交
+		const isRepeatSubmit = (config.headers || {}).repeatSubmit === false;
 		if (accessToken) {
 			// 将 token 添加到请求报文头中
 			config.header['Authorization'] = `Bearer ${accessToken}`;
@@ -65,6 +67,33 @@ service.interceptors.request.use(
 				config.url = url;
 			}
 		}
+		
+		if (!isRepeatSubmit && (config.method.toLowerCase() === 'post' || config.method.toLowerCase() === 'put')) {
+		      const requestObj = {
+		        url: config.url,
+		        data: typeof config.data === 'object' ? JSON.stringify(config.data) : config.data,
+		        time: new Date().getTime()
+		      };
+	 
+		      let sessionObj = uni.getStorageSync('sessionObj'); 
+			  
+		      if (sessionObj === undefined || sessionObj === null || sessionObj === '') {
+		        uni.setStorageSync('sessionObj', JSON.stringify(requestObj));
+		      } else {
+			    sessionObj = JSON.parse(sessionObj);
+		        const s_url = sessionObj.url; // 请求地址
+		        const s_data = sessionObj.data; // 请求数据
+		        const s_time = sessionObj.time; // 请求时间
+		        const interval = 500; // 间隔时间(ms)，小于此时间视为重复提交
+		        if (s_data === requestObj.data && requestObj.time - s_time < interval && s_url === requestObj.url) {
+		          const message = '数据正在处理，请勿重复提交';
+		          console.warn(`[${s_url}]: ` + message);
+		          return Promise.reject(new Error(message));
+		        } else {
+		          uni.setStorageSync('sessionObj', JSON.stringify(requestObj));
+		        }
+		      }
+		    }
 		return config;
 	},
 	(error) => {
@@ -76,6 +105,7 @@ service.interceptors.request.use(
 // 添加响应拦截器
 service.interceptors.response.use(
 	(res) => {
+		
 		// 获取状态码和返回数据
 		var status = res.status;
 		var serve = res.data;
@@ -88,7 +118,7 @@ service.interceptors.response.use(
 		if (status >= 400) {
 			throw new Error(res.statusText || 'Request Error.');
 		}
-
+ 
 		// 处理规范化结果错误
 		if (serve && serve.hasOwnProperty('errors') && serve.errors) {
 			throw new Error(JSON.stringify(serve.errors || 'Request Error.'));
@@ -105,12 +135,6 @@ service.interceptors.response.use(
 			}
 			// 判断是否存在刷新 token，如果存在则存储在本地
 			else if (refreshAccessToken && accessToken && accessToken !== 'invalid_token') {
-				console.log("accessTokenKey")
-				console.log(accessTokenKey)
-				console.log(accessToken)
-				console.log("refreshAccessToken")
-				console.log(refreshAccessTokenKey)
-				console.log(refreshAccessToken)
 				uni.setStorageSync(accessTokenKey, accessToken);
 				uni.setStorageSync(refreshAccessTokenKey, refreshAccessToken);
 			}
@@ -118,7 +142,6 @@ service.interceptors.response.use(
 		
 		// 响应拦截及自定义处理
 		if (serve.code === 401) {
-			// alert("dasdasd");
 			clearAccessTokens();
 		} else if (serve.code === undefined) {
 			return Promise.resolve(res);
@@ -132,6 +155,9 @@ service.interceptors.response.use(
 			}
 			uni.showToast({
 				title: message,
+				// #ifdef  APP-PLUS
+				position:'top',
+				// #endif
 				icon: 'none'
 			});
 			throw new Error(message);
@@ -140,10 +166,10 @@ service.interceptors.response.use(
 		return res;
 	},
 	(error) => {
+		 
 		// 处理响应错误
 		if (error.response) {
 			if (error.response.status === 401) {
-		 
 				clearAccessTokens();
 			}
 		}
@@ -152,17 +178,27 @@ service.interceptors.response.use(
 		if (error.message && error.message.indexOf('timeout') != -1) {
 			uni.showToast({
 				title: '网络超时',
+				// #ifdef  APP-PLUS
+				position:'top',
+				// #endif
 				icon: 'none'
 			});
 		} else if (error.message == 'Network Error') {
 			uni.showToast({
 				title: '网络连接错误',
+				// #ifdef  APP-PLUS
+				position:'top',
+				// #endif
 				icon: 'none'
 			});
 		} else {
+			console.log(error.response);
 			if (error.response && error.response.data) ElMessage.error(error.response.statusText);
 			else uni.showToast({
 				title: error.response.errMsg,
+				// #ifdef  APP-PLUS
+				position:'top',
+				// #endif
 				icon: 'none'
 			});
 		}

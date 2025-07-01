@@ -94,6 +94,12 @@ public class WMSPickTask : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
     public DateTime? EndTime { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public string SerialNumber { get; set; }
     
     /// <summary>
     /// 

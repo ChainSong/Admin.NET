@@ -42,7 +42,7 @@ namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 /// <summary>
 /// 顺丰快递
 /// </summary>
-public class SFExpressStrategy : IExpressInterface
+public class SF_SubExpressStrategy : IExpressInterface
 {
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
@@ -394,7 +394,7 @@ public class SFExpressStrategy : IExpressInterface
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
             contactInfoList = sFContactinfolists,
-            remark = packageOrder.ExternOrderNumber?.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ')
+            remark = packageOrder.ExternOrderNumber
         };
 
         input.Checkword = getExpressConfig.Checkword;
@@ -844,7 +844,7 @@ public class SFExpressStrategy : IExpressInterface
         var flagCount = _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId + "_" + request.PackageNumber + "_flag", (flag + 1), new TimeSpan(1, 0, 0));
 
         //同一个快递单，获取打印快递超过5次，就清理token 就更新token
-        if (expressConfig != null && flag >= 1)
+        if (expressConfig != null && flag >= 3)
         {
             expressConfig.Token = "";
         }
@@ -870,7 +870,7 @@ public class SFExpressStrategy : IExpressInterface
             input.Checkword = getExpressConfig.Checkword;
             input.Url = getExpressConfig.Url;
             input.UrlToken = getExpressConfig.UrlToken;
-            //input.UrlToken = "https://sfapi.sf-express.com/oauth2/accessToken";
+            input.UrlToken = "https://sfapi.sf-express.com/oauth2/accessToken";
             input.Env = getExpressConfig.Env;
             input.PartnerId = getExpressConfig.PartnerId;
             //input.ServiceCode = "COM_RECE_CLOUD_PRINT_WAYBILLS"; //云打印方法COM_RECE_CLOUD_PRINT_WAYBILLS
@@ -897,7 +897,7 @@ public class SFExpressStrategy : IExpressInterface
             //RootobjectPrint_obj RootobjectResult = rootobjectPrint.apiResultData.ToJsonEntity<RootobjectPrint_obj>();
             //rootobjectPrint
 
-            _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId, wMSExpressConfig, new TimeSpan(1, 0, 0));
+            _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId, wMSExpressConfig, new TimeSpan(1, 30, 0));
             response.Msg = "成功";
             response.Code = StatusCode.Success;
             response.Data = wMSExpressConfig;

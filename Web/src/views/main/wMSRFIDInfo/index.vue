@@ -2,7 +2,7 @@
   <div class="wMSRFIDInfo-container">
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
-        
+
         <el-form-item label="入库单号">
           <el-input v-model="queryParams.receiptNumber" clearable="" placeholder="请输入入库单号" />
         </el-form-item>
@@ -26,12 +26,19 @@
         </el-form-item>
         <el-form-item label="SKU">
           <el-input v-model="queryParams.sku" clearable="" placeholder="请输入SKU" />
-
         </el-form-item>
+
+        <el-form-item label="状态">
+          <el-select v-model="queryParams.status" placeholder="请选择">
+            <el-option   key="0" label="待入库" value="0"> </el-option>
+            <el-option   key="1" label="未出库" value="1"> </el-option>
+            <el-option   key="99" label="已出库" value="99"> </el-option>
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="验证码">
           <el-input v-model="queryParams.snCode" clearable="" placeholder="请输入验证码" />
         </el-form-item>
-
         <el-form-item>
           <el-button-group>
             <el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'wMSRFIDInfo:page'"> 查询
@@ -40,9 +47,9 @@
             </el-button>
             <el-button type="primary" icon="ele-Fold" @click="printRFID" v-auth="'wMSReceipt:printRFID'">
               打印RFID</el-button>
-              <el-button type="primary" icon="ele-Fold" @click="exportRFIDFun" v-auth="'wMSReceipt:printRFID'">
-                导出RFID</el-button>
-              
+            <el-button type="primary" icon="ele-Fold" @click="exportRFIDFun" v-auth="'wMSReceipt:printRFID'">
+              导出RFID</el-button>
+
             <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button>
           </el-button-group>
         </el-form-item>
@@ -54,7 +61,8 @@
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-      <el-table :data="tableData" style="width: 100%" v-loading="loading" ref="multipleTableRef"  tooltip-effect="light" row-key="id" border="">
+      <el-table :data="tableData" style="width: 100%" v-loading="loading" ref="multipleTableRef" tooltip-effect="light"
+        row-key="id" border="">
         <el-table-column type="selection" width="55">
         </el-table-column>
         <el-table-column type="index" label="序号" width="55" align="center" />
@@ -62,9 +70,9 @@
         <el-table-column prop="externReceiptNumber" label="入库外部单号" width="150" show-overflow-tooltip="" />
         <el-table-column prop="asnNumber" label="ASN单号" width="150" show-overflow-tooltip="" />
         <el-table-column prop="customerName" label="客户" show-overflow-tooltip="" />
-        <el-table-column prop="warehouseName" label="仓库" show-overflow-tooltip="" width="150"/>
+        <el-table-column prop="warehouseName" label="仓库" show-overflow-tooltip="" width="150" />
         <el-table-column prop="sku" label="SKU" show-overflow-tooltip="" width="200" />
-        <el-table-column prop="goodsType" label="产品品级" show-overflow-tooltip=""  width="150"/>
+        <el-table-column prop="goodsType" label="产品品级" show-overflow-tooltip="" width="150" />
         <el-table-column prop="batchCode" label="批次" show-overflow-tooltip="" />
         <el-table-column prop="receiptPerson" label="入库人" width="150" show-overflow-tooltip="" />
         <el-table-column prop="receiptTime" label="入库时间" width="150" show-overflow-tooltip="" />
@@ -72,26 +80,29 @@
         <el-table-column prop="externOrderNumber" label="出库外部单号" width="150" show-overflow-tooltip="" />
         <el-table-column prop="orderPerson" label="出库人" width="150" show-overflow-tooltip="" />
         <el-table-column prop="orderTime" label="出库时间" width="150" show-overflow-tooltip="" />
-        <el-table-column prop="status" label="状态" show-overflow-tooltip="" >
+        <el-table-column prop="status" label="状态" show-overflow-tooltip="">
           <template #default="scope">
             <el-tag v-if="scope.row.status === 1" type="success">未出库</el-tag>
             <el-tag v-else-if="scope.row.status === 0" type="warning">待入库</el-tag>
-            <el-tag v-else  type="danger">已出库</el-tag>
+            <el-tag v-else type="danger">已出库</el-tag>
+            
           </template>
         </el-table-column>
         <el-table-column prop="printTime" label="打印时间" width="150" show-overflow-tooltip="" />
         <el-table-column prop="printPerson" label="打印人" width="150" show-overflow-tooltip="" />
-        <el-table-column prop="sequence" label="sequence"  width="250" show-overflow-tooltip="" />
+        <el-table-column prop="sequence" label="sequence" width="250" show-overflow-tooltip="" />
         <el-table-column prop="rfid" label="RFID" width="250" show-overflow-tooltip="" />
-        <el-table-column prop="snCode" label="验证码"  width="250" show-overflow-tooltip="" />
+        <el-table-column prop="snCode" label="验证码" width="250" show-overflow-tooltip="" />
         <el-table-column prop="printNum" label="打印次数" show-overflow-tooltip="" />
         <el-table-column prop="printTime" label="打印时间" width="150" show-overflow-tooltip="" />
         <el-table-column prop="printPerson" label="打印人" width="150" show-overflow-tooltip="" />
-        <el-table-column label="操作" width="140" align="center" fixed="right" show-overflow-tooltip=""
+        <el-table-column label="操作" width="240" align="center" fixed="right" show-overflow-tooltip=""
           v-if="auth('wMSRFIDInfo:edit') || auth('wMSRFIDInfo:delete')">
           <template #default="scope">
             <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openQueryWMSRFIDInfo(scope.row)"
               v-auth="'wMSRFIDInfo:edit'">查看 </el-button>
+              <el-button type="primary" size="small" text="" icon="ele-Fold" @click="printRFIDSingle" v-auth="'wMSReceipt:printRFIDSingle'">
+                打印RFID</el-button>
             <!-- <el-button icon="ele-Edit" size="small" text="" type="primary" @click="openEditWMSRFIDInfo(scope.row)" v-auth="'wMSRFIDInfo:edit'">查看 </el-button> -->
             <!-- <el-button icon="ele-Delete" size="small" text="" type="primary" @click="delWMSRFIDInfo(scope.row)" v-auth="'wMSRFIDInfo:delete'"> 删除 </el-button> -->
           </template>
@@ -116,7 +127,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSRFIDInfo/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSRFIDInfo/component/addDialog.vue'
 import { pageWMSRFIDInfo, deleteWMSRFIDInfo } from '/@/api/main/wMSRFIDInfo';
-import { getPrinrRFIDInfoByReceiptId,getPrinrRFIDInfoById,exportRFID } from '/@/api/main/wMSRFIDInfo';
+import { getPrinrRFIDInfoByReceiptId, getPrinrRFIDInfoById, exportRFID } from '/@/api/main/wMSRFIDInfo';
 import { signalR } from '/@/utils/signalRCustom';
 import { stringify } from "querystring";
 import { downloadByData, getFileName } from '/@/utils/download';
@@ -180,19 +191,49 @@ const delWMSRFIDInfo = (row: any) => {
 };
 
 //导出
-const exportRFIDFun= async () => {
+const exportRFIDFun = async () => {
   console.log("exportRFIDFun");
   let res = await exportRFID(Object.assign(queryParams.value, tableParams.value));
-    var fileName = getFileName(res.headers);
-    downloadByData(res.data as any, fileName);
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
 }
 
 // 打印
-const printRFID = () => {
+const printRFID = (row :any) => {
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {
     ids.push(a.id);
   });
+  // 判断是否勾选订单
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要打印RFID吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      let result = await getPrinrRFIDInfoById(ids);
+      // console.log("result");
+      // console.log(JSON.stringify(result.data.result.data));
+      if (result.data.result.code == 1) {
+        await signalR.send("Echo", result.data.result.data);
+        ElMessage.success("打印成功");
+      } else {
+        ElMessage.success("打印失败");
+      }
+    })
+    .catch(() => { });
+};
+
+const printRFIDSingle = (row :any) => {
+  let ids = new Array<Number>();
+  // multipleTableRef.value.getSelectionRows().forEach(a => {
+  //   ids.push(a.id);
+  // });
+  ids.push(row.id);
   // 判断是否勾选订单
   if (ids.length < 1) {
     ElMessage.error("请勾选订单");

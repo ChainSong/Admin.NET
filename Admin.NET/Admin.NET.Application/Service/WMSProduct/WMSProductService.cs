@@ -246,12 +246,11 @@ public class WMSProductService : IDynamicApiController, ITransient
             if (!string.IsNullOrEmpty(sku) && sku.Length > 3)
             {
                 long customerId = input.whereData.customerId;
-
                 //获取可以使用的仓库权限
                 var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerId).ToList();
                 //string sku = objData.inputData;
                 //long customerId = objData.objData.CustomerId;
-                return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().ToListAsync();
+                return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().Take(6).ToListAsync();
             }
             else
             {

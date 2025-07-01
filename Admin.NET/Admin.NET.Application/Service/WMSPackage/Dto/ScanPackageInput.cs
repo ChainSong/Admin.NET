@@ -23,6 +23,7 @@ public class ScanPackageInput
     public string SN { get; set; }
     public string Lot { get; set; }
     public string AcquisitionData { get; set; }
+    public string snCode { get; set; }
     
     public string GoodsName { get; set; }
     public string GoodsType { get; set; }

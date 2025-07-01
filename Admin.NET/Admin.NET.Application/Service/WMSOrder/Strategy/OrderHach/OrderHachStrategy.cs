@@ -42,6 +42,7 @@ namespace Admin.NET.Application.Strategy
 
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+        public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
 
         public OrderHachStrategy()
         {
@@ -76,6 +77,17 @@ namespace Admin.NET.Application.Strategy
                 {
                     response.Code = StatusCode.Error;
                     response.Msg = "订单异常";
+                    return response;
+                }
+            }
+            //判断有没有包装信息
+            var package = await _repPackage.AsQueryable().Where(a => request.Contains(a.OrderId)).ToListAsync();
+            foreach (var item in request)
+            {
+                if (package.Where(a => a.OrderId == item).Count() == 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "订单异常:没有完成包装信息";
                     return response;
                 }
             }
