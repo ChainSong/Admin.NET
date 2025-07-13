@@ -7,7 +7,8 @@
 						<el-form ref="headerRuleRef" label-position="top" :rules="headerRule" :model="state.header">
 							<el-row :gutter="35">
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
-									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
+									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)"
+									v-bind:key="i.id">
 									<template v-if="i.isCreate">
 										<el-form-item :label="i.displayName" style="width: 90%;" :prop="i.columnName">
 											<template v-if="i.type == 'TextBox'">
@@ -70,7 +71,7 @@
 					<el-link type="primary" @click="exportExcel">下载模板</el-link>
 				</el-tab-pane>
 
-				<el-tab-pane label="Execl导入Bom"  name="ExeclCreateBom">
+				<el-tab-pane label="Execl导入Bom" name="ExeclCreateBom">
 					<el-row>
 						<el-col>
 						</el-col>
@@ -85,7 +86,7 @@
 					<el-link type="primary" @click="exportBomExcel">下载模板</el-link>
 				</el-tab-pane>
 
-				
+
 			</el-tabs>
 			<div>
 
@@ -98,7 +99,8 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
 	</div>
@@ -290,13 +292,17 @@ const gettableColumn = async () => {
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
-	if (response.result.data!=null && response.result.data.length > 0) {
-		state.value.orderStatus = response.result.data;
-		// console.log(state.value.orderStatus);
-		//导入弹框提醒
-		resultPopupShow.value = true;
+	if (response.code == 200) {
+		if (response.result.data != null && response.result.data.length > 0) {
+			state.value.orderStatus = response.result.data;
+			// console.log(state.value.orderStatus);
+			//导入弹框提醒
+			resultPopupShow.value = true;
+		} else {
+			ElMessage.info(response.result.msg);
+		}
 	} else {
-		ElMessage.info(response.result.msg);
+		ElMessage.error(response.message);
 	}
 	// if (response.result.code == "1") {
 	// 	closeDialog();
@@ -334,7 +340,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

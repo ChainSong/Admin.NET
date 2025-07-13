@@ -104,6 +104,7 @@ public class WMSInstructionService : IDynamicApiController, ITransient
     public async Task Update(UpdateWMSInstructionInput input)
     {
         var entity = input.Adapt<WMSInstruction>();
+        entity.InstructionStatus = 1;
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
 

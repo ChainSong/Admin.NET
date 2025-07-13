@@ -501,7 +501,12 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             var result = await _repRFIDInfo.AsQueryable().Where(p => pickData.First().RFIDInfo.Select(q => q.RFID).Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增
             && packageData.CustomerId == packageData.CustomerId
             ).ToListAsync();
-
+            if (result.Count > packageData.Details.Sum(a=>a.Qty))
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "RFID 读取错误";
+                return response;
+            }
             foreach (var item in result)
             {
                 item.Status = (int)RFIDStatusEnum.出库;

@@ -89,10 +89,9 @@
 												</template>
 												<template v-if="v.type == 'DropDownListStrRemote'">
 													<select-Remote :whereData="state.header" :isDisabled="v.isCreate"
-														:columnData="v"
-														:key="state.details[scope.$index]"
+														:columnData="v" :key="state.details[scope.$index]"
 														:defaultvValue="state.details[scope.$index][v.columnName]"
-														@select:model="data => {console.log(data) ; state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
+														@select:model="data => { console.log(data); state.details[scope.$index][v.columnName] = data.text; state.details[scope.$index][v.relationColumn] = data.value; console.log(state.details[scope.$index]) }"></select-Remote>
 												</template>
 												<template v-if="v.type == 'DatePicker'">
 													<el-date-picker v-model="state.details[scope.$index][v.columnName]"
@@ -154,7 +153,7 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder+':'+ i.msg"
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + ':' + i.msg"
 				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
@@ -269,7 +268,7 @@ const submit = async () => {
 				if (isValidDetail) {
 					console.log("新增");
 					let results = await addWMSASN(state.value.header);
-				 
+
 					// alert(results.data.result.code );
 					if (results.data.result.code == "1") {
 						ElMessage.success("保存成功");
@@ -279,7 +278,7 @@ const submit = async () => {
 						closeDialog();
 					} else {
 						state.value.orderStatus = results.data.result.data;
-					    console.log(state.value.orderStatus);
+						console.log(state.value.orderStatus);
 						//导入弹框提醒
 						resultPopupShow.value = true;
 						// ElMessage.error(result.data.result.msg);
@@ -343,14 +342,19 @@ const gettableColumn = async () => {
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
-	if (response.result.data!=null && response.result.data.length > 0) {
-		state.value.orderStatus = response.result.data;
-		// console.log(state.value.orderStatus);
-		//导入弹框提醒
-		resultPopupShow.value = true;
+	if (response.code == 200) {
+		if (response.result.data != null && response.result.data.length > 0) {
+			state.value.orderStatus = response.result.data;
+			// console.log(state.value.orderStatus);
+			//导入弹框提醒
+			resultPopupShow.value = true;
+		} else {
+			ElMessage.info(response.result.msg);
+		}
 	} else {
-		ElMessage.info(response.result.msg);
+		ElMessage.error(response.message);
 	}
+
 	// if (response.result.code == "1") {
 	// 	closeDialog();
 	// } else {

@@ -41,7 +41,7 @@ public class OutboundToInboundJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        //return;
+        return;
 
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
@@ -92,7 +92,7 @@ public class OutboundToInboundJob : IJob
                 db.DbMaintenance.CreateDatabase();
                 //db.DbMaintenance.c
                 //var dasd = db.Queryable<WMSInstruction>();
-                var data = db.Ado.SqlQuery<WMSInstruction>(" select distinct CustomerName,Creator,OperationId from WMS_Instruction where  InstructionStatus=1 and InstructionType='HACH出库同步下发' group by CustomerName,Creator,OperationId");
+                var data = db.Ado.SqlQuery<WMSInstruction>(" select distinct CustomerName,Creator,OperationId from WMS_Instruction where  InstructionStatus=1 and InstructionType='HACH出库同步下发'   group by CustomerName,Creator,OperationId");
 
                 if (data != null && data.Count > 0)
                 {

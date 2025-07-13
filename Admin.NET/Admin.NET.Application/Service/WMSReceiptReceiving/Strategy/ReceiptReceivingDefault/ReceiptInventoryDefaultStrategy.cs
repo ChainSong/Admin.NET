@@ -98,7 +98,7 @@ namespace Admin.NET.Application.Strategy
                 //判断上架单和入库单数量是否一致，一致就加入库存
                 WMSInventoryUsable aa = new WMSInventoryUsable();
 
-                var receipt = _repReceipt.AsQueryable().Includes(b => b.Details).Includes(c => c.ReceiptReceivings).Where(b => b.Id == id).First();
+                var receipt = await _repReceipt.AsQueryable().Includes(b => b.Details).Includes(c => c.ReceiptReceivings).Where(b => b.Id == id).FirstAsync();
                 if (receipt != null && receipt.ReceiptStatus == (int)ReceiptStatusEnum.上架)
                 {
                     //var receiptreceiving = _wms_receiptreceivingRepository.GetAll().Where(b => b.ReceiptId == a).ToList();
@@ -118,8 +118,6 @@ namespace Admin.NET.Application.Strategy
                                     //StatusMsg = StatusCode.error.ToString(), 
                                     Msg = "SKU：" + detail.SKU + "行号：" + detail.LineNumber + "，上架数量和订单不符"
                                 });
-
-
                             }
                         }
                         if (orderStatuses.Count > 0)
@@ -179,7 +177,7 @@ namespace Admin.NET.Application.Strategy
 
                         //修改ASN 明细中的实际入库数量
                         //_wms_asndetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(v =>new WMS_ASNDetail{ ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ASNDetailId == v.Id).Sum(c => c.ReceivedQty)});
-                        var asnDetailData = _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToList();
+                        var asnDetailData =await _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToListAsync();
                         foreach (var item in asnDetailData)
                         {
                             item.ReceiptQty = item.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == item.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);

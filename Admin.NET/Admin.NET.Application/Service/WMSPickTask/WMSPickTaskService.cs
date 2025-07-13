@@ -347,7 +347,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                 PickTaskId = a.Key.PickTaskId,
                 Qty = a.Sum(b => b.Qty),
                 IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU).First().IsSN).ToString()
-            }).ToList();
+            }).OrderBy(a=>a.Location).ToList();
             //foreach (var items in item.Details)
             //{
             //    items.IsSN = SqlFunc.Subqueryable<WMSProduct>().Where(s => s.SKU == items.SKU && s.CustomerId == items.CustomerId).Max(s => Convert.ToBoolean(s.IsSN)).ToString();

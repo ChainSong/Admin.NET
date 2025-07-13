@@ -1,22 +1,23 @@
 ﻿
-using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
+using Admin.NET.Common;
+using Admin.NET.Common.AMap;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using AutoMapper;
 using Furion.DistributedIDGenerator;
+using Furion.FriendlyException;
+using NewLife;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using Furion.FriendlyException;
-using Admin.NET.Common.AMap;
-using NewLife;
+using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Strategy
 {
@@ -69,8 +70,8 @@ namespace Admin.NET.Application.Strategy
             //临时方法，在开会改bug (对hach 导入的电话号码做验证)
             // 正则表达式用于匹配电话号码或手机号码
             // 这里的正则表达式是一个示例，可能需要根据实际情况进行调整
-            string phoneStr = @"^[1]+[2,3,4,5,6,7,8,9]+\d{9}";
-            string telStr = @"^(\d{3,4}-)?\d{6,8}$";
+            //string phoneStr = @"^[1]+[2,3,4,5,6,7,8,9]+\d{9}";
+            //string telStr = @"^(\d{3,4}-)?\d{6,8}$";
 
             // 检查电话号码是否符合正则表达式
             //return ;
@@ -125,7 +126,11 @@ namespace Admin.NET.Application.Strategy
                 if (!string.IsNullOrEmpty(item.OrderAddress.Phone))
                 {
                     item.OrderAddress.Phone = item.OrderAddress.Phone.Trim();
-                    if (Regex.IsMatch(item.OrderAddress.Phone, phoneStr) || Regex.IsMatch(item.OrderAddress.Phone, telStr))
+                    //if (Regex.IsMatch(item.OrderAddress.Phone, phoneStr) || Regex.IsMatch(item.OrderAddress.Phone, telStr))
+                    //{
+                    //    continue;
+                    //}
+                    if (PhoneNumberValidator.ValidatePhoneNumber(item.OrderAddress.Phone))
                     {
                         continue;
                     }
@@ -251,7 +256,7 @@ namespace Admin.NET.Application.Strategy
                             Type = item.OrderType,
                             StatusCode = StatusCode.Error,
                             //StatusMsg = StatusCode.warning.ToString(),
-                            Msg = a.SKU +"产品信息不存在"
+                            Msg = a.SKU + "产品信息不存在"
                         });
                         return;
                     }
@@ -270,8 +275,9 @@ namespace Admin.NET.Application.Strategy
                 });
                 if (item.OrderAddress != null)
                 {
+                    item.OrderAddress.ExternOrderNumber = null;
                     item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
-                    item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
+                    //item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
                     item.OrderAddress.Creator = _userManager.Account;
                     item.OrderAddress.CreationTime = DateTime.Now;
                 }
@@ -294,11 +300,15 @@ namespace Admin.NET.Application.Strategy
 
             //开始插入数据
             //await _repPreOrder.Context.InsertNav(orderData).Include(a => a.Details).ExecuteCommandAsync();
-            await _repPreOrder.Context.InsertNav(orderData)
-                .Include(a => a.Details)
-                .Include(b => b.OrderAddress)
-                .Include(b => b.Extend)
-                .ExecuteCommandAsync();
+            _repPreOrder.Context.InsertNav(orderData)
+              .Include(a => a.Details)
+              .Include(b => b.OrderAddress)
+              .Include(b => b.Extend).ExecuteCommand();
+
+            //    await _repPreOrder.InsertRangeAsync().
+            //.Include(a => a.Details)
+            //.Include(b => b.OrderAddress)
+            //.Include(b => b.Extend).ExecuteCommandAsync();
             //_repPreOrder.Insert(asnData, options => options.IncludeGraph = true);
 
 

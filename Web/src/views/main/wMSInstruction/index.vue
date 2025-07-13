@@ -101,13 +101,13 @@
             </el-table-column>
           </template>
         </template>
-        <!-- <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="200">
           <template #default="scope">
-            <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
-            </el-button>
-            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
+            <!-- <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
+            </el-button> -->
+            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">重置</el-button>
           </template>
-        </el-table-column> -->
+        </el-table-column>
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
@@ -130,7 +130,7 @@ import { auth } from '/@/utils/authFunction';
 import selectRemote from '/@/views/tools/select-remote.vue'
 
 // import { pageWMSInstruction, deleteWMSInstruction } from '/@/api/main/wMSInstruction';
-import { pageWMSInstruction, deleteWMSInstruction } from '/@/api/main/wMSInstruction';
+import { pageWMSInstruction, deleteWMSInstruction,updateWMSInstruction } from '/@/api/main/wMSInstruction';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 
 import Header from "../../../entities/instruction";
@@ -210,11 +210,26 @@ const handleQuery = async () => {
 //   addDialogRef.value.openDialog({});
 // };
 
-// // 打开编辑页面
-// const openEdit = (row: any) => {
-//   editTitle.value = '编辑';
-//   editDialogRef.value.openDialog(row);
-// };
+// 打开编辑页面
+const openEdit = async (row: any) => {
+   ElMessageBox.confirm(`确定要重置吗?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      await updateWMSInstruction(row);
+      handleQuery();
+      ElMessage.success("重置成功");
+    })
+    .catch(() => { });
+ 
+  // state.value.headers = res.data.result?.items ?? [];
+  // tableParams.value.total = res.data.result?.total;
+  // loading.value = false;
+  // editTitle.value = '编辑';
+  // editDialogRef.value.openDialog(row);
+};
 // // 打开查询页面
 // const openQuery = (row: any) => {
 //   queryTitle.value = '查看';

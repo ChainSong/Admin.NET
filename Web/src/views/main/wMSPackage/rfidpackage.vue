@@ -11,7 +11,7 @@
                 <el-button style="font-size:20px;" type="info" @click="shortagePackage">短包</el-button>
                 <!-- <el-button type="warning">换箱</el-button> -->
                 <el-button style="font-size:20px;" type="danger" @click="addPackage">新增箱</el-button>
-                <el-button style="font-size:20px;" type="danger" @click="state.dialogVisible = true">扫描SN</el-button>
+                <el-button style="font-size:20px;" type="danger" @click="state.dialogVisible = true;state.sndata.pickTaskNumber='';state.sndata.snCode='';state.sndata.sku=''">扫描SN</el-button>
               </el-row>
             </el-row>
           </el-row>
@@ -113,16 +113,25 @@
       <el-dialog title="扫描SN" v-model="state.dialogVisible" width="50%">
 
         <div>
+
+          <label style="padding-left:5px;font-size:20px">有二维码的时候请不要扫描SKU</label>
           <table style="height:350px;width: 450px;">
             <tr>
-              <th style="padding-left:5px;font-size:20px" rowspan="1">扫描框:</th>
+              <th style="padding-left:5px;font-size:20px" rowspan="1">拣货任务号:</th>
               <td>
                 <el-input style="width: 80%;font-size:20px" v-model="state.sndata.pickTaskNumber"
                   v-on:keyup.enter="scanPickNumber" placeholder="请输入拣货任务号"></el-input>
               </td>
             </tr>
+             <tr>
+              <th style="padding-left:5px;font-size:20px">SKU:</th>
+              <td>
+                <el-input style="width: 80%; font-size:20px" v-model="state.sndata.sku"
+                  v-on:keyup.enter="scanSNPickNumber" placeholder="请输入SKU"></el-input>
+              </td>
+            </tr>
             <tr>
-              <th style="padding-left:5px;font-size:20px">拣货任务号:</th>
+              <th style="padding-left:5px;font-size:20px">条码:</th>
               <td>
                 <el-input style="width: 80%; font-size:20px" v-model="state.sndata.snCode"
                   v-on:keyup.enter="scanSNPickNumber" placeholder="请输入SN"></el-input>

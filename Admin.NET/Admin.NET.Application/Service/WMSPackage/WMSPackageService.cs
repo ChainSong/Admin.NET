@@ -931,7 +931,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
     public async Task<Response> ScanSNPackage(ScanPackageInput request)
     {
         request.Input = request.snCode;
-        if (!string.IsNullOrEmpty(request.Input))
+        if (request.snCode.Contains("|"))
+        {
+            request.SKU = "";
+        }
+        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.SKU))
         {
             //var skuInfo = request.Input.Split('|');
             if (request.Input.Split(' ').Length > 1 || request.Input.Split('|').Length > 1)
@@ -971,17 +975,27 @@ public class WMSPackageService : IDynamicApiController, ITransient
             ;
 
         }
+        else
+        {
+            //request.SKU = collection["p"].Split(':')[1];
+            request.SN = request.Input;
+        }
         if (string.IsNullOrEmpty(request.SKU))
         {
             return new Response() { Code = StatusCode.Error, Msg = "二维码没有SN" };
         }
         //查看任务号存不存在
-        var checkPickTaskNumber = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber== request.PickTaskNumber).FirstAsync();
+        var checkPickTaskNumber = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
         if (checkPickTaskNumber.Result == null || string.IsNullOrEmpty(checkPickTaskNumber.Result.PickTaskNumber))
         {
-            return new Response() { Code = StatusCode.Error,Msg="任务号不存在" };
+            return new Response() { Code = StatusCode.Error, Msg = "任务号不存在" };
         }
-        var sndata = _sysCacheService.Get<string>(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber+ request.snCode);
+        var checkSKU = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SKU == request.SKU).FirstAsync();
+        //if (checkSKU.Result == null || string.IsNullOrEmpty(checkSKU.Result.PickTaskNumber))
+        //{
+        //    return new Response() { Code = StatusCode.Error, Msg = "SKU不存在" };
+        //}
+        var sndata = _sysCacheService.Get<string>(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.snCode);
         //判断是不是已经扫描过了 
         if (!string.IsNullOrEmpty(sndata))
         {
@@ -989,7 +1003,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         }
 
         var packahe = _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
-        if (packahe.Result==null || string.IsNullOrEmpty(packahe.Result.PackageNumber))
+        if (packahe.Result == null || string.IsNullOrEmpty(packahe.Result.PackageNumber))
         {
             return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };
         }
@@ -1003,7 +1017,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         packageAcquisition.CreationTime = DateTime.Now;
         await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
         _sysCacheService.Set(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.snCode, request.SN);
-        return new Response() { Code= StatusCode.Success,  Msg = "操作成功" };
+        return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
 
     }
 

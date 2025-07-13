@@ -127,6 +127,8 @@ service.interceptors.response.use(
 			} else {
 				message = serve.message;
 			}
+			console.log("message");
+			console.log(message);
 			ElMessage.error(message);
 			throw new Error(message);
 		}

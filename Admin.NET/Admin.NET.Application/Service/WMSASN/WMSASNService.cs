@@ -416,7 +416,8 @@ public class WMSASNService : IDynamicApiController, ITransient
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw Oops.Oh(ex.Message);
+         
         }
     }
 
@@ -594,6 +595,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         {
             return new Response<List<OrderStatusDto>> { Code = StatusCode.Error, Msg = ex.Message };
             //throw Oops.Oh(ErrorCodeEnum.D1001, ex.Message);
+            throw Oops.Oh( ex.Message);
         }
     }
     [DisplayName("ASN 转入库单")]

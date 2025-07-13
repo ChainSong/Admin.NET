@@ -29,7 +29,8 @@
 			</template>
 		</el-dialog>
 		<el-dialog v-model="resultPopupShow" title="导入结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder +':'+ i.msg" :type="i.statusMsg">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + ':' + i.msg"
+				:type="i.statusMsg">
 			</el-alert>
 		</el-dialog>
 	</div>
@@ -147,7 +148,7 @@ const submit = async () => {
 					if (result.data.result.code == "1") {
 						closeDialog();
 					} else {
-						ElMessage.error("保存失败:"+result.data.result.msg);
+						ElMessage.error("保存失败:" + result.data.result.msg);
 					}
 
 				} else {
@@ -174,14 +175,17 @@ const submit = async () => {
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
 	console.log(response);
-	 
-	if (response.result.data!=null && response.result.data.length > 0) {
-		state.value.orderStatus = response.result.data;
-		// console.log(state.value.orderStatus);
-		//导入弹框提醒
-		resultPopupShow.value = true;
-	}else{
-		ElMessage.info(response.result.msg);
+	if (response.code == 200) {
+		if (response.result.data != null && response.result.data.length > 0) {
+			state.value.orderStatus = response.result.data;
+			// console.log(state.value.orderStatus);
+			//导入弹框提醒
+			resultPopupShow.value = true;
+		} else {
+			ElMessage.info(response.result.msg);
+		}
+	} else {
+		ElMessage.error(response.message);
 	}
 	// console.log(response)
 	// // state.value.orderStatus = response.result;
@@ -214,7 +218,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-

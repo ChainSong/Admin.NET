@@ -145,7 +145,7 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
 
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Creator { get; set; }
+    public string? Creator { get; set; }
     
     /// <summary>
     /// 
@@ -158,7 +158,7 @@ public class WMSOrderAddress : ITenantIdFilter
     /// </summary>
  
     [SugarColumn(ColumnDescription = "", Length = 50)]
-    public string Updator { get; set; }
+    public string? Updator { get; set; }
 
 
     /// <summary>

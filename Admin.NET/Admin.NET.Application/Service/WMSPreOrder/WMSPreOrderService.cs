@@ -592,8 +592,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         }
         catch (Exception ex)
         {
-            return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = ex.Message };
-            //throw Oops.Oh(ex.Message);
+            //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = ex.Message };
+            throw Oops.Oh(ex.Message);
             //throw Oops.Oh("该订单类型不支持部分转入库单");
         }
 
