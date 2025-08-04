@@ -26,97 +26,81 @@ namespace Admin.NET.Core.Job;
 /// 
 
 [JobDetail("OrderAddressGeocodeJob", Description = "高德API解析出库地址", GroupName = "default", Concurrent = false)]
-[Period(24 * 60 * 60 * 1000, TriggerId = "OrderAddressGeocodeJob", Description = "高德API解析出库地址")]
+//[Period(24 * 60 * 60 * 1000, TriggerId = "OrderAddressGeocodeJob", Description = "高德API解析出库地址")]
+[Daily(TriggerId = "OrderAddressGeocodeJob", Description = "高德API解析出库地址")]
 public class OrderAddressGeocodeJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
-    private readonly SqlSugarRepository<WMSOrderAddressGaoDeMapping> _repOrderAddressGaoDeMapping;
-    private readonly AMap _aMap;//高德API
-    public OrderAddressGeocodeJob(IServiceProvider serviceProvider, SqlSugarRepository<WMSOrderAddress> repOrderAddress
-        , SqlSugarRepository<WMSOrderAddressGaoDeMapping> repOrderAddressGaoDeMapping, AMap aMap)
+    public OrderAddressGeocodeJob(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _repOrderAddress = repOrderAddress;
-        _repOrderAddressGaoDeMapping = repOrderAddressGaoDeMapping;
-        _aMap = aMap;
     }
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        List<WMSOrderAddress> Output = new List<WMSOrderAddress>();
-        WMSOrderAddress orderAddress= new WMSOrderAddress();
-        var data = await GetNeedToConnectData();
-        if (data != null && data.Count > 0)
+        using var scope = _serviceProvider.CreateScope();
+
+        var orderAddressRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddress>>();
+        var mappingRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddressGaoDeMapping>>();
+        var userManager = scope.ServiceProvider.GetService<UserManager>();
+        var aMap = new AMap();
+
+        var pendingList = await GetPendingAddresses(orderAddressRepo, mappingRepo);
+        if (pendingList == null || pendingList.Count == 0) return;
+
+        var updatedList = new List<WMSOrderAddress>();
+        var mappingList = new List<WMSOrderAddressGaoDeMapping>();
+
+        foreach (var item in pendingList)
         {
-            foreach (var item in data)
-            {
-                var Georesponse = await _aMap.RequestGeoCode(item.Address, item.City);
+            var geo = await aMap.RequestGeoCode(item.Address, item.City);
+            var geoPOI = await aMap.RequestGeoCodePOI(item.Address);
+            var geocode = geo?.geocodes?.FirstOrDefault();
+            var geocodePOI = geoPOI?.Pois?.FirstOrDefault();
 
-                if (Georesponse?.geocodes == null || Georesponse.geocodes.Count == 0)
-                    continue;
+            if (geocode == null) continue;
 
-                var ModifiedAddress = item.Adapt<WMSOrderAddress>();
-                ModifiedAddress.Province = Georesponse.geocodes[0].province;
-                ModifiedAddress.City = Georesponse.geocodes[0].city;
-                Output.Add(ModifiedAddress);
+            item.Province = geocode.province;
+            item.City = geocode.city;
+            item.CompanyName= geocodePOI?.name;
+            updatedList.Add(item);
 
-                await Task.Delay(3000); // 间隔3秒
-            }
-
-            if (Output!=null && Output.Count>0)
-            {
-                await UpdateOrderAddress(Output);
-                await AddGaodeOrderAddress(Output);
-            }
-        }
-    }
-    /// <summary>
-    /// 获取需要对接高德解析地址的数据
-    /// </summary>
-    /// <returns></returns>
-    public async Task<List<WMSOrderAddress>> GetNeedToConnectData()
-    {
-        //获取已经对接过的
-        var ConnectedIds = await _repOrderAddressGaoDeMapping.AsQueryable()
-            .Select(a => a.OrderAddressId)
-            .ToListAsync();
-        //返回未对接的
-        return await _repOrderAddress.AsQueryable()
-             .Where(x => !ConnectedIds.Contains(x.Id))
-             .ToListAsync();
-    }
-    /// <summary>
-    /// 修改订单地址 
-    /// </summary>
-    /// <returns></returns>
-    public async Task UpdateOrderAddress(List<WMSOrderAddress> input)
-    {
-        if (input == null || input.Count == 0)
-            return;
-        await _repOrderAddress.AsUpdateable(input)
-       .UpdateColumns(x => new { x.Province, x.City })  
-       .WhereColumns(x => x.Id)                      
-       .ExecuteCommandAsync();
-    }
-    /// <summary>
-    /// 新增高德地址关联表
-    /// </summary>
-    /// <returns></returns>
-    public async Task AddGaodeOrderAddress(List<WMSOrderAddress> input)
-    {
-        if (input == null || input.Count == 0)
-            return;
-        List<WMSOrderAddressGaoDeMapping> List = new List<WMSOrderAddressGaoDeMapping>();
-
-        foreach (var item in input)
-        {
-            List.Add(new WMSOrderAddressGaoDeMapping
+            mappingList.Add(new WMSOrderAddressGaoDeMapping
             {
                 OrderAddressId = item.Id,
                 CompanyName = item.CompanyName,
-                IsConnected = true
+                IsConnected = true,
+                TenantId = userManager.TenantId,
             });
+
+            await Task.Delay(3000); // 间隔 3 秒
         }
-        await _repOrderAddressGaoDeMapping.InsertRangeAsync(List);
+
+        if (updatedList.Count > 0)
+        {
+            await UpdateAddressInfo(orderAddressRepo, updatedList);
+            await mappingRepo.InsertRangeAsync(mappingList);
+        }
+    }
+
+    private async Task<List<WMSOrderAddress>> GetPendingAddresses(
+       SqlSugarRepository<WMSOrderAddress> orderRepo,
+       SqlSugarRepository<WMSOrderAddressGaoDeMapping> mapRepo)
+    {
+        var connectedIds = await mapRepo.AsQueryable()
+            .Select(x => x.OrderAddressId)
+            .ToListAsync();
+
+        return await orderRepo.AsQueryable()
+            .Where(x => !connectedIds.Contains(x.Id))
+            .Where(x => x.Province == null || x.City == null)
+            .ToListAsync();
+    }
+
+    private async Task UpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, List<WMSOrderAddress> list)
+    {
+        await repo.AsUpdateable(list)
+            .UpdateColumns(x => new { x.Province, x.City })
+            .WhereColumns(x => x.Id)
+            .ExecuteCommandAsync();
     }
 }

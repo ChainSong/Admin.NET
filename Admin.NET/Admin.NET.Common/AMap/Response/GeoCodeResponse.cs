@@ -37,3 +37,26 @@ public class GeoCodeResponse
     public List<GeoCodes> geocodes {  get; set; }
 
 }
+
+
+
+public class GeoCodePOIResponse
+{
+    /// <summary>
+    /// 返回结果状态值
+    /// </summary>
+    public string status { get; set; }
+    /// <summary>
+    /// 返回结果数目
+    /// </summary>
+    public string count { get; set; }
+    /// <summary>
+    /// 返回状态说明
+    /// </summary>
+    public string info { get; set; }
+    /// <summary>
+    /// 地理编码信息列表
+    /// </summary>
+    public List<Pois> Pois { get; set; }
+
+}

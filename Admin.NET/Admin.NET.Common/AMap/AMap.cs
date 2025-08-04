@@ -24,6 +24,7 @@ namespace Admin.NET.Common.AMap;
 public class AMap
 {
     public static readonly string GeoUrl = App.GetConfig<string>("AMap:GeoUrl");
+    public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
     public static readonly string GeoKey = App.GetConfig<string>("AMap:GeoKey");
     /// <summary>
     /// 请求高德地图 地理编码
@@ -68,6 +69,48 @@ public class AMap
     }
 
     /// <summary>
+    /// 请求高德地图 地理编码
+    /// </summary>
+    /// <param name="address"></param>
+    /// <param name="city"></param>
+    /// <returns></returns>
+    public async Task<GeoCodePOIResponse> RequestGeoCodePOI(string KeyWords)
+    {
+        GeoCodePOIResponse response = new GeoCodePOIResponse();
+        string RequestUrl = string.Empty;
+        //将字符串中的特殊字符转换为符合 URL 规范的格式
+        var encodedKeyWords = Uri.EscapeDataString(KeyWords);
+        //获取请求Url
+        RequestUrl = BuildRequestPOIUrl(encodedKeyWords);
+
+        // 检查请求 URL 是否为空
+        if (string.IsNullOrEmpty(RequestUrl))
+        {
+            throw new InvalidOperationException("请求 URL 不能为空");
+        }
+        // 创建 HttpClient
+        using (var client = new HttpClient())
+        {
+            // 发送 GET 请求
+            var GeoRresponse = await client.GetAsync(RequestUrl);
+
+            // 读取响应内容
+            var content = await GeoRresponse.Content.ReadAsStringAsync();
+
+            // 反序列化响应内容
+            var geoResponsePOI = JsonConvert.DeserializeObject<GeoCodePOIResponse>(content);
+
+            // 检查反序列化结果
+            if (geoResponsePOI == null)
+            {
+                throw new InvalidOperationException("反序列化响应内容失败");
+            }
+
+            return geoResponsePOI;
+        }
+    }
+
+    /// <summary>
     /// 构建请求GEO URL
     /// </summary>
     /// <param name="address"></param>
@@ -86,6 +129,25 @@ public class AMap
         {
             RequestUrl += $"&city={city}";
         }
+        return RequestUrl;
+    }
+
+    /// <summary>
+    /// 构建请求GEO URL
+    /// </summary>
+    /// <param name="address"></param>
+    /// <param name="city"></param>
+    /// <returns></returns>
+    public string BuildRequestPOIUrl(string address)
+    {
+        string RequestUrl = string.Empty;
+        //如果地址为空 那么就返回报错
+        if (string.IsNullOrEmpty(address))
+        {
+            return null;
+        }
+        RequestUrl = GeoUrl + $"?keywords={address}";
+       
         return RequestUrl;
     }
 }

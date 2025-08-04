@@ -48,7 +48,7 @@ public class WMSOrderAddressGaoDeMapping : ITenantIdFilter
     /// 创建时间
     /// </summary>
     [SugarColumn(ColumnDescription = "创建时间")]
-    public DateTime? CreationTime { get; set; }
+    public DateTime? CreationTime { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 租户Id
