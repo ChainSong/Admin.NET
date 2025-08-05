@@ -24,48 +24,65 @@ namespace Admin.NET.Common.AMap;
 public class AMap
 {
     public static readonly string GeoUrl = App.GetConfig<string>("AMap:GeoUrl");
-    public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
     public static readonly string GeoKey = App.GetConfig<string>("AMap:GeoKey");
+
+    public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
+    public static readonly string GeoPOIKey = App.GetConfig<string>("AMap:GeoPOIKey");
+
     /// <summary>
     /// 请求高德地图 地理编码
     /// </summary>
     /// <param name="address"></param>
     /// <param name="city"></param>
     /// <returns></returns>
-    public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city)
+    //public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city=null)
+    //{
+    //    if (string.IsNullOrWhiteSpace(address)) return null;
+
+    //    GeoCodeResponse response = new GeoCodeResponse();
+    //    string RequestUrl = string.Empty;
+    //    //将字符串中的特殊字符转换为符合 URL 规范的格式
+    //    var encodedAddress = Uri.EscapeDataString(address);
+    //    //获取请求Url
+    //    RequestUrl = BuildRequestUrl(encodedAddress, city);
+    //    // 检查请求 URL 是否为空
+    //    if (string.IsNullOrEmpty(RequestUrl))
+    //    {
+    //        throw new InvalidOperationException("请求 URL 不能为空");
+    //    }
+    //    // 创建 HttpClient
+    //    using (var client = new HttpClient())
+    //    {
+    //        // 发送 GET 请求
+    //       var  GeoRresponse = await client.GetAsync(RequestUrl);
+
+    //        // 读取响应内容
+    //        var content = await GeoRresponse.Content.ReadAsStringAsync();
+
+    //        // 反序列化响应内容
+    //        var geoResponse = JsonConvert.DeserializeObject<GeoCodeResponse>(content);
+
+    //        // 检查反序列化结果
+    //        if (geoResponse == null)
+    //        {
+    //            throw new InvalidOperationException("反序列化响应内容失败");
+    //        }
+
+    //        return geoResponse;
+    //    }
+    //}
+
+    public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city = null)
     {
-        GeoCodeResponse response = new GeoCodeResponse();
-        string RequestUrl = string.Empty;
-        //将字符串中的特殊字符转换为符合 URL 规范的格式
-        var encodedAddress = Uri.EscapeDataString(address);
-        //获取请求Url
-        RequestUrl = BuildRequestUrl(encodedAddress, city);
-
-        // 检查请求 URL 是否为空
-        if (string.IsNullOrEmpty(RequestUrl))
+        if (string.IsNullOrWhiteSpace(address)) return null;
+        var encodedAddress = EncodeUrlParam(address);
+        var requestUrl = BuildUrl(GeoUrl, new Dictionary<string, string>
         {
-            throw new InvalidOperationException("请求 URL 不能为空");
-        }
-        // 创建 HttpClient
-        using (var client = new HttpClient())
-        {
-            // 发送 GET 请求
-           var  GeoRresponse = await client.GetAsync(RequestUrl);
-
-            // 读取响应内容
-            var content = await GeoRresponse.Content.ReadAsStringAsync();
-
-            // 反序列化响应内容
-            var geoResponse = JsonConvert.DeserializeObject<GeoCodeResponse>(content);
-
-            // 检查反序列化结果
-            if (geoResponse == null)
-            {
-                throw new InvalidOperationException("反序列化响应内容失败");
-            }
-
-            return geoResponse;
-        }
+            { "address", encodedAddress },
+            { "key", GeoKey },
+            { "city", city }
+        });
+        return await SendRequestAsync<GeoCodeResponse>(requestUrl);
     }
 
     /// <summary>
@@ -76,38 +93,15 @@ public class AMap
     /// <returns></returns>
     public async Task<GeoCodePOIResponse> RequestGeoCodePOI(string KeyWords)
     {
-        GeoCodePOIResponse response = new GeoCodePOIResponse();
-        string RequestUrl = string.Empty;
-        //将字符串中的特殊字符转换为符合 URL 规范的格式
-        var encodedKeyWords = Uri.EscapeDataString(KeyWords);
-        //获取请求Url
-        RequestUrl = BuildRequestPOIUrl(encodedKeyWords);
-
-        // 检查请求 URL 是否为空
-        if (string.IsNullOrEmpty(RequestUrl))
+        if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+        var encodedKeywords = EncodeUrlParam(KeyWords);
+        var requestUrl = BuildUrl(GeoPOIUrl, new Dictionary<string, string>
         {
-            throw new InvalidOperationException("请求 URL 不能为空");
-        }
-        // 创建 HttpClient
-        using (var client = new HttpClient())
-        {
-            // 发送 GET 请求
-            var GeoRresponse = await client.GetAsync(RequestUrl);
-
-            // 读取响应内容
-            var content = await GeoRresponse.Content.ReadAsStringAsync();
-
-            // 反序列化响应内容
-            var geoResponsePOI = JsonConvert.DeserializeObject<GeoCodePOIResponse>(content);
-
-            // 检查反序列化结果
-            if (geoResponsePOI == null)
-            {
-                throw new InvalidOperationException("反序列化响应内容失败");
-            }
-
-            return geoResponsePOI;
-        }
+            { "keywords", encodedKeywords },
+            { "types", "公司" },
+            { "key", GeoPOIKey }
+        });
+        return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
     }
 
     /// <summary>
@@ -132,22 +126,52 @@ public class AMap
         return RequestUrl;
     }
 
+    #region 公共方法封装
+
     /// <summary>
-    /// 构建请求GEO URL
+    /// URL参数编码
     /// </summary>
-    /// <param name="address"></param>
-    /// <param name="city"></param>
-    /// <returns></returns>
-    public string BuildRequestPOIUrl(string address)
+    private string EncodeUrlParam(string value)
     {
-        string RequestUrl = string.Empty;
-        //如果地址为空 那么就返回报错
-        if (string.IsNullOrEmpty(address))
-        {
-            return null;
-        }
-        RequestUrl = GeoUrl + $"?keywords={address}";
-       
-        return RequestUrl;
+        return Uri.EscapeDataString(value);
     }
+
+    /// <summary>
+    /// 构建 URL 参数字符串
+    /// </summary>
+    private string BuildUrl(string baseUrl, Dictionary<string, string?> parameters)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentNullException(nameof(baseUrl));
+
+        var query = string.Join("&", parameters
+            .Where(p => !string.IsNullOrWhiteSpace(p.Value))
+            .Select(p => $"{p.Key}={p.Value}"));
+
+        return $"{baseUrl}?{query}";
+    }
+  
+    /// <summary>
+    /// 通用的 HTTP GET 请求发送和 JSON 解析
+    /// </summary>
+    private async Task<T> SendRequestAsync<T>(string url) where T : class
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(url)) throw new InvalidOperationException("请求 URL 不能为空");
+            using var client = new HttpClient();
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<T>(content);
+            if (result == null)
+            {
+                throw new InvalidOperationException("反序列化响应内容失败");
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+    #endregion
 }

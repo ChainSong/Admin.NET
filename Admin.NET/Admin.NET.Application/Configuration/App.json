@@ -43,9 +43,14 @@
     "PrivateKey": "3690655E33D5EA3D9A4AE1A1ADD766FDEA045CDEAA43A9206FB8C430CEFE0D94" // 私钥
   },
   "AMap": {
-    "GeoUrl": "https://restapi.amap.com/v3/geocode/geo",
     //两个KEY  不知道是哪个key
     //"GeoKey": "6d8b692c64f5b5fcb23dfc2a6ec0b63d"
-    "GeoKey": "c75bcdaa4dfa95844ee7f8833b00d96a"
+    "GeoUrl": "https://restapi.amap.com/v3/geocode/geo",
+    "GeoKey": "c75bcdaa4dfa95844ee7f8833b00d96a",
+
+    //关键字搜索 API 服务地址
+    "GeoPOIUrl": "https://restapi.amap.com/v3/place/text",
+    "GeoPOIKey": "c75bcdaa4dfa95844ee7f8833b00d96a"
+
   }
 }

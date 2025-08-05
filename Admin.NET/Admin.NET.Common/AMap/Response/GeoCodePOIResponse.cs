@@ -11,29 +11,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Common.AMap.Response;
-/// <summary>
-/// 请求高德地图 地理编码API 接收类
-/// </summary>
-public class GeoCodeResponse
+
+
+public class GeoCodePOIResponse
 {
-    /// <summary>
-    /// 返回结果状态值
-    /// </summary>
-    public string status {  get; set; }
-    /// <summary>
-    /// 返回结果数目
-    /// </summary>
-    public string count { get; set; }
-    /// <summary>
-    /// 返回状态说明
-    /// </summary>
-    public string info { get; set; }
-    /// <summary>
-    /// 地理编码信息列表
-    /// </summary>
-    public List<GeoCodes> geocodes {  get; set; }
+    [JsonPropertyName("status")]
+    public string Status { get; set; }
+
+    [JsonPropertyName("count")]
+    public string Count { get; set; }
+
+    [JsonPropertyName("info")]
+    public string Info { get; set; }
+
+    [JsonPropertyName("infocode")]
+    public string Infocode { get; set; }
+
+    [JsonPropertyName("suggestion")]
+    public Suggestion Suggestion { get; set; }
+
+    [JsonPropertyName("pois")]
+    public List<Poi> Pois { get; set; }
 
 }
+

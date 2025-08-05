@@ -67,10 +67,3 @@ public class GeoCodes
     public string level { get; set; }
 }
 
-
-public class Pois
-{
-    public long id { get; set; }
-
-    public string name {  get; set; }
-}

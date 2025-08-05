@@ -37,48 +37,68 @@ public class OrderAddressGeocodeJob : IJob
     }
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        using var scope = _serviceProvider.CreateScope();
-
-        var orderAddressRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddress>>();
-        var mappingRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddressGaoDeMapping>>();
-        var userManager = scope.ServiceProvider.GetService<UserManager>();
-        var aMap = new AMap();
-
-        var pendingList = await GetPendingAddresses(orderAddressRepo, mappingRepo);
-        if (pendingList == null || pendingList.Count == 0) return;
-
-        var updatedList = new List<WMSOrderAddress>();
-        var mappingList = new List<WMSOrderAddressGaoDeMapping>();
-
-        foreach (var item in pendingList)
+        try
         {
-            var geo = await aMap.RequestGeoCode(item.Address, item.City);
-            var geoPOI = await aMap.RequestGeoCodePOI(item.Address);
-            var geocode = geo?.geocodes?.FirstOrDefault();
-            var geocodePOI = geoPOI?.Pois?.FirstOrDefault();
+            using var scope = _serviceProvider.CreateScope();
 
-            if (geocode == null) continue;
+            var orderAddressRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddress>>();
+            var mappingRepo = scope.ServiceProvider.GetRequiredService<SqlSugarRepository<WMSOrderAddressGaoDeMapping>>();
+            var userManager = scope.ServiceProvider.GetService<UserManager>();
+            var aMap = new AMap();
 
-            item.Province = geocode.province;
-            item.City = geocode.city;
-            item.CompanyName= geocodePOI?.name;
-            updatedList.Add(item);
+            var pendingList = await GetPendingAddresses(orderAddressRepo, mappingRepo);
+            if (pendingList == null || pendingList.Count == 0) return;
 
-            mappingList.Add(new WMSOrderAddressGaoDeMapping
+            var updatedList = new List<WMSOrderAddress>();
+            var mappingList = new List<WMSOrderAddressGaoDeMapping>();
+
+            foreach (var item in pendingList)
             {
-                OrderAddressId = item.Id,
-                CompanyName = item.CompanyName,
-                IsConnected = true,
-                TenantId = userManager.TenantId,
-            });
 
-            await Task.Delay(3000); // 间隔 3 秒
+                if (string.IsNullOrEmpty(item.Address)) continue;
+                var geo = await aMap.RequestGeoCode(item.Address, item.City);
+                var geoPOI = await aMap.RequestGeoCodePOI(item.Address);
+                var geocode = geo?.geocodes?.FirstOrDefault();
+                var geocodePOI = geoPOI?.Pois?.FirstOrDefault();
+
+                if (geocode == null) continue;
+
+                item.Province = geocode.province;
+                item.City = geocode.city;
+                item.CompanyName = geocodePOI?.Name;
+                //updatedList.Add(item);
+                await UpdateAddressInfo(orderAddressRepo, item);
+
+                var mapping = new WMSOrderAddressGaoDeMapping
+                {
+                    OrderAddressId = item.Id,
+                    CompanyName = item.CompanyName,
+                    IsConnected = true,
+                    TenantId = 1300000000001,
+                };
+                await mappingRepo.InsertAsync(mapping);
+                await Task.Delay(3000); // 间隔 3 秒
+
+                //mappingList.Add(new WMSOrderAddressGaoDeMapping
+                //{
+                //    OrderAddressId = item.Id,
+                //    CompanyName = item.CompanyName,
+                //    IsConnected = true,
+                //    TenantId = 1300000000001,
+                //});
+
+            }
+
+            //if (updatedList.Count > 0)
+            //{
+            //    //await UpdateAddressInfo(orderAddressRepo, updatedList);
+            //    //await mappingRepo.InsertRangeAsync(mappingList);
+            //}
         }
-
-        if (updatedList.Count > 0)
+        catch (Exception ex)
         {
-            await UpdateAddressInfo(orderAddressRepo, updatedList);
-            await mappingRepo.InsertRangeAsync(mappingList);
+
+            throw;
         }
     }
 
@@ -89,16 +109,27 @@ public class OrderAddressGeocodeJob : IJob
         var connectedIds = await mapRepo.AsQueryable()
             .Select(x => x.OrderAddressId)
             .ToListAsync();
-
+        //var connectedexiIds = new List<long> { 20221, 20222 };
         return await orderRepo.AsQueryable()
             .Where(x => !connectedIds.Contains(x.Id))
-            .Where(x => x.Province == null || x.City == null)
+            //.Where(x => x.Province == null || x.City == null)
+            //.Where(x => connectedexiIds.Contains(x.Id))
+            //.Take(2)
             .ToListAsync();
     }
 
-    private async Task UpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, List<WMSOrderAddress> list)
+    private async Task BatchUpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, List<WMSOrderAddress> list)
     {
         await repo.AsUpdateable(list)
+            .UpdateColumns(x => new { x.Province, x.City })
+            .WhereColumns(x => x.Id)
+            .ExecuteCommandAsync();
+    }
+
+
+    private async Task UpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, WMSOrderAddress info)
+    {
+        await repo.AsUpdateable(info)
             .UpdateColumns(x => new { x.Province, x.City })
             .WhereColumns(x => x.Id)
             .ExecuteCommandAsync();
