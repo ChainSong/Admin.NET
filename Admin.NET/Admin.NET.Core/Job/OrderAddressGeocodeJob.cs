@@ -23,7 +23,6 @@ namespace Admin.NET.Core.Job;
 /// <summary>
 /// 通过高德API解析出库地址JOB
 /// </summary>
-/// 
 
 [JobDetail("OrderAddressGeocodeJob", Description = "高德API解析出库地址", GroupName = "default", Concurrent = false)]
 //[Period(24 * 60 * 60 * 1000, TriggerId = "OrderAddressGeocodeJob", Description = "高德API解析出库地址")]
