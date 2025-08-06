@@ -15,6 +15,13 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service.HachDashBoardConfig.Dto;
 
+public class ChartsInput
+{
+    public DateTime? Month { get; set; }
+    public long? CustomerId { get; set; }
+    public string? OBProvince { get; set; }
+}
+
 /// <summary>
 /// 汇总金额项
 /// </summary>
