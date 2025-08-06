@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Service.HachDashBoardConfig.Dto;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using Org.BouncyCastle.Asn1.X509;
+using ServiceStack;
 
 namespace Admin.NET.Application.Service.HachDashBoardConfig;
 
@@ -61,7 +63,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         _repOrderDetail = repOrderDetail;
         _repASNDetail = repASNDetail;
     }
-    #endregion 
+    #endregion
 
     /// <summary>
     /// 汇总Tab项数据
@@ -71,20 +73,49 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     public async Task<SumItemOutput> GetSumItemData(WMSReceiptInput input)
     {
         SumItemOutput itemOutput = new SumItemOutput();
-
-        // 时间区间准备
         var today = DateTime.Today;
-        var lastMonth = today.AddMonths(-1);
-        var year = lastMonth.Year;
-        var month = lastMonth.Month;
+        var (firstDayOfMonth, lastDayOfMonth) = GetMonthDateRange(today);
         var currentMonthString = today.ToString("yyyy-MM");
-        var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
 
-        #region 上个月库存金额
+        // 并行获取数据
+        var tasks = new List<Task<long>>
+    {
+        GetLastMonthAmount(today, priceMap),
+        GetCurrentMonthAmount(firstDayOfMonth, today, priceMap),
+        GetCurrentTargetAmount(currentMonthString),
+        GetYTDOrderVSASNAmount()
+    };
+
+        // 等待所有任务完成
+        var results = await Task.WhenAll(tasks);
+
+        itemOutput.LastMonthAmount = results[0];
+        itemOutput.CurrentMonthAmount = results[1];
+        itemOutput.CurrentTargetAmount = results[2];
+        itemOutput.YTDOrderVSASNAmount = results[3];
+
+        // 计算差值
+        itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
+
+        // 获取当月入库和出库金额
+        itemOutput.CurrentReceiptAmount = Convert.ToInt64(await GetCurrentReceiptAmount(firstDayOfMonth, lastDayOfMonth));
+        itemOutput.CurrentOrderAmount = Convert.ToInt64(await GetCurrentOrerAmount(firstDayOfMonth, lastDayOfMonth));
+
+        return itemOutput;
+    }
+
+    #region 封装的公共方法
+    /// <summary>
+    /// 获取上月总金额
+    /// </summary>
+    /// <param name="today"></param>
+    /// <param name="priceMap"></param>
+    /// <returns></returns>
+    private async Task<long> GetLastMonthAmount(DateTime today, Dictionary<string, double> priceMap)
+    {
         var lastAccountDate = await _repHachAccountDate.AsQueryable()
             .Where(x => x.StartDate.HasValue &&
                         x.StartDate.Value.Year == today.Year &&
@@ -99,14 +130,23 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 .Select(a => new { a.SKU, Qty = SqlFunc.AggregateSum(a.Qty) })
                 .ToListAsync();
 
-            itemOutput.LastMonthAmount = CalculateTotalAmount(
+            return CalculateTotalAmount(
                 lastMonthInventory.Select(x => (x.SKU, (double)x.Qty)),
                 priceMap
             );
         }
-        #endregion
+        return 0;
+    }
 
-        #region 当前月库存金额
+    /// <summary>
+    /// 获取当月总金额
+    /// </summary>
+    /// <param name="firstDayOfMonth"></param>
+    /// <param name="today"></param>
+    /// <param name="priceMap"></param>
+    /// <returns></returns>
+    private async Task<long> GetCurrentMonthAmount(DateTime firstDayOfMonth, DateTime today, Dictionary<string, double> priceMap)
+    {
         var currentInventory = await _repInventoryUsable.AsQueryable()
             .Where(a => a.InventoryStatus == 1)
             .Where(a => a.InventoryTime >= firstDayOfMonth && a.InventoryTime <= today)
@@ -114,30 +154,33 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             .Select(a => new { a.SKU, Qty = SqlFunc.AggregateSum(a.Qty) })
             .ToListAsync();
 
-        itemOutput.CurrentMonthAmount = CalculateTotalAmount(
+        return CalculateTotalAmount(
             currentInventory.Select(x => (x.SKU, (double)x.Qty)),
             priceMap
         );
-        #endregion
+    }
 
-        #region 目标库存金额
-        if (await _repHachTagretKRMB.AsQueryable().AnyAsync(a => a.Month == currentMonthString))
-        {
-            var target = await _repHachTagretKRMB.AsQueryable()
-                .Where(a => a.Month == currentMonthString)
-                .GroupBy(a => 1)
-                .Select(a => new { PlanKRMB = SqlFunc.AggregateSum(a.PlanKRMB) })
-                .FirstAsync();
+    /// <summary>
+    /// 获取当月库存目标金额
+    /// </summary>
+    /// <param name="currentMonthString"></param>
+    /// <returns></returns>
+    private async Task<long> GetCurrentTargetAmount(string currentMonthString)
+    {
+        var target = await _repHachTagretKRMB.AsQueryable()
+            .Where(a => a.Month == currentMonthString)
+            .GroupBy(a => 1)
+            .Select(a => new { PlanKRMB = SqlFunc.AggregateSum(a.PlanKRMB) })
+            .FirstAsync();
+        return Convert.ToInt64(target?.PlanKRMB ?? 0);
+    }
 
-            itemOutput.CurrentTargetAmount = Convert.ToInt64(target?.PlanKRMB ?? 0);
-        }
-        #endregion
-
-        #region 当前月库存金额 - 目标库存金额差值
-        itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
-        #endregion
-
-        #region YTD 出库 vs 入库
+    /// <summary>
+    /// 获取YTD ORDER VS YTD ASN
+    /// </summary>
+    /// <returns></returns>
+    private async Task<long> GetYTDOrderVSASNAmount()
+    {
         var totalOrderQty = await _repOrderDetail.AsQueryable()
             .Where(d => SqlFunc.Subqueryable<WMSOrder>()
                         .Where(o => o.Id == d.OrderId && o.OrderStatus == 99)
@@ -150,43 +193,51 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         .Any())
             .SumAsync(d => d.ExpectedQty);
 
-        itemOutput.YTDOrderVSASNAmount = totalASNQty == 0
+        return totalASNQty == 0
             ? 0
             : Convert.ToInt64(totalOrderQty / totalASNQty);
-        #endregion
+    }
 
-        #region 当月入库金额
-        var currentMonthASNQty = await _repASNDetail.AsQueryable()
+    /// <summary>
+    /// 获取当月入库总金额
+    /// </summary>
+    /// <param name="firstDayOfMonth"></param>
+    /// <param name="lastDayOfMonth"></param>
+    /// <returns></returns>
+    private async Task<double> GetCurrentReceiptAmount(DateTime firstDayOfMonth, DateTime lastDayOfMonth)
+    {
+        return await _repASNDetail.AsQueryable()
             .Where(d => SqlFunc.Subqueryable<WMSASN>()
-                .Where(o => o.Id == d.ASNId &&
-                            o.ASNStatus != 90 &&
-                            o.CreationTime >= firstDayOfMonth &&
-                            o.CreationTime <= lastDayOfMonth)
-                .Any())
+                        .Where(o => o.Id == d.ASNId &&
+                                    o.ASNStatus != 90 &&
+                                    o.CreationTime >= firstDayOfMonth &&
+                                    o.CreationTime <= lastDayOfMonth)
+                        .Any())
             .SumAsync(d => d.ExpectedQty);
+    }
 
-        itemOutput.CurrentReceiptAmount = Convert.ToInt64(currentMonthASNQty);
-        #endregion
-
-        #region 当月出库金额
-        var currentMonthOrderQty = await _repOrderDetail.AsQueryable()
+    /// <summary>
+    /// 获取当月出库总金额
+    /// </summary>
+    /// <param name="firstDayOfMonth"></param>
+    /// <param name="lastDayOfMonth"></param>
+    /// <returns></returns>
+    private async Task<double> GetCurrentOrerAmount(DateTime firstDayOfMonth, DateTime lastDayOfMonth)
+    {
+        return await _repOrderDetail.AsQueryable()
             .Where(d => SqlFunc.Subqueryable<WMSOrder>()
-                .Where(o => o.Id == d.OrderId &&
-                            o.OrderStatus == 99 &&
-                            o.CreationTime >= firstDayOfMonth &&
-                            o.CreationTime <= lastDayOfMonth)
-                .Any())
+                        .Where(o => o.Id == d.OrderId &&
+                                    o.OrderStatus == 99 &&
+                                    o.CreationTime >= firstDayOfMonth &&
+                                    o.CreationTime <= lastDayOfMonth)
+                        .Any())
             .SumAsync(d => d.AllocatedQty);
-
-        itemOutput.CurrentOrderAmount = Convert.ToInt64(currentMonthOrderQty);
-        #endregion
-
-        return itemOutput;
     }
 
     /// <summary>
     /// 获取 SKU -> Price 的映射字典
     /// </summary>
+    /// <returns></returns>
     private async Task<Dictionary<string, double>> GetProductPriceMap()
     {
         var products = await _repProduct.AsQueryable()
@@ -199,6 +250,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <summary>
     /// 通过库存数量和价格表计算总金额
     /// </summary>
+    /// <param name="data"></param>
+    /// <param name="priceMap"></param>
+    /// <returns></returns>
     private long CalculateTotalAmount(IEnumerable<(string SKU, double Qty)> data, Dictionary<string, double> priceMap)
     {
         double total = 0;
@@ -211,4 +265,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         return Convert.ToInt64(total);
     }
+    /// <summary>
+    /// 公共方法：获取月份的开始和结束日期
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns></returns>
+    private (DateTime FirstDay, DateTime LastDay) GetMonthDateRange(DateTime date)
+    {
+        var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+        return (firstDayOfMonth, lastDayOfMonth);
+    }
+
+    #endregion
+
 }
