@@ -30,18 +30,6 @@ public class WMSHachAccountDate : ITenantIdFilter
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public virtual long Id { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [SugarColumn(ColumnDescription = "")]
-    public long? Year { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 50)]
-    public long? Month { get; set; }
-
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public DateTime? StartDate { get; set; }
 
