@@ -50,7 +50,12 @@
 
     //关键字搜索 API 服务地址
     "GeoPOIUrl": "https://restapi.amap.com/v3/place/text",
-    "GeoPOIKey": "c75bcdaa4dfa95844ee7f8833b00d96a"
+    "GeoPOIKey": "c75bcdaa4dfa95844ee7f8833b00d96a",
+
+    //Geonames 提供了一个免费的 API，可以获取世界各国的省份、城市等信息
+    "GeonamesUrl": "http://api.geonames.org/childrenJSON",
+    "GeonamesUserName": "HACH",
+    "GeonamesPassword": "HACH666888@"
 
   }
 }

@@ -20,6 +20,8 @@ public class ChartsInput
     public DateTime? Month { get; set; }
     public long? CustomerId { get; set; }
     public string? OBProvince { get; set; }
+    public int Take { get; set; } = 100;
+
 }
 
 /// <summary>
@@ -61,4 +63,11 @@ public class SumItemOutput
     /// 当月出库总金额
     /// </summary>
     public long? CurrentOrderAmount { get; set; }
+}
+
+public class SelectItem
+{
+    public long? Id { get; set; }
+    public string? Label { get; set; }
+    public string? Value { get; set; }
 }

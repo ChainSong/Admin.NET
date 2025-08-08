@@ -29,49 +29,15 @@ public class AMap
     public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
     public static readonly string GeoPOIKey = App.GetConfig<string>("AMap:GeoPOIKey");
 
+    public static readonly string GeonamesUrl = App.GetConfig<string>("AMap:GeonamesUrl");
+    public static readonly string GeonamesUserName = App.GetConfig<string>("AMap:GeonamesUserName");
+
     /// <summary>
-    /// 请求高德地图 地理编码
+    /// 请求高德地图地理编码
     /// </summary>
     /// <param name="address"></param>
     /// <param name="city"></param>
     /// <returns></returns>
-    //public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city=null)
-    //{
-    //    if (string.IsNullOrWhiteSpace(address)) return null;
-
-    //    GeoCodeResponse response = new GeoCodeResponse();
-    //    string RequestUrl = string.Empty;
-    //    //将字符串中的特殊字符转换为符合 URL 规范的格式
-    //    var encodedAddress = Uri.EscapeDataString(address);
-    //    //获取请求Url
-    //    RequestUrl = BuildRequestUrl(encodedAddress, city);
-    //    // 检查请求 URL 是否为空
-    //    if (string.IsNullOrEmpty(RequestUrl))
-    //    {
-    //        throw new InvalidOperationException("请求 URL 不能为空");
-    //    }
-    //    // 创建 HttpClient
-    //    using (var client = new HttpClient())
-    //    {
-    //        // 发送 GET 请求
-    //       var  GeoRresponse = await client.GetAsync(RequestUrl);
-
-    //        // 读取响应内容
-    //        var content = await GeoRresponse.Content.ReadAsStringAsync();
-
-    //        // 反序列化响应内容
-    //        var geoResponse = JsonConvert.DeserializeObject<GeoCodeResponse>(content);
-
-    //        // 检查反序列化结果
-    //        if (geoResponse == null)
-    //        {
-    //            throw new InvalidOperationException("反序列化响应内容失败");
-    //        }
-
-    //        return geoResponse;
-    //    }
-    //}
-
     public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city = null)
     {
         if (string.IsNullOrWhiteSpace(address)) return null;
@@ -86,7 +52,7 @@ public class AMap
     }
 
     /// <summary>
-    /// 请求高德地图 地理编码
+    /// 请求高德地图POI 地理编码
     /// </summary>
     /// <param name="address"></param>
     /// <param name="city"></param>
@@ -100,6 +66,18 @@ public class AMap
             { "keywords", encodedKeywords },
             { "types", "公司" },
             { "key", GeoPOIKey }
+        });
+        return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
+    }
+
+    public async Task<GeoCodePOIResponse> RequestGeonames(string KeyWords)
+    {
+        if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+        var encodedKeywords = EncodeUrlParam(KeyWords);
+        var requestUrl = BuildUrl(GeoPOIUrl, new Dictionary<string, string>
+        {
+            { "GeonamesUrl", KeyWords },
+            { "username",GeonamesUserName },
         });
         return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
     }

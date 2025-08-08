@@ -25,22 +25,29 @@ public class CustomerProductPriceMapping
     public class MonthVSLastOutput
 {
     //月库存金额趋势图VS去年
-    public MonthVSLast monthVSLast;
+    public MonthVSLast MonthVSLast;
     //及时库存
-    public Dictionary<string, double> TodayPriceOfInventory { get; set; }
+    public List<ChartIndex> TodayPriceOfInventory { get; set; }
     //当月库存出库产品总金额
-    public Dictionary<string, double> CurrentMonthPriceOfOB { get; set; }
+    public List<ChartIndex> CurrentMonthPriceOfOB { get; set; }
     //当月每天  入库/出库
-    public Dictionary<DateTime, string> CurrentMonthPriceReceiptVSOB { get; set; }
+    public List<ChartIndex> CurrentMonthPriceReceiptVSOB { get; set; }
     //当年按照  月累计 库存总金额  对比去年  
-    public Dictionary<string, double> MonthlyCumulativeAmountVSLast { get; set; }
+    public List<ChartIndex> MonthlyCumulativeAmountVSLast { get; set; }
 
     //当年当月前3月累计 库存总金额  对比去年 相同月份数据 
-    public Dictionary<string, double> CumulativeAmountVSLastThreeMonth { get; set; }
+    public List<ChartIndex> CumulativeAmountVSLastThreeMonth { get; set; }
 }
 
 public class MonthVSLast
 {
-    public Dictionary<long, long> LastYear { get; set; }
-    public Dictionary<long, long> CurrentYear { get; set; }
+    public List<ChartIndex> LastYear { get; set; }
+    public List<ChartIndex> CurrentYear { get; set; }
+}
+
+
+public class ChartIndex
+{
+    public string Xseries { get; set; }
+    public long? Yseries { get; set; }
 }
