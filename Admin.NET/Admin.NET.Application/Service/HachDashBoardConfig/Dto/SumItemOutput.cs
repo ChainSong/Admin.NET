@@ -21,7 +21,24 @@ public class ChartsInput
     public long? CustomerId { get; set; }
     public string? OBProvince { get; set; }
     public int Take { get; set; } = 100;
+}
 
+public class ProvinceInput
+{
+    //只支持单个关键词语搜索关键词支持：行政区名称、citycode、adcode
+    //例如，在 subdistrict = 2，搜索省份（例如山东），能够显示市（例如济南），区（例如历下区）
+    public string? Keywords { get; set; }
+    //设置显示下级行政区级数（行政区级别包括：国家、省/直辖市、市、区/县4个级别）
+    //可选值：0、1、2、3
+    //0：不返回下级行政区；
+    //1：返回下一级行政区；
+    //2：返回下两级行政区；
+    //3：返回下三级行政区；
+    public string? Subdistrict { get; set; }
+    // 此项控制行政区信息中返回行政区边界坐标点； 可选值：base、all;
+    //base:不返回行政区边界坐标点；
+    //all:只返回当前查询 district 的边界值，不返回子节点的边界值；
+    public string? Extensions { get; set; }
 }
 
 /// <summary>

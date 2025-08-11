@@ -22,7 +22,7 @@ public class CustomerProductPriceMapping
     public string? Sku { get; set; }
     public double? Price { get; set; }
 }
-    public class MonthVSLastOutput
+public class MonthVSLastOutput
 {
     //月库存金额趋势图VS去年
     public MonthVSLast MonthVSLast;
@@ -38,16 +38,34 @@ public class CustomerProductPriceMapping
     //当年当月前3月累计 库存总金额  对比去年 相同月份数据 
     public List<ChartIndex> CumulativeAmountVSLastThreeMonth { get; set; }
 }
-
 public class MonthVSLast
 {
     public List<ChartIndex> LastYear { get; set; }
     public List<ChartIndex> CurrentYear { get; set; }
 }
-
-
 public class ChartIndex
 {
     public string Xseries { get; set; }
-    public long? Yseries { get; set; }
+    public double? Yseries { get; set; }
+}
+public class OBProvinceOutput
+{
+    public List<OBProvince> oBProvince { get; set; }
+    public List<OBProvinceGroupbyWhere> oBProvinceGroupbyProvince { get; set; }
+}
+//计算省份的总金额，总数量
+public class OBProvince 
+{
+    public string ObProvince { get; set; }
+    public double? Qty { get; set; }
+    public long? Amount { get; set; }
+}
+//根据条件计算省份每位客户的的总金额，总数量
+public class OBProvinceGroupbyWhere
+{
+    public string? ObProvince { get; set; }
+    public string? Customer { get; set; }
+    public long? CustomerId { get; set; }
+    public double? Qty { get; set; }
+    public long? Amount { get; set; }
 }

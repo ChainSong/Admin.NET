@@ -65,9 +65,7 @@ public class OrderAddressGeocodeJob : IJob
                 item.Province = geocode.province;
                 item.City = geocode.city;
                 item.CompanyName = geocodePOI?.Name;
-                //updatedList.Add(item);
                 await UpdateAddressInfo(orderAddressRepo, item);
-
                 var mapping = new WMSOrderAddressGaoDeMapping
                 {
                     OrderAddressId = item.Id,
@@ -77,22 +75,7 @@ public class OrderAddressGeocodeJob : IJob
                 };
                 await mappingRepo.InsertAsync(mapping);
                 await Task.Delay(3000); // 间隔 3 秒
-
-                //mappingList.Add(new WMSOrderAddressGaoDeMapping
-                //{
-                //    OrderAddressId = item.Id,
-                //    CompanyName = item.CompanyName,
-                //    IsConnected = true,
-                //    TenantId = 1300000000001,
-                //});
-
             }
-
-            //if (updatedList.Count > 0)
-            //{
-            //    //await UpdateAddressInfo(orderAddressRepo, updatedList);
-            //    //await mappingRepo.InsertRangeAsync(mappingList);
-            //}
         }
         catch (Exception ex)
         {
@@ -108,24 +91,11 @@ public class OrderAddressGeocodeJob : IJob
         var connectedIds = await mapRepo.AsQueryable()
             .Select(x => x.OrderAddressId)
             .ToListAsync();
-        //var connectedexiIds = new List<long> { 20221, 20222 };
         return await orderRepo.AsQueryable()
             .Where(x => !connectedIds.Contains(x.Id))
-            //.Where(x => x.Province == null || x.City == null)
-            //.Where(x => connectedexiIds.Contains(x.Id))
-            //.Take(2)
             .ToListAsync();
     }
-
-    private async Task BatchUpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, List<WMSOrderAddress> list)
-    {
-        await repo.AsUpdateable(list)
-            .UpdateColumns(x => new { x.Province, x.City })
-            .WhereColumns(x => x.Id)
-            .ExecuteCommandAsync();
-    }
-
-
+ 
     private async Task UpdateAddressInfo(SqlSugarRepository<WMSOrderAddress> repo, WMSOrderAddress info)
     {
         await repo.AsUpdateable(info)

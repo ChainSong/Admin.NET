@@ -24,10 +24,9 @@ namespace Admin.NET.Common.AMap;
 public class AMap
 {
     public static readonly string GeoUrl = App.GetConfig<string>("AMap:GeoUrl");
-    public static readonly string GeoKey = App.GetConfig<string>("AMap:GeoKey");
-
     public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
-    public static readonly string GeoPOIKey = App.GetConfig<string>("AMap:GeoPOIKey");
+    public static readonly string GeoDistrictUrl = App.GetConfig<string>("AMap:GeoDistrictUrl");
+    public static readonly string GeoWebServicesAPI = App.GetConfig<string>("AMap:GeoWebServicesAPI");
 
     public static readonly string GeonamesUrl = App.GetConfig<string>("AMap:GeonamesUrl");
     public static readonly string GeonamesUserName = App.GetConfig<string>("AMap:GeonamesUserName");
@@ -45,7 +44,7 @@ public class AMap
         var requestUrl = BuildUrl(GeoUrl, new Dictionary<string, string>
         {
             { "address", encodedAddress },
-            { "key", GeoKey },
+            { "key", GeoWebServicesAPI },
             { "city", city }
         });
         return await SendRequestAsync<GeoCodeResponse>(requestUrl);
@@ -65,11 +64,34 @@ public class AMap
         {
             { "keywords", encodedKeywords },
             { "types", "公司" },
-            { "key", GeoPOIKey }
+            { "key", GeoWebServicesAPI }
         });
         return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
     }
+    /// <summary>
+    /// 行政区域查询 API 服务地址
+    /// </summary>
+    /// <param name="KeyWords"></param>
+    /// <returns></returns>
+    public async Task<GeoDistrictCodeResponse> RequestGeoCodeDistrict(string KeyWords, string? Subdistrict = "1", string? Extensions = "base")
+    {
+        if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+        var encodedKeywords = EncodeUrlParam(KeyWords);
+        var requestUrl = BuildUrl(GeoDistrictUrl, new Dictionary<string, string>
+        {
+            { "keywords", encodedKeywords },
+            { "subdistrict",Subdistrict},
+            { "extensions",Extensions },
+            { "key", GeoWebServicesAPI }
+        });
+        return await SendRequestAsync<GeoDistrictCodeResponse>(requestUrl);
+    }
 
+    /// <summary>
+    /// 请求 Geonames查询国家行政区   免费  用不了
+    /// </summary>
+    /// <param name="KeyWords"></param>
+    /// <returns></returns>
     public async Task<GeoCodePOIResponse> RequestGeonames(string KeyWords)
     {
         if (string.IsNullOrWhiteSpace(KeyWords)) return null;
@@ -96,7 +118,7 @@ public class AMap
         {
             return null;
         }
-        RequestUrl = GeoUrl + $"?address={address}&key={GeoKey}";
+        RequestUrl = GeoUrl + $"?address={address}&key={GeoWebServicesAPI}";
         if (!string.IsNullOrEmpty(city))
         {
             RequestUrl += $"&city={city}";
@@ -127,7 +149,7 @@ public class AMap
 
         return $"{baseUrl}?{query}";
     }
-  
+
     /// <summary>
     /// 通用的 HTTP GET 请求发送和 JSON 解析
     /// </summary>
