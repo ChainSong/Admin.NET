@@ -14,7 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service.HachDashBoardConfig.Dto;
-
+/// <summary>
+/// 产品客户价格关系表
+/// </summary>
 public class CustomerProductPriceMapping
 {
     public long? CustomerId { get; set; }
@@ -22,7 +24,10 @@ public class CustomerProductPriceMapping
     public string? Sku { get; set; }
     public double? Price { get; set; }
 }
-public class MonthVSLastOutput
+/// <summary>
+/// 第一张图
+/// </summary>
+public class MonthVSLastChartOneOutput
 {
     //月库存金额趋势图VS去年
     public MonthVSLast MonthVSLast;
@@ -38,29 +43,82 @@ public class MonthVSLastOutput
     //当年当月前3月累计 库存总金额  对比去年 相同月份数据 
     public List<ChartIndex> CumulativeAmountVSLastThreeMonth { get; set; }
 }
-public class MonthVSLast
+/// <summary>
+/// 第二张图
+/// </summary>
+public class MonthVSLastChartTwoOutput
 {
-    public List<ChartIndex> LastYear { get; set; }
-    public List<ChartIndex> CurrentYear { get; set; }
+    /// <summary>
+    /// 月出库金额趋势 vs 去年
+    /// </summary>
+    public MonthVSLast MonthlyObAmount { get; set; }
+    /// <summary>
+    /// 月出库数量趋势 vs 去年
+    /// </summary>
+    public MonthVSLast MonthlyObQty{ get; set; }
+    /// <summary>
+    /// YTD 累积出库产品Minor金额 (Top5): 需要提供
+    /// </summary>
+    public MonthVSLast MonthlyCumulativeObAmount{ get; set; }
+    /// <summary>
+    /// 月累计发货金额最高的省份
+    /// </summary>
+    /// TOP5  AND  ELSE
+    public List<ChartIndex> MonthlyCumulativeShipmentAmount { get; set; }
+    /// <summary>
+    /// 每月新用户增长趋势
+    /// </summary>
+    public List<ChartIndex> MonthlyNewUserTrend { get; set; }
+    /// <summary>
+    /// 月累计新用户增长趋势
+    /// </summary>
+    public List<ChartIndex> MonthlyCumulativeNewUserTrend { get; set; }
 }
-public class ChartIndex
-{
-    public string Xseries { get; set; }
-    public double? Yseries { get; set; }
-}
+/// <summary>
+/// 第三张图
+/// </summary>
 public class OBProvinceOutput
 {
     public List<OBProvince> oBProvince { get; set; }
     public List<OBProvinceGroupbyWhere> oBProvinceGroupbyProvince { get; set; }
 }
-//计算省份的总金额，总数量
+/// <summary>
+/// 目标年份与前一年
+/// </summary>
+public class MonthVSLast
+{
+    public List<ChartIndex> LastYear { get; set; }
+    public List<ChartIndex> CurrentYear { get; set; }
+}
+/// <summary>
+/// 图标的x 与 y
+/// </summary>
+public class ChartIndex
+{
+    public string Xseries { get; set; }
+    public double? Yseries { get; set; }
+}
+
+public class OBProvinceList
+{
+    public string? ObProvince { get; set; }
+    public string? Customer { get; set; }
+    public string? Sku { get; set; }
+    public long? CustomerId { get; set; }
+    public double? Qty { get; set; }
+}
+/// <summary>
+/// 计算省份的总金额，总数量
+/// </summary>
 public class OBProvince 
 {
     public string ObProvince { get; set; }
     public double? Qty { get; set; }
     public long? Amount { get; set; }
 }
-//根据条件计算省份每位客户的的总金额，总数量
+/// <summary>
+/// 根据条件计算省份每位客户的的总金额，总数量
+/// </summary>
 public class OBProvinceGroupbyWhere
 {
     public string? ObProvince { get; set; }
