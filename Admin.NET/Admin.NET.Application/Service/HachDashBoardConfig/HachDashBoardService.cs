@@ -56,7 +56,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
-
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
     public HachDashBoardService(UserManager userManager,
         SqlSugarRepository<WMSHachAccountDate> repHachAccountDate,
@@ -155,9 +154,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         return selectItems;
     }
     #endregion
-
     #endregion
-
     /// <summary>
     /// 汇总Tab项数据
     /// </summary>
@@ -207,18 +204,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
-        //月库存金额趋势图VS去年 当月没到关账日不展示数据
-        monthVSLastOutput.MonthVSLast = await GetMonthVSLast(input, priceMap);
-        //及时库存
-        monthVSLastOutput.TodayPriceOfInventory = await GetInventoryUsableGroupBySkuByToday(input, DateTime.Today, priceMap);
-        //当月库存出库产品总金额
-        monthVSLastOutput.CurrentMonthPriceOfOB = await GetCurrentOrderGroupBySKUByAmount(input, priceMap);
-        //库销比
-        monthVSLastOutput.CurrentMonthPriceReceiptVSOB = await GetInventoryToSellPercent(input, priceMap);
-        //月累计对比去年
-        monthVSLastOutput.MonthlyCumulativeAmountVSLast = await GetCumulativeAmountVSLast(input, priceMap);
-        //获取过去三个月累计库存
-        monthVSLastOutput.CumulativeAmountVSLastThreeMonth = await GetCumulativeAmountVSLastThreeMonth(input, priceMap);
+        ////月库存金额趋势图VS去年 当月没到关账日不展示数据
+        //monthVSLastOutput.MonthVSLast = await GetMonthVSLast(input, priceMap);
+        ////及时库存
+        //monthVSLastOutput.TodayPriceOfInventory = await GetInventoryUsableGroupBySkuByToday(input, DateTime.Today, priceMap);
+        ////当月库存出库产品总金额
+        //monthVSLastOutput.CurrentMonthPriceOfOB = await GetCurrentOrderGroupBySKUByAmount(input, priceMap);
+        ////库销比
+        //monthVSLastOutput.CurrentMonthPriceReceiptVSOB = await GetInventoryToSellPercent(input, priceMap);
+        ////月累计对比去年
+        //monthVSLastOutput.MonthlyCumulativeAmountVSLast = await GetCumulativeAmountVSLast(input, priceMap);
+        ////获取过去三个月累计库存
+        //monthVSLastOutput.CumulativeAmountVSLastThreeMonth = await GetCumulativeAmountVSLastThreeMonth(input, priceMap);
         return monthVSLastOutput;
     }
 
@@ -509,10 +506,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="firstDayOfMonth"></param>
     /// <param name="lastDayOfMonth"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetCurrentOrderGroupBySKUByAmount(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetCurrentOrderGroupBySKUByAmount")]
+    public async Task<List<ChartIndex>> GetCurrentOrderGroupBySKUByAmount(ChartsInput input)
     {
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         var AccountDate = await GetAccountByDate(Convert.ToDateTime(input.Month));
-
         // 3. 计算各SKU金额
         var skuAmounts = new List<ChartIndex>();
         // 如果查询不到记录或EndDate大于今天，直接返回0
@@ -791,8 +796,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="today"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetInventoryUsableGroupBySkuByToday(ChartsInput input, DateTime today, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetInventoryUsableGroupBySkuByToday")]
+    public async Task<List<ChartIndex>> GetInventoryUsableGroupBySkuByToday(ChartsInput input)
     {
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        DateTime today = new DateTime();
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         var result = new List<ChartIndex>();
         try
         {
@@ -969,10 +984,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// </summary>
     /// <returns></returns>
     /// 当月没到关账日不展示数据
-    private async Task<MonthVSLast> GetMonthVSLast(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthVSLast")]
+    public async Task<MonthVSLast> GetMonthVSLast(ChartsInput input)
     {
         MonthVSLast monthVSLastOutput = new MonthVSLast();
-
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         #region 获取去年的月份数据
         //获取去年所有月份的账期
         var ALLLastMonth = Enumerable.Range(1, 12) // 生成1-12月
@@ -1041,8 +1064,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetInventoryToSellPercent(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetInventoryToSellPercent")]
+    public async Task<List<ChartIndex>> GetInventoryToSellPercent(ChartsInput input)
     {
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
+
         var receiptData = await GetReceiptGroupByDateAmount(Convert.ToDateTime(input.Month), priceMap);
         var OrderData = await GetOrderGroupByDateAmount(Convert.ToDateTime(input.Month), priceMap);
         // 创建字典来存储每天的比率
@@ -1080,8 +1113,17 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     ///获取月累计库存,当年不计算当月 跟去年对比
     /// </summary>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetCumulativeAmountVSLast(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetCumulativeAmountVSLast")]
+    public async Task<List<ChartIndex>> GetCumulativeAmountVSLast(ChartsInput input)
     {
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
 
         var pivotMonth = Convert.ToDateTime(input.Month); // 例如 2025-08-01
         var currentYear = pivotMonth.Year;
@@ -1172,8 +1214,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetCumulativeAmountVSLastThreeMonth(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetCumulativeAmountVSLastThreeMonth")]
+    public async Task<List<ChartIndex>> GetCumulativeAmountVSLastThreeMonth(ChartsInput input)
     {
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
+
         var today = Convert.ToDateTime(input.Month);
         var currentMonth = new DateTime(today.Year, today.Month, 1);
         var lastYear = today.Year - 1;
