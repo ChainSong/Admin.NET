@@ -33,6 +33,9 @@ using static Aliyun.OSS.Model.SelectObjectRequestModel.OutputFormatModel;
 using Utilities;
 using Tea.Utils;
 using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.QueryMarketingMemberCardOpenCardsResponse.Types.Card.Types;
+using Admin.NET.Application.Service.WMSReport.Dto;
+using System.Data;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECOrderSearchRequest.Types;
 
 namespace Admin.NET.Application;
 
@@ -85,6 +88,29 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         _repOrderAddress = repOrderAddress;
     }
     #endregion
+
+    //public string GetSearchWhere(long? CustomerId, DateTime? StartDate, DateTime? EndDate, string? ObProvince)
+    //{
+    //    StringBuilder stringBuilder = new StringBuilder();
+    //    if (!string.IsNullOrEmpty(ObProvince))
+    //    {
+    //        stringBuilder.Append(" and Province = '"+ObProvince+"'");
+    //    }
+
+    //    if (CustomerId.HasValue)
+    //    {
+    //        stringBuilder.Append(" and customerId = " + CustomerId + "");
+    //    }
+    //    else
+    //    {
+    //        stringBuilder.Append(" and customerId in (22, 23, 29, 56, 49, 44, 30) ");
+    //    }
+
+    //    if (true)
+    //    {
+
+    //    }
+    //}
 
     #region 下拉筛选条件数据
 
@@ -155,6 +181,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
     #endregion
     #endregion
+
     /// <summary>
     /// 汇总Tab项数据
     /// </summary>
@@ -167,14 +194,15 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     {
         ChartsInput input = new ChartsInput();
         SumItemOutput itemOutput = new SumItemOutput();
-        var today = DateTime.Today;
-        var currentMonthString = today.ToString("yyyy-MM");
+        var currentMonthString = DateTime.Today.ToString("yyyy-MM");
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
+        //获取目标月份账期起始日，结束日
+        var TargetDate = await GetAccountByDate(DateTime.Today.AddMonths(-1));
         //上个月的库存金额
-        itemOutput.LastMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input, today.AddMonths(-1), priceMap);
+        itemOutput.LastMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input, TargetDate, priceMap);
         //这天的库存金额
-        itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(today, priceMap);
+        itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(DateTime.Today, priceMap);
         //获取当月库存目标金额
         itemOutput.CurrentTargetAmount = await GetTargetAmountByMonth(currentMonthString);
         //获取YTD ORDER VS YTD ASN
@@ -182,67 +210,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 计算差值
         itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
         // 获取当月入库和出库金额
-        itemOutput.CurrentReceiptAmount = Convert.ToInt64(await GetCurrentReceiptAmount(today, priceMap));
-        itemOutput.CurrentOrderAmount = Convert.ToInt64(await GetCurrentOrderAmount(today, priceMap));
+        itemOutput.CurrentReceiptAmount = Convert.ToInt64(await GetCurrentReceiptAmount(DateTime.Today, priceMap));
+        itemOutput.CurrentOrderAmount = Convert.ToInt64(await GetCurrentOrderAmount(DateTime.Today, priceMap));
         return itemOutput;
     }
-
-    /// <summary>
-    /// 屏一
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    [HttpPost]
-    [AllowAnonymous]
-    [ApiDescriptionSettings(Name = "GetChartsOneData")]
-    public async Task<MonthVSLastChartOneOutput> GetChartsOneData(ChartsInput input)
-    {
-        MonthVSLastChartOneOutput monthVSLastOutput = new MonthVSLastChartOneOutput();
-        if (!input.Month.HasValue)
-        {
-            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
-        }
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        ////月库存金额趋势图VS去年 当月没到关账日不展示数据
-        //monthVSLastOutput.MonthVSLast = await GetMonthVSLast(input, priceMap);
-        ////及时库存
-        //monthVSLastOutput.TodayPriceOfInventory = await GetInventoryUsableGroupBySkuByToday(input, DateTime.Today, priceMap);
-        ////当月库存出库产品总金额
-        //monthVSLastOutput.CurrentMonthPriceOfOB = await GetCurrentOrderGroupBySKUByAmount(input, priceMap);
-        ////库销比
-        //monthVSLastOutput.CurrentMonthPriceReceiptVSOB = await GetInventoryToSellPercent(input, priceMap);
-        ////月累计对比去年
-        //monthVSLastOutput.MonthlyCumulativeAmountVSLast = await GetCumulativeAmountVSLast(input, priceMap);
-        ////获取过去三个月累计库存
-        //monthVSLastOutput.CumulativeAmountVSLastThreeMonth = await GetCumulativeAmountVSLastThreeMonth(input, priceMap);
-        return monthVSLastOutput;
-    }
-
-    #region 屏二
-    [HttpPost]
-    [AllowAnonymous]
-    [ApiDescriptionSettings(Name = "GetChartsTwoData")]
-    public async Task<MonthVSLastChartTwoOutput> GetChartsTwoData(ChartsInput input)
-    {
-        MonthVSLastChartTwoOutput outputs = new MonthVSLastChartTwoOutput();
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        //月出库金额趋势 vs 去年
-        outputs.MonthlyObAmount = await GetMonthlyOBAmountVSLast(input, priceMap);
-        //月出库金额趋势 vs 去年
-        outputs.MonthlyObQty = await GetMonthlyOBQtyVSLast(input, priceMap);
-        //YTD 累积出库产品Minor金额 (Top5)
-        outputs.MonthlyCumulativeObAmount = await GetMonthlyCumulativeObAmount(input, priceMap);
-        //月累计发货金额最高的省份
-        outputs.MonthlyCumulativeShipmentAmount = await GetMonthlyCumulativeShipmentAmount(input, priceMap);
-        //当年月份新增用户数量
-        outputs.MonthlyNewUserTrend = await GetMonthlyNewUserTrend(input, priceMap);
-        //当年月份新增用户数量
-        outputs.MonthlyCumulativeNewUserTrend = await GetMonthlyCumulativeNewUserTrend(input, priceMap);
-        return outputs;
-    }
-    #endregion
 
     #region 屏三
     /// <summary>
@@ -291,15 +262,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns></returns>
     private async Task<List<CustomerProductPriceMapping>> GetProductPriceMap()
     {
-        return await _repProduct.AsQueryable()
-            .Select(p => new CustomerProductPriceMapping
-            {
-                CustomerName = p.CustomerName,
-                CustomerId = p.CustomerId,
-                Sku = p.SKU,
-                Price = p.Price
-            })
-            .ToListAsync();
+        string sql = @"SELECT  [CustomerName] AS [CustomerName] , [CustomerId] AS [CustomerId] , [SKU] AS [Sku] , 
+                      [Price] AS [Price]  FROM [WMS_Product] where CustomerId in(22, 23, 29, 56, 49, 44, 30)";
+        return _repProduct.Context.Ado.GetDataTable(sql).TableToList<CustomerProductPriceMapping>();
     }
 
     /// <summary>
@@ -327,31 +292,13 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="today"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<long> GetInventoryUsableSnapshotByAccountDate(ChartsInput input, DateTime today, List<CustomerProductPriceMapping> priceMap)
+    private async Task<long> GetInventoryUsableSnapshotByAccountDate(ChartsInput input, WMSHachAccountDate lastAccountDate, List<CustomerProductPriceMapping> priceMap)
     {
-        var lastAccountDate = await GetAccountByDate(today);
-
-        // 如果查询不到记录或EndDate大于今天，直接返回0
-        if (lastAccountDate == null)
-        {
-            return 0;
-        }
-        //测试性能
-        var SQL = _repInventoryUsableSnapshot.AsQueryable()
-            .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-            .Where(a => a.InventoryTime >= lastAccountDate.EndDate && a.InventoryTime <= Convert.ToDateTime(lastAccountDate.EndDate).AddDays(1).AddSeconds(-1))
-            .GroupBy(a => new { a.CustomerId, a.CustomerName, a.SKU })
-            .Select(a => new { a.CustomerId, a.CustomerName, a.SKU, Qty = SqlFunc.AggregateSum(a.Qty) }).ToSqlString();
-
-        var lastMonthInventory = await _repInventoryUsableSnapshot.AsQueryable()
-            .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-            .Where(a => a.InventoryTime >= lastAccountDate.EndDate && a.InventoryTime <= Convert.ToDateTime(lastAccountDate.EndDate).AddDays(1).AddSeconds(-1))
-            .GroupBy(a => new { a.CustomerId, a.CustomerName, a.SKU })
-            .Select(a => new { a.CustomerId, a.CustomerName, a.SKU, Qty = SqlFunc.AggregateSum(a.Qty) })
-            .ToListAsync();
+        string sql = @"SELECT  [CustomerId] AS [CustomerId] , [CustomerName] AS [CustomerName] , [SKU] AS [SKU] , SUM([Qty]) AS [Qty]  FROM [WMS_Inventory_Usable_Snapshot]  WHERE (( [InventoryTime] >= '" + lastAccountDate.EndDate + "' ) AND ( [InventoryTime] <= (DATEADD(Second,-1, (DATEADD(Day,1, CAST('" + lastAccountDate.EndDate + "' AS DATETIME))) )) ))GROUP BY [CustomerId],[CustomerName],[SKU] ";
+        var lastMonthInventory = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(sql).TableToList<CustomerProductPriceMapping>();
 
         return CalculateTotalAmount(
-            lastMonthInventory.Select(x => (x.CustomerId, x.CustomerName, x.SKU, (double)x.Qty)),
+            lastMonthInventory.Select(x => ((long)x.CustomerId, x.CustomerName, x.Sku, (double)x.Qty)),
             priceMap
         );
     }
@@ -525,23 +472,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             return skuAmounts;
         }
-        // 2. 查询当月出库数据（按SKU分组）
-        var skuData = await _repOrderDetail.AsQueryable()
-            .Where(d => SqlFunc.Subqueryable<WMSOrder>()
-                      .Where(o => o.Id == d.OrderId &&
-                                  o.OrderStatus == 99 &&
-                                  o.CreationTime >= AccountDate.StartDate &&
-                                  o.CreationTime <= AccountDate.EndDate)
-                      .Any())
-            .GroupBy(d => d.SKU)
-            //.Take(input.Take)
-            .Select(d => new
-            {
-                SKU = d.SKU,
-                TotalQty = SqlFunc.AggregateSum(d.AllocatedQty)
-            })
-            .ToListAsync();
-
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlWhereSql = "customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+        }
+        string sql = "SELECT  [SKU] AS [SKU] , SUM([AllocatedQty]) AS [TotalQty]  FROM [WMS_OrderDetail] [d]  WHERE (EXISTS ( SELECT * FROM [WMS_Order] [o]  WHERE 1=1 and " + sqlWhereSql + "" +
+            "  and (((( [Id] = [d].[OrderId] ) AND ( [OrderStatus] = 99 )) AND ( [CreationTime] >= '" + AccountDate.StartDate + "' )) AND ( [CreationTime] <=  '" + AccountDate.EndDate + "' )) ))GROUP BY [SKU] ";
+        var skuData = _repOrderDetail.Context.Ado.GetDataTable(sql).TableToList<OrderDetailTotal>();
 
         if (skuData != null && skuData.Count > 0)
         {
@@ -581,6 +523,20 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 3. 计算各SKU金额
         var skuAmounts = new List<ChartIndex>();
 
+        var sql = _repOrderDetail.AsQueryable()
+            .Where(d => SqlFunc.Subqueryable<WMSOrder>()
+                      .Where(o => o.Id == d.OrderId &&
+                                  o.OrderStatus == 99 &&
+                                  o.CreationTime >= StartDate &&
+                                  o.CreationTime <= EndDate)
+                      .Any())
+            .WhereIF(input.CustomerId.HasValue, d => d.CustomerId == input.CustomerId)
+            .GroupBy(d => d.SKU)
+            .Select(d => new
+            {
+                SKU = d.SKU,
+                TotalQty = SqlFunc.AggregateSum(d.AllocatedQty)
+            }).ToSqlString();
         // 2. 查询当月出库数据（按SKU分组）
         var skuData = await _repOrderDetail.AsQueryable()
             .Where(d => SqlFunc.Subqueryable<WMSOrder>()
@@ -630,33 +586,37 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="today">当前日期</param>
     /// <param name="priceMap">商品价格字典</param>
     /// <returns>按天汇总的入库总金额</returns>
-    private async Task<Dictionary<DateTime, long>> GetReceiptGroupByDateAmount(DateTime today, List<CustomerProductPriceMapping> priceMap)
+    private async Task<Dictionary<DateTime, long>> GetReceiptGroupByDateAmount(ChartsInput input, DateTime today, List<CustomerProductPriceMapping> priceMap)
     {
         var AccountDate = await GetAccountByDate(today);
         Dictionary<DateTime, long> dailyAmount = new Dictionary<DateTime, long>();
         if (AccountDate == null)
             return dailyAmount;
         // 遍历当月的每一天
-
         for (var date = Convert.ToDateTime(AccountDate.StartDate); date <= AccountDate.EndDate; date = date.AddDays(1))
         {
-
-            var sql = _repASNDetail.AsQueryable()
-                    .Where(d => SqlFunc.Subqueryable<WMSASN>()
-                    .Where(o => o.Id == d.ASNId &&
-                    o.ASNStatus != 90 &&
-                                            o.CreationTime >= date.Date && // 精确到当天
-                                            o.CreationTime < date.Date.AddDays(1)) // 精确到当天
-                                .Any()).ToSqlString();
-            // 获取当天的入库数据
-            var todayData = await _repASNDetail.AsQueryable()
-                .Where(d => SqlFunc.Subqueryable<WMSASN>()
-                            .Where(o => o.Id == d.ASNId &&
-                                        o.ASNStatus != 90 &&
-                                        o.CreationTime >= date.Date && // 精确到当天
-                                        o.CreationTime < date.Date.AddDays(1)) // 精确到当天
-                            .Any())
-                .ToListAsync();
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = "customerId = " + input.CustomerId + "";
+            }
+            else
+            {
+                sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+            }
+            string sql = "SELECT [TenantId],[Id],[ASNId],[ASNNumber],[ExternReceiptNumber],[CustomerId]," +
+                "[CustomerName],[WarehouseId],[WarehouseName],[LineNumber],[SKU],[UPC],[GoodsType],[GoodsName]," +
+                "[BoxCode],[TrayCode],[BatchCode],[LotCode],[PoCode],[SoCode],[Weight],[Volume],[ExpectedQty]," +
+                "[ReceivedQty],[ReceiptQty],[UnitCode],[Onwer],[ProductionDate],[ExpirationDate],[Remark],[Creator]," +
+                "[CreationTime],[Updator],[UpdateTime],[Str1],[Str2],[Str3],[Str4],[Str5],[Str6],[Str7],[Str8],[Str9]," +
+                "[Str10],[Str11],[Str12],[Str13],[Str14],[Str15],[Str16],[Str17],[Str18],[Str19],[Str20],[DateTime1]," +
+                "[DateTime2],[DateTime3],[DateTime4],[DateTime5],[Int1],[Int2],[Int3],[Int4],[Int5] FROM [WMS_ASNDetail] [d]  " +
+                "WHERE (EXISTS ( SELECT * FROM [WMS_ASN] [o] " +
+                " WHERE 1=1 and " + sqlWhereSql + "  and" +
+                " (((( [Id] = [d].[ASNId] ) AND ( [ASNStatus] <> 90 )) " +
+                "AND ( [CreationTime] >= '" + date.Date + "' )) " +
+                "AND ( [CreationTime] <'" + date.Date.AddDays(1) + "') )) )";
+            var todayData = _repASNDetail.Context.Ado.GetDataTable(sql).TableToList<WMSASNDetail>();
 
             // 计算当天的总金额
             var totalAmount = CalculateTotalAmount(
@@ -675,7 +635,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="today">当前日期</param>
     /// <param name="priceMap">商品价格字典</param>
     /// <returns>按天汇总的入库总金额</returns>
-    private async Task<Dictionary<DateTime, long>> GetOrderGroupByDateAmount(DateTime today, List<CustomerProductPriceMapping> priceMap)
+    private async Task<Dictionary<DateTime, long>> GetOrderGroupByDateAmount(ChartsInput input, DateTime today, List<CustomerProductPriceMapping> priceMap)
     {
         var AccountDate = await GetAccountByDate(today);
         Dictionary<DateTime, long> dailyAmount = new Dictionary<DateTime, long>();
@@ -684,15 +644,30 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 遍历当月的每一天
         for (var date = Convert.ToDateTime(AccountDate.StartDate); date <= AccountDate.EndDate; date = date.AddDays(1))
         {
-            // 获取当天的入库数据
-            var todayData = await _repOrderDetail.AsQueryable()
-                .Where(d => SqlFunc.Subqueryable<WMSOrder>()
-                            .Where(o => o.Id == d.OrderId &&
-                                        o.OrderStatus == 99 &&
-                                        o.CreationTime >= date.Date && // 精确到当天
-                                        o.CreationTime < date.Date.AddDays(1)) // 精确到当天
-                            .Any())
-                .ToListAsync();
+
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = "customerId = " + input.CustomerId + "";
+            }
+            else
+            {
+                sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+            }
+            string sql = "SELECT [TenantId],[Id],[PreOrderId],[PreOrderDetailId],[OrderId],[PreOrderNumber]," +
+                "[OrderNumber],[ExternOrderNumber],[CustomerId],[CustomerName],[WarehouseId],[WarehouseName]," +
+                "[LineNumber],[SKU],[UPC],[GoodsName],[GoodsType],[OrderQty],[AllocatedQty],[BoxCode],[TrayCode]," +
+                "[BatchCode],[LotCode],[PoCode],[SoCode],[Weight],[Volume],[UnitCode],[Onwer],[ProductionDate]," +
+                "[ExpirationDate],[Creator],[CreationTime],[Updator],[UpdateTime],[Remark],[Str1],[Str2],[Str3]," +
+                "[Str4],[Str5],[Str6],[Str7],[Str8],[Str9],[Str10],[Str11],[Str12],[Str13],[Str14],[Str15],[Str16]," +
+                "[Str17],[Str18],[Str19],[Str20],[DateTime1],[DateTime2],[DateTime3],[DateTime4],[DateTime5],[Int1]," +
+                "[Int2],[Int3],[Int4],[Int5] FROM [WMS_OrderDetail] [d]  WHERE (EXISTS ( SELECT * FROM [WMS_Order] [o] " +
+                " WHERE 1=1 and " + sqlWhereSql + " and " +
+                "(((( [Id] = [d].[OrderId] ) AND ( [OrderStatus] = 99 )) AND " +
+                "( [CreationTime] >= '" + date.Date + "' )) AND " +
+                "( [CreationTime] < (DATEADD(Day,1, '" + date.Date.AddDays(1) + "' )) )) ))";
+
+            var todayData = _repOrderDetail.Context.Ado.GetDataTable(sql).TableToList<WMSOrderDetail>();
 
             // 计算当天的总金额
             var totalAmount = CalculateTotalAmount(
@@ -805,37 +780,27 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-        DateTime today = new DateTime();
+        DateTime today = DateTime.Today;
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
         var result = new List<ChartIndex>();
         try
         {
-            var inventoryData1 = _repInventoryUsable.AsQueryable()
-                .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-                .Where(a => a.InventoryStatus == 1)
-                .Where(a => a.InventoryTime >= today.Date && a.InventoryTime <= today.Date.AddDays(1).AddSeconds(-1))
-                .GroupBy(a => a.SKU)
-                .Take(input.Take)
-                .Select(a => new
-                {
-                    SKU = a.SKU,
-                    Qty = SqlFunc.AggregateSum(a.Qty)
-                })
-                .ToSqlString();
-            // 1. 获取当天库存数据（按SKU分组汇总）
-            var inventoryData = await _repInventoryUsable.AsQueryable()
-                .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
-                .Where(a => a.InventoryStatus == 1)
-                .Where(a => a.InventoryTime >= today.Date && a.InventoryTime <= today.Date.AddDays(1).AddSeconds(-1))
-                .GroupBy(a => a.SKU)
-                .Take(input.Take)
-                .Select(a => new
-                {
-                    SKU = a.SKU,
-                    Qty = SqlFunc.AggregateSum(a.Qty)
-                })
-                .ToListAsync();
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = "customerId = " + input.CustomerId + "";
+            }
+            else
+            {
+                sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+            }
+            string sql = @" SELECT [SKU] AS [SKU] ,SUM([Qty]) AS [Qty]  FROM [WMS_Inventory_Usable]  " +
+                "WHERE 1=1 and " + sqlWhereSql + "" +
+                "and ( [InventoryStatus] = 1 )  AND (( [InventoryTime] >= '" + today.Date + "' ) " +
+                "AND ( [InventoryTime] <= (DATEADD(Second,-1, (DATEADD(Day,1,'" + today.Date.AddDays(1) + "' )) )) ))GROUP BY [SKU]";
+            var inventoryData = _repInventoryUsable.Context.Ado.GetDataTable(sql).TableToList<WMSInventoryUsable>();
+
             if (inventoryData != null && inventoryData.Count > 0)
             {
                 // 2. 计算每个SKU的金额
@@ -875,24 +840,28 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="today"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<long> GetInventoryUsableGroupBySkuByMonth(DateTime StartDate,
-        DateTime EndDate, List<CustomerProductPriceMapping> priceMap)
+    private async Task<long> GetInventoryUsableGroupBySkuByMonth(ChartsInput input, DateTime StartDate,
+      DateTime EndDate, List<CustomerProductPriceMapping> priceMap)
     {
         try
         {
-            // 1. 获取指定时间库存数据（按SKU分组汇总）
-            var inventoryData = await _repInventoryUsableSnapshot.AsQueryable()
-                .Where(a => a.InventoryStatus == 1)
-                .Where(a => a.InventoryTime >= StartDate && a.InventoryTime <= EndDate)
-                .GroupBy(a => new { a.SKU, a.CustomerId, a.CustomerName })
-                .Select(a => new
-                {
-                    SKU = a.SKU,
-                    Qty = SqlFunc.AggregateSum(a.Qty),
-                    CustomerId = a.CustomerId,
-                    CustomerName = a.CustomerName,
-                })
-                .ToListAsync();
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = "customerId = " + input.CustomerId + "";
+            }
+            else
+            {
+                sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+            }
+            string sql = "SELECT  [SKU] AS [SKU] , SUM([Qty]) AS [Qty] , [CustomerId] AS [CustomerId] , " +
+                "[CustomerName] AS [CustomerName]  FROM [WMS_Inventory_Usable_Snapshot]  " +
+                "WHERE 1=1 and " + sqlWhereSql + " and ( [InventoryStatus] = 1 )  " +
+                "AND (( [InventoryTime] >= '" + StartDate + "' ) " +
+                "AND ( [InventoryTime] <= '" + EndDate + "' ))" +
+                "GROUP BY [SKU],[CustomerId],[CustomerName] ";
+            var inventoryData = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(sql).TableToList<WMSInventoryUsableSnapshot>();
+
             return CalculateTotalAmount(
          inventoryData.Select(x => (x.CustomerId, x.CustomerName, x.SKU, (double)x.Qty)),
          priceMap
@@ -901,7 +870,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         catch (Exception ex)
         {
         }
-
         return 0;
     }
 
@@ -912,17 +880,27 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns>按天汇总的入库总金额</returns>
     private async Task<Dictionary<string, double>> GetOrderGroupMonthAmount(ChartsInput input, WMSHachAccountDate TargetData, List<CustomerProductPriceMapping> priceMap)
     {
-        // 获取当天的入库数据
-        var todayData = await _repOrderDetail.AsQueryable()
-            .Where(d => SqlFunc.Subqueryable<WMSOrder>()
-                        .Where(o => o.Id == d.OrderId &&
-                                    o.OrderStatus == 99 &&
-                                    o.CreationTime >= TargetData.StartDate && // 精确到当天
-                                    o.CreationTime < Convert.ToDateTime(TargetData.EndDate).AddDays(1).AddSeconds(-1)) // 精确到当天
-                        .Any())
-            .WhereIF(input.CustomerId.HasValue, d => d.CustomerId == input.CustomerId)
-            .ToListAsync();
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlWhereSql = "customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+        }
 
+        string sql = "SELECT [TenantId],[Id],[PreOrderId],[PreOrderDetailId],[OrderId],[PreOrderNumber],[OrderNumber]," +
+            "[ExternOrderNumber],[CustomerId],[CustomerName],[WarehouseId],[WarehouseName],[LineNumber],[SKU],[UPC],[GoodsName]," +
+            "[GoodsType],[OrderQty],[AllocatedQty],[BoxCode],[TrayCode],[BatchCode],[LotCode],[PoCode],[SoCode],[Weight],[Volume]," +
+            "[UnitCode],[Onwer],[ProductionDate],[ExpirationDate],[Creator],[CreationTime],[Updator],[UpdateTime],[Remark],[Str1]," +
+            "[Str2],[Str3],[Str4],[Str5],[Str6],[Str7],[Str8],[Str9],[Str10],[Str11],[Str12],[Str13],[Str14],[Str15],[Str16],[Str17]," +
+            "[Str18],[Str19],[Str20],[DateTime1],[DateTime2],[DateTime3],[DateTime4],[DateTime5],[Int1],[Int2],[Int3],[Int4],[Int5] " +
+            "FROM [WMS_OrderDetail] [d]  WHERE (EXISTS ( SELECT * FROM [WMS_Order] [o] " +
+            " WHERE 1=1 and " + sqlWhereSql + "  and (((( [Id] = [d].[OrderId] ) AND ( [OrderStatus] = 99 )) " +
+            "AND ( [CreationTime] >= '" + TargetData.StartDate + "' )) " +
+            "AND ( [CreationTime] < '" + Convert.ToDateTime(TargetData.EndDate).AddDays(1) + "')) ))";
+        var todayData = _repOrderDetail.Context.Ado.GetDataTable(sql).TableToList<WMSOrderDetail>();
         // 计算当天的总金额
         var totalAmount = CalculateTotalAmount(
             todayData.Select(x => (x.CustomerId.GetValueOrDefault(), x.CustomerName, x.SKU, (double)x.AllocatedQty)),
@@ -944,16 +922,23 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns></returns>
     private async Task<Dictionary<string, double>> GetOrderGroupMonthQty(ChartsInput input, WMSHachAccountDate TargetData, List<CustomerProductPriceMapping> priceMap)
     {
-        // 获取当天的入库数据
-        var TotalQty = await _repOrderDetail.AsQueryable()
-            .Where(d => SqlFunc.Subqueryable<WMSOrder>()
-                        .Where(o => o.Id == d.OrderId &&
-                                    o.OrderStatus == 99 &&
-                                    o.CreationTime >= TargetData.StartDate && // 精确到当天
-                                    o.CreationTime < Convert.ToDateTime(TargetData.EndDate).AddDays(1).AddSeconds(-1)) // 精确到当天
-                        .Any())
-            .WhereIF(input.CustomerId.HasValue, d => d.CustomerId == input.CustomerId)
-            .SumAsync(d => d.OrderQty);
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlWhereSql = "customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "customerId in (22, 23, 29, 56, 49, 44, 30)";
+        }
+
+        string sql = "SELECT SUM(OrderQty) FROM [WMS_OrderDetail] [d]  " +
+            "WHERE (EXISTS ( SELECT * FROM [WMS_Order] [o] " +
+            "WHERE 1=1 and " + sqlWhereSql + " " +
+            "and  (((( [Id] = [d].[OrderId] ) AND ( [OrderStatus] = 99 )) " +
+            "AND ( [CreationTime] >= '" + TargetData.StartDate + "' )) " +
+            "AND ( [CreationTime] < '" + Convert.ToDateTime(TargetData.EndDate).AddDays(1) + "') )) )";
+        var TotalQty = await _repOrderDetail.Context.Ado.GetDoubleAsync(sql);
 
         return new Dictionary<string, double>
                {
@@ -1009,7 +994,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             var TargetMonth = await GetAccountByDate(item);
             if (TargetMonth != null)
             {
-                LastData = await GetInventoryUsableSnapshotByAccountDate(input, TargetMonth.StartDate.GetValueOrDefault(), priceMap);
+                LastData = await GetInventoryUsableSnapshotByAccountDate(input, TargetMonth, priceMap);
                 LastYear.Add(new ChartIndex
                 {
                     Xseries = Convert.ToDateTime(TargetMonth.StartDate).ToString("MM"),
@@ -1035,13 +1020,13 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             long CurrentData = 0;
             //获取目标月份账期起始日，结束日
-            var TargetMonth = await GetAccountByDate(item);
-            if (TargetMonth != null)
+            var TargetDate = await GetAccountByDate(item);
+            if (TargetDate != null)
             {
-                CurrentData = await GetInventoryUsableSnapshotByAccountDate(input, TargetMonth.StartDate.GetValueOrDefault(), priceMap);
+                CurrentData = await GetInventoryUsableSnapshotByAccountDate(input, TargetDate, priceMap);
                 CurrentYear.Add(new ChartIndex
                 {
-                    Xseries = Convert.ToDateTime(TargetMonth.StartDate).ToString("MM"),
+                    Xseries = Convert.ToDateTime(TargetDate.StartDate).ToString("MM"),
                     Yseries = CurrentData
                 });
                 continue;
@@ -1075,9 +1060,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
-
-        var receiptData = await GetReceiptGroupByDateAmount(Convert.ToDateTime(input.Month), priceMap);
-        var OrderData = await GetOrderGroupByDateAmount(Convert.ToDateTime(input.Month), priceMap);
+        var receiptData = await GetReceiptGroupByDateAmount(input, Convert.ToDateTime(input.Month), priceMap);
+        var OrderData = await GetOrderGroupByDateAmount(input, Convert.ToDateTime(input.Month), priceMap);
         // 创建字典来存储每天的比率
         List<ChartIndex> dailyPercentages = new List<ChartIndex>();
 
@@ -1093,7 +1077,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 var orderAmount = OrderData[receipt.Key];
                 dailyPercentages.Add(new ChartIndex
                 {
-                    Xseries = Convert.ToString(receipt.Key),
+                    Xseries = Convert.ToString(receipt.Key.ToString("dd")),
                     Yseries = orderAmount == 0 ? 0 : (receiptAmount / (double)orderAmount) * 100
                 });
             }
@@ -1101,7 +1085,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             {
                 dailyPercentages.Add(new ChartIndex
                 {
-                    Xseries = Convert.ToString(receipt.Key),
+                    Xseries = Convert.ToString(receipt.Key.ToString("dd")),
                     Yseries = 0
                 });
             }
@@ -1149,7 +1133,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
             // 今年累计：从当年1月1日 -> 当月截止
             // 注意：你的 GetInventoryUsableGroupBySkuByMonth 返回 long，这里转 decimal 参与计算
-            var val = await GetInventoryUsableGroupBySkuByMonth(
+            var val = await GetInventoryUsableGroupBySkuByMonth(input,
                 new DateTime(currentYear, 1, 1),
                 end,
                 priceMap
@@ -1157,7 +1141,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             currentCum[month] = (decimal)val;
         }
 
-        // 去年的对应同月（比如今年“2025-03”的同比基数是“2024-03”）
+        // 去年的对应同月 
         foreach (var month in lastYearMonths)
         {
             var mm = month.Substring(5);           // "MM"
@@ -1167,6 +1151,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             var end = accountDate?.EndDate ?? new DateTime(lyMonthDate.Year, lyMonthDate.Month, DateTime.DaysInMonth(lyMonthDate.Year, lyMonthDate.Month));
 
             var val = await GetInventoryUsableGroupBySkuByMonth(
+                input,
                 new DateTime(lastYear, 1, 1),
                 end,
                 priceMap
@@ -1203,7 +1188,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 Yseries = y
             });
         }
-
         return result;
 
     }
@@ -1256,6 +1240,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             else
             {
                 value = await GetInventoryUsableGroupBySkuByMonth(
+                    input,
                     accountDate.StartDate.Value,
                     accountDate.EndDate.Value,
                     priceMap
@@ -1277,6 +1262,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             else
             {
                 value = await GetInventoryUsableGroupBySkuByMonth(
+                    input,
                     accountDate.StartDate.Value,
                     accountDate.EndDate.Value,
                     priceMap
@@ -1326,9 +1312,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<MonthVSLast> GetMonthlyOBAmountVSLast(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyOBAmountVSLast")]
+    public async Task<MonthVSLast> GetMonthlyOBAmountVSLast(ChartsInput input)
     {
         MonthVSLast monthVSLast = new MonthVSLast();
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         var TargetDate = Convert.ToDateTime(input.Month);
         var currentMonth = new DateTime(TargetDate.Year, TargetDate.Month, 1);
         var lastYear = TargetDate.Year - 1;
@@ -1405,9 +1396,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<MonthVSLast> GetMonthlyOBQtyVSLast(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyOBQtyVSLast")]
+    public async Task<MonthVSLast> GetMonthlyOBQtyVSLast(ChartsInput input)
     {
         MonthVSLast monthVSLast = new MonthVSLast();
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         var TargetDate = Convert.ToDateTime(input.Month);
         var currentMonth = new DateTime(TargetDate.Year, TargetDate.Month, 1);
         var lastYear = TargetDate.Year - 1;
@@ -1500,10 +1496,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<MonthVSLast> GetMonthlyCumulativeObAmount(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyCumulativeObAmount")]
+    public async Task<MonthVSLast> GetMonthlyCumulativeObAmount(ChartsInput input)
     {
         MonthVSLast outputs = new MonthVSLast();
-
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         // 获取当前年份的第一天 00:00:00
         DateTime firstDay = new DateTime(DateTime.Now.Year, 1, 1, 0, 0, 0);
         // 获取当前月份的天数（自动处理闰年）
@@ -1524,16 +1524,19 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetMonthlyCumulativeShipmentAmount(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyCumulativeShipmentAmount")]
+    public async Task<List<ChartIndex>> GetMonthlyCumulativeShipmentAmount(ChartsInput input)
     {
         List<ChartIndex> chartIndices = new List<ChartIndex>();
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         var orderData = await GetObList(input);
         var orderDataByProvince = await GetObDataGByProvince(orderData, priceMap);
         orderDataByProvince = orderDataByProvince.OrderByDescending(a => a.Amount).ToList();
-
         // 获取前 5 条数据
         var top5 = orderDataByProvince.Take(5).ToList();
-
         // 将前 5 条数据添加到返回结果中
         foreach (var item in top5)
         {
@@ -1567,8 +1570,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="priceMap"></param>
     /// <returns></returns>
     /// 如果1月份的用户 在2月或者后面的月份出现了 那么后面的月份的count减去对应的用户数量
-    private async Task<List<ChartIndex>> GetMonthlyNewUserTrend(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyNewUserTrend")]
+    public async Task<List<ChartIndex>> GetMonthlyNewUserTrend(ChartsInput input)
     {
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         List<ChartIndex> chartIndices = new List<ChartIndex>();
         DateTime firstDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0);
 
@@ -1592,6 +1601,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 遍历每个月份，获取每月新增用户
         var addressDataTaskList = dateList.Select(async item =>
         {
+            var sql = _repOrderAddress.AsQueryable()
+                .Where(a => a.CreationTime >= item && a.CreationTime < item.AddMonths(1)).ToSqlString();
+
             var addressData = await _repOrderAddress.AsQueryable()
                 .Where(a => a.CreationTime >= item && a.CreationTime < item.AddMonths(1))
                 .ToListAsync();
@@ -1653,11 +1665,15 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns></returns>
     /// 如果1月份的用户 在2月或者后面的月份出现了 那么后面的月份的count减去对应的用户数量
     ///但是数据是 1月 跟前面的对比  然后是1月跟2月 跟前面的对比 然后是1月跟3月跟前面的对比 以此类推
-    private async Task<List<ChartIndex>> GetMonthlyCumulativeNewUserTrend(ChartsInput input, List<CustomerProductPriceMapping> priceMap)
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetMonthlyCumulativeNewUserTrend")]
+    public async Task<List<ChartIndex>> GetMonthlyCumulativeNewUserTrend(ChartsInput input)
     {
         List<ChartIndex> chartIndices = new List<ChartIndex>();
         DateTime firstDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0);
-
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
         // 如果传入的月份有值，则使用传入月份的第一天
         if (input.Month.HasValue)
         {
@@ -1678,6 +1694,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 遍历每个月份，获取每月新增用户
         var addressDataTaskList = dateList.Select(async item =>
         {
+            var sql = _repOrderAddress.AsQueryable()
+    .Where(a => a.CreationTime >= item && a.CreationTime < item.AddMonths(1)).ToSqlString();
+
             var addressData = await _repOrderAddress.AsQueryable()
                 .Where(a => a.CreationTime >= item && a.CreationTime < item.AddMonths(1))
                 .ToListAsync();
@@ -1747,13 +1766,30 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns></returns>
     private async Task<List<OBProvinceList>> GetObList(ChartsInput input)
     {
+        var sql = _repOrder.AsQueryable()
+             .LeftJoin<WMSOrderAddress>((o, oa) => o.PreOrderId == oa.PreOrderId)
+             .LeftJoin<WMSOrderDetail>((o, oa, od) => o.Id == od.OrderId)
+             .Where((o, oa, od) => o.OrderStatus == 99)
+             .WhereIF(input.Month.HasValue, (o, oa, od) => o.CreationTime >= DateTime.Parse(input.Month + "-01"))
+             .WhereIF(input.Month.HasValue, (o, oa, od) => o.CreationTime <= DateTime.Parse(input.Month + "-01").AddMonths(1).AddTicks(-1))
+             .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, (o, oa, od) => o.CustomerId == input.CustomerId)
+             .WhereIF(!string.IsNullOrEmpty(input.OBProvince), (o, oa, od) => oa.Province.Contains(input.OBProvince))
+             .GroupBy((o, oa, od) => new { oa.Province, od.SKU, o.CustomerName, o.CustomerId })
+             .Select((o, oa, od) => new OBProvinceList
+             {
+                 ObProvince = oa.Province,
+                 Customer = o.CustomerName,
+                 CustomerId = o.CustomerId,
+                 Sku = od.SKU,
+                 Qty = SqlFunc.AggregateSum(od.OrderQty),
+             }).ToSqlString();
         var orderData = await _repOrder.AsQueryable()
              .LeftJoin<WMSOrderAddress>((o, oa) => o.PreOrderId == oa.PreOrderId)
              .LeftJoin<WMSOrderDetail>((o, oa, od) => o.Id == od.OrderId)
              .Where((o, oa, od) => o.OrderStatus == 99)
              .WhereIF(input.Month.HasValue, (o, oa, od) => o.CreationTime >= DateTime.Parse(input.Month + "-01"))
              .WhereIF(input.Month.HasValue, (o, oa, od) => o.CreationTime <= DateTime.Parse(input.Month + "-01").AddMonths(1).AddTicks(-1))
-             .WhereIF(input.CustomerId.HasValue, (o, oa, od) => o.CustomerId == input.CustomerId)
+             .WhereIF(input.CustomerId.HasValue && input.CustomerId > 0, (o, oa, od) => o.CustomerId == input.CustomerId)
              .WhereIF(!string.IsNullOrEmpty(input.OBProvince), (o, oa, od) => oa.Province.Contains(input.OBProvince))
              .GroupBy((o, oa, od) => new { oa.Province, od.SKU, o.CustomerName, o.CustomerId })
              .Select((o, oa, od) => new OBProvinceList

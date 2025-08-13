@@ -23,6 +23,8 @@ public class CustomerProductPriceMapping
     public string? CustomerName { get; set; }
     public string? Sku { get; set; }
     public double? Price { get; set; }
+    public double? Qty { get; set; }
+
 }
 /// <summary>
 /// 第一张图
@@ -126,4 +128,13 @@ public class OBProvinceGroupbyWhere
     public long? CustomerId { get; set; }
     public double? Qty { get; set; }
     public long? Amount { get; set; }
+}
+
+
+
+public class OrderDetailTotal
+{
+    public string? SKU { get; set; }
+    public double? TotalQty { get; set; }
+
 }
