@@ -566,7 +566,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 });
             }
         }
-
+        skuAmounts = skuAmounts.OrderByDescending(a => a.Yseries).ToList();
         return skuAmounts;
     }
 
