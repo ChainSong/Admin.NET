@@ -130,11 +130,21 @@ public class OBProvinceGroupbyWhere
     public long? Amount { get; set; }
 }
 
-
-
 public class OrderDetailTotal
 {
     public string? SKU { get; set; }
     public double? TotalQty { get; set; }
 
+}
+public class OrderDetailTotalByMonth
+{
+    public string? Month { get; set; }
+    public double? Qty { get; set; }
+    public string? SKU { get; set; }
+}
+
+public class OrderDetailTotalAmount
+{
+    public string? Month { get; set; }
+    public double? Price { get; set; }
 }
