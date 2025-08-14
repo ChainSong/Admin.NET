@@ -232,20 +232,20 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         OBProvinceOutput outputs = new OBProvinceOutput();
         try
         {
-            //没选中省份 那就返回空list
-            if (string.IsNullOrEmpty(input.OBProvince))
-                return outputs;
-
+      
             // 商品价格字典缓存
             var priceMap = await GetProductPriceMap();
             var orderData = await GetObList(input);
 
             if (orderData != null && orderData.Count > 0)
             {
-                // 计算每个省份的不同供应商的总金额
-                outputs.oBProvinceGroupbyProvince = await GetObProvinceDataGByCustomer(orderData, priceMap);
+
+                //// 计算每个省份的不同供应商的总金额
+                //outputs.oBProvinceGroupbyProvince = await GetObProvinceDataGByCustomer(orderData, priceMap);
+                
                 // 计算每个省份的总金额
                 outputs.oBProvince = await GetObDataGByProvince(orderData, priceMap);
+
             }
         }
         catch (Exception ex)
@@ -1922,6 +1922,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     #endregion
 
     #region 大屏三
+
     /// <summary>
     /// 获取出库数据
     /// </summary>
@@ -1998,6 +1999,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         return oBProvinces;
     }
+   
     #endregion
 
     #endregion
