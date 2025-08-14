@@ -127,7 +127,7 @@ public class OBProvinceGroupbyWhere
     public string? Customer { get; set; }
     public long? CustomerId { get; set; }
     public double? Qty { get; set; }
-    public long? Amount { get; set; }
+    public double? Amount { get; set; }
 }
 
 public class OrderDetailTotal

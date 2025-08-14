@@ -227,30 +227,52 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetByOBProvince")]
-    public async Task<OBProvinceOutput> GetByOBProvince(ChartsInput input)
+    public async Task<List<OBProvince>> GetByOBProvince(ChartsInput input)
     {
-        OBProvinceOutput outputs = new OBProvinceOutput();
+        List<OBProvince> outputs = new List<OBProvince>();
         try
         {
-      
+            if (!input.Month.HasValue)
+            {
+                input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+            }
             // 商品价格字典缓存
             var priceMap = await GetProductPriceMap();
             var orderData = await GetObList(input);
 
             if (orderData != null && orderData.Count > 0)
             {
-
-                //// 计算每个省份的不同供应商的总金额
-                //outputs.oBProvinceGroupbyProvince = await GetObProvinceDataGByCustomer(orderData, priceMap);
-                
                 // 计算每个省份的总金额
-                outputs.oBProvince = await GetObDataGByProvince(orderData, priceMap);
-
+                outputs = await GetObDataGByProvince(orderData, priceMap);
             }
         }
         catch (Exception ex)
         {
             throw;
+        }
+        return outputs;
+    }
+    [HttpPost]
+    [AllowAnonymous]
+    [ApiDescriptionSettings(Name = "GetByOBProvinceByProvince")]
+    public async Task<List<OBProvinceGroupbyWhere>> GetByOBProvinceByProvince(ChartsInput input)
+    {
+        List<OBProvinceGroupbyWhere> outputs = new List<OBProvinceGroupbyWhere>();
+        if (string.IsNullOrEmpty(input.OBProvince))
+        {
+            return outputs;
+        }
+        if (!input.Month.HasValue)
+        {
+            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+        }
+        // 商品价格字典缓存
+        var priceMap = await GetProductPriceMap();
+        var orderData = await GetObList(input);
+        if (orderData != null && orderData.Count > 0)
+        {
+            //// 计算每个省份的不同供应商的总金额
+            outputs = await GetObProvinceDataGByCustomer(orderData, priceMap);
         }
         return outputs;
     }
@@ -1939,11 +1961,16 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             sqlWhereSql = "od.customerId in (22, 23, 29, 56, 49, 44, 30)";
         }
+        var sqlWhereSql2 = string.Empty;
+        if (!string.IsNullOrEmpty(input.OBProvince))
+        {
+            sqlWhereSql2 = " and oa.province like '%"+ input.OBProvince + "%' ";
+        }
         string sql = "SELECT  [oa].[Province] AS [ObProvince] , [o].[CustomerName] AS [Customer] , [o].[CustomerId] AS [CustomerId] , " +
             "[od].[SKU] AS [Sku] , SUM([od].[OrderQty]) AS [Qty]  FROM [WMS_Order] [o] Left JOIN [WMS_OrderAddress] [oa] " +
             "ON ( [o].[PreOrderId] = [oa].[PreOrderId] )  Left JOIN [WMS_OrderDetail] [od] ON ( [o].[Id] = [od].[OrderId] )  " +
             " WHERE 1=1 and " + sqlWhereSql + " and ( [o].[OrderStatus] = 99 ) " +
-            " AND ( [o].[CreationTime] >= '" + input.Month + "' )  " +
+            " "+ sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + input.Month + "' )  " +
             "AND ( [o].[CreationTime] <= '" + Convert.ToDateTime(input.Month).AddDays(1) + "' )" +
             "GROUP BY [oa].[Province],[od].[SKU],[o].[CustomerName],[o].[CustomerId] ";
         var orderData = _repCustomer.Context.Ado.GetDataTable(sql).TableToList<OBProvinceList>();
@@ -1959,18 +1986,32 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     private async Task<List<OBProvince>> GetObDataGByProvince(List<OBProvinceList> data, List<CustomerProductPriceMapping> priceMap)
     {
         List<OBProvince> oBProvinces = new List<OBProvince>();
-        var provinceGroupss = data.GroupBy(x => new { x.ObProvince });
-        foreach (var provinceGroup in provinceGroupss)
+
+        // 格式化每个 province 的名称
+        var formattedData = data.Select(x => new OBProvinceList
+        {
+            ObProvince = FormatProvinceName(x.ObProvince), // 格式化省份名称
+            Qty = x.Qty,
+            CustomerId = x.CustomerId,
+            Customer = x.Customer,
+            Sku = x.Sku
+        }).ToList();
+
+        // 分组数据
+        var provinceGroups = formattedData.GroupBy(x => x.ObProvince);
+
+        foreach (var provinceGroup in provinceGroups)
         {
             oBProvinces.Add(new OBProvince
             {
-                ObProvince = provinceGroup.Key.ObProvince,
+                ObProvince = provinceGroup.Key,
                 Qty = provinceGroup.Sum(x => x.Qty),
                 Amount = CalculateTotalAmount(
                     provinceGroup.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())),
                     priceMap),
             });
         }
+
         return oBProvinces;
     }
 
@@ -1980,27 +2021,108 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="data"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<List<OBProvinceGroupbyWhere>> GetObProvinceDataGByCustomer(List<OBProvinceList> data, List<CustomerProductPriceMapping> priceMap)
+    private async Task<List<OBProvinceGroupbyWhere>> GetObProvinceDataGByCustomer(
+        List<OBProvinceList> data,
+        List<CustomerProductPriceMapping> priceMap)
     {
         List<OBProvinceGroupbyWhere> oBProvinces = new List<OBProvinceGroupbyWhere>();
-        var provinceGroups = data.GroupBy(x => x.ObProvince);
+        // 格式化每个 province 的名称
+        var formattedData = data.Select(x => new OBProvinceList
+        {
+            ObProvince = FormatProvinceName(x.ObProvince), // 格式化省份名称
+            Qty = x.Qty,
+            CustomerId = x.CustomerId,
+            Customer = x.Customer,
+            Sku = x.Sku
+        }).ToList();
+
+        // 按省份和客户分组
+        var provinceGroups = formattedData.GroupBy(x => new { x.ObProvince, x.CustomerId });
+
         foreach (var provinceGroup in provinceGroups)
         {
+            // 计算每组的总数量和总金额
+            double totalQty = provinceGroup.Sum(x => x.Qty.GetValueOrDefault());
+            double totalAmount = CalculateTotalAmount(
+                provinceGroup.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())),
+                priceMap);
+
+            // 创建并添加到返回列表
             oBProvinces.Add(new OBProvinceGroupbyWhere
             {
-                ObProvince = provinceGroup.Key,
-                Qty = provinceGroup.Sum(x => x.Qty),
-                Amount = CalculateTotalAmount(
-                provinceGroup.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())),
-                priceMap),
-                Customer = provinceGroup.Select(x => x.Customer).FirstOrDefault(),
-                CustomerId = provinceGroup.Select(x => x.CustomerId).FirstOrDefault(),
+                ObProvince = provinceGroup.Key.ObProvince, // 省份
+                Qty = totalQty, // 总数量
+                Amount = totalAmount, // 总金额
+                Customer = provinceGroup.Select(x => x.Customer).FirstOrDefault(), // 客户名称
+                CustomerId = provinceGroup.Key.CustomerId // 客户ID
             });
         }
+
         return oBProvinces;
     }
-   
+
     #endregion
 
+
+
+    private static readonly Dictionary<string, string> ProvinceNameMap = new Dictionary<string, string>
+{
+    { "北京市", "北京" },
+    { "天津市", "天津" },
+    { "上海市", "上海" },
+    { "重庆市", "重庆" },
+    { "香港特别行政区", "香港" },
+    { "澳门特别行政区", "澳门" },
+    { "内蒙古自治区", "内蒙古" },
+    { "广西壮族自治区", "广西" },
+    { "西藏自治区", "西藏" },
+    { "宁夏回族自治区", "宁夏" },
+    { "新疆维吾尔自治区", "新疆" },
+    { "河北省", "河北" },
+    { "山西省", "山西" },
+    { "辽宁省", "辽宁" },
+    { "吉林省", "吉林" },
+    { "黑龙江省", "黑龙江" },
+    { "江苏省", "江苏" },
+    { "浙江省", "浙江" },
+    { "安徽省", "安徽" },
+    { "福建省", "福建" },
+    { "江西省", "江西" },
+    { "山东省", "山东" },
+    { "河南省", "河南" },
+    { "湖北省", "湖北" },
+    { "湖南省", "湖南" },
+    { "广东省", "广东" },
+    { "海南省", "海南" },
+    { "四川省", "四川" },
+    { "贵州省", "贵州" },
+    { "云南省", "云南" },
+    { "陕西省", "陕西" },
+    { "甘肃省", "甘肃" },
+    { "青海省", "青海" },
+    { "台湾省", "台湾" },
+};
+
+
+    // 格式化省份名称的函数
+    private string FormatProvinceName(string provinceName)
+    {
+        if (string.IsNullOrEmpty(provinceName)) return "";
+
+        if (provinceName.Contains("山东"))
+        {
+
+        }
+        // 使用映射表进行格式化，如果没有找到匹配，则返回原始名称
+        // 处理映射表中定义的特殊名称
+        if (ProvinceNameMap.ContainsKey(provinceName))
+        {
+            return ProvinceNameMap[provinceName];
+        }
+
+        // 替换省、自治区等后缀（“省”、“自治区”或“特别行政区”）
+        return provinceName.Replace("省", "").Replace("自治区", "").Replace("特别行政区", "").Trim();
+
+    }
     #endregion
 }
