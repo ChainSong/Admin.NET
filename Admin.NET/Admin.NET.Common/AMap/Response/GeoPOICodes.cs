@@ -50,10 +50,10 @@ public class Poi
     public string TypeCode { get; set; }
 
     [JsonPropertyName("address")]
-    public string Address { get; set; }
+    public object Address { get; set; }
 
     [JsonPropertyName("location")]
-    public string Location { get; set; }
+    public object Location { get; set; }
 
     [JsonPropertyName("tel")]
     public object Tel { get; set; }   // string or []

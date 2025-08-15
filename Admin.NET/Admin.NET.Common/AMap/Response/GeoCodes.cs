@@ -41,7 +41,7 @@ public class GeoCodes
     /// <summary>
     /// 地址所在的区
     /// </summary>
-    public string district { get; set; }
+    public object district { get; set; }
     /// <summary>
     /// 街道
     /// </summary>

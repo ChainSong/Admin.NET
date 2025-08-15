@@ -56,6 +56,10 @@ public class OrderAddressGeocodeJob : IJob
 
                 if (string.IsNullOrEmpty(item.Address)) continue;
                 var geo = await aMap.RequestGeoCode(item.Address, item.City);
+                if (geo!=null && geo.status=="0")
+                {
+                    continue;
+                }
                 var geoPOI = await aMap.RequestGeoCodePOI(item.Address);
                 var geocode = geo?.geocodes?.FirstOrDefault();
                 var geocodePOI = geoPOI?.Pois?.FirstOrDefault();
