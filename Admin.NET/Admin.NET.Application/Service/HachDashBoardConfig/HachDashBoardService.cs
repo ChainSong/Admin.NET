@@ -2057,13 +2057,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 CustomerId = provinceGroup.Key.CustomerId // 客户ID
             });
         }
-
         return oBProvinces;
     }
 
     #endregion
-
-
 
     private static readonly Dictionary<string, string> ProvinceNameMap = new Dictionary<string, string>
 {
