@@ -116,7 +116,7 @@ public class OBProvince
 {
     public string ObProvince { get; set; }
     public double? Qty { get; set; }
-    public long? Amount { get; set; }
+    public double? Amount { get; set; }
 }
 /// <summary>
 /// 根据条件计算省份每位客户的的总金额，总数量

@@ -55,37 +55,37 @@ public class SumItemOutput
     /// <summary>
     /// 上个月库存总金额 Last month's total inventory amount
     /// </summary> 
-    public long? LastMonthAmount { get; set; }
+    public double? LastMonthAmount { get; set; }
 
     /// <summary>
     /// 目前库存总金额  Total inventory amount for this month
     /// </summary>
-    public long? CurrentMonthAmount { get;set; }
+    public double? CurrentMonthAmount { get;set; }
 
     /// <summary>
     /// 当月目标库存总金额 Target inventory total amount
     /// </summary>
-    public long? CurrentTargetAmount { get; set; }
+    public double? CurrentTargetAmount { get; set; }
 
     /// <summary>
     /// 目前库存总金额VS目标库存总金额 Current total inventory amount vs. target total inventory amount
     /// </summary>
-    public long? CMonthVSTargetAmount { get; set; }
+    public double? CMonthVSTargetAmount { get; set; }
 
     /// <summary>
     /// YTD出库/入库
     /// </summary>
-    public long? YTDOrderVSASNAmount { get; set; }
+    public double? YTDOrderVSASNAmount { get; set; }
 
     /// <summary>
     /// 当月入库总金额
     /// </summary>
-    public long? CurrentReceiptAmount { get; set; }
+    public double? CurrentReceiptAmount { get; set; }
 
     /// <summary>
     /// 当月出库总金额
     /// </summary>
-    public long? CurrentOrderAmount { get; set; }
+    public double? CurrentOrderAmount { get; set; }
 }
 
 public class SelectItem
