@@ -33,7 +33,7 @@ public class GeoCodes
     /// <summary>
     /// 地址所在的城市名
     /// </summary>
-    public string city { get; set; }
+    public object city { get; set; }
     /// <summary>
     /// 城市编码
     /// </summary>

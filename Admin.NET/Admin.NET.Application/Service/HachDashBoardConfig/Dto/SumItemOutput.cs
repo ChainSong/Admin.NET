@@ -23,6 +23,12 @@ public class ChartsInput
     public int Take { get; set; } = 100;
 }
 
+public class ObChartsInput: ChartsInput
+{
+    public DateTime? StartDate{ get; set; }
+    public DateTime? EndDate { get; set; }
+}
+
 public class ProvinceInput
 {
     //只支持单个关键词语搜索关键词支持：行政区名称、citycode、adcode

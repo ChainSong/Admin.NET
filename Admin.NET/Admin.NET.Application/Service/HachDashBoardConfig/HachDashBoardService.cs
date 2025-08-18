@@ -227,15 +227,26 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetByOBProvince")]
-    public async Task<List<OBProvince>> GetByOBProvince(ChartsInput input)
+    public async Task<List<OBProvince>> GetByOBProvince(ObChartsInput input)
     {
         List<OBProvince> outputs = new List<OBProvince>();
         try
         {
-            if (!input.Month.HasValue)
+            if (!input.StartDate.HasValue)
             {
-                input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+                // 获取当前月份的第一天
+                input.StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             }
+
+            if (!input.EndDate.HasValue)
+            {
+                // 获取当前月份的最后一天
+                input.EndDate = new DateTime(Convert.ToDateTime(input.StartDate).Year, DateTime.Today.Month, 1)
+                                  .AddMonths(1).AddDays(-1);
+            }
+
+
+
             // 商品价格字典缓存
             var priceMap = await GetProductPriceMap();
             var orderData = await GetObList(input);
@@ -255,17 +266,26 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetByOBProvinceByProvince")]
-    public async Task<List<OBProvinceGroupbyWhere>> GetByOBProvinceByProvince(ChartsInput input)
+    public async Task<List<OBProvinceGroupbyWhere>> GetByOBProvinceByProvince(ObChartsInput input)
     {
         List<OBProvinceGroupbyWhere> outputs = new List<OBProvinceGroupbyWhere>();
         if (string.IsNullOrEmpty(input.OBProvince))
         {
             return outputs;
         }
-        if (!input.Month.HasValue)
+        if (!input.StartDate.HasValue)
         {
-            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
+            // 获取当前月份的第一天
+            input.StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         }
+
+        if (!input.EndDate.HasValue)
+        {
+            // 获取当前月份的最后一天
+            input.EndDate = new DateTime(Convert.ToDateTime(input.StartDate).Year, DateTime.Today.Month, 1)
+                              .AddMonths(1).AddDays(-1);
+        }
+
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
         var orderData = await GetObList(input);
@@ -1703,7 +1723,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         // 商品价格字典缓存
         var priceMap = await GetProductPriceMap();
-        var orderData = await GetObList(input);
+        var orderData = await GetPieObList(input);
         var orderDataByProvince = await GetObDataGByProvince(orderData, priceMap);
         orderDataByProvince = orderDataByProvince.OrderByDescending(a => a.Amount).ToList();
         // 获取前 5 条数据
@@ -1941,16 +1961,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
            "AND ( [CreationTime] < '" + date.AddMonths(1) + "'))";
         return _repOrderAddress.Context.Ado.GetDataTable(sql).TableToList<WMSOrderAddress>();
     }
-    #endregion
 
-    #region 大屏三
-
-    /// <summary>
-    /// 获取出库数据
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    private async Task<List<OBProvinceList>> GetObList(ChartsInput input)
+    private async Task<List<OBProvinceList>> GetPieObList(ChartsInput input)
     {
         var sqlWhereSql = string.Empty;
         if (input.CustomerId.HasValue && input.CustomerId > 0)
@@ -1964,14 +1976,49 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         var sqlWhereSql2 = string.Empty;
         if (!string.IsNullOrEmpty(input.OBProvince))
         {
-            sqlWhereSql2 = " and oa.province like '%"+ input.OBProvince + "%' ";
+            sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
         }
         string sql = "SELECT  [oa].[Province] AS [ObProvince] , [o].[CustomerName] AS [Customer] , [o].[CustomerId] AS [CustomerId] , " +
             "[od].[SKU] AS [Sku] , SUM([od].[OrderQty]) AS [Qty]  FROM [WMS_Order] [o] Left JOIN [WMS_OrderAddress] [oa] " +
             "ON ( [o].[PreOrderId] = [oa].[PreOrderId] )  Left JOIN [WMS_OrderDetail] [od] ON ( [o].[Id] = [od].[OrderId] )  " +
             " WHERE 1=1 and " + sqlWhereSql + " and ( [o].[OrderStatus] = 99 ) " +
-            " "+ sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + input.Month + "' )  " +
+            " " + sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + input.Month + "' )  " +
             "AND ( [o].[CreationTime] <= '" + Convert.ToDateTime(input.Month).AddDays(1) + "' )" +
+            "GROUP BY [oa].[Province],[od].[SKU],[o].[CustomerName],[o].[CustomerId] ";
+        var orderData = _repCustomer.Context.Ado.GetDataTable(sql).TableToList<OBProvinceList>();
+        return orderData;
+    }
+    #endregion
+
+    #region 大屏三
+
+    /// <summary>
+    /// 获取出库数据
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    private async Task<List<OBProvinceList>> GetObList(ObChartsInput input)
+    {
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlWhereSql = "od.customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "od.customerId in (22, 23, 29, 56, 49, 44, 30)";
+        }
+        var sqlWhereSql2 = string.Empty;
+        if (!string.IsNullOrEmpty(input.OBProvince))
+        {
+            sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
+        }
+        string sql = "SELECT  [oa].[Province] AS [ObProvince] , [o].[CustomerName] AS [Customer] , [o].[CustomerId] AS [CustomerId] , " +
+            "[od].[SKU] AS [Sku] , SUM([od].[OrderQty]) AS [Qty]  FROM [WMS_Order] [o] Left JOIN [WMS_OrderAddress] [oa] " +
+            "ON ( [o].[PreOrderId] = [oa].[PreOrderId] )  Left JOIN [WMS_OrderDetail] [od] ON ( [o].[Id] = [od].[OrderId] )  " +
+            " WHERE 1=1 and " + sqlWhereSql + " and ( [o].[OrderStatus] = 99 ) " +
+            " " + sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + input.StartDate + "' )  " +
+            "AND ( [o].[CreationTime] <= '" + Convert.ToDateTime(input.EndDate).AddDays(1) + "' )" +
             "GROUP BY [oa].[Province],[od].[SKU],[o].[CustomerName],[o].[CustomerId] ";
         var orderData = _repCustomer.Context.Ado.GetDataTable(sql).TableToList<OBProvinceList>();
         return orderData;
