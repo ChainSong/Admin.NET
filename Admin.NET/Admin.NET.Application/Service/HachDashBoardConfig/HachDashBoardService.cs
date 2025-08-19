@@ -292,6 +292,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             //// 计算每个省份的不同供应商的总金额
             outputs = await GetObProvinceDataGByCustomer(orderData, priceMap);
         }
+        outputs = outputs.OrderByDescending(a => a.Amount).ToList();
         return outputs;
     }
     #endregion
