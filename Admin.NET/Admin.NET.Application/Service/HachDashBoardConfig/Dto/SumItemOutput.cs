@@ -15,6 +15,12 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service.HachDashBoardConfig.Dto;
 
+public class SumTabInput
+{
+    public long? CustomerId { get; set; }
+}
+
+
 public class ChartsInput
 {
     public DateTime? Month { get; set; }
