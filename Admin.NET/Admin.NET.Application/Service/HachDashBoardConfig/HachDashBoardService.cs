@@ -1563,7 +1563,6 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
         return result;
     }
 
-
     /// <summary>
     /// 获取目标月份 获取 库存表数据
     /// </summary>
@@ -1637,7 +1636,6 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
             todayData.Select(x => (x.CustomerId.GetValueOrDefault(), x.CustomerName, x.SKU, (double)x.AllocatedQty)),
             priceMap
         );
-
         // 正确返回Dictionary
         return new Dictionary<string, double?>
                {
@@ -1677,8 +1675,6 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
                };
     }
     #endregion
-
-
 
     #region 大屏二
     /// <summary>
@@ -2354,43 +2350,42 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
     #endregion
 
     private static readonly Dictionary<string, string> ProvinceNameMap = new Dictionary<string, string>
-{
-    { "北京市", "北京" },
-    { "天津市", "天津" },
-    { "上海市", "上海" },
-    { "重庆市", "重庆" },
-    { "香港特别行政区", "香港" },
-    { "澳门特别行政区", "澳门" },
-    { "内蒙古自治区", "内蒙古" },
-    { "广西壮族自治区", "广西" },
-    { "西藏自治区", "西藏" },
-    { "宁夏回族自治区", "宁夏" },
-    { "新疆维吾尔自治区", "新疆" },
-    { "河北省", "河北" },
-    { "山西省", "山西" },
-    { "辽宁省", "辽宁" },
-    { "吉林省", "吉林" },
-    { "黑龙江省", "黑龙江" },
-    { "江苏省", "江苏" },
-    { "浙江省", "浙江" },
-    { "安徽省", "安徽" },
-    { "福建省", "福建" },
-    { "江西省", "江西" },
-    { "山东省", "山东" },
-    { "河南省", "河南" },
-    { "湖北省", "湖北" },
-    { "湖南省", "湖南" },
-    { "广东省", "广东" },
-    { "海南省", "海南" },
-    { "四川省", "四川" },
-    { "贵州省", "贵州" },
-    { "云南省", "云南" },
-    { "陕西省", "陕西" },
-    { "甘肃省", "甘肃" },
-    { "青海省", "青海" },
-    { "台湾省", "台湾" },
-};
-
+        {
+            { "北京市", "北京" },
+            { "天津市", "天津" },
+            { "上海市", "上海" },
+            { "重庆市", "重庆" },
+            { "香港特别行政区", "香港" },
+            { "澳门特别行政区", "澳门" },
+            { "内蒙古自治区", "内蒙古" },
+            { "广西壮族自治区", "广西" },
+            { "西藏自治区", "西藏" },
+            { "宁夏回族自治区", "宁夏" },
+            { "新疆维吾尔自治区", "新疆" },
+            { "河北省", "河北" },
+            { "山西省", "山西" },
+            { "辽宁省", "辽宁" },
+            { "吉林省", "吉林" },
+            { "黑龙江省", "黑龙江" },
+            { "江苏省", "江苏" },
+            { "浙江省", "浙江" },
+            { "安徽省", "安徽" },
+            { "福建省", "福建" },
+            { "江西省", "江西" },
+            { "山东省", "山东" },
+            { "河南省", "河南" },
+            { "湖北省", "湖北" },
+            { "湖南省", "湖南" },
+            { "广东省", "广东" },
+            { "海南省", "海南" },
+            { "四川省", "四川" },
+            { "贵州省", "贵州" },
+            { "云南省", "云南" },
+            { "陕西省", "陕西" },
+            { "甘肃省", "甘肃" },
+            { "青海省", "青海" },
+            { "台湾省", "台湾" },
+        };
 
     // 格式化省份名称的函数
     private string FormatProvinceName(string provinceName)
