@@ -206,6 +206,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 date.StartDate = Convert.ToDateTime(DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd"));
                 date.EndDate = Convert.ToDateTime(DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")).AddMonths(1);
             }
+            else
+            {
+                date = TargetDate;
+            }
             itemOutput.LastMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input2, date);
             ////这天的库存金额
             itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(input2, DateTime.Today);
