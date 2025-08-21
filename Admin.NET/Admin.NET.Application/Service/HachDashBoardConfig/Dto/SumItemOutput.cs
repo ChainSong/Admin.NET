@@ -19,8 +19,6 @@ public class SumTabInput
 {
     public long? CustomerId { get; set; }
 }
-
-
 public class ChartsInput
 {
     public DateTime? Month { get; set; }
@@ -28,13 +26,11 @@ public class ChartsInput
     public string? OBProvince { get; set; }
     public int Take { get; set; } = 100;
 }
-
 public class ObChartsInput: ChartsInput
 {
     public DateTime? StartDate{ get; set; }
     public DateTime? EndDate { get; set; }
 }
-
 public class ProvinceInput
 {
     //只支持单个关键词语搜索关键词支持：行政区名称、citycode、adcode
@@ -52,7 +48,6 @@ public class ProvinceInput
     //all:只返回当前查询 district 的边界值，不返回子节点的边界值；
     public string? Extensions { get; set; }
 }
-
 /// <summary>
 /// 汇总金额项
 /// </summary>
@@ -93,10 +88,10 @@ public class SumItemOutput
     /// </summary>
     public double? CurrentOrderAmount { get; set; }
 }
-
 public class SelectItem
 {
     public long? Id { get; set; }
     public string? Label { get; set; }
     public string? Value { get; set; }
 }
+

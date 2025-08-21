@@ -148,3 +148,10 @@ public class OrderDetailTotalAmount
     public string? Month { get; set; }
     public double? Price { get; set; }
 }
+
+public class MonthAmountCumulativeOutput
+{
+    public int? Month { get; set; }
+    public double? CurrentYearCumulative { get; set; }
+    public double? PreviousYearCumulative { get; set; }
+}
