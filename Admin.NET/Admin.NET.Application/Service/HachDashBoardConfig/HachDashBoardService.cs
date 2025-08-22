@@ -336,11 +336,15 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and i.customerId in (" + CustomerStr + ")";
         }
 
+        //string query = "SELECT SUM(i.[Qty] * p.[Price]) AS [GrandTotalValue] FROM  [WMS_Inventory_Usable] i WITH (NOLOCK)" +
+        //               "INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]   AND i.[SKU] = p.[SKU]" +
+        //               "WHERE  i.[InventoryStatus] = 1 AND i.[InventoryTime] >= '" + Convert.ToDateTime(today).ToString("yyyy-MM-dd HH:mm:ss") + "'" +
+        //               " AND i.[InventoryTime] < '" + Convert.ToDateTime(today).AddDays(1).ToString("yyyy-MM-dd HH:mm:ss") + "' " +
+        //               " " + sqlWhereSql + "";
+
         string query = "SELECT SUM(i.[Qty] * p.[Price]) AS [GrandTotalValue] FROM  [WMS_Inventory_Usable] i WITH (NOLOCK)" +
-                       "INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]   AND i.[SKU] = p.[SKU]" +
-                       "WHERE  i.[InventoryStatus] = 1 AND i.[InventoryTime] >= '" + Convert.ToDateTime(today).ToString("yyyy-MM-dd HH:mm:ss") + "'" +
-                       " AND i.[InventoryTime] < '" + Convert.ToDateTime(today).AddDays(1).ToString("yyyy-MM-dd HH:mm:ss") + "' " +
-                       " " + sqlWhereSql + "";
+                     "INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]   AND i.[SKU] = p.[SKU]" +
+                     "WHERE  i.[InventoryStatus] = 1 " + sqlWhereSql + "";
 
         try
         {
