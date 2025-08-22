@@ -437,7 +437,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                     totalOrderQty = 0;
                 }
 
-                totalOrderQty = Convert.ToDouble(result);
+                totalOrderQty = Convert.ToDouble(totalOrderQty);
             }
             catch (Exception ex)
             {
@@ -471,7 +471,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                     totalAsnQty = 0;
                 }
 
-                totalAsnQty = Convert.ToDouble(resultAsn);
+                totalAsnQty = Convert.ToDouble(totalAsnQty);
             }
             catch (Exception ex)
             {
@@ -535,7 +535,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         Amount = 0;
                     }
 
-                    Amount = Convert.ToDouble(result);
+                    Amount = Convert.ToDouble(Amount);
                 }
                 catch (Exception ex)
                 {
@@ -592,7 +592,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         Amount = 0;
                     }
 
-                    Amount = Convert.ToDouble(result);
+                    Amount = Convert.ToDouble(Amount);
                 }
                 catch (Exception ex)
                 {
@@ -742,6 +742,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             {
                 return skuAmounts;
             }
+            skuAmounts = skuAmounts.OrderByDescending(a => a.Yseries).ToList();
             return skuAmounts;
         }
         catch (Exception ex)
