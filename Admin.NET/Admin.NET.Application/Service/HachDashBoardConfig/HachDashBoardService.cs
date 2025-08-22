@@ -869,6 +869,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 // 计算每个省份的总金额
                 outputs = await GetObDataGByProvince(orderData, priceMap);
             }
+            else
+            {
+                // 如果结果集为null，循环省份数据并创建零值结果
+                outputs = GetAllProvincesWithZeroData();
+            }
         }
         catch (Exception ex)
         {
@@ -1314,7 +1319,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
              " AND o.[CreationTime] < '" + Convert.ToDateTime(AccountDate.EndDate).AddDays(1).ToString("yyyy-MM-dd HH:mm:ss") + "' " +
              " LEFT JOIN [wms_product] p WITH(NOLOCK) ON d.[CustomerId] = p.[CustomerId] " +
              " AND d.[SKU] = p.[SKU] GROUP BY ds.[Date])" +
-             " SELECT ds.[Date] AS Xseries, ROUND( CASE WHEN ISNULL(o.OrderAmount, 0) = 0 THEN 0" +
+             " SELECT CONVERT(varchar(100), ds.[Date], 23) AS Xseries, ROUND( CASE WHEN ISNULL(o.OrderAmount, 0) = 0 THEN 0" +
              " ELSE (CAST(ISNULL(a.AsnAmount,0) AS DECIMAL(18,4)) / o.OrderAmount) * 100 END, 2) AS Yseries" +
              " FROM DateSeries ds  LEFT JOIN ASN_Daily   a ON ds.[Date] = a.[Date] LEFT JOIN Order_Daily o ON ds.[Date] = o.[Date]" +
              " ORDER BY ds.[Date] OPTION (MAXRECURSION 0);";
@@ -2278,18 +2283,6 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
         // 获取所有省份名称
         var allProvinces = ProvinceNameMap.Values.ToList();
 
-        //foreach (var provinceGroup in provinceGroups)
-        //{
-        //    oBProvinces.Add(new OBProvince
-        //    {
-        //        ObProvince = provinceGroup.Key,
-        //        Qty = provinceGroup.Sum(x => x.Qty),
-        //        Amount = CalculateTotalAmount(
-        //            provinceGroup.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())),
-        //            priceMap),
-        //    });
-        //}
-
         // 为每个省份保证有数据
         foreach (var province in allProvinces)
         {
@@ -2395,7 +2388,22 @@ WHERE cy.[Year] = {Year}  AND cy.[Month] BETWEEN {StartMonth} AND {EndMonth} ORD
             { "青海省", "青海" },
             { "台湾省", "台湾" },
         };
+    private List<OBProvince> GetAllProvincesWithZeroData()
+    {
+        var zeroData = new List<OBProvince>();
 
+        foreach (var province in ProvinceNameMap.Values)
+        {
+            zeroData.Add(new OBProvince
+            {
+                ObProvince = province,
+                Qty = 0,
+                Amount = 0
+            });
+        }
+
+        return zeroData;
+    }
     // 格式化省份名称的函数
     private string FormatProvinceName(string provinceName)
     {
