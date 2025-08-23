@@ -5,54 +5,20 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Const;
-using Admin.NET.Core.Entity;
-using Admin.NET.Core;
-using Furion.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Admin.NET.Application.Service.HachDashBoardConfig.Dto;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using Org.BouncyCastle.Asn1.X509;
-using ServiceStack;
-using System.Globalization;
-using Microsoft.AspNetCore.Authorization;
-using Elasticsearch.Net;
 using Admin.NET.Common.AMap;
 using Admin.NET.Common.AMap.Response;
-using FastExpressionCompiler;
-using XAct;
-using ServiceStack.Script;
-using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
-using Nest;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using static Aliyun.OSS.Model.SelectObjectRequestModel.OutputFormatModel;
-using Utilities;
-using Tea.Utils;
-using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.QueryMarketingMemberCardOpenCardsResponse.Types.Card.Types;
-using Admin.NET.Application.Service.WMSReport.Dto;
-using System.Data;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECOrderSearchRequest.Types;
-using NPOI.SS.Formula.Functions;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.ScanProductAddV2Request.Types.Product.Types;
-using System.IO;
+using Admin.NET.Core;
+using Admin.NET.Core.Entity;
+using Furion.DependencyInjection;
+using Microsoft.AspNetCore.Authorization;
 using MongoDB.Driver.Linq;
-using Admin.NET.Common.LocalLog;
-using Org.BouncyCastle.Asn1.X9;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
-using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.CreateRefundDomesticRefundRequest.Types.Amount.Types;
-using System.Collections;
-using NPOI.XSSF.UserModel;
-using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+using ServiceStack;
 using StackExchange.Redis;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.NontaxCreateBillCardRequest.Types.BillTemplate.Types;
-using System.Collections.Concurrent;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using ServiceStack.Messaging;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaSecOrderUploadCombinedShippingInfoRequest.Types.SubOrder.Types;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
 namespace Admin.NET.Application;
 /// <summary>
 /// HACH大屏
@@ -75,6 +41,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
+    private readonly SqlSugarRepository<WMSHachCustomerMapping> _repHachCustomerMapping;
+
     public static string logFilePath = @"C:\HachLogs\DashBoard_Logs\OrderDashBoard.log";
     public string CustomerStr = "33,34,35,36,37,38,39,40,41,42,43,44,45";
     public HachDashBoardService(UserManager userManager,
@@ -88,7 +56,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
         SqlSugarRepository<WMSASNDetail> repASNDetail,
         SqlSugarRepository<WMSInventoryUsable> repInventoryUsable,
-        SqlSugarRepository<WMSOrderAddress> repOrderAddress
+        SqlSugarRepository<WMSOrderAddress> repOrderAddress,
+        SqlSugarRepository<WMSHachCustomerMapping> repHachCustomerMapping
         )
     {
         _userManager = userManager;
@@ -103,6 +72,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         _repOrderDetail = repOrderDetail;
         _repASNDetail = repASNDetail;
         _repOrderAddress = repOrderAddress;
+        _repHachCustomerMapping = repHachCustomerMapping;
     }
     #endregion
 
@@ -136,17 +106,17 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "SelectCustomerList")]
-    public async Task<List<SelectItem>> SelectCustomerList(List<long> CustomerIds)
+    public async Task<List<SelectItem>> SelectCustomerList(List<long?> CustomerIds)
     {
-        return await _repCustomer.AsQueryable()
-            .Where(a => a.CustomerStatus == 1)
-            .WhereIF(CustomerIds.Count > 0 && CustomerIds.Any(), a => CustomerIds.Contains(a.Id))
-            .Select(a => new SelectItem
-            {
-                Id = a.Id,
-                Label = a.CustomerName
-            })
-            .ToListAsync();
+        string sqlWhereSql = string.Empty;
+
+        if (CustomerIds != null && CustomerIds.Count > 0)
+        {
+            sqlWhereSql = "and customerid in (" + string.Join(",", CustomerIds) + ")";
+        }
+        string Sql = "select Id,CustomerId as Value,CustomerName as Label from WMS_Hach_Customer_Mapping" +
+            " where type='HachDachBoard' "+sqlWhereSql+"";
+        return _repHachCustomerMapping.Context.Ado.GetDataTable(Sql).TableToList<SelectItem>();
     }
     #endregion
 
@@ -229,7 +199,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
             //itemOutput.YTDOrderVSASNAmount = Convert.ToDouble(Math.Abs(Convert.ToDecimal(itemOutput.CurrentReceiptAmount - itemOutput.CurrentOrderAmount)));
 
-            itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount==0?0 : (double)itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount; ;
+            itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount == 0 ? 0 : (double)itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount; ;
             return itemOutput;
         }
         catch (Exception EX)
