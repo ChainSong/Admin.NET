@@ -623,7 +623,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     //屏幕一 上面第一张折线图
 
     /// <summary>
-    /// 月库存金额趋势图VS去年
+    /// 目标月上一月库存金额趋势图VS去年
     /// </summary>
     /// <returns></returns>
     /// 当月没到关账日不展示数据
@@ -640,11 +640,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
         // 获取当前年度的开始和结束日期
         DateTime currentYearStartDate = new DateTime(input.Month.Value.Year, 1, 1);
-        DateTime currentYearEndDate = input.Month.Value.AddMonths(1); // 下个月的第一天，这样可以用 < 比较
+        DateTime currentYearEndDate = input.Month.Value; // 下个月的第一天，这样可以用 < 比较
 
         // 获取去年同期的开始和结束日期
         DateTime lastYearStartDate = currentYearStartDate.AddYears(-1);
-        DateTime lastYearEndDate = currentYearEndDate.AddYears(-1);
+        DateTime lastYearEndDate = currentYearEndDate.AddMonths(-1).AddYears(-1);
 
         monthVSLastOutput.LastYear = await GetInventoryUsableSnapshotListByTargetDate(input, lastYearStartDate, lastYearEndDate);
         monthVSLastOutput.CurrentYear = await GetInventoryUsableSnapshotListByTargetDate(input, currentYearStartDate, currentYearEndDate); ;
@@ -665,33 +665,74 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "GetInventoryUsableGroupBySkuByToday")]
     public async Task<List<ChartIndex>> GetInventoryUsableGroupBySkuByToday(ChartsInput input)
     {
-        if (!input.Month.HasValue)
-        {
-            input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
-        }
-        DateTime today = DateTime.Today;
-        var result = new List<ChartIndex>();
+        List < ChartIndex > result = new List<ChartIndex>();
         try
         {
-            var sqlWhereSql = string.Empty;
-            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            #region 当月查询库存表数据
+            //如果月份没有值 就是默认就是当天 如果有值并且是当月  那就查询库存表的数据
+            if (!input.Month.HasValue || (input.Month.HasValue && Convert.ToDateTime(input.Month).ToString("yyyy-MM").Equals(Convert.ToDateTime(DateTime.Today).ToString("yyyy-MM"))))
             {
-                sqlWhereSql = " AND i.customerId = " + input.CustomerId + "";
+                var sqlWhereSql = string.Empty;
+                if (input.CustomerId.HasValue && input.CustomerId > 0)
+                {
+                    sqlWhereSql = "and i.customerId = " + input.CustomerId + "";
+                }
+                else
+                {
+                    sqlWhereSql = "and i.customerId in (" + CustomerStr + ")";
+                }
+
+                string sql = "SELECT COALESCE(NULLIF(p.[str2], ''),i.sku) as Xseries,SUM(i.[Qty] * p.[Price]) AS Yseries FROM  [WMS_Inventory_Usable] i WITH (NOLOCK)" +
+                               " INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]   AND i.[SKU] = p.[SKU]"+
+                               " WHERE  i.[InventoryStatus] = 1 "+sqlWhereSql+""+
+                               " group by COALESCE(NULLIF(p.[str2], ''),i.sku)  order by Yseries desc";
+                try
+                {
+                    result = _repInventoryUsable.Context.Ado.GetDataTable(sql).TableToList<ChartIndex>();
+                    // 更安全的null检查和类型转换
+            
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+                }
             }
+            #endregion
+
+            #region 历史月份查询目标月份关账日期的结束日
             else
             {
-                sqlWhereSql = " AND i.customerId in (" + CustomerStr + ")";
+                var sqlWhereSql = string.Empty;
+                if (input.CustomerId.HasValue && input.CustomerId > 0)
+                {
+                    sqlWhereSql = "and i.customerId = " + input.CustomerId + "";
+                }
+                //查询目标日期上个月的库存信息
+                string Sql = " SELECT COALESCE(NULLIF(p.[str2], ''),i.sku) as Xseries,SUM(i.[Qty] * p.[Price]) AS Yseries  FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
+                             " INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU]  WHERE 1=1  " +
+                             " AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) =  ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate   " +
+                             " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).ToString("yyyy-MM") + "',120) )  " +
+                             " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDachBoard' "+ sqlWhereSql + ") " +
+                             " group by COALESCE(NULLIF(p.[str2], ''),i.sku) order by Yseries desc ";
+                try
+                {
+                    result = _repInventoryUsable.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
+                    // 更安全的null检查和类型转换
+                  
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+                }
             }
-            string sql = "SELECT  COALESCE(NULLIF(p.[str2], ''), i.[SKU]) AS Xseries, SUM(i.[Qty] * ISNULL(p.[Price], 0)) AS Yseries " +
-                "FROM [WMS_Inventory_Usable] i  INNER JOIN [wms_product] p ON i.[CustomerId] = p.[CustomerId] AND i.[SKU] = p.[SKU]" +
-                " WHERE 1=1 " + sqlWhereSql + " AND i.[InventoryStatus] = 1 " +
-                "GROUP BY COALESCE(NULLIF(p.[str2], ''), i.[SKU]),i.[SKU],p.[str2] ORDER BY Yseries DESC;";
-            result = _repInventoryUsable.Context.Ado.GetDataTable(sql).TableToList<ChartIndex>();
+            #endregion
         }
         catch (Exception ex)
         {
+            throw ex;
         }
-        return result;
     }
 
     //屏幕一  上面第三张图柱状图
@@ -761,14 +802,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
 
     /// <summary>
-    /// 库销比 目标年月 vs 去年
+    /// 获取年初至今出入库金额比率
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    [ApiDescriptionSettings(Name = "GetInventoryToSellPercent")]
-    public async Task<MonthVSLast> GetInventoryToSellPercent(ChartsInput input)
+    [ApiDescriptionSettings(Name = "GetYearToDateInOutAmountRatio")]
+    public async Task<MonthVSLast> GetYearToDateInOutAmountRatio(ChartsInput input)
     {
         MonthVSLast result = new MonthVSLast();
 
@@ -804,13 +845,13 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
 
     /// <summary>
-    ///获取月累计库存,当年不计算当月 跟去年对比
+    ///获取累计出入库金额比率
     /// </summary>
     /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    [ApiDescriptionSettings(Name = "GetCumulativeAmountVSLast")]
-    public async Task<MonthVSLast> GetCumulativeAmountVSLast(ChartsInput input)
+    [ApiDescriptionSettings(Name = "GetCumulativeInOutAmountRatio")]
+    public async Task<MonthVSLast> GetCumulativeInOutAmountRatio(ChartsInput input)
     {
         try
         {
@@ -859,8 +900,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    [ApiDescriptionSettings(Name = "GetCumulativeAmountVSLastThreeMonth")]
-    public async Task<MonthVSLast> GetCumulativeAmountVSLastThreeMonth(ChartsInput input)
+    [ApiDescriptionSettings(Name = "GetRollingThreeMonthInOutRatio")]
+    public async Task<MonthVSLast> GetRollingThreeMonthInOutRatio(ChartsInput input)
     {
         try
         {
@@ -870,7 +911,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             {
                 input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
             }
-            DateTime? CurrentYearEndDate = Convert.ToDateTime(input.Month).AddMonths(-1);
+            DateTime? CurrentYearEndDate = Convert.ToDateTime(input.Month);
             DateTime? CurrentYearStartDate = CurrentYearEndDate.HasValue
                 ? new DateTime(Convert.ToDateTime(input.Month).AddMonths(-3).Year, Convert.ToDateTime(input.Month).AddMonths(-3).Month, 1)
                 : (DateTime?)null;
