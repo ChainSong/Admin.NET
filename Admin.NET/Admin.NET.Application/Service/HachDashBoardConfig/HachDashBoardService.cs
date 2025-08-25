@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using static Aliyun.OSS.Model.SelectObjectRequestModel.OutputFormatModel;
 namespace Admin.NET.Application;
 /// <summary>
 /// HACH大屏
@@ -848,7 +849,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
     #region 大屏二
 
-    #region 大屏二 第一张折线图
+    #region 大屏二 上面第一张折线图
     /// <summary>
     /// 月出库金额趋势 vs 去年
     /// </summary>
@@ -911,7 +912,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
     #endregion
 
-    #region 大屏二 第二张折线图
+    #region 大屏二 上面第二张折线图
     /// <summary>
     /// 月出库数量趋势 vs 去年
     /// </summary>
@@ -975,7 +976,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
     #endregion
 
-    #region 大屏二 第三张柱状图
+    #region 大屏二 上面第三张柱状图
     /// <summary>
     /// YTD 累积出库产品Minor金额 (Top5)
     /// </summary>
@@ -1023,6 +1024,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
     #endregion
 
+    #region 大屏二 下面第一张饼图
     /// <summary>xx
     /// 月累计发货金额最高的省份 饼图  top5 and else 
     /// </summary>
@@ -1039,37 +1041,35 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        var orderData = await GetPieObList(input);
-        var orderDataByProvince = await GetObDataGByProvince(orderData, priceMap);
-        orderDataByProvince = orderDataByProvince.OrderByDescending(a => a.Amount).ToList();
-        // 获取前 5 条数据
-        var top5 = orderDataByProvince.Take(5).ToList();
-        // 将前 5 条数据添加到返回结果中
-        foreach (var item in top5)
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
-            chartIndices.Add(new ChartIndex
-            {
-                Xseries = item.ObProvince,  // 省份名
-                Yseries = item.Amount      // 对应的金额
-            });
+            sqlWhereSql = "and o.customerId = " + input.CustomerId + "";
         }
-
-        // 计算剩余数据的总和并归类为 "其它"
-        var others = orderDataByProvince.Skip(5).ToList();
-        var totalAmountForOthers = others.Sum(a => a.Amount);
-
-        // 将 "其它" 的数据加入列表
-        if (totalAmountForOthers > 0)
+        else
         {
-            chartIndices.Add(new ChartIndex
-            {
-                Xseries = "其它",  // 归类为 "其它"
-                Yseries = totalAmountForOthers
-            });
+            sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
         }
-
+        string query = "WITH ProvinceSummary AS (SELECT  ISNULL(oa.[Province], '未知省份') AS [ObProvince]," +
+            " SUM(od.[OrderQty]) AS [Qty]  FROM [WMS_Order] o " +
+            " INNER JOIN WMS_HachAccountDate h ON  o.[CreationTime] <= h.EndDate " +
+            " AND (YEAR(StartDate) = "+Convert.ToDateTime(input.Month.HasValue?input.Month.Value:DateTime.Today).Year+" " +
+            " AND MONTH(StartDate) = "+Convert.ToDateTime(input.Month.HasValue?input.Month.Value:DateTime.Today).Month+") " +
+            " LEFT JOIN [WMS_OrderAddress] oa ON o.[PreOrderId] = oa.[PreOrderId] " +
+            " LEFT JOIN [WMS_OrderDetail] od ON o.[Id] = od.[OrderId] " +
+            " WHERE 1=1 "+sqlWhereSql+" " +
+            " AND o.[OrderStatus] = 99 GROUP BY oa.[Province]), " +
+            " ProvinceRank AS (SELECT [ObProvince],[Qty],ROW_NUMBER() OVER (ORDER BY [Qty] DESC) AS RankNum FROM ProvinceSummary) " +
+            " SELECT CASE WHEN RankNum <= 5 THEN [ObProvince] ELSE '其它' END AS Xseries,SUM([Qty]) AS Yseries FROM ProvinceRank " +
+            " GROUP BY CASE WHEN RankNum <= 5 THEN [ObProvince] ELSE '其它' END ORDER BY SUM([Qty]) DESC";
+        try
+        {
+            chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+        }
+        catch (Exception ex)
+        {
+            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+        }
         return chartIndices;
     }
     /// <summary>
@@ -1079,92 +1079,55 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="priceMap"></param>
     /// <returns></returns>
     /// 如果1月份的用户 在2月或者后面的月份出现了 那么后面的月份的count减去对应的用户数量
+    #endregion
 
+    #region 大屏二 下面第二张柱状图
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetMonthlyNewUserTrend")]
     public async Task<List<ChartIndex>> GetMonthlyNewUserTrend(ChartsInput input)
     {
+        List<ChartIndex> chartIndices = new List<ChartIndex>();
+
         if (!input.Month.HasValue)
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        List<ChartIndex> chartIndices = new List<ChartIndex>();
-        DateTime firstDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0);
 
-        // 如果传入的月份有值，则使用传入月份的第一天
-        if (input.Month.HasValue)
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
-            firstDayOfMonth = Convert.ToDateTime(input.Month);
+            sqlWhereSql = "and o.customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
         }
 
-        // 生成当年每个月的第一天的日期
-        var dateList = Enumerable.Range(1, 12) // 1~12
-                     .Select(month => new DateTime(firstDayOfMonth.Year, month, 1))
-                     .ToArray();
-
-        // 用于存储每个月的新增用户数量（按省份统计）
-        Dictionary<string, Dictionary<string, double>> userCountByProvincePerMonth = new Dictionary<string, Dictionary<string, double>>();
-
-        // 记录每个用户的首次出现月份（UserId -> FirstMonth）
-        Dictionary<string, int> userFirstMonth = new Dictionary<string, int>();
-
-        // 遍历每个月份，获取每月新增用户
-        var addressDataTaskList = dateList.Select(async item =>
+        string query = "SELECT DATENAME(MONTH, ad.StartDate) AS Xseries, COUNT(DISTINCT oa.Phone) AS Yseries FROM [WMS_OrderAddress] oa " +
+            "INNER JOIN WMS_HachAccountDate ad ON oa.CreationTime >= ad.StartDate  " +
+            "AND oa.CreationTime <= ad.EndDate WHERE YEAR(ad.StartDate) = "+input.Month.Value.Year+"  " +
+            "AND MONTH(ad.StartDate) BETWEEN 1 AND "+input.Month.Value.Month+" " +
+            "AND oa.Phone IS NOT NULL  AND oa.Phone <> '' " +
+            "AND NOT EXISTS (SELECT 1 FROM [WMS_OrderAddress] oa2 " +
+            "INNER JOIN WMS_HachAccountDate ad2 ON oa2.CreationTime >= ad2.StartDate  " +
+            "AND oa2.CreationTime <= ad2.EndDate " +
+            "WHERE oa2.Phone = oa.Phone AND YEAR(ad2.StartDate) = "+input.Month.Value.Year+" AND MONTH(ad2.StartDate) < MONTH(ad.StartDate)) " +
+            "GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate) ORDER BY MONTH(ad.StartDate);";
+        try
         {
-            var addressData = await GetOrderAddressList(item);
-
-            var monthlyUserCountByProvince = new Dictionary<string, double>();
-
-            foreach (var address in addressData)
-            {
-                var userId = address.Name;
-                var province = address.Province;
-
-                if (!userFirstMonth.ContainsKey(userId)) // 新用户
-                {
-                    userFirstMonth[userId] = item.Month;
-
-                    if (!monthlyUserCountByProvince.ContainsKey(province))
-                    {
-                        monthlyUserCountByProvince[province] = 0;
-                    }
-                    monthlyUserCountByProvince[province]++;
-                }
-                else // 已出现过的用户
-                {
-                    var firstMonth = userFirstMonth[userId];
-                    if (firstMonth < item.Month) // 用户首次出现在之前的某个月份
-                    {
-                        continue;  // 跳过重复用户
-                    }
-                }
-            }
-
-            // 将该月按省份统计的用户数存入字典
-            userCountByProvincePerMonth[item.ToString("yyyy-MM")] = monthlyUserCountByProvince;
-        }).ToList();
-
-        // 等待所有异步任务完成
-        await Task.WhenAll(addressDataTaskList);
-
-        // 聚合结果，按月份返回新增用户数量，不需要省份
-        var monthUserCount = userCountByProvincePerMonth
-            .ToDictionary(month => month.Key, month => month.Value.Values.Sum());
-
-        // 设置最终结果集
-        chartIndices.AddRange(monthUserCount.Select(month =>
-            new ChartIndex
-            {
-                Xseries = month.Key,  // 取月份（键）
-                Yseries = month.Value // 取新增用户数量（值）
-            })
-        );
+            chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+        }
+        catch (Exception ex)
+        {
+            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+        }
 
         return chartIndices;
     }
+    #endregion
+
+    #region 下面第三张柱状图
     /// <summary>
     /// 当年月份累计新增用户数量 根据省份来分组
     /// </summary>
@@ -1179,90 +1142,47 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     public async Task<List<ChartIndex>> GetMonthlyCumulativeNewUserTrend(ChartsInput input)
     {
         List<ChartIndex> chartIndices = new List<ChartIndex>();
+
         if (!input.Month.HasValue)
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-        DateTime firstDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0);
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        // 如果传入的月份有值，则使用传入月份的第一天
-        if (input.Month.HasValue)
+
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
-            firstDayOfMonth = Convert.ToDateTime(input.Month);
+            sqlWhereSql = "and o.customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
         }
 
-        // 生成当年每个月的第一天的日期
-        var dateList = Enumerable.Range(1, 12) // 1~12
-                     .Select(month => new DateTime(firstDayOfMonth.Year, month, 1))
-                     .ToArray();
-
-        // 用于存储每个月的新增用户数量（按省份统计）
-        Dictionary<string, Dictionary<string, double>> userCountByProvincePerMonth = new Dictionary<string, Dictionary<string, double>>();
-
-        // 记录每个用户的首次出现月份（UserId -> FirstMonth）
-        Dictionary<string, int> userFirstMonth = new Dictionary<string, int>();
-
-        // 遍历每个月份，获取每月新增用户
-        var addressDataTaskList = dateList.Select(async item =>
+        string query = "WITH MonthlyNew AS (SELECT  MONTH(ad.StartDate) AS MonthNum, DATENAME(MONTH, ad.StartDate) AS Xseries, " +
+            "COUNT(DISTINCT oa.Phone) AS NewCount FROM [WMS_OrderAddress] oa  INNER JOIN WMS_HachAccountDate ad  " +
+            "ON oa.CreationTime >= ad.StartDate  AND oa.CreationTime <= ad.EndDate WHERE YEAR(ad.StartDate) = "+input.Month.Value.Year+" " +
+            "AND MONTH(ad.StartDate) BETWEEN 1 AND "+input.Month.Value.Month+" " +
+            "AND oa.Phone IS NOT NULL  AND oa.Phone <> '' AND NOT EXISTS (SELECT 1  FROM [WMS_OrderAddress] oa2 " +
+            "INNER JOIN WMS_HachAccountDate ad2  ON oa2.CreationTime >= ad2.StartDate AND oa2.CreationTime <= ad2.EndDate  " +
+            "WHERE oa2.Phone = oa.Phone AND YEAR(ad2.StartDate) = "+input.Month.Value.Year+" " +
+            "AND MONTH(ad2.StartDate) < MONTH(ad.StartDate)) GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate)), " +
+            "Cumulative AS (SELECT MonthNum,Xseries,NewCount,SUM(NewCount) OVER (PARTITION BY 1 ORDER BY MonthNum) AS CumCount " +
+            " FROM MonthlyNew), MonthlyComparison AS (SELECT MonthNum,Xseries,NewCount,CumCount,LAG(CumCount, 1) " +
+            "OVER (ORDER BY MonthNum) AS PrevCumCount FROM Cumulative) " +
+            "SELECT Xseries,CASE  WHEN ISNULL(CumCount - PrevCumCount, CumCount) < 0 THEN 0 ELSE ISNULL(CumCount - PrevCumCount, CumCount)  END AS Yseries " +
+            "FROM MonthlyComparison ORDER BY MonthNum; ";
+        try
         {
-            var addressData = await GetOrderAddressList(item);
-
-            var monthlyUserCountByProvince = new Dictionary<string, double>();
-
-            foreach (var address in addressData)
-            {
-                var userId = address.Name;
-                var province = address.Province;
-
-                if (!userFirstMonth.ContainsKey(userId)) // 新用户
-                {
-                    userFirstMonth[userId] = item.Month;
-
-                    if (!monthlyUserCountByProvince.ContainsKey(province))
-                    {
-                        monthlyUserCountByProvince[province] = 0;
-                    }
-                    monthlyUserCountByProvince[province]++;
-                }
-                else // 已出现过的用户
-                {
-                    var firstMonth = userFirstMonth[userId];
-                    if (firstMonth < item.Month) // 用户首次出现在之前的某个月份
-                    {
-                        continue;  // 跳过重复用户
-                    }
-                }
-            }
-
-            // 将该月按省份统计的用户数存入字典
-            userCountByProvincePerMonth[item.ToString("yyyy-MM")] = monthlyUserCountByProvince;
-        }).ToList();
-
-        // 等待所有异步任务完成
-        await Task.WhenAll(addressDataTaskList);
-
-        // 累计每个月的用户数量
-        Dictionary<string, double> cumulativeMonthUserCount = new Dictionary<string, double>();
-        double cumulativeUserCount = 0;
-
-        foreach (var month in userCountByProvincePerMonth)
-        {
-            cumulativeUserCount += month.Value.Values.Sum(); // 累计每月新增用户数量
-            cumulativeMonthUserCount[month.Key] = cumulativeUserCount; // 按月记录累计的用户数
+            chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
         }
-
-        // 设置最终结果集
-        chartIndices.AddRange(cumulativeMonthUserCount.Select(month =>
-            new ChartIndex
-            {
-                Xseries = month.Key,  // 取月份（键）
-                Yseries = month.Value // 取累计新增用户数量（值）
-            })
-        );
+        catch (Exception ex)
+        {
+            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+        }
 
         return chartIndices;
     }
+    #endregion
 
     /// <summary>
     /// 根据时间范围获取 出库地址
@@ -1278,33 +1198,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
            " WHERE 1=1  and (( [CreationTime] >= '" + date.ToString("yyyy-MM-dd HH:mm:ss") + "' ) " +
            "AND ( [CreationTime] < '" + date.AddMonths(1).ToString("yyyy-MM-dd HH:mm:ss") + "'))";
         return _repOrderAddress.Context.Ado.GetDataTable(sql).TableToList<WMSOrderAddress>();
-    }
-
-    private async Task<List<OBProvinceList>> GetPieObList(ChartsInput input)
-    {
-        var sqlWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
-        {
-            sqlWhereSql = "od.customerId = " + input.CustomerId + "";
-        }
-        else
-        {
-            sqlWhereSql = "od.customerId in (" + CustomerStr + ")";
-        }
-        var sqlWhereSql2 = string.Empty;
-        if (!string.IsNullOrEmpty(input.OBProvince))
-        {
-            sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
-        }
-        string sql = "SELECT  [oa].[Province] AS [ObProvince] , [o].[CustomerName] AS [Customer] , [o].[CustomerId] AS [CustomerId] , " +
-            "[od].[SKU] AS [Sku] , SUM([od].[OrderQty]) AS [Qty]  FROM [WMS_Order] [o] Left JOIN [WMS_OrderAddress] [oa] " +
-            "ON ( [o].[PreOrderId] = [oa].[PreOrderId] )  Left JOIN [WMS_OrderDetail] [od] ON ( [o].[Id] = [od].[OrderId] )  " +
-            " WHERE 1=1 and " + sqlWhereSql + " and ( [o].[OrderStatus] = 99 ) " +
-            " " + sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + Convert.ToDateTime(input.Month).ToString("yyyy-MM-dd HH:mm:ss") + "' )  " +
-            "AND ( [o].[CreationTime] <= '" + Convert.ToDateTime(input.Month).AddDays(1).ToString("yyyy-MM-dd HH:mm:ss") + "' )" +
-            "GROUP BY [oa].[Province],[od].[SKU],[o].[CustomerName],[o].[CustomerId] ";
-        var orderData = _repCustomer.Context.Ado.GetDataTable(sql).TableToList<OBProvinceList>();
-        return orderData;
     }
     #endregion
 
