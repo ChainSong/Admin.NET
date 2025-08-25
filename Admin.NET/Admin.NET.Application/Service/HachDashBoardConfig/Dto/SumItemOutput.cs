@@ -76,7 +76,7 @@ public class SumItemOutput
     /// <summary>
     /// YTD出库/入库
     /// </summary>
-    public double? YTDOrderVSASNAmount { get; set; }
+    public float? YTDOrderVSASNAmount { get; set; }
 
     /// <summary>
     /// 当月入库总金额
