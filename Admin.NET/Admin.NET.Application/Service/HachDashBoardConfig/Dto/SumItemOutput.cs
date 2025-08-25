@@ -26,9 +26,9 @@ public class ChartsInput
     public string? OBProvince { get; set; }
     public int Take { get; set; } = 100;
 }
-public class ObChartsInput: ChartsInput
+public class ObChartsInput : ChartsInput
 {
-    public DateTime? StartDate{ get; set; }
+    public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 }
 public class ProvinceInput
@@ -61,7 +61,7 @@ public class SumItemOutput
     /// <summary>
     /// 目前库存总金额  Total inventory amount for this month
     /// </summary>
-    public double? CurrentMonthAmount { get;set; }
+    public double? CurrentMonthAmount { get; set; }
 
     /// <summary>
     /// 当月目标库存总金额 Target inventory total amount
