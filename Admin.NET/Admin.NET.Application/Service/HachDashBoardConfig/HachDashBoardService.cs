@@ -1104,16 +1104,19 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
         }
 
-        string query = "SELECT DATENAME(MONTH, ad.StartDate) AS Xseries, COUNT(DISTINCT oa.Phone) AS Yseries FROM [WMS_OrderAddress] oa " +
-            "INNER JOIN WMS_HachAccountDate ad ON oa.CreationTime >= ad.StartDate  " +
-            "AND oa.CreationTime <= ad.EndDate WHERE YEAR(ad.StartDate) = "+input.Month.Value.Year+"  " +
-            "AND MONTH(ad.StartDate) BETWEEN 1 AND "+input.Month.Value.Month+" " +
-            "AND oa.Phone IS NOT NULL  AND oa.Phone <> '' " +
-            "AND NOT EXISTS (SELECT 1 FROM [WMS_OrderAddress] oa2 " +
-            "INNER JOIN WMS_HachAccountDate ad2 ON oa2.CreationTime >= ad2.StartDate  " +
-            "AND oa2.CreationTime <= ad2.EndDate " +
-            "WHERE oa2.Phone = oa.Phone AND YEAR(ad2.StartDate) = "+input.Month.Value.Year+" AND MONTH(ad2.StartDate) < MONTH(ad.StartDate)) " +
-            "GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate) ORDER BY MONTH(ad.StartDate);";
+        string query = " WITH MonthlyNew AS (SELECT MONTH(ad.StartDate) AS MonthNum,DATENAME(MONTH, ad.StartDate) AS Xseries, " +
+                       " COUNT(DISTINCT oa.Phone) AS NewCount FROM [WMS_OrderAddress] oa " +
+                       " INNER JOIN WMS_HachAccountDate ad ON oa.CreationTime >= ad.StartDate  AND oa.CreationTime <= ad.EndDate  " +
+                       " WHERE YEAR(ad.StartDate) = " + input.Month.Value.Year + " AND MONTH(ad.StartDate) BETWEEN 1 AND " + input.Month.Value.Month + " " +
+                       " AND oa.Phone IS NOT NULL AND oa.Phone <> ''  " +
+                       " GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate)), PrevUsers AS (SELECT  oa.Phone, MONTH(ad.StartDate) AS MonthNum FROM [WMS_OrderAddress] oa  " +
+                       " INNER JOIN WMS_HachAccountDate ad  ON oa.CreationTime >= ad.StartDate AND oa.CreationTime <= ad.EndDate  " +
+                       " WHERE YEAR(ad.StartDate) = " + input.Month.Value.Year + " AND MONTH(ad.StartDate) BETWEEN 1 AND " + input.Month.Value.Month + "  " +
+                       " AND oa.Phone IS NOT NULL  AND oa.Phone <> '' GROUP BY oa.Phone, MONTH(ad.StartDate)),  " +
+                       " MonthlyComparison AS (SELECT mn.MonthNum,mn.Xseries,mn.NewCount,COUNT(DISTINCT pu.Phone) AS PrevMonthUsers FROM MonthlyNew mn" +
+                       " LEFT JOIN PrevUsers pu ON mn.MonthNum > pu.MonthNum GROUP BY mn.MonthNum, mn.Xseries, mn.NewCount) " +
+                       " SELECT Xseries,Case when NewCount - PrevMonthUsers<=0 then 0 else NewCount - PrevMonthUsers end AS Yseries  " +
+                       " FROM MonthlyComparison ORDER BY MonthNum; ";
         try
         {
             chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
@@ -1127,7 +1130,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
     #endregion
 
-    #region 下面第三张柱状图
+    #region 大屏二 下面第三张柱状图
     /// <summary>
     /// 当年月份累计新增用户数量 根据省份来分组
     /// </summary>
@@ -1151,26 +1154,29 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         var sqlWhereSql = string.Empty;
         if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
-            sqlWhereSql = "and o.customerId = " + input.CustomerId + "";
+            sqlWhereSql = "and pd.customerId = " + input.CustomerId + "";
         }
         else
         {
-            sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
+            sqlWhereSql = "and pd.customerId in (" + CustomerStr + ")";
         }
 
-        string query = "WITH MonthlyNew AS (SELECT  MONTH(ad.StartDate) AS MonthNum, DATENAME(MONTH, ad.StartDate) AS Xseries, " +
-            "COUNT(DISTINCT oa.Phone) AS NewCount FROM [WMS_OrderAddress] oa  INNER JOIN WMS_HachAccountDate ad  " +
-            "ON oa.CreationTime >= ad.StartDate  AND oa.CreationTime <= ad.EndDate WHERE YEAR(ad.StartDate) = "+input.Month.Value.Year+" " +
-            "AND MONTH(ad.StartDate) BETWEEN 1 AND "+input.Month.Value.Month+" " +
-            "AND oa.Phone IS NOT NULL  AND oa.Phone <> '' AND NOT EXISTS (SELECT 1  FROM [WMS_OrderAddress] oa2 " +
-            "INNER JOIN WMS_HachAccountDate ad2  ON oa2.CreationTime >= ad2.StartDate AND oa2.CreationTime <= ad2.EndDate  " +
-            "WHERE oa2.Phone = oa.Phone AND YEAR(ad2.StartDate) = "+input.Month.Value.Year+" " +
-            "AND MONTH(ad2.StartDate) < MONTH(ad.StartDate)) GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate)), " +
-            "Cumulative AS (SELECT MonthNum,Xseries,NewCount,SUM(NewCount) OVER (PARTITION BY 1 ORDER BY MonthNum) AS CumCount " +
-            " FROM MonthlyNew), MonthlyComparison AS (SELECT MonthNum,Xseries,NewCount,CumCount,LAG(CumCount, 1) " +
-            "OVER (ORDER BY MonthNum) AS PrevCumCount FROM Cumulative) " +
-            "SELECT Xseries,CASE  WHEN ISNULL(CumCount - PrevCumCount, CumCount) < 0 THEN 0 ELSE ISNULL(CumCount - PrevCumCount, CumCount)  END AS Yseries " +
-            "FROM MonthlyComparison ORDER BY MonthNum; ";
+        string query = "WITH MonthlyNew AS (SELECT MONTH(ad.StartDate) AS MonthNum,DATENAME(MONTH, ad.StartDate) AS Xseries," +
+            " COUNT(DISTINCT oa.Phone) AS NewCount   FROM [WMS_OrderAddress] oa " +
+            " INNER JOIN WMS_HachAccountDate ad  ON oa.CreationTime >= ad.StartDate   AND oa.CreationTime <= ad.EndDate" +
+            " INNER JOIN wms_preorder pd   ON oa.preorderid = pd.id   " +
+            " WHERE YEAR(ad.StartDate) = "+input.Month.Value.Year+"  AND MONTH(ad.StartDate) BETWEEN 1 AND "+input.Month.Value.Month+ " AND oa.Phone <> '' " +
+            " "+ sqlWhereSql + " " +
+            " AND oa.Phone IS NOT NULL   AND oa.Phone <> ''  " +
+            " GROUP BY MONTH(ad.StartDate), DATENAME(MONTH, ad.StartDate)), PrevUsers AS ( SELECT  oa.Phone,MONTH(ad.StartDate) AS MonthNum FROM [WMS_OrderAddress] oa  " +
+            " INNER JOIN WMS_HachAccountDate ad ON oa.CreationTime >= ad.StartDate   AND oa.CreationTime <= ad.EndDate  " +
+            " INNER JOIN wms_preorder pd   ON oa.preorderid = pd.id   " +
+            " WHERE YEAR(ad.StartDate) = " + input.Month.Value.Year+" AND MONTH(ad.StartDate) BETWEEN 1 AND  "+input.Month.Value.Month+ "  " +
+            " AND oa.Phone IS NOT NULL   AND oa.Phone <> ''  "+ sqlWhereSql + " GROUP BY oa.Phone, " +
+            " MONTH(ad.StartDate)), MonthlyComparison AS (SELECT mn.MonthNum,mn.Xseries,mn.NewCount,COUNT(DISTINCT pu.Phone) AS PrevMonthUsers FROM MonthlyNew mn " +
+            " LEFT JOIN PrevUsers pu ON mn.MonthNum > pu.MonthNum  GROUP BY mn.MonthNum, mn.Xseries, mn.NewCount)  " +
+            " SELECT Xseries,CASE WHEN LAG(NewCount, 1, 0) OVER (ORDER BY MonthNum) > 0  THEN NewCount + LAG(NewCount, 1, 0) OVER (ORDER BY MonthNum)  ELSE NewCount END AS Yseries " +
+            " FROM MonthlyComparison ORDER BY MonthNum; ";
         try
         {
             chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
@@ -1183,22 +1189,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         return chartIndices;
     }
     #endregion
-
-    /// <summary>
-    /// 根据时间范围获取 出库地址
-    /// </summary>
-    /// <param name="date"></param>
-    /// <returns></returns>
-    private async Task<List<WMSOrderAddress>> GetOrderAddressList(DateTime date)
-    {
-        string sql = "SELECT [Id],[PreOrderId],[PreOrderNumber],[ExternOrderNumber],[Name],[CompanyName]," +
-           "[CompanyType],[ShipType],[AddressTag],[Phone],[ZipCode],[Province],[City],[Country],[County]," +
-           "[Address],[IsSignBack],[ExpressCompany],[ExpressNumber],[PayMethod],[IsOneselfPickup],[ExpressTypeId]," +
-           "[Creator],[CreationTime],[Updator],[UpdateTime],[TenantId] FROM [WMS_OrderAddress] " +
-           " WHERE 1=1  and (( [CreationTime] >= '" + date.ToString("yyyy-MM-dd HH:mm:ss") + "' ) " +
-           "AND ( [CreationTime] < '" + date.AddMonths(1).ToString("yyyy-MM-dd HH:mm:ss") + "'))";
-        return _repOrderAddress.Context.Ado.GetDataTable(sql).TableToList<WMSOrderAddress>();
-    }
+ 
     #endregion
 
     #region 大屏三
