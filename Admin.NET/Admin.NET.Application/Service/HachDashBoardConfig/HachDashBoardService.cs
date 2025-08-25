@@ -475,18 +475,12 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-
-        // 获取当前年度的开始和结束日期
-        DateTime currentYearStartDate = new DateTime(input.Month.Value.Year, 1, 1);
-        DateTime currentYearEndDate = input.Month.Value; // 下个月的第一天，这样可以用 < 比较
-
-        // 获取去年同期的开始和结束日期
-        DateTime lastYearStartDate = currentYearStartDate.AddYears(-1);
-        DateTime lastYearEndDate = currentYearEndDate.AddMonths(-1).AddYears(-1);
-
-        monthVSLastOutput.LastYear = await GetInventoryUsableSnapshotListByTargetDate(input, lastYearStartDate, lastYearEndDate);
-        monthVSLastOutput.CurrentYear = await GetInventoryUsableSnapshotListByTargetDate(input, currentYearStartDate, currentYearEndDate); ;
-
+        //只查询到上个月
+        input.Month = Convert.ToDateTime(input.Month).AddMonths(-1);
+        monthVSLastOutput.CurrentYear = await GetInventoryUsableSnapshotListByTargetDate(input);
+        //查去年
+        input.Month = Convert.ToDateTime(input.Month).AddYears(-1);
+        monthVSLastOutput.LastYear = await GetInventoryUsableSnapshotListByTargetDate(input);
         return monthVSLastOutput;
     }
 
@@ -496,7 +490,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <param name="lastAccountDate"></param>
     /// <returns></returns>
-    private async Task<List<ChartIndex>> GetInventoryUsableSnapshotListByTargetDate(ChartsInput input, DateTime StartDate, DateTime EndDate)
+    private async Task<List<ChartIndex>> GetInventoryUsableSnapshotListByTargetDate(ChartsInput input)
     {
         List<ChartIndex> result = new List<ChartIndex>();
         var sqlWhereSql = string.Empty;
@@ -508,19 +502,19 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             sqlWhereSql = "and i.customerId in (" + CustomerStr + ")";
         }
-        string query = " WITH AllMonths AS (SELECT  MONTH(DATEADD(MONTH, n, '" + StartDate.ToString("yyyy-MM-dd") + "')) AS [MonthNumber]," +
-                       " DATENAME(MONTH, DATEADD(MONTH, n, '" + StartDate.ToString("yyyy-MM-dd") + "')) AS [MonthName] FROM" +
-                       " (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 " +
-                       " UNION SELECT 7 UNION SELECT 8  UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 ) months " +
-                       " WHERE DATEADD(MONTH, n, '" + StartDate.ToString("yyyy-MM-dd") + "') < '" + EndDate.ToString("yyyy-MM-dd") + "')," +
-                       " MonthlyData AS (SELECT YEAR(i.[InventorySnapshotTime]) AS [Year], MONTH(i.[InventorySnapshotTime]) AS [MonthNumber]," +
-                       " SUM(i.[Qty] * p.[Price]) AS [MonthlyAmount]  FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
-                       " INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId] " +
-                       " AND i.[SKU] = p.[SKU]  WHERE i.[InventorySnapshotTime] >= '" + StartDate.ToString("yyyy-MM-dd") + "'  " +
-                       " AND i.[InventorySnapshotTime] < '" + EndDate.ToString("yyyy-MM-dd") + "'  " + sqlWhereSql + " " +
-                       " GROUP BY YEAR(i.[InventorySnapshotTime]), MONTH(i.[InventorySnapshotTime])) " +
-                       " SELECT  am.[MonthName] as Xseries,COALESCE(md.[MonthlyAmount], 0) AS Yseries  FROM AllMonths am  " +
-                       " LEFT JOIN MonthlyData md ON am.[MonthNumber] = md.[MonthNumber]  ORDER BY am.[MonthNumber];";
+        string query = " WITH AllMonths AS (SELECT  MONTH(DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1))) AS [MonthNumber]," +
+                " DATENAME(MONTH, DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1))) AS [MonthName]  " +
+                " FROM (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6  " +
+                " UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11) months   " +
+                " WHERE DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1)) <= DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + ", 1))," +
+                " MonthlyData AS (SELECT YEAR(h.EndDate) AS [Year], MONTH(h.EndDate) AS [MonthNumber], SUM(i.[Qty] * p.[Price]) AS [MonthlyAmount] " +
+                " FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK)  INNER JOIN [wms_product] p WITH (NOLOCK)    " +
+                " ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU]  " +
+                " INNER JOIN WMS_HachAccountDate h WITH (NOLOCK) ON i.[InventorySnapshotTime] >= h.StartDate  " +
+                " AND i.[InventorySnapshotTime] <= h.EndDate AND YEAR(h.EndDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " AND MONTH(h.EndDate) <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + " " +
+                " WHERE 1=1 "+sqlWhereSql+"   GROUP BY YEAR(h.EndDate), MONTH(h.EndDate))  " +
+                " SELECT   am.[MonthName] as Xseries, COALESCE(md.[MonthlyAmount], 0) AS Yseries  FROM AllMonths am   " +
+                " LEFT JOIN MonthlyData md ON am.[MonthNumber] = md.[MonthNumber]  WHERE am.[MonthNumber] <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + " ORDER BY am.[MonthNumber];";
         try
         {
             result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
