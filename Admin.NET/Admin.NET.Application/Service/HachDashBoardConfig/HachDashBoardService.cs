@@ -992,18 +992,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             input.Month = Convert.ToDateTime(DateTime.Today.ToString("yyyy-MM"));
         }
-        outputs = await GetOrderTotalAmountGroupBySKUByTagetMonthly(input);
-        return outputs;
-    }
-
-    /// <summary>
-    /// 根据目标月份 获取 年初到尾的出库总金额数据
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    private async Task<List<ChartIndex>> GetOrderTotalAmountGroupBySKUByTagetMonthly(ChartsInput input)
-    {
-        List<ChartIndex> result = new List<ChartIndex>();
         var sqlWhereSql = string.Empty;
         if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
@@ -1014,26 +1002,25 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and o.customerId in (" + CustomerStr + ")";
         }
 
-        string query = "SELECT d.[SKU] AS Xseries,SUM(d.[AllocatedQty] * ISNULL(p.[Price], 0)) AS Yseries FROM [WMS_OrderDetail] d"+
-                       " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] AND o.[OrderStatus] = 99"+
-                       " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate"+
-                       " AND YEAR(h.StartDate) = "+ Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Year + " " +
-                       " AND MONTH(h.StartDate) BETWEEN 1 AND "+ Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Month+ ""+
-                       " LEFT JOIN [WMS_Product] p ON d.[SKU] = p.[SKU]  AND d.[CustomerId] = p.[CustomerId]"+
-                       " WHERE 1=1 "+sqlWhereSql+" "+
+        string query = "SELECT d.[SKU] AS Xseries,SUM(d.[AllocatedQty] * ISNULL(p.[Price], 0)) AS Yseries FROM [WMS_OrderDetail] d" +
+                       " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] AND o.[OrderStatus] = 99" +
+                       " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate" +
+                       " AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Year + " " +
+                       " AND MONTH(h.StartDate) BETWEEN 1 AND " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Month + "" +
+                       " LEFT JOIN [WMS_Product] p ON d.[SKU] = p.[SKU]  AND d.[CustomerId] = p.[CustomerId]" +
+                       " WHERE 1=1 " + sqlWhereSql + " " +
                        " GROUP BY d.[SKU] ORDER BY Yseries DESC";
         try
         {
-            result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            outputs = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
         }
         catch (Exception ex)
         {
             throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
         }
 
-        return result;
+        return outputs;
     }
-
     #endregion
 
     /// <summary>xx
