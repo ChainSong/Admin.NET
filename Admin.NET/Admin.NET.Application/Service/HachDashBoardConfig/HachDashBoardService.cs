@@ -1158,27 +1158,37 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         List<OBProvince> outputs = new List<OBProvince>();
         try
         {
-            if (!input.StartDate.HasValue)
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
             {
-                // 获取当前月份的第一天
-                input.StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                sqlWhereSql = "and customerId = " + input.CustomerId + "";
             }
 
-            if (!input.EndDate.HasValue)
+            var sqlWhereSql2 = string.Empty;
+            if (!string.IsNullOrEmpty(input.OBProvince))
             {
-                // 获取当前月份的最后一天
-                input.EndDate = new DateTime(Convert.ToDateTime(input.StartDate).Year, DateTime.Today.Month, 1)
-                                  .AddMonths(1).AddDays(-1);
+                sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
+            }
+            var sqlWhereDate = string.Empty;
+            var sqlWhereDateStr = string.Empty;
+
+            if (input.StartDate.HasValue)
+            {
+                sqlWhereDateStr = "AND [o].[CreationTime] >="+ input.StartDate.Value.ToString("yyyy-MM-dd") + " AND [o].[CreationTime] <= "+ input.EndDate.Value.ToString("yyyy-MM-dd") +" ";
             }
 
-            // 商品价格字典缓存
-            var priceMap = await GetProductPriceMap();
-            var orderData = await GetObList(input);
+            string Sql = "SELECT [oa].[Province] AS [ObProvince], SUM([od].[OrderQty] * ISNULL([p].[Price], 0)) AS [Amount] " +
+                "FROM [WMS_Order] [o]  LEFT JOIN [WMS_OrderAddress] [oa] ON [o].[PreOrderId] = [oa].[PreOrderId] LEFT JOIN [WMS_OrderDetail] [od] " +
+                "ON [o].[Id] = [od].[OrderId] LEFT JOIN [wms_product] [p] ON [od].[SKU] = [p].[sku] AND [o].[CustomerId] = [p].[customerid]  " +
+                "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard')  " +
+                "AND [o].[OrderStatus] = 99  " + sqlWhereDateStr + " " +
+                "GROUP BY [oa].[Province] ORDER BY [Amount] DESC";
+            var orderData = _repCustomer.Context.Ado.GetDataTable(Sql).TableToList<OBProvince>();
 
             if (orderData != null && orderData.Count > 0)
             {
                 // 计算每个省份的总金额
-                outputs = await GetObDataGByProvince(orderData, priceMap);
+                outputs = await GetObDataGByProvince(orderData);
             }
             else
             {
@@ -1556,43 +1566,29 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// <param name="data"></param>
     /// <param name="priceMap"></param>
     /// <returns></returns>
-    private async Task<List<OBProvince>> GetObDataGByProvince(List<OBProvinceList> data, List<CustomerProductPriceMapping> priceMap)
+    private async Task<List<OBProvince>> GetObDataGByProvince(List<OBProvince> data)
     {
         List<OBProvince> oBProvinces = new List<OBProvince>();
-
-        // 格式化每个 province 的名称
-        var formattedData = data.Select(x => new OBProvinceList
-        {
-            ObProvince = FormatProvinceName(x.ObProvince), // 格式化省份名称
-            Qty = x.Qty,
-            CustomerId = x.CustomerId,
-            Customer = x.Customer,
-            Sku = x.Sku
-        }).ToList();
-
-        // 分组数据
-        var provinceGroups = formattedData.GroupBy(x => x.ObProvince);
 
         // 获取所有省份名称
         var allProvinces = ProvinceNameMap.Values.ToList();
 
-        // 为每个省份保证有数据
-        foreach (var province in allProvinces)
-        {
-            var provinceGroup = provinceGroups.FirstOrDefault(pg => pg.Key == province);
-            double totalQty = provinceGroup?.Sum(x => x.Qty) ?? 0;  // 如果没有数据，Qty 为 0
-            double? totalAmount = CalculateTotalAmount(
-                provinceGroup?.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())) ?? Enumerable.Empty<(long, string, string, double)>(),
-                priceMap);
-
-            // 添加每个省份的数据，若没有数据则返回 Qty 和 Amount 为 0
-            oBProvinces.Add(new OBProvince
+        // 格式化输入数据并创建查找字典
+        var formattedDataDict = data
+            .Select(x => new OBProvince
             {
-                ObProvince = province,
-                Qty = totalQty,
-                Amount = totalAmount ?? 0, // 如果没有金额数据，则默认为 0
-            });
-        }
+                ObProvince = FormatProvinceName(x.ObProvince),
+                Amount = x.Amount
+            })
+            .GroupBy(x => x.ObProvince)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Amount));
+
+        // 创建结果列表，确保包含所有省份
+        oBProvinces = allProvinces.Select(province => new OBProvince
+        {
+            ObProvince = province,
+            Amount = formattedDataDict.TryGetValue(province, out var amount) ? amount : 0
+        }).ToList();
 
         return oBProvinces;
     }
