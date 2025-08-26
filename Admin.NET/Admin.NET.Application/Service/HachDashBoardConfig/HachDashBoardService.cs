@@ -1186,14 +1186,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
 
-        string query = "SELECT d.[SKU] AS Xseries,SUM(d.[AllocatedQty] * ISNULL(p.[Price], 0)) AS Yseries FROM [WMS_OrderDetail] d" +
+        string query = "SELECT COALESCE(NULLIF(p.Str2, ''), p.SKU) AS Xseries,SUM(d.[AllocatedQty] * ISNULL(p.[Price], 0)) AS Yseries FROM [WMS_OrderDetail] d" +
                        " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] AND o.[OrderStatus] = 99" +
                        " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate" +
                        " AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " " +
                        " AND MONTH(h.StartDate) BETWEEN 1 AND " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + "" +
                        " LEFT JOIN [WMS_Product] p ON d.[SKU] = p.[SKU]  AND d.[CustomerId] = p.[CustomerId]" +
                        " WHERE 1=1   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ") " +
-                       " GROUP BY d.[SKU] ORDER BY Yseries DESC";
+                       " GROUP BY COALESCE(NULLIF(p.Str2, ''), p.SKU)  ORDER BY Yseries DESC";
         try
         {
             outputs = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
