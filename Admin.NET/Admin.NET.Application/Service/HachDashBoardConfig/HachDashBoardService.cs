@@ -1402,11 +1402,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 sqlWhereSql = "and customerId = " + input.CustomerId + "";
             }
 
-            var sqlWhereSql2 = string.Empty;
-            if (!string.IsNullOrEmpty(input.OBProvince))
-            {
-                sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
-            }
+            //var sqlWhereSql2 = string.Empty;
+            //if (!string.IsNullOrEmpty(input.OBProvince))
+            //{
+            //    sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
+            //}
             var sqlWhereDate = string.Empty;
             var sqlWhereDateStr = string.Empty;
 
@@ -1418,8 +1418,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             string Sql = "SELECT [oa].[Province] AS [ObProvince], SUM([od].[OrderQty] * ISNULL([p].[Price], 0)) AS [Amount] " +
                 "FROM [WMS_Order] [o]  LEFT JOIN [WMS_OrderAddress] [oa] ON [o].[PreOrderId] = [oa].[PreOrderId] LEFT JOIN [WMS_OrderDetail] [od] " +
                 "ON [o].[Id] = [od].[OrderId] LEFT JOIN [wms_product] [p] ON [od].[SKU] = [p].[sku] AND [o].[CustomerId] = [p].[customerid]  " +
-                "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard')  " +
+                "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' "+ sqlWhereSql + ")  " +
                 "AND [o].[OrderStatus] = 99  " + sqlWhereDateStr + " " +
+                //" "+ sqlWhereSql2 + "  " +
                 "GROUP BY [oa].[Province] ORDER BY [Amount] DESC";
             var orderData = _repCustomer.Context.Ado.GetDataTable(Sql).TableToList<OBProvince>();
 
