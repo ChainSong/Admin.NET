@@ -20,6 +20,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using static Aliyun.OSS.Model.SelectObjectRequestModel.OutputFormatModel;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 namespace Admin.NET.Application;
 /// <summary>
 /// HACH大屏
@@ -1174,7 +1175,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
             if (input.StartDate.HasValue)
             {
-                sqlWhereDateStr = "AND [o].[CreationTime] >="+ input.StartDate.Value.ToString("yyyy-MM-dd") + " AND [o].[CreationTime] <= "+ input.EndDate.Value.ToString("yyyy-MM-dd") +" ";
+                sqlWhereDateStr = "AND CONVERT(varchar(10),[o].[CreationTime] ,120)>='" + input.StartDate.Value.ToString("yyyy-MM-dd") + "' AND CONVERT(varchar(10),[o].[CreationTime] ,120) <= '" + input.EndDate.Value.ToString("yyyy-MM-dd") + "' ";
             }
 
             string Sql = "SELECT [oa].[Province] AS [ObProvince], SUM([od].[OrderQty] * ISNULL([p].[Price], 0)) AS [Amount] " +
@@ -1212,28 +1213,59 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             return outputs;
         }
-        if (!input.StartDate.HasValue)
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
-            // 获取当前月份的第一天
-            input.StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
 
-        if (!input.EndDate.HasValue)
+        var sqlWhereSql2 = string.Empty;
+        if (!string.IsNullOrEmpty(input.OBProvince))
         {
-            // 获取当前月份的最后一天
-            input.EndDate = new DateTime(Convert.ToDateTime(input.StartDate).Year, DateTime.Today.Month, 1)
-                              .AddMonths(1).AddDays(-1);
+            sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
+        }
+        var sqlWhereDate = string.Empty;
+        var sqlWhereDateStr = string.Empty;
+
+        if (input.StartDate.HasValue)
+        {
+            sqlWhereDateStr = "AND CONVERT(varchar(10),[o].[CreationTime] ,120)>='" + input.StartDate.Value.ToString("yyyy-MM-dd") + "' AND CONVERT(varchar(10),[o].[CreationTime] ,120) <= '" + input.EndDate.Value.ToString("yyyy-MM-dd") + "' ";
         }
 
-        // 商品价格字典缓存
-        var priceMap = await GetProductPriceMap();
-        var orderData = await GetObList(input);
-        if (orderData != null && orderData.Count > 0)
+        string Sql = "SELECT [oa].[Province] AS [ObProvince],o.CustomerId,o.CustomerName as Customer ,sum(od.OrderQty) as Qty,  SUM([od].[OrderQty] * ISNULL([p].[Price], 0)) AS [Amount] " +
+            "FROM [WMS_Order] [o]  LEFT JOIN [WMS_OrderAddress] [oa] ON [o].[PreOrderId] = [oa].[PreOrderId] LEFT JOIN [WMS_OrderDetail] [od] " +
+            "ON [o].[Id] = [od].[OrderId] LEFT JOIN [wms_product] [p] ON [od].[SKU] = [p].[sku] AND [o].[CustomerId] = [p].[customerid]  " +
+            "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard')  " +
+            "AND [o].[OrderStatus] = 99  " + sqlWhereDateStr + " " +
+            "" + sqlWhereSql2 + " GROUP BY [oa].[Province],o.CustomerName,o.CustomerId ORDER BY [Amount] DESC";
+        outputs = _repCustomer.Context.Ado.GetDataTable(Sql).TableToList<OBProvinceGroupbyWhere>();
+
+        if (outputs != null && outputs.Count > 0)
         {
-            //// 计算每个省份的不同供应商的总金额
-            outputs = await GetObProvinceDataGByCustomer(orderData, priceMap);
+            // 格式化输入数据并创建查找字典
+            var formattedDataDict = outputs
+                .Select(x => new OBProvinceGroupbyWhere
+                {
+                    ObProvince = FormatProvinceName(x.ObProvince),
+                    Amount = x.Amount,
+                    Qty = x.Qty,
+                    Customer = x.Customer,
+                    CustomerId = x.CustomerId
+                })
+                .GroupBy(a => a.Customer)
+                .Select(g => new OBProvinceGroupbyWhere
+                {
+                    Customer = g.Key,
+                    Amount = g.Sum(x => x.Amount), 
+                    Qty = g.Sum(x => x.Qty),       
+                    ObProvince = g.First().ObProvince,  
+                    CustomerId = g.First().CustomerId  
+                })
+                .OrderByDescending(a => a.Amount)  // 按Amount降序排序
+                .ToList();
+
+            outputs = formattedDataDict;
         }
-        outputs = outputs.OrderByDescending(a => a.Amount).ToList();
         return outputs;
     }
     #endregion
@@ -1590,51 +1622,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             Amount = formattedDataDict.TryGetValue(province, out var amount) ? amount : 0
         }).ToList();
 
-        return oBProvinces;
-    }
-
-    /// <summary>
-    /// 根据出库省份获取总金额
-    /// </summary>
-    /// <param name="data"></param>
-    /// <param name="priceMap"></param>
-    /// <returns></returns>
-    private async Task<List<OBProvinceGroupbyWhere>> GetObProvinceDataGByCustomer(
-        List<OBProvinceList> data,
-        List<CustomerProductPriceMapping> priceMap)
-    {
-        List<OBProvinceGroupbyWhere> oBProvinces = new List<OBProvinceGroupbyWhere>();
-        // 格式化每个 province 的名称
-        var formattedData = data.Select(x => new OBProvinceList
-        {
-            ObProvince = FormatProvinceName(x.ObProvince), // 格式化省份名称
-            Qty = x.Qty,
-            CustomerId = x.CustomerId,
-            Customer = x.Customer,
-            Sku = x.Sku
-        }).ToList();
-
-        // 按省份和客户分组
-        var provinceGroups = formattedData.GroupBy(x => new { x.ObProvince, x.CustomerId });
-
-        foreach (var provinceGroup in provinceGroups)
-        {
-            // 计算每组的总数量和总金额
-            double totalQty = provinceGroup.Sum(x => x.Qty.GetValueOrDefault());
-            double? totalAmount = CalculateTotalAmount(
-                provinceGroup.Select(x => (x.CustomerId.GetValueOrDefault(), x.Customer, x.Sku, x.Qty.GetValueOrDefault())),
-                priceMap);
-
-            // 创建并添加到返回列表
-            oBProvinces.Add(new OBProvinceGroupbyWhere
-            {
-                ObProvince = provinceGroup.Key.ObProvince, // 省份
-                Qty = totalQty, // 总数量
-                Amount = totalAmount, // 总金额
-                Customer = provinceGroup.Select(x => x.Customer).FirstOrDefault(), // 客户名称
-                CustomerId = provinceGroup.Key.CustomerId // 客户ID
-            });
-        }
         return oBProvinces;
     }
 
