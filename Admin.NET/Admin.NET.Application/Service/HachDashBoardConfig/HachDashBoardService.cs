@@ -236,17 +236,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
         return itemOutput;
     }
-    private async Task<T> GetTaskResultOrDefault<T>(Task<T> task, T defaultValue)
-    {
-        try
-        {
-            return await task;
-        }
-        catch
-        {
-            return defaultValue; // 或者根据需求记录特定错误
-        }
-    }
+ 
     #region 大屏汇总
     /// <summary>
     /// 获取月份 获取 库存快照表数据
@@ -391,8 +381,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSqlDate = "AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + input.Month.Value.ToString("yyyy-MM") + "'";
         }
         string query = " SELECT  SUM( CAST([PlanKRMB] AS MONEY)) AS [PlanKRMB]  FROM [WMS_HachTagretKRMB] " +
-                       " WHERE 1=1 " + sqlWhereSqlDate + " " +
-                       "AND  customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+                       " WHERE 1=1 AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + (input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM")) + "' " +
+                       "AND  customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard'  " + sqlWhereSql + ")";
         try
         {
             var result = await _repHachTagretKRMB.Context.Ado
@@ -1482,7 +1472,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         string Sql = "SELECT [oa].[Province] AS [ObProvince],o.CustomerId,o.CustomerName as Customer ,sum(od.OrderQty) as Qty,  SUM([od].[OrderQty] * ISNULL([p].[Price], 0)) AS [Amount] " +
             "FROM [WMS_Order] [o]  LEFT JOIN [WMS_OrderAddress] [oa] ON [o].[PreOrderId] = [oa].[PreOrderId] LEFT JOIN [WMS_OrderDetail] [od] " +
             "ON [o].[Id] = [od].[OrderId] LEFT JOIN [wms_product] [p] ON [od].[SKU] = [p].[sku] AND [o].[CustomerId] = [p].[customerid]  " +
-            "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard')  " +
+            "WHERE 1=1 AND od.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' "+ sqlWhereSql + ")  " +
             "AND [o].[OrderStatus] = 99  " + sqlWhereDateStr + " " +
             "" + sqlWhereSql2 + " GROUP BY [oa].[Province],o.CustomerName,o.CustomerId ORDER BY [Amount] DESC";
         outputs = _repCustomer.Context.Ado.GetDataTable(Sql).TableToList<OBProvinceGroupbyWhere>();
