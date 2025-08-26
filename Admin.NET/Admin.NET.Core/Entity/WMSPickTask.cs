@@ -176,7 +176,7 @@ public class WMSPickTask : ITenantIdFilter
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? Str1 { get; set; }
     
     /// <summary>

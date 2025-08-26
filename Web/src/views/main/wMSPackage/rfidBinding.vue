@@ -37,13 +37,7 @@
                     v-on:keyup.enter="scanPackage" style="font-size:20px" placeholder="请输入内容"></el-input>
                 </td>
               </tr>
-              <tr>
-                <th style="padding-left:5px;font-size:20px">拣货任务号:</th>
-                <td>
-                  <el-input v-model="state.vm.form.pickTaskNumber" :disabled="true" style="font-size:20px"
-                    placeholder="拣货任务号" />
-                </td>
-              </tr>
+              
               <tr>
                 <th style="padding-left:5px;font-size:20px">SKU:</th>
                 <td>
@@ -51,95 +45,25 @@
                   <!-- <label style="font-size:20px;">{{ state.vm.form.sku }}</label> -->
                 </td>
               </tr>
-              <tr>
-                <th style="padding-left:5px;font-size:20px">重量:</th>
+                <tr>
+                <th style="padding-left:5px;font-size:20px">SN:</th>
                 <td>
-                  <el-input style="font-size:20px;" v-model="state.vm.form.weight"
-                    onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')" placeholder="请输入重量"></el-input>
-                  <!-- <input id="netweight" type="text" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,3})?).*$/g, '$1')"
-                  class="form-control" style="width:100%" /> -->
+                  <el-input v-model="state.vm.form.sn" :disabled="true" style="font-size:20px" placeholder="JNE" />
+                  <!-- <label style="font-size:20px;">{{ state.vm.form.sku }}</label> -->
+                </td>
+              </tr>
+                <tr>
+                <th style="padding-left:5px;font-size:20px">RFID:</th>
+                <td>
+                  <el-input v-model="state.vm.form.rfid" :disabled="true" style="font-size:20px" placeholder="RFID" />
+                  <!-- <label style="font-size:20px;">{{ state.vm.form.sku }}</label> -->
                 </td>
               </tr>
             </table>
           </div>
-
-          <div style="padding-left: 100px;padding-top: 30px;">
-            <el-row>
-              <el-table show-summary :data="state.vm.tableData" height="350" style="width: 100%;font-size:20px;">
-                <el-table-column prop="sku" label="SKU" width="200">
-                </el-table-column>
-                <el-table-column prop="pickQty" label="拣货数量" width="150">
-                </el-table-column>
-                <el-table-column prop="scanQty" label="扫描数量" width="150">
-                </el-table-column>
-                <el-table-column prop="remainingQty" label="剩余数量" width="150">
-                </el-table-column>
-                <el-table-column prop="packageQty" label="包装数量" width="150">
-                </el-table-column>
-              </el-table>
-            </el-row>
-          </div>
         </div>
 
-      </div>
-
-      <el-row style="top: 30px;">
-        <el-table :data="state.vm.packageData" style="width: 100%;height: 500px;;font-size:20px;">
-          <el-table-column prop="orderNumber" label="出库单号">
-          </el-table-column>
-          <el-table-column prop="pickTaskNumber" label="拣货任务号">
-          </el-table-column>
-          <el-table-column prop="packageNumber" label="箱号">
-          </el-table-column>
-          <el-table-column prop="detailCount" label="包装数量">
-          </el-table-column>
-          <el-table-column prop="expressCompany" label="快递公司">
-          </el-table-column>
-          <el-table-column prop="expressNumber" label="快递单号">
-          </el-table-column>
-          <el-table-column prop="printNum" label="打印次数">
-          </el-table-column>
-          <el-table-column fixed="right" label="操作">
-            <template #default="scope">
-              <el-button class="el-icon-s-comment" type="text" @click="printExpress(scope.row)" size="small">打印
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-row>
-      <printDialog ref="printDialogRef" :title="ptintTitle" />
-
-      <el-dialog title="扫描SN" v-model="state.dialogVisible" width="50%">
-
-        <div>
-
-          <label style="padding-left:5px;font-size:20px">有二维码的时候请不要扫描SKU</label>
-          <table style="height:350px;width: 450px;">
-            <tr>
-              <th style="padding-left:5px;font-size:20px" rowspan="1">拣货任务号:</th>
-              <td>
-                <el-input style="width: 80%;font-size:20px" v-model="state.sndata.pickTaskNumber"
-                  v-on:keyup.enter="scanPickNumber" placeholder="请输入拣货任务号"></el-input>
-              </td>
-            </tr>
-            <tr>
-              <th style="padding-left:5px;font-size:20px">SKU:</th>
-              <td>
-                <el-input style="width: 80%; font-size:20px" v-model="state.sndata.sku"
-                  v-on:keyup.enter="scanSNPickNumber" placeholder="请输入SKU"></el-input>
-              </td>
-            </tr>
-            <tr>
-              <th style="padding-left:5px;font-size:20px">条码:</th>
-              <td>
-                <el-input style="width: 80%; font-size:20px" v-model="state.sndata.snCode"
-                  v-on:keyup.enter="scanSNPickNumber" placeholder="请输入SN"></el-input>
-              </td>
-            </tr>
-
-          </table>
-        </div>
-      </el-dialog>
+      </div> 
     </el-card>
   </div>
 </template>
@@ -177,6 +101,7 @@ const state = ref({
       expressCompany: "",
       lot: "",
       sn: "",
+      rfid: "",
       rfidStr: "",
       rfidInfo: [],
     },
@@ -243,10 +168,12 @@ const audio_success = new Audio('/audio/success.mp3'); // 替换为实际的音�
 onMounted(async () => {
   gettableColumn();
   getExpress();
-  try {
-    signalR.on('echo', (data: any) => {
+  signalR.on('echo', (data: any) => {
+
+    try {
       console.log("WebSocket data");
       console.log(data);
+
       state.value.vm.form.rfidStr = data;
       // state.value.vm.form.rfidInfo = data.rfidinfo;
       // console.log("state.value.vm.form");
@@ -255,14 +182,14 @@ onMounted(async () => {
 
         getRFIDInfoData();
       }
+    } catch (error) {
+      console.error('捕获到错误:', error);
+      // 可以显示一个错误消息给用户
+      //  ElMessage.error("发生了一个错误，请联系管理员。");
+      // alert('发生了一个错误，请联系管理员。');
+    }
 
-    });
-  } catch (error) {
-    console.error('捕获到错误:', error);
-    // 可以显示一个错误消息给用户
-    //  ElMessage.error("发生了一个错误，请联系管理员。");
-    // alert('发生了一个错误，请联系管理员。');
-  }
+  });
 
 });
 
@@ -270,71 +197,65 @@ onMounted(async () => {
 // 获取RFID信息
 const getRFIDInfoData = async () => {
 
-  try {
-    state.value.vm.form.expressCompany = expressValue.value;
-    // ElMessage.warning("getRFIDInfoData");
-    let res = await getRFIDInfo(state.value.vm.form);
 
-    if (res.data.result.code == 1) {
-      audio_success.play(); // 播放音频
+  state.value.vm.form.expressCompany = expressValue.value;
+  // ElMessage.warning("getRFIDInfoData");
+  let res = await getRFIDInfo(state.value.vm.form);
 
-      allPackage(state.value.vm.form);
-      state.value.vm.form = res.data.result.data;
+  if (res.data.result.code == 1) {
+    audio_success.play(); // 播放音频
 
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    allPackage(state.value.vm.form);
+    state.value.vm.form = res.data.result.data;
 
-    } else if (res.data.result.code == 99) {
-      audio_success.play(); // 播放音频
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
-      allPackage(state.value.vm.form);
-      signalR.send("echo", 5);
-      signalR.send("echo", 9);
-      state.value.vm.form.input = "";
-      state.value.vm.form.sku = "";
-      state.value.vm.form.pickTaskNumber = "";
-      state.value.vm.form.weight = 0;
-      // state.value.vm.tableData = res.data.result.data.packageDatas;
-      state.value.vm.tableData = [];
+  } else if (res.data.result.code == 99) {
+    audio_success.play(); // 播放音频
 
-      input.value = true;
-      input.value = false;
-      // allPackage(state.value.vm.form);
-      nextTick(() => {
-        input.value.focus();
-        input.value.select();
-      });
-      // console.log("resRFID");
-      // console.log(res);
+    allPackage(state.value.vm.form);
+    signalR.send("echo", 5);
+    signalR.send("echo", 9);
+    state.value.vm.form.input = "";
+    state.value.vm.form.sku = "";
+    state.value.vm.form.pickTaskNumber = "";
+    state.value.vm.form.weight = 0;
+    // state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData = [];
 
-      ElMessage.success(res.data.result.msg);
-    } else if (res.data.result.code == -1) {
+    input.value = true;
+    input.value = false;
+    // allPackage(state.value.vm.form);
+    nextTick(() => {
+      input.value.focus();
+      input.value.select();
+    });
+    // console.log("resRFID");
+    // console.log(res);
 
-      audio_error.play(); // 播放音频
-      // signalR.send("echo", 5)
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
-      ElMessage.error(res.data.result.msg);
-    } else if (res.data.result.code == 5) {
+    ElMessage.success(res.data.result.msg);
+  } else if (res.data.result.code == -1) {
 
-      audio_error.play(); // 播放音频
-      // signalR.send("echo", 5)
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
-      ElMessage.error(res.data.result.msg);
-    } else if (res.data.result.code == -1) {
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
-      ElMessage.warning(res.data.result.msg);
-    } else {
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
-      ElMessage.warning(res.data.result.msg);
-    }
-  } catch (error) {
-    console.error('捕获到错误:', error);
-    // 可以显示一个错误消息给用户
-    //  ElMessage.error("发生了一个错误，请联系管理员。");
-    // alert('发生了一个错误，请联系管理员。');
+    audio_error.play(); // 播放音频
+    // signalR.send("echo", 5)
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.error(res.data.result.msg);
+  } else if (res.data.result.code == 5) {
+
+    audio_error.play(); // 播放音频
+    // signalR.send("echo", 5)
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.error(res.data.result.msg);
+  } else if (res.data.result.code == -1) {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.warning(res.data.result.msg);
+  } else {
+    state.value.vm.form = res.data.result.data;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
+    ElMessage.warning(res.data.result.msg);
   }
 
 

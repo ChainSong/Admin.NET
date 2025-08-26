@@ -844,10 +844,10 @@ public class SFExpressStrategy : IExpressInterface
         var flagCount = _sysCacheService.Set("SFExpress_" + request.CustomerId + "_" + request.WarehouseId + "_" + request.PackageNumber + "_flag", (flag + 1), new TimeSpan(1, 0, 0));
 
         //同一个快递单，获取打印快递超过5次，就清理token 就更新token (改为0  每次都获取)
-        //if (expressConfig != null && flag >= 0)
-        //{
-        expressConfig.Token = "";
-        //}
+        if (expressConfig != null && flag >= 0)
+        {
+            expressConfig.Token = "";
+        }
         if (expressConfig != null && !string.IsNullOrEmpty(expressConfig.Token))
         {
             response.Msg = "成功";

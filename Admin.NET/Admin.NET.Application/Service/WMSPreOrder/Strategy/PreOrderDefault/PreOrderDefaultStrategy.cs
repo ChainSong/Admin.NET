@@ -275,7 +275,7 @@ namespace Admin.NET.Application.Strategy
                 });
                 if (item.OrderAddress != null)
                 {
-                    item.OrderAddress.ExternOrderNumber = null;
+                    //item.OrderAddress.ExternOrderNumber = null;
                     item.OrderAddress.PreOrderNumber = item.PreOrderNumber;
                     //item.OrderAddress.ExternOrderNumber = item.ExternOrderNumber;
                     item.OrderAddress.Creator = _userManager.Account;
