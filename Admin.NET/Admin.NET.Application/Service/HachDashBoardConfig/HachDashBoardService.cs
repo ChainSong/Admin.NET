@@ -369,19 +369,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     {
 
         var sqlWhereSql = string.Empty;
-        var sqlWhereSqlDate = string.Empty;
-
 
         if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
-        if (input.Month.HasValue)
-        {
-            sqlWhereSqlDate = "AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + input.Month.Value.ToString("yyyy-MM") + "'";
-        }
+    
         string query = " SELECT  SUM( CAST([PlanKRMB] AS MONEY)) AS [PlanKRMB]  FROM [WMS_HachTagretKRMB] " +
-                       " WHERE 1=1 AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + (input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM")) + "' " +
+                       " WHERE 1=1 AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + (input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM") : DateTime.Today.ToString("yyyy-MM")) + "' " +
                        "AND  customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard'  " + sqlWhereSql + ")";
         try
         {
@@ -1401,12 +1396,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             {
                 sqlWhereSql = "and customerId = " + input.CustomerId + "";
             }
-
-            //var sqlWhereSql2 = string.Empty;
-            //if (!string.IsNullOrEmpty(input.OBProvince))
-            //{
-            //    sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
-            //}
+ 
             var sqlWhereDate = string.Empty;
             var sqlWhereDateStr = string.Empty;
 
