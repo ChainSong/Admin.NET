@@ -8,19 +8,29 @@ using Admin.NET.Application.Const;
 using Admin.NET.Application.Service.HachDashBoardConfig.Dto;
 using Admin.NET.Common.AMap;
 using Admin.NET.Common.AMap.Response;
+using Admin.NET.Common.LocalLog;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using Furion.DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
+using Minio.DataModel;
 using MongoDB.Driver.Linq;
+using Nest;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using ServiceStack;
+using ServiceStack.Messaging;
 using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using static Aliyun.OSS.Model.SelectObjectRequestModel.OutputFormatModel;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ScanProductAddV2Request.Types.Product.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaSecOrderUploadCombinedShippingInfoRequest.Types.SubOrder.Types;
+using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.CreateRefundDomesticRefundRequest.Types.Amount.Types;
 namespace Admin.NET.Application;
 /// <summary>
 /// HACH大屏
@@ -76,6 +86,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         _repHachCustomerMapping = repHachCustomerMapping;
     }
     #endregion
+
+    LocalLog Logger = new LocalLog();
 
     #region 下拉筛选条件数据
 
@@ -165,33 +177,76 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "GetSumItemData")]
     public async Task<SumItemOutput> GetSumItemData(ChartsInput input)
     {
+        SumItemOutput itemOutput = new SumItemOutput();
+
         try
         {
-            SumItemOutput itemOutput = new SumItemOutput();
-            //获取目标月份账期起始日，结束日
-            //目标月份 上个月关账日的库存快照数据总金额
             itemOutput.LastMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input);
-            //当   月:  目标月份关账日的库存快照数据总金额
-            //历史月份：关账日的库存快照数据总金额
-            itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(input);
-            ////获取目标月份库存目标金额
-            itemOutput.CurrentTargetAmount = await GetTargetAmountByMonth(input);
-            ///计算差值 目标月份总金额-目标月份库存目标金额
-            itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
-            //// 获取目标月份入库总金额
-            itemOutput.CurrentReceiptAmount = await GetCurrentReceiptAmount(input);
-            //// 获取目标月份出库总金额
-            itemOutput.CurrentOrderAmount = await GetCurrentOrderAmount(input);
-            //目标月份  出库总金额/入库总金额
-            itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount == 0 ? 0 : (float)Math.Round((decimal)(itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount), 3);
-            return itemOutput;
         }
-        catch (Exception EX)
+        catch (Exception ex)
         {
-            throw;
+            itemOutput.LastMonthAmount = 0;
+            Console.WriteLine($"LastMonthAmount error: {ex.Message}");
+        }
+
+        try
+        {
+            itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(input);
+        }
+        catch (Exception ex)
+        {
+            itemOutput.CurrentMonthAmount = 0;
+            Console.WriteLine($"CurrentMonthAmount error: {ex.Message}");
+        }
+
+        try
+        {
+            itemOutput.CurrentTargetAmount = await GetTargetAmountByMonth(input);
+        }
+        catch (Exception ex)
+        {
+            itemOutput.CurrentTargetAmount = 0;
+            Console.WriteLine($"CurrentTargetAmount error: {ex.Message}");
+        }
+
+        // 继续处理其他字段...
+        itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
+
+        try
+        {
+            itemOutput.CurrentReceiptAmount = await GetCurrentReceiptAmount(input);
+        }
+        catch (Exception ex)
+        {
+            itemOutput.CurrentReceiptAmount = 0;
+            Console.WriteLine($"CurrentReceiptAmount error: {ex.Message}");
+        }
+
+        try
+        {
+            itemOutput.CurrentOrderAmount = await GetCurrentOrderAmount(input);
+        }
+        catch (Exception ex)
+        {
+            itemOutput.CurrentOrderAmount = 0;
+            Console.WriteLine($"CurrentOrderAmount error: {ex.Message}");
+        }
+
+        itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount == 0 ? 0 : (float)Math.Round((decimal)(itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount), 3);
+
+        return itemOutput;
+    }
+    private async Task<T> GetTaskResultOrDefault<T>(Task<T> task, T defaultValue)
+    {
+        try
+        {
+            return await task;
+        }
+        catch
+        {
+            return defaultValue; // 或者根据需求记录特定错误
         }
     }
-
     #region 大屏汇总
     /// <summary>
     /// 获取月份 获取 库存快照表数据
@@ -212,8 +267,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         string Sql = " SELECT SUM(i.[Qty] * p.[Price])FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
                     " INNER JOIN [wms_product] p WITH (NOLOCK) ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU] " +
                     " WHERE 1=1  AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) = ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate  " +
-                    " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).AddMonths(-1).ToString("yyyy-MM") + "', 120) )  " +
+                    " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).AddMonths(-1).ToString("yyyy-MM") + "', 120) )  " +
                     " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+
+        Logger.LogMessage("查询大屏汇总1" + Sql, logFilePath);
         try
         {
             var result = await _repInventoryUsableSnapshot.Context.Ado
@@ -227,6 +284,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         catch (Exception ex)
         {
+            Logger.LogMessage("查询大屏汇总1报错" + ex.Message, logFilePath);
             throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
         }
     }
@@ -286,7 +344,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 string Sql = " SELECT SUM(i.[Qty] * p.[Price])FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
                             " INNER JOIN [wms_product] p WITH (NOLOCK) ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU] " +
                             " WHERE 1=1  AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) = ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate  " +
-                            " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).ToString("yyyy-MM") + "', 120) )  " +
+                            " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).ToString("yyyy-MM") + "', 120) )  " +
                             " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
                 try
                 {
@@ -321,14 +379,19 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     {
 
         var sqlWhereSql = string.Empty;
+        var sqlWhereSqlDate = string.Empty;
+
 
         if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
+        if (input.Month.HasValue)
+        {
+            sqlWhereSqlDate = "AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + input.Month.Value.ToString("yyyy-MM") + "'";
+        }
         string query = " SELECT  SUM( CAST([PlanKRMB] AS MONEY)) AS [PlanKRMB]  FROM [WMS_HachTagretKRMB] " +
-                       " WHERE (((YEAR([Month]) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " " +
-                       "AND MONTH([Month]) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + ")))" +
+                       " WHERE 1=1 " + sqlWhereSqlDate + " " +
                        "AND  customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
         try
         {
@@ -366,7 +429,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             string query = "SELECT SUM(d.[ReceivedQty] * p.[Price]) AS [TotalAmount]  FROM [WMS_ASNDetail] d WITH (NOLOCK) " +
                 "INNER JOIN [wms_product] p WITH (NOLOCK)  ON d.[CustomerId] = p.[CustomerId]  AND d.[SKU] = p.[SKU] " +
                 "INNER JOIN [WMS_ASN] o WITH (NOLOCK)  ON o.[Id] = d.[ASNId] AND o.[ASNStatus] <> 90  " +
-                "INNER JOIN WMS_HachAccountDate h WITH (NOLOCK) ON (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + ") " +
+                "INNER JOIN WMS_HachAccountDate h WITH (NOLOCK) ON (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + ") " +
                 "AND o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate " +
                 "WHERE 1=1 AND d.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
             try
@@ -414,7 +477,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 " FROM WMS_OrderDetail od WITH (NOLOCK)  " +
                 " INNER JOIN [wms_product] p WITH (NOLOCK)  ON od.[CustomerId] = p.[CustomerId]  AND od.[SKU] = p.[SKU] " +
                 " INNER JOIN WMS_Order o WITH (NOLOCK)  ON o.[Id] = od.OrderId  AND o.OrderStatus = 99 " +
-                "INNER JOIN WMS_HachAccountDate h WITH (NOLOCK)  on (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + ") " +
+                "INNER JOIN WMS_HachAccountDate h WITH (NOLOCK)  on (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + ") " +
                 "AND o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate  " +
                 "WHERE 1=1 AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
 
@@ -487,22 +550,27 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
 
-        string query = " WITH AllMonths AS (SELECT  MONTH(DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1))) AS [MonthNumber]," +
+        string query = " WITH AllMonths AS (SELECT  MONTH(DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + ", 1, 1))) AS [MonthNumber]," +
                 " DATENAME(MONTH, DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1))) AS [MonthName]  " +
                 " FROM (SELECT 0 AS n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6  " +
                 " UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION SELECT 11) months   " +
-                " WHERE DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", 1, 1)) <= DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + ", " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + ", 1))," +
+                " WHERE DATEADD(MONTH, n, DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + ", 1, 1)) <= DATEFROMPARTS(" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + ", " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + ", 1))," +
                 " MonthlyData AS (SELECT YEAR(h.EndDate) AS [Year], MONTH(h.EndDate) AS [MonthNumber], SUM(i.[Qty] * p.[Price]) AS [MonthlyAmount] " +
                 " FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK)  INNER JOIN [wms_product] p WITH (NOLOCK)    " +
                 " ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU]  " +
                 " INNER JOIN WMS_HachAccountDate h WITH (NOLOCK) ON i.[InventorySnapshotTime] >= h.StartDate  " +
-                " AND i.[InventorySnapshotTime] <= h.EndDate AND YEAR(h.EndDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " AND MONTH(h.EndDate) <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + " " +
+                " AND i.[InventorySnapshotTime] <= h.EndDate AND YEAR(h.EndDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " AND MONTH(h.EndDate) <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + " " +
                 " WHERE 1=1 AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")   GROUP BY YEAR(h.EndDate), MONTH(h.EndDate))  " +
                 " SELECT   am.[MonthName] as Xseries, COALESCE(md.[MonthlyAmount], 0) AS Yseries  FROM AllMonths am   " +
-                " LEFT JOIN MonthlyData md ON am.[MonthNumber] = md.[MonthNumber]  WHERE am.[MonthNumber] <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + " ORDER BY am.[MonthNumber];";
+                " LEFT JOIN MonthlyData md ON am.[MonthNumber] = md.[MonthNumber]  WHERE am.[MonthNumber] <= " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + " ORDER BY am.[MonthNumber];";
         try
         {
             result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in result)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
         }
         catch (Exception ex)
         {
@@ -528,6 +596,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     public async Task<List<ChartIndex>> GetInventoryUsableGroupBySkuByToday(ChartsInput input)
     {
         List<ChartIndex> result = new List<ChartIndex>();
+        List<ChartIndex> Finallyresult = new List<ChartIndex>();
+
         try
         {
             #region 当月查询库存表数据
@@ -546,8 +616,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 try
                 {
                     result = _repInventoryUsable.Context.Ado.GetDataTable(sql).TableToList<ChartIndex>();
-                    // 更安全的null检查和类型转换
-
+                
                     return result;
                 }
                 catch (Exception ex)
@@ -569,7 +638,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 string Sql = " SELECT COALESCE(NULLIF(p.[str2], ''),i.sku) as Xseries,SUM(i.[Qty] * p.[Price]) AS Yseries  FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
                              " INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU]  WHERE 1=1  " +
                              " AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) =  ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate   " +
-                             " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).ToString("yyyy-MM") + "',120) )  " +
+                             " where CONVERT(VARCHAR(7),StartDate, 120)  = CONVERT(VARCHAR(7),'" + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).ToString("yyyy-MM") + "',120) )  " +
                              " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ") " +
                              " group by COALESCE(NULLIF(p.[str2], ''),i.sku) order by Yseries desc ";
                 try
@@ -697,6 +766,75 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
         return result;
     }
+
+    /// <summary>
+    /// 获取目标月份每天的库销比
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="today"></param>
+    /// <returns></returns>
+    private async Task<List<ChartIndex>> GetOrderVSAsnSalesByTargetMonth(ChartsInput input, DateTime? StartDate, DateTime? EndDate)
+    {
+        var skuAmounts = new List<ChartIndex>();
+
+        var sqlOrderWhereSql = string.Empty;
+        var sqlAsnWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlOrderWhereSql = "o.customerId = " + input.CustomerId + "";
+            sqlAsnWhereSql = "a.customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlOrderWhereSql = "o.customerId in (" + CustomerStr + ")";
+            sqlAsnWhereSql = "a.customerId in (" + CustomerStr + ")";
+        }
+        string Sql = "WITH Outbound AS (SELECT FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth," +
+            "SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS OutboundAmount  FROM [WMS_OrderDetail] d  " +
+            "INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id]  " +
+            "INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId  " +
+            "INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  " +
+            "AND o.[CreationTime] <= h.EndDate WHERE o.[OrderStatus] = 99  " +
+            "AND " + sqlOrderWhereSql + " " +
+            "AND CONVERT(varchar(10),h.StartDate  ,120) >= '" + StartDate.Value.ToString("yyyy-MM-dd") + "'  " +
+            "AND CONVERT(varchar(10),h.EndDate  ,120) <= '" + EndDate.Value.ToString("yyyy-MM-dd") + "' " +
+            "GROUP BY FORMAT(h.StartDate, 'yyyy-MM') ), " +
+            "Inbound AS ( SELECT  FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth, " +
+            "SUM(ad.ExpectedQty * ISNULL(p.[Price], 0)) AS InboundAmount FROM WMS_ASNDetail ad   " +
+            "INNER JOIN WMS_ASN a ON ad.asnid = a.[Id]  " +
+            "INNER JOIN WMS_Product p ON ad.[SKU] = p.[SKU] AND ad.CustomerId = p.CustomerId  " +
+            "INNER JOIN WMS_HachAccountDate h ON a.[CreationTime] >= h.StartDate  " +
+            "AND a.[CreationTime] <= h.EndDate WHERE a.ASNStatus <> 90  " +
+            "AND " + sqlAsnWhereSql + "   " +
+            "AND CONVERT(varchar(10),h.StartDate  ,120) >= '" + StartDate.Value.ToString("yyyy-MM-dd") + "'  " +
+            "AND CONVERT(varchar(10),h.EndDate  ,120) <= '" + EndDate.Value.ToString("yyyy-MM-dd") + "' " +
+            "GROUP BY FORMAT(h.StartDate, 'yyyy-MM'))," +
+            "AllMonths AS (SELECT DISTINCT FORMAT(StartDate, 'yyyy-MM') AS OrderMonth ,FORMAT(StartDate, 'MM') AS MonthNumber FROM WMS_HachAccountDate " +
+            "WHERE CONVERT(varchar(10),StartDate ,120) >= '" + StartDate.Value.ToString("yyyy-MM-dd") + "'  " +
+            "AND  CONVERT(varchar(10),EndDate  ,120)<= '" + EndDate.Value.ToString("yyyy-MM-dd") + "' ) SELECT  am.MonthNumber as Xseries,  CASE  WHEN ISNULL(i.InboundAmount, 0) = 0 THEN 0  " +
+            "ELSE ROUND(ISNULL(o.OutboundAmount, 0) * 1.0 / i.InboundAmount * 100, 4)  END AS Yseries FROM AllMonths am " +
+            " LEFT JOIN Outbound o ON am.OrderMonth = o.OrderMonth LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth  " +
+            "ORDER BY am.OrderMonth,am.MonthNumber;";
+        try
+        {
+            skuAmounts = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
+            // 更安全的null检查和类型转换
+
+            // 转换月份数字为英文名称
+            foreach (var item in skuAmounts)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
+            return skuAmounts;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogMessage("获取目标月份每天的库销比报错了：" + ex.Message, logFilePath);
+            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+        }
+    }
+
+
     #endregion
 
     #region 屏幕一 下面第二张图折线图
@@ -747,6 +885,80 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             throw;
         }
     }
+
+    /// <summary>
+    /// 获取目标年月份逐月累计库销比
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="today"></param>
+    /// <returns></returns>
+    private async Task<List<ChartIndex>> GetOrderVSAsnAccumulatedMonthlySalesByTargetMonth(ChartsInput input, DateTime? StartDate, DateTime? EndDate)
+    {
+        var skuAmounts = new List<ChartIndex>();
+        var skuAmount2s = new List<ChartIndex>();
+
+        var sqlOrderWhereSql = string.Empty;
+        var sqlAsnWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlOrderWhereSql = "o.customerId = " + input.CustomerId + "";
+            sqlAsnWhereSql = "a.customerId = " + input.CustomerId + "";
+        }
+        else
+        {
+            sqlOrderWhereSql = "o.customerId in (" + CustomerStr + ")";
+            sqlAsnWhereSql = "a.customerId in (" + CustomerStr + ")";
+        }
+        string Sql = "WITH Outbound AS(SELECT  FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth,h.StartDate," +
+            " SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS OutboundAmount  FROM [WMS_OrderDetail] d  " +
+            " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] " +
+            " INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId  " +
+            " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate " +
+            " AND o.[CreationTime] <= h.EndDate  WHERE o.[OrderStatus] = 99  " +
+            " AND " + sqlOrderWhereSql + "  " +
+            " AND h.StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
+            " AND h.EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' " +
+            " GROUP BY FORMAT(h.StartDate, 'yyyy-MM'), h.StartDate), " +
+            " Inbound AS ( SELECT FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth, h.StartDate," +
+            " SUM(ad.ExpectedQty * ISNULL(p.[Price], 0)) AS InboundAmount   FROM WMS_ASNDetail ad " +
+            " INNER JOIN WMS_ASN a ON ad.asnid = a.[Id] " +
+            " INNER JOIN WMS_Product p ON ad.[SKU] = p.[SKU] AND ad.CustomerId = p.CustomerId " +
+            " INNER JOIN WMS_HachAccountDate h ON a.[CreationTime] >= h.StartDate " +
+            " AND a.[CreationTime] <= h.EndDate  WHERE a.ASNStatus <> 90 " +
+            " AND " + sqlAsnWhereSql + " " +
+            " AND h.StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
+            " AND h.EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' " +
+            " GROUP BY FORMAT(h.StartDate, 'yyyy-MM'), h.StartDate)," +
+            " AllMonths AS ( SELECT DISTINCT  FORMAT(StartDate, 'yyyy-MM') AS OrderMonth, " +
+            " MONTH(StartDate) AS MonthNumber FROM WMS_HachAccountDate " +
+            " WHERE StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
+            " AND EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' )," +
+            " CumulativeOutbound AS ( SELECT  am.OrderMonth, " +
+            " SUM(o.OutboundAmount) OVER (ORDER BY am.MonthNumber) AS CumulativeOutboundAmount " +
+            " FROM AllMonths am LEFT JOIN Outbound o ON am.OrderMonth = o.OrderMonth)," +
+            " CumulativeInbound AS (SELECT  am.OrderMonth, SUM(i.InboundAmount) OVER (ORDER BY am.MonthNumber) AS CumulativeInboundAmount " +
+            " FROM AllMonths am  LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth) " +
+            " SELECT   am.MonthNumber AS Xseries, " +
+            " CASE  WHEN ISNULL(ci.CumulativeInboundAmount, 0) = 0 THEN 0    ELSE ROUND(ISNULL(co.CumulativeOutboundAmount, 0) * 1.0 / ci.CumulativeInboundAmount * 100, 4) " +
+            " END AS Yseries  FROM AllMonths am  LEFT JOIN CumulativeOutbound co " +
+            " ON am.OrderMonth = co.OrderMonth LEFT JOIN CumulativeInbound ci ON am.OrderMonth = ci.OrderMonth  " +
+            " ORDER BY am.OrderMonth, am.MonthNumber; ";
+        try
+        {
+            skuAmounts = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in skuAmounts)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
+            return skuAmounts;
+        }
+        catch (Exception ex)
+        {
+            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+        }
+    }
+
     #endregion
 
     #region 屏幕一 下面第三张图折线图
@@ -862,15 +1074,27 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
-        string query = "SELECT  MONTH(h.StartDate) AS Xseries, SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS Yseries  FROM [WMS_OrderDetail] d   " +
-            "INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id]  " +
-            "INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId  " +
-            "INNER JOIN WMS_HachAccountDate h  ON o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate  " +
-            "WHERE o.[OrderStatus] = 99   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ") AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " " +
-            "AND MONTH(h.StartDate) BETWEEN 1 AND  " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + "  GROUP BY MONTH(h.StartDate) ORDER BY MONTH(h.StartDate) ";
+ 
+        string query = " WITH AllMonths AS (SELECT RIGHT('0' + CAST(Number AS VARCHAR(2)), 2) AS MonthNumber" +
+                       " FROM(VALUES(1), (2), (3), (4), (5), (6), (7), (8), (9), (10), (11), (12)) AS Months(Number)" +
+                       " WHERE Number BETWEEN 1 AND " + Convert.ToInt32(input.Month.HasValue ? input.Month.Value.Month : DateTime.Today.Month) + ")," +
+                       " OrderData AS(SELECT FORMAT(h.StartDate, 'MM') AS Xseries, SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS Yseries" +
+                       " FROM[WMS_OrderDetail] d" +
+                       " INNER JOIN[WMS_Order] o ON d.[OrderId] = o.[Id] INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId" +
+                       " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate" +
+                       " WHERE o.[OrderStatus] = 99 AND o.customerId IN(SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type = 'HachDashBoard' " + sqlWhereSql + " )" +
+                       " AND YEAR(h.StartDate) =  " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " AND MONTH(h.StartDate) BETWEEN 1 AND  " + Convert.ToInt32(input.Month.HasValue ? input.Month.Value.Month : DateTime.Today.Month) + "  " +
+                       " GROUP BY FORMAT(h.StartDate, 'MM'))" +
+                       " SELECT am.MonthNumber AS Xseries,ISNULL(od.Yseries, 0) AS Yseries FROM AllMonths am" +
+                       " LEFT JOIN OrderData od ON am.MonthNumber = od.Xseries ORDER BY am.MonthNumber";
         try
         {
             result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in result)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
         }
         catch (Exception ex)
         {
@@ -922,14 +1146,27 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
 
-        string query = "SELECT  MONTH(h.StartDate) AS Xseries, SUM(d.[OrderQty]) AS Yseries  FROM [WMS_OrderDetail] d   " +
-            "INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id]  " +
-            "INNER JOIN WMS_HachAccountDate h  ON o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate  " +
-            "WHERE o.[OrderStatus] = 99  AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ") AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Year + " " +
-            "AND MONTH(h.StartDate) BETWEEN 1 AND  " + Convert.ToDateTime(input.Month.HasValue ? input.Month : DateTime.Today).Month + "  GROUP BY MONTH(h.StartDate) ORDER BY MONTH(h.StartDate) ";
+        string Sql = "WITH AllMonths AS (  SELECT RIGHT('0' + CAST(Number AS VARCHAR(2)), 2) AS MonthNumber " +
+            " FROM (VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10)) AS Months(Number) " +
+            " WHERE Number BETWEEN 1 AND  " + Convert.ToInt32(input.Month.HasValue ? input.Month.Value.Month : DateTime.Today.Month) + ")," +
+            " OrderData AS ( SELECT  FORMAT(h.StartDate, 'MM') AS Xseries, " +
+            " SUM(d.[OrderQty]) AS Yseries  FROM [WMS_OrderDetail] d  " +
+            " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id]  " +
+            " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate  " +
+            " WHERE o.[OrderStatus] = 99   AND o.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' "+ sqlWhereSql + ") " +
+            " AND YEAR(h.StartDate) =  " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + "   " +
+            " AND MONTH(h.StartDate) BETWEEN 1 AND " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + " " +
+            " GROUP BY FORMAT(h.StartDate, 'MM')) " +
+            " SELECT am.MonthNumber AS Xseries, ISNULL(od.Yseries, 0) AS Yseries FROM AllMonths am  " +
+            " LEFT JOIN OrderData od ON am.MonthNumber = od.Xseries  ORDER BY am.MonthNumber";
         try
         {
-            result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            result = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in result)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
         }
         catch (Exception ex)
         {
@@ -967,8 +1204,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         string query = "SELECT d.[SKU] AS Xseries,SUM(d.[AllocatedQty] * ISNULL(p.[Price], 0)) AS Yseries FROM [WMS_OrderDetail] d" +
                        " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] AND o.[OrderStatus] = 99" +
                        " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate" +
-                       " AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Year + " " +
-                       " AND MONTH(h.StartDate) BETWEEN 1 AND " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Month + "" +
+                       " AND YEAR(h.StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " " +
+                       " AND MONTH(h.StartDate) BETWEEN 1 AND " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + "" +
                        " LEFT JOIN [WMS_Product] p ON d.[SKU] = p.[SKU]  AND d.[CustomerId] = p.[CustomerId]" +
                        " WHERE 1=1   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ") " +
                        " GROUP BY d.[SKU] ORDER BY Yseries DESC";
@@ -1011,8 +1248,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         string query = "WITH ProvinceSummary AS (SELECT  ISNULL(oa.[Province], '未知省份') AS [ObProvince]," +
             " SUM(od.[OrderQty]) AS [Qty]  FROM [WMS_Order] o " +
             " INNER JOIN WMS_HachAccountDate h ON  o.[CreationTime] <= h.EndDate " +
-            " AND (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Year + " " +
-            " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value : DateTime.Today).Month + ") " +
+            " AND (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " " +
+            " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + ") " +
             " LEFT JOIN [WMS_OrderAddress] oa ON o.[PreOrderId] = oa.[PreOrderId] " +
             " LEFT JOIN [WMS_OrderDetail] od ON o.[Id] = od.[OrderId] " +
             " WHERE 1=1   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")  " +
@@ -1077,6 +1314,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         try
         {
             chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in chartIndices)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
         }
         catch (Exception ex)
         {
@@ -1133,6 +1375,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         try
         {
             chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
+            // 转换月份数字为英文名称
+            foreach (var item in chartIndices)
+            {
+                item.Xseries = ConvertMonthNumberToName(item.Xseries);
+            }
         }
         catch (Exception ex)
         {
@@ -1256,10 +1503,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 .Select(g => new OBProvinceGroupbyWhere
                 {
                     Customer = g.Key,
-                    Amount = g.Sum(x => x.Amount), 
-                    Qty = g.Sum(x => x.Qty),       
-                    ObProvince = g.First().ObProvince,  
-                    CustomerId = g.First().CustomerId  
+                    Amount = g.Sum(x => x.Amount),
+                    Qty = g.Sum(x => x.Qty),
+                    ObProvince = g.First().ObProvince,
+                    CustomerId = g.First().CustomerId
                 })
                 .OrderByDescending(a => a.Amount)  // 按Amount降序排序
                 .ToList();
@@ -1273,46 +1520,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     #region 封装的公共方法
 
     #region tab汇总项封装方法
-    /// <summary>
-    /// 获取 SKU -> Price 的映射字典
-    /// </summary>
-    /// <returns></returns>
-    private async Task<List<CustomerProductPriceMapping>> GetProductPriceMap()
-    {
-        string sql = @"SELECT  [CustomerName] AS [CustomerName] , [CustomerId] AS [CustomerId] , [SKU] AS [Sku] , 
-                      [Price] AS [Price]  FROM [WMS_Product] where CustomerId in(" + CustomerStr + ")";
-        return _repProduct.Context.Ado.GetDataTable(sql).TableToList<CustomerProductPriceMapping>();
-    }
-
-    /// <summary>
-    /// 通过库存数量和价格表计算总金额
-    /// </summary>
-    /// <param name="data"></param>
-    /// <param name="priceMap"></param>
-    /// <returns></returns>
-    private double? CalculateTotalAmount(IEnumerable<(long CustomerId, string CustomerName, string SKU, double Qty)> data, List<CustomerProductPriceMapping> priceMap)
-    {
-        double? TotalAmount = 0;
-        try
-        {
-            double total = 0;
-            foreach (var item in data)
-            {
-                var priceEntry = priceMap.FirstOrDefault(p => p.Sku == item.SKU && p.CustomerId == item.CustomerId);
-                if (priceEntry != null && priceEntry.Price.HasValue)
-                {
-                    total += item.Qty * priceEntry.Price.Value;
-                }
-            }
-            TotalAmount = Convert.ToInt64(total); // 向下取整，可换成 Math.Round(total)
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
-        return TotalAmount;
-    }
-
     // 根据日期范围生成月份列表
     private List<string> GenerateMonthsFromDateRange(DateTime startDate, DateTime endDate)
     {
@@ -1326,133 +1533,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
 
         return months;
-    }
-    /// <summary>
-    /// 获取目标月份每天的库销比
-    /// </summary>
-    /// <param name="input"></param>
-    /// <param name="today"></param>
-    /// <returns></returns>
-    private async Task<List<ChartIndex>> GetOrderVSAsnSalesByTargetMonth(ChartsInput input, DateTime? StartDate, DateTime? EndDate)
-    {
-        var skuAmounts = new List<ChartIndex>();
-
-        var sqlOrderWhereSql = string.Empty;
-        var sqlAsnWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
-        {
-            sqlOrderWhereSql = "o.customerId = " + input.CustomerId + "";
-            sqlAsnWhereSql = "a.customerId = " + input.CustomerId + "";
-        }
-        else
-        {
-            sqlOrderWhereSql = "o.customerId in (" + CustomerStr + ")";
-            sqlAsnWhereSql = "a.customerId in (" + CustomerStr + ")";
-        }
-        string Sql = "WITH Outbound AS (SELECT FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth," +
-            "SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS OutboundAmount  FROM [WMS_OrderDetail] d  " +
-            "INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id]  " +
-            "INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId  " +
-            "INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate  " +
-            "AND o.[CreationTime] <= h.EndDate WHERE o.[OrderStatus] = 99  " +
-            "AND " + sqlOrderWhereSql + " " +
-            "AND h.StartDate >= '" + StartDate + "'  " +
-            "AND h.EndDate <= '" + EndDate + "' " +
-            "GROUP BY FORMAT(h.StartDate, 'yyyy-MM') ), " +
-            "Inbound AS ( SELECT  FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth, " +
-            "SUM(ad.ExpectedQty * ISNULL(p.[Price], 0)) AS InboundAmount FROM WMS_ASNDetail ad   " +
-            "INNER JOIN WMS_ASN a ON ad.asnid = a.[Id]  " +
-            "INNER JOIN WMS_Product p ON ad.[SKU] = p.[SKU] AND ad.CustomerId = p.CustomerId  " +
-            "INNER JOIN WMS_HachAccountDate h ON a.[CreationTime] >= h.StartDate  " +
-            "AND a.[CreationTime] <= h.EndDate WHERE a.ASNStatus <> 90  " +
-            "AND " + sqlAsnWhereSql + "   " +
-            "AND h.StartDate >= '" + StartDate + "'  " +
-            "AND h.EndDate <= '" + EndDate + "' " +
-            "GROUP BY FORMAT(h.StartDate, 'yyyy-MM'))," +
-            "AllMonths AS (SELECT DISTINCT FORMAT(StartDate, 'yyyy-MM') AS OrderMonth ,MONTH(StartDate) AS MonthNumber FROM WMS_HachAccountDate " +
-            "WHERE StartDate >= '" + StartDate + "'  " +
-            "AND EndDate <= '" + EndDate + "' ) SELECT  am.MonthNumber as Xseries,  CASE  WHEN ISNULL(i.InboundAmount, 0) = 0 THEN 0  " +
-            "ELSE ROUND(ISNULL(o.OutboundAmount, 0) * 1.0 / i.InboundAmount, 4)  END AS Yseries FROM AllMonths am " +
-            " LEFT JOIN Outbound o ON am.OrderMonth = o.OrderMonth LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth  " +
-            "ORDER BY am.OrderMonth,am.MonthNumber;";
-        try
-        {
-            skuAmounts = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
-            // 更安全的null检查和类型转换
-            return skuAmounts;
-        }
-        catch (Exception ex)
-        {
-            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
-        }
-    }
-
-    /// <summary>
-    /// 获取目标年月份逐月累计库销比
-    /// </summary>
-    /// <param name="input"></param>
-    /// <param name="today"></param>
-    /// <returns></returns>
-    private async Task<List<ChartIndex>> GetOrderVSAsnAccumulatedMonthlySalesByTargetMonth(ChartsInput input, DateTime? StartDate, DateTime? EndDate)
-    {
-        var skuAmounts = new List<ChartIndex>();
-
-        var sqlOrderWhereSql = string.Empty;
-        var sqlAsnWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
-        {
-            sqlOrderWhereSql = "o.customerId = " + input.CustomerId + "";
-            sqlAsnWhereSql = "a.customerId = " + input.CustomerId + "";
-        }
-        else
-        {
-            sqlOrderWhereSql = "o.customerId in (" + CustomerStr + ")";
-            sqlAsnWhereSql = "a.customerId in (" + CustomerStr + ")";
-        }
-        string Sql = "WITH Outbound AS(SELECT  FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth,h.StartDate," +
-            " SUM(d.[OrderQty] * ISNULL(p.[Price], 0)) AS OutboundAmount  FROM [WMS_OrderDetail] d  " +
-            " INNER JOIN [WMS_Order] o ON d.[OrderId] = o.[Id] " +
-            " INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId  " +
-            " INNER JOIN WMS_HachAccountDate h ON o.[CreationTime] >= h.StartDate " +
-            " AND o.[CreationTime] <= h.EndDate  WHERE o.[OrderStatus] = 99  " +
-            " AND " + sqlOrderWhereSql + "  " +
-            " AND h.StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
-            " AND h.EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' " +
-            " GROUP BY FORMAT(h.StartDate, 'yyyy-MM'), h.StartDate), " +
-            " Inbound AS ( SELECT FORMAT(h.StartDate, 'yyyy-MM') AS OrderMonth, h.StartDate," +
-            " SUM(ad.ExpectedQty * ISNULL(p.[Price], 0)) AS InboundAmount   FROM WMS_ASNDetail ad " +
-            " INNER JOIN WMS_ASN a ON ad.asnid = a.[Id] " +
-            " INNER JOIN WMS_Product p ON ad.[SKU] = p.[SKU] AND ad.CustomerId = p.CustomerId " +
-            " INNER JOIN WMS_HachAccountDate h ON a.[CreationTime] >= h.StartDate " +
-            " AND a.[CreationTime] <= h.EndDate  WHERE a.ASNStatus <> 90 " +
-            " AND " + sqlAsnWhereSql + " " +
-            " AND h.StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
-            " AND h.EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' " +
-            " GROUP BY FORMAT(h.StartDate, 'yyyy-MM'), h.StartDate)," +
-            " AllMonths AS ( SELECT DISTINCT  FORMAT(StartDate, 'yyyy-MM') AS OrderMonth, " +
-            " MONTH(StartDate) AS MonthNumber FROM WMS_HachAccountDate " +
-            " WHERE StartDate >= '" + Convert.ToDateTime(StartDate).ToString("yyyy-MM-dd") + "' " +
-            " AND EndDate <= '" + Convert.ToDateTime(EndDate).ToString("yyyy-MM-dd") + "' )," +
-            " CumulativeOutbound AS ( SELECT  am.OrderMonth, " +
-            " SUM(o.OutboundAmount) OVER (ORDER BY am.MonthNumber) AS CumulativeOutboundAmount " +
-            " FROM AllMonths am LEFT JOIN Outbound o ON am.OrderMonth = o.OrderMonth)," +
-            " CumulativeInbound AS (SELECT  am.OrderMonth, SUM(i.InboundAmount) OVER (ORDER BY am.MonthNumber) AS CumulativeInboundAmount " +
-            " FROM AllMonths am  LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth) " +
-            " SELECT   am.MonthNumber AS Xseries, " +
-            " CASE  WHEN ISNULL(ci.CumulativeInboundAmount, 0) = 0 THEN 0    ELSE ROUND(ISNULL(co.CumulativeOutboundAmount, 0) * 1.0 / ci.CumulativeInboundAmount, 4) " +
-            " END AS Yseries  FROM AllMonths am  LEFT JOIN CumulativeOutbound co " +
-            " ON am.OrderMonth = co.OrderMonth LEFT JOIN CumulativeInbound ci ON am.OrderMonth = ci.OrderMonth  " +
-            " ORDER BY am.OrderMonth, am.MonthNumber; ";
-        try
-        {
-            skuAmounts = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(Sql).TableToList<ChartIndex>();
-            // 更安全的null检查和类型转换
-            return skuAmounts;
-        }
-        catch (Exception ex)
-        {
-            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
-        }
     }
 
     // 合并实际数据与所有月份，确保数据完整性
@@ -1474,52 +1554,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
 
         return result;
-    }
-
-    /// <summary>
-    /// 获取今年已经过去的所有月份（不包括当月）
-    /// </summary>
-    /// <returns></returns>
-    private List<string> GetPastMonthsExcludingCurrent(DateTime TargetDate)
-    {
-        var today = DateTime.Today;
-        var currentYear = today.Year;
-        var currentMonth = today.Month;
-
-        var pastMonths = new List<string>();
-
-        // 如果目标年份是当前年份，则只统计到上个月
-        if (TargetDate.Year == currentYear)
-        {
-            for (int month = 1; month <= TargetDate.AddMonths(-1).Month; month++)
-            {
-                var monthStr = new DateTime(TargetDate.Year, month, 1).ToString("yyyy-MM");
-                pastMonths.Add(monthStr);
-            }
-        }
-        // 如果目标年份是过去的年份，则返回所有12个月
-        else if (TargetDate.Year < currentYear)
-        {
-            var TargetMonth = 12;
-
-            if (TargetDate.Month < currentMonth)
-                if (TargetDate.Month < currentMonth)
-                {
-                    TargetMonth = Convert.ToInt32(TargetDate.Month);
-                }
-            for (int month = 1; month <= TargetMonth; month++)
-            {
-                var monthStr = new DateTime(TargetDate.Year, month, 1).ToString("yyyy-MM");
-                pastMonths.Add(monthStr);
-            }
-        }
-        // 如果目标年份是未来年份，则返回空列表（因为还没有月份过去）
-        else
-        {
-            return pastMonths; // 空列表
-        }
-
-        return pastMonths;
     }
 
     /// <summary>
@@ -1562,36 +1596,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
 
     #region 大屏三
-
-    /// <summary>
-    /// 获取出库数据
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    private async Task<List<OBProvinceList>> GetObList(ObChartsInput input)
-    {
-        var sqlWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
-        {
-            sqlWhereSql = "and customerId = " + input.CustomerId + "";
-        }
-
-        var sqlWhereSql2 = string.Empty;
-        if (!string.IsNullOrEmpty(input.OBProvince))
-        {
-            sqlWhereSql2 = " and oa.province like '%" + input.OBProvince + "%' ";
-        }
-        string sql = "SELECT  [oa].[Province] AS [ObProvince] , [o].[CustomerName] AS [Customer] , [o].[CustomerId] AS [CustomerId] , " +
-            "[od].[SKU] AS [Sku] , SUM([od].[OrderQty]) AS [Qty]  FROM [WMS_Order] [o] Left JOIN [WMS_OrderAddress] [oa] " +
-            "ON ( [o].[PreOrderId] = [oa].[PreOrderId] )  Left JOIN [WMS_OrderDetail] [od] ON ( [o].[Id] = [od].[OrderId] )  " +
-            " WHERE 1=1 and    od.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")  and ( [o].[OrderStatus] = 99 ) " +
-            " " + sqlWhereSql2 + " AND ( [o].[CreationTime] >= '" + Convert.ToDateTime(input.StartDate).ToString("yyyy-MM-dd HH:mm:ss") + "' )  " +
-            "AND ( [o].[CreationTime] <= '" + Convert.ToDateTime(input.EndDate).AddDays(1).ToString("yyyy-MM-dd HH:mm:ss") + "' )" +
-            "GROUP BY [oa].[Province],[od].[SKU],[o].[CustomerName],[o].[CustomerId] ";
-        var orderData = _repCustomer.Context.Ado.GetDataTable(sql).TableToList<OBProvinceList>();
-        return orderData;
-    }
-
     /// <summary>
     /// 根据出库省份获取总金额
     /// </summary>
@@ -1626,6 +1630,33 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     }
 
     #endregion
+    private string ConvertMonthNumberToName(string monthNumber)
+    {
+        // 处理单数字月份
+        if (monthNumber.Length == 1)
+        {
+            monthNumber = "0" + monthNumber;
+        }
+
+        // 使用LINQ查找对应的月份名称
+        var monthPair = MonthNameMap.FirstOrDefault(x => x.Value == monthNumber);
+        return monthPair.Key ?? monthNumber; // 如果找不到，返回原始值
+    }
+    private static readonly Dictionary<string, string> MonthNameMap = new Dictionary<string, string>
+        {
+            { "January", "01" },
+            { "February", "02" },
+            { "March", "03" },
+            { "April", "04" },
+            { "May", "05" },
+            { "June", "06" },
+            { "July", "07" },
+            { "August", "08" },
+            { "September", "09" },
+            { "October", "10" },
+            { "November", "11" },
+            { "December", "12" },
+        };
 
     private static readonly Dictionary<string, string> ProvinceNameMap = new Dictionary<string, string>
         {
@@ -1695,10 +1726,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             return ProvinceNameMap[provinceName];
         }
-
         // 替换省、自治区等后缀（“省”、“自治区”或“特别行政区”）
         return provinceName.Replace("省", "").Replace("自治区", "").Replace("特别行政区", "").Trim();
-
     }
     #endregion
 }
