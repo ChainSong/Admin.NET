@@ -232,7 +232,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             Console.WriteLine($"CurrentOrderAmount error: {ex.Message}");
         }
 
-        itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount == 0 ? 0 : (float)Math.Round((decimal)(itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount), 3);
+        itemOutput.YTDOrderVSASNAmount = itemOutput.CurrentReceiptAmount == 0 ? 0 : (float)Math.Round((decimal)(itemOutput.CurrentOrderAmount / itemOutput.CurrentReceiptAmount)*100, 3);
 
         return itemOutput;
     }
