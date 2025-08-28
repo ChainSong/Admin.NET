@@ -797,7 +797,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             "AllMonths AS (SELECT DISTINCT FORMAT(StartDate, 'yyyy-MM') AS OrderMonth ,FORMAT(StartDate, 'MM') AS MonthNumber FROM WMS_HachAccountDate " +
             "WHERE CONVERT(varchar(10),StartDate ,120) >= '" + StartDate.Value.ToString("yyyy-MM-dd") + "'  " +
             "AND  CONVERT(varchar(10),EndDate  ,120)<= '" + EndDate.Value.ToString("yyyy-MM-dd") + "' ) SELECT  am.MonthNumber as Xseries,  CASE  WHEN ISNULL(i.InboundAmount, 0) = 0 THEN 0  " +
-            "ELSE ROUND(ISNULL(o.OutboundAmount, 0) * 1.0 / i.InboundAmount * 100, 4)  END AS Yseries FROM AllMonths am " +
+            "ELSE ROUND(ISNULL(o.OutboundAmount, 0) * 1.0 / i.InboundAmount, 4)  END AS Yseries FROM AllMonths am " +
             " LEFT JOIN Outbound o ON am.OrderMonth = o.OrderMonth LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth  " +
             "ORDER BY am.OrderMonth,am.MonthNumber;";
         try
@@ -924,7 +924,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             " CumulativeInbound AS (SELECT  am.OrderMonth, SUM(i.InboundAmount) OVER (ORDER BY am.MonthNumber) AS CumulativeInboundAmount " +
             " FROM AllMonths am  LEFT JOIN Inbound i ON am.OrderMonth = i.OrderMonth) " +
             " SELECT   am.MonthNumber AS Xseries, " +
-            " CASE  WHEN ISNULL(ci.CumulativeInboundAmount, 0) = 0 THEN 0    ELSE ROUND(ISNULL(co.CumulativeOutboundAmount, 0) * 1.0 / ci.CumulativeInboundAmount * 100, 4) " +
+            " CASE  WHEN ISNULL(ci.CumulativeInboundAmount, 0) = 0 THEN 0    ELSE ROUND(ISNULL(co.CumulativeOutboundAmount, 0) * 1.0 / ci.CumulativeInboundAmount, 4) " +
             " END AS Yseries  FROM AllMonths am  LEFT JOIN CumulativeOutbound co " +
             " ON am.OrderMonth = co.OrderMonth LEFT JOIN CumulativeInbound ci ON am.OrderMonth = ci.OrderMonth  " +
             " ORDER BY am.OrderMonth, am.MonthNumber; ";
