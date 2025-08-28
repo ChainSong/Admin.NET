@@ -103,10 +103,12 @@ public class ChartIndex
 
 public class OBProvinceList
 {
+    public string? Month { get; set; }
+
     public string? ObProvince { get; set; }
-    public string? Customer { get; set; }
-    public string? Sku { get; set; }
     public long? CustomerId { get; set; }
+    public string? CustomerName { get; set; }
+    public double? Amount { get; set; }
     public double? Qty { get; set; }
 }
 /// <summary>
