@@ -1350,7 +1350,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
                         JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
                         GROUP BY REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''))
-                        SELECT top 20 pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
+                        SELECT top 200 pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
                         MAX(OrderData.OrderQty) as Qty,MAX(OrderData.price) as Amount  
                         FROM Periods pds JOIN Events e ON e.AccountDate = pds.AccountDate 
                         LEFT JOIN CustomerIdentifiers ci ON ci.CustomerIdentifier = e.CustomerIdentifier
@@ -1489,7 +1489,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        FROM Periods p
                        LEFT JOIN MonthlyData md ON md.AccountDate = p.AccountDate
                        GROUP BY p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType)
-                       SELECT top 20 MonthNum as Month,CustomerId,CustomerName,CompanyType,Qty,Amount
+                       SELECT top 200 MonthNum as Month,CustomerId,CustomerName,CompanyType,Qty,Amount
                        FROM MonthlySummary
                        ORDER BY AccountDate DESC, Amount DESC;";
         try
