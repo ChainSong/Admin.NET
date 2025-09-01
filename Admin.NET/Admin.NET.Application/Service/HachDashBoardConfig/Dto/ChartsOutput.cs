@@ -76,14 +76,7 @@ public class MonthVSLastChartTwoOutput
     /// </summary>
     public List<ChartIndex> MonthlyCumulativeNewUserTrend { get; set; }
 }
-/// <summary>
-/// 第三张图
-/// </summary>
-public class OBProvinceOutput
-{
-    public List<OBProvince> oBProvince { get; set; }
-    public List<OBProvinceGroupbyWhere> oBProvinceGroupbyProvince { get; set; }
-}
+ 
 /// <summary>
 /// 目标年份与前一年
 /// </summary>
@@ -100,7 +93,12 @@ public class ChartIndex
     public string Xseries { get; set; }
     public double? Yseries { get; set; }
 }
-
+public class OBProvinceOutput
+{
+    public long? TotalQty { get; set; }
+    public List<OBProvinceList> oBProvinceList { get; set; }
+   
+}
 public class OBProvinceList
 {
     public string? Month { get; set; }

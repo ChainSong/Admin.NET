@@ -1309,8 +1309,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetMonthlyNewUserTrendTb")]
-    public async Task<List<OBProvinceList>> GetMonthlyNewUserTrendTb(ChartsInput input)
+    public async Task<OBProvinceOutput> GetMonthlyNewUserTrendTb(ChartsInput input)
     {
+        OBProvinceOutput oBProvince = new OBProvinceOutput();
+        List<OBProvinceList> list = new List<OBProvinceList>();
         var sqlWhereSql = string.Empty;
         if (input.CustomerId.HasValue && input.CustomerId > 0)
         {
@@ -1348,7 +1350,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
                         JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
                         GROUP BY REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''))
-                        SELECT pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
+                        SELECT top 20 pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
                         MAX(OrderData.OrderQty) as Qty,MAX(OrderData.price) as Amount  
                         FROM Periods pds JOIN Events e ON e.AccountDate = pds.AccountDate 
                         LEFT JOIN CustomerIdentifiers ci ON ci.CustomerIdentifier = e.CustomerIdentifier
@@ -1371,7 +1373,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         );
         var result = dt.TableToList<OBProvinceList>();
 
-        var formatted = result
+        list = result
             .Select(x => new OBProvinceList
             {
                 Month = x.Month,
@@ -1379,14 +1381,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 Amount = x.Amount,
                 Qty = x.Qty,
                 CustomerId = x.CustomerId,
-                CustomerName = x.CustomerName
+                CustomerName = x.CustomerName,
+                CompanyName=x.CompanyName,
+                CompanyType=x.CompanyType
             })
             .GroupBy(g => new
             {
                 g.Month,
                 g.CustomerId,
                 g.CustomerName,
-                g.ObProvince
+                g.ObProvince,
+                g.CompanyType,
+                g.CompanyName
             })
             .Select(g => new OBProvinceList
             {
@@ -1395,16 +1401,20 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                 CustomerName = g.Key.CustomerName,
                 ObProvince = g.Key.ObProvince,
                 Amount = g.Sum(z => z.Amount),
-                Qty = g.Sum(z => z.Qty)
+                Qty = g.Sum(z => z.Qty),
+                CompanyType = g.Key.CompanyType,
+                CompanyName=g.Key.CompanyName
             })
             .OrderBy(x => x.Month)
             .ThenByDescending(x => x.Amount)
             .ToList();
-        foreach (var item in formatted)
+        foreach (var item in list)
         {
             item.Month = ConvertMonthNumberToName(item.Month);
         }
-        return formatted;
+        oBProvince.oBProvinceList = list;
+        oBProvince.TotalQty =(long) list.Sum(a=>a.Qty);
+        return oBProvince;
     }
 
     #endregion
@@ -1422,8 +1432,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetMonthlyCumulativeNewUserTrendTb")]
-    public async Task<List<OBProvinceList>> GetMonthlyCumulativeNewUserTrendTb(ChartsInput input)
+    public async Task<OBProvinceOutput> GetMonthlyCumulativeNewUserTrendTb(ChartsInput input)
     {
+        OBProvinceOutput oBProvinceOutput = new OBProvinceOutput();
+        List<OBProvinceList> list = new List<OBProvinceList>();
         // 1) 标准化“最后月份”为该月第一天（yyyy-MM-01）
         if (!input.Month.HasValue)
             input.Month = DateTime.Parse(DateTime.Today.ToString("yyyy-MM-01"));
@@ -1442,8 +1454,8 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
                        DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
                        DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum; 
-                       ;WITH Periods AS ( SELECT h.AccountDate,h.StartDate,h.EndDate,CAST(RIGHT(CAST(h.AccountDate AS CHAR(6)), 2) AS INT) AS MonthNum,
-                       STUFF(CAST(h.AccountDate AS CHAR(6)), 5, 0, '-') AS MonthLabel   FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) 
+                       ;WITH Periods AS ( SELECT h.AccountDate,h.StartDate,h.EndDate,
+                       CAST(left(CAST(h.AccountDate AS CHAR(6)), 4) AS varchar) AS MonthNum   FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) 
                        WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
                        AllowedCustomers AS ( SELECT DISTINCT customerid AS CustomerId  FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK) WHERE [type] = 'HachDashBoard' {sqlWhereSql}),
                        CustomerIdentifiers AS ( SELECT 
@@ -1454,7 +1466,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
                        GROUP BY  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
                        ),
-                       MonthlyData AS (SELECT h.AccountDate, oa.Province AS ObProvince, oa.CompanyName,oa.CompanyType,o.CustomerId,o.CustomerName,
+                       MonthlyData AS (SELECT h.AccountDate,  oa.CompanyType,o.CustomerId,o.CustomerName,
                        REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
                        AS CustomerIdentifier,
                        SUM(o.OrderQty) AS MonthlyOrderQty,SUM(o.OrderQty * ISNULL(pdt.Price, 0)) AS MonthlyAmount,ci.FirstAccountDate
@@ -1466,18 +1478,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        LEFT JOIN CustomerIdentifiers ci ON  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
                        = ci.CustomerIdentifier
                        WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
-                       GROUP BY  h.AccountDate,oa.Province,oa.CompanyName,oa.CompanyType,o.CustomerId,o.CustomerName,
+                       GROUP BY  h.AccountDate,oa.Province,oa.CompanyType,o.CustomerId,o.CustomerName,
                        REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''),
                        ci.FirstAccountDate),
-                       MonthlySummary AS ( SELECT p.AccountDate,p.MonthNum ,p.MonthLabel,md.ObProvince,md.CustomerId,md.CustomerName,md.CompanyName,md.CompanyType,
+                       MonthlySummary AS ( SELECT p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType,
                        -- 累计到当月的新增客户数量
                        COUNT(DISTINCT CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.CustomerIdentifier END) AS Qty,
                        -- 累计到当月的新增客户金额
                        SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) AS Amount
                        FROM Periods p
                        LEFT JOIN MonthlyData md ON md.AccountDate = p.AccountDate
-                       GROUP BY p.AccountDate,p.MonthNum,p.MonthLabel,md.ObProvince,md.CustomerId,md.CustomerName,md.CompanyName,md.CompanyType)
-                       SELECT MonthNum as Month,MonthLabel,CustomerId,CustomerName,ObProvince,CompanyName,CompanyType,Qty,Amount
+                       GROUP BY p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType)
+                       SELECT top 20 MonthNum as Month,CustomerId,CustomerName,CompanyType,Qty,Amount
                        FROM MonthlySummary
                        ORDER BY AccountDate DESC, Amount DESC;";
         try
@@ -1490,7 +1502,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
             var raw = dt.TableToList<OBProvinceList>();
 
-            var normalized = raw
+            list = raw
                 .Select(x => new OBProvinceList
                 {
                     Month = x.Month,
@@ -1499,13 +1511,17 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                     ObProvince = FormatProvinceName(x.ObProvince),
                     Amount = x.Amount,
                     Qty = x.Qty,
+                    CompanyName=x.CompanyName,
+                    CompanyType=x.CompanyType
                 })
                 .GroupBy(g => new
                 {
                     g.Month,
                     g.CustomerId,
                     g.CustomerName,
-                    g.ObProvince
+                    g.ObProvince,
+                    g.CompanyType,
+                    g.CompanyName,
                 })
                 .Select(g => new OBProvinceList
                 {
@@ -1514,12 +1530,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                     CustomerName = g.Key.CustomerName,
                     ObProvince = g.Key.ObProvince,
                     Amount = g.Sum(z => z.Amount),
-                    Qty = g.Sum(z => z.Qty)
+                    Qty = g.Sum(z => z.Qty),
+                    CompanyName=g.Key.CompanyName,
+                    CompanyType=g.Key.CompanyType
                 })
                 .ToList();
 
-            var result = normalized
-                .GroupBy(k => new { k.CustomerId, k.CustomerName, k.ObProvince })
+            var result = list
+                .GroupBy(k => new { k.CustomerId, k.CustomerName, k.ObProvince,k.CompanyType,k.CompanyName })
                 .SelectMany(g =>
                 {
                     int running = 0;
@@ -1537,12 +1555,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             {
                 item.Month=ConvertMonthNumberToName(item.Month);
             }
-            return result;
+            oBProvinceOutput.oBProvinceList = result;
+            oBProvinceOutput.TotalQty = (long?)result.Sum(a => a.Qty);
         }
         catch
         {
             throw; // 保留原始堆栈
         }
+        return oBProvinceOutput;
     }
 
     #endregion
@@ -1776,18 +1796,18 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// </summary>
     private static readonly Dictionary<string, string> MonthNameMap = new Dictionary<string, string>
         {
-            { "January", "01" },
-            { "February", "02" },
-            { "March", "03" },
-            { "April", "04" },
+            { "Jan", "01" },
+            { "Feb", "02" },
+            { "Mar", "03" },
+            { "Apr", "04" },
             { "May", "05" },
-            { "June", "06" },
-            { "July", "07" },
-            { "August", "08" },
-            { "September", "09" },
-            { "October", "10" },
-            { "November", "11" },
-            { "December", "12" },
+            { "Jun", "06" },
+            { "Jul", "07" },
+            { "Aug", "08" },
+            { "Sep", "09" },
+            { "Oct", "10" },
+            { "Nov", "11" },
+            { "Dec", "12" },
         };
     /// <summary>
     /// 省份名称映射表
