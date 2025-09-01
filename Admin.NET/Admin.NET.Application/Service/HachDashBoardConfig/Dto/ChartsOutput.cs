@@ -108,6 +108,8 @@ public class OBProvinceList
     public string? ObProvince { get; set; }
     public long? CustomerId { get; set; }
     public string? CustomerName { get; set; }
+    public string? CompanyName { get; set; }
+    public string? CompanyType { get; set; }
     public double? Amount { get; set; }
     public double? Qty { get; set; }
 }

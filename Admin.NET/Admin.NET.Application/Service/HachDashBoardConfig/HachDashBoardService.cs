@@ -704,7 +704,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        " SELECT COALESCE(NULLIF(p.Str2, ''), d.SKU) AS Xseries, SUM(d.OrderQty * ISNULL(p.Price, 0)) AS Yseries FROM dbo.WMS_OrderDetail AS d"+
                        " JOIN dbo.WMS_Order AS o ON d.OrderId = o.Id JOIN dbo.WMS_Product AS p ON p.SKU = d.SKU AND p.CustomerId = d.CustomerId"+
                        " JOIN Period h ON o.CreationTime >= h.StartDate AND o.CreationTime <  DATEADD(DAY, 1, h.EndDate)   "+
-                       " WHERE o.OrderStatus = 99 AND o.CustomerId IN ( SELECT CustomerId FROM dbo.WMS_Hach_Customer_Mapping WHERE [Type] = 'HachDashBoard' "+ sqlWhereSql + ") "+
+                       " WHERE o.OrderStatus = 99 " +
+                       " AND o.CustomerId IN ( SELECT CustomerId FROM dbo.WMS_Hach_Customer_Mapping " +
+                       " WHERE [Type] = 'HachDashBoard' "+ sqlWhereSql + ") "+
                        " GROUP BY COALESCE(NULLIF(p.Str2, ''), d.SKU) ORDER BY Yseries DESC;";
         try
         {
@@ -791,7 +793,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         // 获取该年份的第一个月（最开始的那个月）
         string startMonthString = targetDate.Year + "01";
 
-        // 如果您确实需要上个月，可以这样（但根据您的描述，可能不需要）
         string lastMonthString = targetDate.ToString("yyyyMM");
 
         string Sql = " WITH Periods AS (SELECT h.AccountDate, h.StartDate, h.EndDate " +
@@ -839,7 +840,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
         }
     }
-
 
     #endregion
 
@@ -908,9 +908,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             sqlWhereSql = " and customerId = " + input.CustomerId + "";
         }
-        string monthString = StartDate.HasValue ? StartDate.Value.ToString("yyyyMM") : DateTime.Today.ToString("yyyyMM");
-        DateTime targetDate = DateTime.ParseExact(monthString, "yyyyMM", CultureInfo.InvariantCulture);
-
+ 
         // 获取该年份的第一个月（最开始的那个月）
         string startMonthString = StartDate.HasValue ? StartDate.Value.ToString("yyyyMM") : DateTime.Today.ToString("yyyyMM");
         string lastMonthString = EndDate.HasValue ? EndDate.Value.ToString("yyyyMM") : DateTime.Today.ToString("yyyyMM");
@@ -1091,7 +1089,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        " INNER JOIN WMS_Product p ON d.[SKU] = p.[SKU] AND d.CustomerId = p.CustomerId " +
                        " INNER JOIN AllAccountMonths h  ON o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate " +
                        " WHERE o.[OrderStatus] = 99 " +
-                       " AND o.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type = 'HachDashBoard') " +
+                       " AND o.customerId IN (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type = 'HachDashBoard' "+sqlWhereSql+") " +
                        " GROUP BY h.AccountDate)" +
                        " SELECT right(am.AccountDate,2) AS Xseries,ISNULL(od.Yseries, 0) AS Yseries FROM AllAccountMonths am  " +
                        " LEFT JOIN OrderData od ON am.AccountDate = od.Xseries " +
@@ -1171,9 +1169,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                      " INNER JOIN dbo.WMS_Order AS o ON  o.CreationTime >= p.StartDate"+
                      " AND o.CreationTime <  DATEADD(DAY, 1, p.EndDate)  "+
                      " AND o.OrderStatus = 99 AND o.CustomerId IN ("+
-                     " SELECT cm.CustomerId FROM dbo.WMS_Hach_Customer_Mapping AS cm WHERE cm.[Type] = 'HachDashBoard')"+
+                     " SELECT cm.CustomerId FROM dbo.WMS_Hach_Customer_Mapping AS cm WHERE cm.[Type] = 'HachDashBoard' "+sqlWhereSql+")"+
                      " INNER JOIN dbo.WMS_OrderDetail AS od ON od.OrderId = o.Id GROUP BY p.AccountDate )"+
-                     " SELECT  CAST(p.AccountDate AS VARCHAR(6)) AS Xseries, ISNULL(a.Yseries, 0)  AS Yseries"+
+                     " SELECT  Right(CAST(p.AccountDate AS VARCHAR(6)),2) AS Xseries, ISNULL(a.Yseries, 0)  AS Yseries"+
                      " FROM Periods p LEFT JOIN OrderAgg a ON a.AccountDate = p.AccountDate"+
                      " ORDER BY p.AccountDate;";
         try
@@ -1231,7 +1229,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         " INNER JOIN Periods AS h "+
                         " ON  o.CreationTime >= h.StartDate AND o.CreationTime <  DATEADD(DAY, 1, h.EndDate) "+
                         " WHERE o.OrderStatus = 99 AND o.CustomerId IN ( "+
-                        " SELECT cm.CustomerId FROM dbo.WMS_Hach_Customer_Mapping AS cm WHERE cm.[Type] = 'HachDashBoard')) "+
+                        " SELECT cm.CustomerId FROM dbo.WMS_Hach_Customer_Mapping AS cm WHERE cm.[Type] = 'HachDashBoard' "+sqlWhereSql+")) "+
                         " SELECT COALESCE(NULLIF(p.Str2, ''), p.SKU) AS Xseries,SUM(d.AllocatedQty * ISNULL(p.Price, 0)) AS Yseries "+
                         " FROM FilteredOrders o "+
                         " INNER JOIN dbo.WMS_OrderDetail d ON d.OrderId = o.Id "+
@@ -1273,12 +1271,14 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         {
             sqlWhereSql = "and customerId = " + input.CustomerId + "";
         }
+        string monthString = input.Month.HasValue ? input.Month.Value.ToString("yyyyMM") : DateTime.Today.ToString("yyyyMM");
+        DateTime targetDate = DateTime.ParseExact(monthString, "yyyyMM", CultureInfo.InvariantCulture);
+        string lastMonthString = targetDate.ToString("yyyyMM");
 
         string query = "WITH ProvinceSummary AS (SELECT  ISNULL(oa.[Province], '未知省份') AS [ObProvince]," +
             " SUM(od.[OrderQty]) AS [Qty]  FROM [WMS_Order] o " +
             " INNER JOIN WMS_HachAccountDate h ON  o.[CreationTime] <= h.EndDate " +
-            " AND (YEAR(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Year + " " +
-            " AND MONTH(StartDate) = " + Convert.ToDateTime(input.Month.HasValue ? input.Month.Value.ToString("yyyy-MM-dd") : DateTime.Today).Month + ") " +
+            "  AND  AccountDate='"+ lastMonthString + "'" +
             " LEFT JOIN [WMS_OrderAddress] oa ON o.[PreOrderId] = oa.[PreOrderId] " +
             " LEFT JOIN [WMS_OrderDetail] od ON o.[Id] = od.[OrderId] " +
             " WHERE 1=1   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")  " +
@@ -1321,30 +1321,48 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
         var targetMonth = DateTime.Parse(input.Month.Value.ToString("yyyy-MM-01"));
 
-        string sql = $@"DECLARE @TargetMonth DATE = @Month;
-DECLARE @TargetYear     INT  = YEAR(@TargetMonth);
-DECLARE @TargetMonthNum INT  = MONTH(@TargetMonth);
-                        ;WITH Periods AS (SELECT MONTH(d.StartDate) AS MonthNum, MIN(d.StartDate)   AS StartDate, MAX(d.EndDate)     AS EndDate, 
-                        CONVERT(CHAR(7), MIN(d.StartDate), 120) AS MonthLabel
-                        FROM WMS_HachAccountDate d WHERE YEAR(d.StartDate) = @TargetYear AND MONTH(d.StartDate) BETWEEN 1 AND @TargetMonthNum
-                         GROUP BY MONTH(d.StartDate)), FirstOccur AS ( SELECT CONCAT(oa2.name, '|', oa2.phone) AS CustomerIdentifier, MIN(oa2.CreationTime)  AS first_time
-                        FROM WMS_OrderAddress oa2 WHERE oa2.name IS NOT NULL AND oa2.phone IS NOT NULL
-                         GROUP BY CONCAT(oa2.name, '|', oa2.phone)) SELECT p.MonthNum ,p.MonthLabel as Month,o.CustomerId,o.CustomerName,
-                        oa.Province      AS ObProvince,SUM(o.OrderQty * pdt.Price) AS Amount, 
-                        COUNT(DISTINCT CASE  WHEN fo.first_time >= p.StartDate AND fo.first_time <= p.EndDate
-                        THEN CONCAT(oa.name, '|', oa.phone) END) AS Qty FROM Periods p 
-                        JOIN WMS_OrderAddress oa ON oa.CreationTime >= p.StartDate AND oa.CreationTime <= p.EndDate
-                        JOIN WMS_OrderDetail o ON o.PreOrderId = oa.PreOrderId AND o.CreationTime >= p.StartDate 
-                        AND o.CreationTime <= p.EndDate JOIN WMS_Product pdt
-                        ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId LEFT JOIN FirstOccur fo 
-                        ON fo.CustomerIdentifier = CONCAT(oa.name, '|', oa.phone)
-                        WHERE o.CustomerId IN (    SELECT customerid   FROM WMS_Hach_Customer_Mapping   
-                        WHERE type = 'HachDashBoard' {sqlWhereSql}
-                        ) GROUP BY  p.MonthNum, p.MonthLabel, p.StartDate, p.EndDate, oa.Province, o.CustomerId, o.CustomerName 
-                        ORDER BY p.MonthNum, Amount DESC;";
+        string sql = $@"DECLARE @TargetMonth     DATE = @Month;
+                        DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
+                        DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
+                        DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
+                        DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum; 
+                        ;WITH Periods AS ( SELECT h.AccountDate, h.StartDate, h.EndDate, CAST(RIGHT(CAST(h.AccountDate AS CHAR(6)), 2) AS INT)AS MonthNum,   
+                        STUFF(CAST(h.AccountDate AS CHAR(6)), 5, 0, '-') AS MonthLabel  
+                        FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
+                        AllowedCustomers AS ( SELECT DISTINCT customerid AS CustomerId FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK) 
+                        WHERE [type] = 'HachDashBoard' {sqlWhereSql}),
+                        Events AS ( SELECT h.AccountDate,oa.Province    AS ObProvince,oa.CompanyName ,oa.CompanyType,o.CustomerId,o.CustomerName,
+                        REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') 
+                        AS CustomerIdentifier, o.OrderQty,ISNULL(pdt.Price, 0)AS Price FROM dbo.WMS_OrderDetail AS o  WITH (NOLOCK)
+                        JOIN AllowedCustomers       ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+                        JOIN dbo.WMS_OrderAddress   oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                        JOIN dbo.WMS_Product       pdt WITH (NOLOCK) ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
+                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK)
+                        ON  o.CreationTime >= h.StartDate
+                        AND o.CreationTime <  DATEADD(DAY, 1, h.EndDate)  
+                        WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
+                        CustomerIdentifiers AS ( 
+                        SELECT REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') 
+                        AS CustomerIdentifier, MIN(h.AccountDate) AS FirstAccountDate FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
+                        JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+                        JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
+                        GROUP BY REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''))
+                        SELECT pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
+                        MAX(OrderData.OrderQty) as Qty,MAX(OrderData.price) as Amount  
+                        FROM Periods pds JOIN Events e ON e.AccountDate = pds.AccountDate 
+                        LEFT JOIN CustomerIdentifiers ci ON ci.CustomerIdentifier = e.CustomerIdentifier
+                        outer apply (
+                        select SUM(OrderQty) OrderQty, max(isnull(OrderQty,0)*isnull(WMS_Product.Price,0)) price from WMS_Order left join WMS_OrderDetail
+                        on WMS_Order.PreOrderNumber=WMS_OrderDetail.PreOrderNumber
+                        left join WMS_OrderAddress on WMS_Order.PreOrderNumber=WMS_OrderAddress.PreOrderNumber
+                        outer apply (select top 1 Price from WMS_Product where WMS_Product.SKU=WMS_OrderDetail.SKU and WMS_Product.CustomerId =WMS_OrderDetail.CustomerId)  WMS_Product
+                        where  CONVERT(VARCHAR(7),WMS_OrderDetail.CreationTime, 23)=pds.MonthLabel and WMS_OrderAddress.CompanyName=e.CompanyName
+                        ) OrderData 
+                        GROUP BY pds.AccountDate, pds.MonthNum, pds.MonthLabel, e.ObProvince, e.CustomerId, e.CustomerName, e.CompanyName,e.CompanyType
+                        ORDER BY pds.AccountDate DESC;";
 
         // 4) 仅传 @Month 参数
-
         var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
             sql,
             new List<SugarParameter> {
@@ -1382,7 +1400,10 @@ DECLARE @TargetMonthNum INT  = MONTH(@TargetMonth);
             .OrderBy(x => x.Month)
             .ThenByDescending(x => x.Amount)
             .ToList();
-
+        foreach (var item in formatted)
+        {
+            item.Month = ConvertMonthNumberToName(item.Month);
+        }
         return formatted;
     }
 
@@ -1416,84 +1437,55 @@ DECLARE @TargetMonthNum INT  = MONTH(@TargetMonth);
         }
 
         // 3) 主查询 SQL：计算每月窗口内的金额与“当月新增 Qty”
-        var sql = $@" 
-DECLARE @Month DATE =@TargetMonth;  
-DECLARE @TargetYear     INT = YEAR(@Month);
-DECLARE @TargetMonthNum INT = MONTH(@Month);
-;WITH Periods AS (
-    SELECT 
-        MONTH(d.StartDate)                       AS MonthNum,
-        MIN(d.StartDate)                         AS StartDate,
-        MAX(d.EndDate)                           AS EndDate,
-        CONVERT(CHAR(7), MIN(d.StartDate), 120)  AS MonthLabel  -- yyyy-MM
-    FROM WMS_HachAccountDate d
-    WHERE YEAR(d.StartDate) = @TargetYear
-      AND MONTH(d.StartDate) BETWEEN 1 AND @TargetMonthNum
-    GROUP BY MONTH(d.StartDate)
-),
-FirstOccur AS (
-    SELECT 
-        CONCAT(oa2.name, '|', oa2.phone) AS CustomerIdentifier,
-        MIN(oa2.CreationTime)            AS first_time
-    FROM WMS_OrderAddress oa2
-    WHERE oa2.name  IS NOT NULL
-      AND oa2.phone IS NOT NULL
-    GROUP BY CONCAT(oa2.name, '|', oa2.phone)
-),
-BaseAgg AS (
-    SELECT
-        p.MonthNum,
-        p.MonthLabel,
-        o.CustomerId,
-        o.CustomerName,
-        oa.Province      AS ObProvince,
-        SUM(o.OrderQty * pdt.Price) AS Amount,
-        COUNT(DISTINCT CASE 
-            WHEN fo.first_time >= p.StartDate AND fo.first_time <= p.EndDate
-            THEN CONCAT(oa.name, '|', oa.phone)
-        END) AS NewUsers
-    FROM Periods p
-    JOIN WMS_OrderAddress oa
-      ON oa.CreationTime >= p.StartDate AND oa.CreationTime <= p.EndDate
-    JOIN WMS_OrderDetail o
-      ON o.PreOrderId = oa.PreOrderId
-     AND o.CreationTime >= p.StartDate AND o.CreationTime <= p.EndDate
-    JOIN WMS_Product pdt
-      ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
-    LEFT JOIN FirstOccur fo
-      ON fo.CustomerIdentifier = CONCAT(oa.name, '|', oa.phone)
-    WHERE o.CustomerId IN (
-        SELECT customerid
-        FROM WMS_Hach_Customer_Mapping
-        WHERE type = 'HachDashBoard'
-         {sqlWhereSql}
-    )
-    GROUP BY 
-        p.MonthNum, p.MonthLabel, p.StartDate, p.EndDate,
-        oa.Province, o.CustomerId, o.CustomerName
-)
-SELECT
-    MonthNum,
-    MonthLabel as Month,
-    CustomerId,
-    CustomerName,   
-    ObProvince,
-    Amount,
-    NewUsers AS SingelQty,
-    SUM(NewUsers) OVER (
-        PARTITION BY CustomerId, CustomerName, ObProvince
-        ORDER BY MonthNum
-        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-    ) AS Qty
-FROM BaseAgg
-ORDER BY MonthNum, Amount DESC;
-";
+        var sql = $@"  DECLARE @TargetMonth     DATE = @Month;
+                       DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
+                       DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
+                       DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
+                       DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum; 
+                       ;WITH Periods AS ( SELECT h.AccountDate,h.StartDate,h.EndDate,CAST(RIGHT(CAST(h.AccountDate AS CHAR(6)), 2) AS INT) AS MonthNum,
+                       STUFF(CAST(h.AccountDate AS CHAR(6)), 5, 0, '-') AS MonthLabel   FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) 
+                       WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
+                       AllowedCustomers AS ( SELECT DISTINCT customerid AS CustomerId  FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK) WHERE [type] = 'HachDashBoard' {sqlWhereSql}),
+                       CustomerIdentifiers AS ( SELECT 
+                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+                       AS CustomerIdentifier,MIN(h.AccountDate) AS FirstAccountDate  FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
+                       JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+                       JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                       JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
+                       GROUP BY  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+                       ),
+                       MonthlyData AS (SELECT h.AccountDate, oa.Province AS ObProvince, oa.CompanyName,oa.CompanyType,o.CustomerId,o.CustomerName,
+                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+                       AS CustomerIdentifier,
+                       SUM(o.OrderQty) AS MonthlyOrderQty,SUM(o.OrderQty * ISNULL(pdt.Price, 0)) AS MonthlyAmount,ci.FirstAccountDate
+                       FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
+                       JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+                       JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                       JOIN dbo.WMS_Product pdt WITH (NOLOCK) ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
+                       JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
+                       LEFT JOIN CustomerIdentifiers ci ON  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+                       = ci.CustomerIdentifier
+                       WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
+                       GROUP BY  h.AccountDate,oa.Province,oa.CompanyName,oa.CompanyType,o.CustomerId,o.CustomerName,
+                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''),
+                       ci.FirstAccountDate),
+                       MonthlySummary AS ( SELECT p.AccountDate,p.MonthNum ,p.MonthLabel,md.ObProvince,md.CustomerId,md.CustomerName,md.CompanyName,md.CompanyType,
+                       -- 累计到当月的新增客户数量
+                       COUNT(DISTINCT CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.CustomerIdentifier END) AS Qty,
+                       -- 累计到当月的新增客户金额
+                       SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) AS Amount
+                       FROM Periods p
+                       LEFT JOIN MonthlyData md ON md.AccountDate = p.AccountDate
+                       GROUP BY p.AccountDate,p.MonthNum,p.MonthLabel,md.ObProvince,md.CustomerId,md.CustomerName,md.CompanyName,md.CompanyType)
+                       SELECT MonthNum as Month,MonthLabel,CustomerId,CustomerName,ObProvince,CompanyName,CompanyType,Qty,Amount
+                       FROM MonthlySummary
+                       ORDER BY AccountDate DESC, Amount DESC;";
         try
         {
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
                 sql,
                 new List<SugarParameter> {
-                new SugarParameter("@TargetMonth", targetMonth)
+                new SugarParameter("@Month", targetMonth)
                 });
 
             var raw = dt.TableToList<OBProvinceList>();
@@ -1541,7 +1533,10 @@ ORDER BY MonthNum, Amount DESC;
                 .OrderBy(x => x.Month)
                 .ThenByDescending(x => x.Amount)
                 .ToList();
-
+            foreach (var item in result)
+            {
+                item.Month=ConvertMonthNumberToName(item.Month);
+            }
             return result;
         }
         catch
@@ -1721,43 +1716,7 @@ ORDER BY MonthNum, Amount DESC;
 
         return result;
     }
-
-    /// <summary>
-    /// 根据月份获取账期
-    /// </summary>
-    /// <param name="date"></param>
-    /// <returns></returns>
-    private async Task<WMSHachAccountDate> GetAccountByDate(DateTime date)
-    {
-        try
-        {
-            WMSHachAccountDate result = new WMSHachAccountDate();
-            // 该月第一天
-            var startOfMonth = new DateTime(date.Year, date.Month, 1);
-            // 下个月第一天（不包含）
-            var endOfMonth = startOfMonth.AddMonths(1);
-            string Sql = "SELECT top 1 [StartDate],[EndDate] FROM [WMS_HachAccountDate] " +
-                " WHERE ((( [StartDate]<>'' AND [StartDate] IS NOT NULL ) " +
-                "AND ( [StartDate] >= '" + startOfMonth.ToString("yyyy-MM-dd") + "' )) " +
-                "AND ( [EndDate] < '" + endOfMonth.ToString("yyyy-MM-dd") + "' )) " +
-                "order by id desc";
-
-            var data = _repHachAccountDate.Context.Ado.GetDataTable(Sql).TableToList<WMSHachAccountDate>();
-
-            if (data != null)
-            {
-                return data.FirstOrDefault();
-            }
-
-            return null;
-        }
-        catch (Exception EX)
-        {
-
-            throw;
-        }
-    }
-
+ 
     #endregion
 
     #region 大屏三
