@@ -1312,18 +1312,20 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     public async Task<OBProvinceOutput> GetMonthlyNewUserTrendTb(ChartsInput input)
     {
         OBProvinceOutput oBProvince = new OBProvinceOutput();
-        List<OBProvinceList> list = new List<OBProvinceList>();
-        var sqlWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        try
         {
-            sqlWhereSql = " AND customerId = " + input.CustomerId.Value;
-        }
-        if (!input.Month.HasValue)
-            input.Month = DateTime.Parse(DateTime.Today.ToString("yyyy-MM-01"));
+            List<OBProvinceList> list = new List<OBProvinceList>();
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = " AND customerId = " + input.CustomerId.Value;
+            }
+            if (!input.Month.HasValue)
+                input.Month = DateTime.Parse(DateTime.Today.ToString("yyyy-MM-01"));
 
-        var targetMonth = DateTime.Parse(input.Month.Value.ToString("yyyy-MM-01"));
+            var targetMonth = DateTime.Parse(input.Month.Value.ToString("yyyy-MM-01"));
 
-        string sql = $@"DECLARE @TargetMonth     DATE = @Month;
+            string sql = $@"DECLARE @TargetMonth     DATE = @Month;
                         DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
                         DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
                         DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
@@ -1364,57 +1366,63 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                         GROUP BY pds.AccountDate, pds.MonthNum, pds.MonthLabel, e.ObProvince, e.CustomerId, e.CustomerName, e.CompanyName,e.CompanyType
                         ORDER BY pds.AccountDate DESC;";
 
-        // 4) 仅传 @Month 参数
-        var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
-            sql,
-            new List<SugarParameter> {
+            // 4) 仅传 @Month 参数
+            var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
+                sql,
+                new List<SugarParameter> {
         new SugarParameter("@Month", targetMonth)
-            }
-        );
-        var result = dt.TableToList<OBProvinceList>();
+                }
+            );
+            var result = dt.TableToList<OBProvinceList>();
 
-        list = result
-            .Select(x => new OBProvinceList
+            list = result
+                .Select(x => new OBProvinceList
+                {
+                    Month = x.Month,
+                    ObProvince = FormatProvinceName(x.ObProvince),
+                    Amount = x.Amount,
+                    Qty = x.Qty,
+                    CustomerId = x.CustomerId,
+                    CustomerName = x.CustomerName,
+                    CompanyName = x.CompanyName,
+                    CompanyType = x.CompanyType
+                })
+                .GroupBy(g => new
+                {
+                    g.Month,
+                    g.CustomerId,
+                    g.CustomerName,
+                    g.ObProvince,
+                    g.CompanyType,
+                    g.CompanyName
+                })
+                .Select(g => new OBProvinceList
+                {
+                    Month = g.Key.Month,
+                    CustomerId = g.Key.CustomerId,
+                    CustomerName = g.Key.CustomerName,
+                    ObProvince = g.Key.ObProvince,
+                    Amount = g.Sum(z => z.Amount),
+                    Qty = g.Sum(z => z.Qty),
+                    CompanyType = g.Key.CompanyType,
+                    CompanyName = g.Key.CompanyName
+                })
+                .OrderBy(x => x.Month)
+                .ThenByDescending(x => x.Amount)
+                .ToList();
+            foreach (var item in list)
             {
-                Month = x.Month,
-                ObProvince = FormatProvinceName(x.ObProvince),
-                Amount = x.Amount,
-                Qty = x.Qty,
-                CustomerId = x.CustomerId,
-                CustomerName = x.CustomerName,
-                CompanyName=x.CompanyName,
-                CompanyType=x.CompanyType
-            })
-            .GroupBy(g => new
-            {
-                g.Month,
-                g.CustomerId,
-                g.CustomerName,
-                g.ObProvince,
-                g.CompanyType,
-                g.CompanyName
-            })
-            .Select(g => new OBProvinceList
-            {
-                Month = g.Key.Month,
-                CustomerId = g.Key.CustomerId,
-                CustomerName = g.Key.CustomerName,
-                ObProvince = g.Key.ObProvince,
-                Amount = g.Sum(z => z.Amount),
-                Qty = g.Sum(z => z.Qty),
-                CompanyType = g.Key.CompanyType,
-                CompanyName=g.Key.CompanyName
-            })
-            .OrderBy(x => x.Month)
-            .ThenByDescending(x => x.Amount)
-            .ToList();
-        foreach (var item in list)
-        {
-            item.Month = ConvertMonthNumberToName(item.Month);
+                item.Month = ConvertMonthNumberToName(item.Month);
+            }
+            oBProvince.oBProvinceList = list;
+            oBProvince.TotalQty = (long)list.Sum(a => a.Qty);
+            return oBProvince;
         }
-        oBProvince.oBProvinceList = list;
-        oBProvince.TotalQty =(long) list.Sum(a=>a.Qty);
-        return oBProvince;
+        catch (Exception ex)
+        {
+            return oBProvince;
+            throw;
+        }
     }
 
     #endregion
@@ -1543,6 +1551,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         catch
         {
+            return oBProvinceOutput;
             throw; // 保留原始堆栈
         }
         return oBProvinceOutput;
