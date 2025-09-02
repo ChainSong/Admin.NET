@@ -21,6 +21,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using ServiceStack;
 using ServiceStack.Messaging;
 using StackExchange.Redis;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -42,45 +43,33 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 {
 
     #region 注入依赖
-    private readonly SqlSugarRepository<WMSHachAccountDate> _repHachAccountDate;
     private readonly SqlSugarRepository<WMSHachTagretKRMB> _repHachTagretKRMB;
     private readonly SqlSugarRepository<WMSInventoryUsableSnapshot> _repInventoryUsableSnapshot;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
-    private readonly SqlSugarRepository<WMSWarehouse> _repWarehouse;
-    private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
-    private readonly SqlSugarRepository<WMSOrderAddress> _repOrderAddress;
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
     private readonly SqlSugarRepository<WMSHachCustomerMapping> _repHachCustomerMapping;
     public static string logFilePath = @"C:\HachLogs\DashBoard_Logs\OrderDashBoard.log";
     public HachDashBoardService( 
-        SqlSugarRepository<WMSHachAccountDate> repHachAccountDate,
         SqlSugarRepository<WMSInventoryUsableSnapshot> repInventoryUsableSnapshot,
         SqlSugarRepository<WMSHachTagretKRMB> repHachTagretKRMB,
         SqlSugarRepository<WMSProduct> repProduct,
         SqlSugarRepository<WMSCustomer> repCustomer,
-        SqlSugarRepository<WMSWarehouse> repWarehouse,
-        SqlSugarRepository<WMSOrder> repOrder,
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
         SqlSugarRepository<WMSASNDetail> repASNDetail,
         SqlSugarRepository<WMSInventoryUsable> repInventoryUsable,
-        SqlSugarRepository<WMSOrderAddress> repOrderAddress,
         SqlSugarRepository<WMSHachCustomerMapping> repHachCustomerMapping
         )
     {
-        _repHachAccountDate = repHachAccountDate;
         _repInventoryUsableSnapshot = repInventoryUsableSnapshot;
         _repInventoryUsable = repInventoryUsable;
         _repHachTagretKRMB = repHachTagretKRMB;
         _repProduct = repProduct;
         _repCustomer = repCustomer;
-        _repWarehouse = repWarehouse;
-        _repOrder = repOrder;
         _repOrderDetail = repOrderDetail;
         _repASNDetail = repASNDetail;
-        _repOrderAddress = repOrderAddress;
         _repHachCustomerMapping = repHachCustomerMapping;
     }
     #endregion
@@ -177,35 +166,112 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     {
         SumItemOutput itemOutput = new SumItemOutput();
 
+        var sqlWhereSql = string.Empty;
+        if (input.CustomerId.HasValue && input.CustomerId > 0)
+        {
+            sqlWhereSql = "and customerId = " + input.CustomerId + "";
+        }
+
+        string monthString = input.Month.HasValue ? input.Month.Value.ToString("yyyyMM") : DateTime.Today.ToString("yyyyMM");
+       
+        DateTime targetDate = DateTime.ParseExact(monthString, "yyyyMM", CultureInfo.InvariantCulture);
+      
+        string Sql1 = string.Empty;
         #region 上个月库存金额
         try
         {
-            itemOutput.LastMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input);
+            string data1Month = targetDate.AddMonths(-1).ToString("yyyyMM");
+
+            //查询目标日期上个月的库存信息
+            Sql1 = " SELECT SUM(i.[Qty] * p.[Price])FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
+                        " INNER JOIN [wms_product] p WITH (NOLOCK) ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU] " +
+                        " WHERE 1=1  AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) = ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate  " +
+                        " where AccountDate =  '" + data1Month + "' )" +
+                        " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+          
+            var result = await _repInventoryUsableSnapshot.Context.Ado.GetScalarAsync(Sql1);
+
+            if (result == null || result == DBNull.Value)
+            {
+                itemOutput.LastMonthAmount = 0;
+            }
+
+            itemOutput.LastMonthAmount = Convert.ToDouble(result);
+
+            //itemOutput.CurrentMonthAmount = await GetInventoryUsableSnapshotByAccountDate(input);
+
         }
         catch (Exception ex)
         {
+            Logger.LogMessage("查询大屏汇总1报错" + ex.Message+"执行sql:"+ Sql1, logFilePath);
+
             itemOutput.LastMonthAmount = 0;
         }
         #endregion
 
+        string Sql2 = string.Empty;
         #region 目前库存金额
         try
         {
-            itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(input);
+
+            if (!input.Month.HasValue || (input.Month.HasValue && Convert.ToDateTime(input.Month).ToString("yyyy-MM").Equals(Convert.ToDateTime(DateTime.Today).ToString("yyyy-MM"))))
+            {
+
+                Sql2 = "SELECT SUM(i.[Qty] * p.[Price]) AS [GrandTotalValue] FROM  [WMS_Inventory_Usable] i WITH (NOLOCK)" +
+                "INNER JOIN [wms_product] p WITH (NOLOCK)   ON i.[CustomerId] = p.[CustomerId]   AND i.[SKU] = p.[SKU]" +
+                "WHERE  i.[InventoryStatus] = 1 AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping " +
+                "WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+
+            }
+            else
+            {
+                string data2Month = targetDate.ToString("yyyyMM");
+
+                Sql2 = " SELECT SUM(i.[Qty] * p.[Price])FROM [WMS_Inventory_Usable_Snapshot] i WITH (NOLOCK) " +
+                       " INNER JOIN [wms_product] p WITH (NOLOCK) ON i.[CustomerId] = p.[CustomerId]  AND i.[SKU] = p.[SKU] " +
+                       " WHERE 1=1  AND  CONVERT(VARCHAR(10),i.[InventorySnapshotTime], 120) = ( select CONVERT(VARCHAR(10),EndDate, 120)  from WMS_HachAccountDate  " +
+                       " where AccountDate  =  '" + data2Month + "' )  " +
+                       " AND i.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+
+            }
+            var result = await _repInventoryUsable.Context.Ado.GetScalarAsync(Sql2);
+            if (result == null || result == DBNull.Value)
+            {
+                itemOutput.CurrentMonthAmount = 0;
+            }
+            itemOutput.CurrentMonthAmount = Convert.ToDouble(result);
+
+            //itemOutput.CurrentMonthAmount = await GetInventoryUsableByToday(input);
         }
         catch (Exception ex)
         {
+            Logger.LogMessage("查询大屏汇总2报错" + ex.Message + "执行sql:" + Sql2, logFilePath);
             itemOutput.CurrentMonthAmount = 0;
         }
         #endregion
 
+        string Sql3 = string.Empty;
         #region 库存目标金额
         try
         {
-            itemOutput.CurrentTargetAmount = await GetTargetAmountByMonth(input);
+            var Date3Month = input.Month.HasValue ? Convert.ToDateTime(input.Month.Value).ToString("yyyy-MM"):DateTime.Today.ToString("yyyy-MM");
+            Sql3 = " SELECT  SUM( CAST([PlanKRMB] AS MONEY)) AS [PlanKRMB]  FROM [WMS_HachTagretKRMB] " +
+                    " WHERE 1=1 AND CONVERT(VARCHAR(7), TRY_CONVERT(DATE, [Month] + '-01'), 120) = '" + Date3Month + "' " +
+                    "AND  customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard'  " + sqlWhereSql + ")";
+           
+            var result = await _repHachTagretKRMB.Context.Ado.GetScalarAsync(Sql3);
+            // 更安全的null检查和类型转换
+            if (result == null || result == DBNull.Value)
+            {
+                itemOutput.CurrentTargetAmount = 0;
+            }
+            itemOutput.CurrentTargetAmount = Convert.ToDouble(result);
+
+            //itemOutput.CurrentTargetAmount = await GetTargetAmountByMonth(input);
         }
         catch (Exception ex)
         {
+            Logger.LogMessage("查询大屏汇总3报错" + ex.Message + "执行sql:" + Sql3, logFilePath);
             itemOutput.CurrentTargetAmount = 0;
         }
         #endregion 
@@ -213,24 +279,72 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         //当前库存金额-库存目标金额
         itemOutput.CMonthVSTargetAmount = itemOutput.CurrentMonthAmount - itemOutput.CurrentTargetAmount;
 
+        string Sql5 = string.Empty;
         #region 当月入库总金额
         try
         {
-            itemOutput.CurrentReceiptAmount = await GetCurrentReceiptAmount(input);
+
+            string data3Month = targetDate.ToString("yyyyMM");
+
+            Sql5 = " SELECT SUM(d.[ReceivedQty] * p.[Price]) AS [TotalAmount]  FROM [WMS_ASNDetail] d WITH (NOLOCK) " +
+                          " INNER JOIN [wms_product] p WITH (NOLOCK)  ON d.[CustomerId] = p.[CustomerId]  AND d.[SKU] = p.[SKU] " +
+                          " INNER JOIN [WMS_ASN] o WITH (NOLOCK)  ON o.[Id] = d.[ASNId] AND o.[ASNStatus] <> 90  " +
+                          " INNER JOIN WMS_HachAccountDate h WITH (NOLOCK) ON AccountDate = '" + data3Month + "' " +
+                          " AND o.[CreationTime] >= h.StartDate AND o.[CreationTime] <= h.EndDate " +
+                          " WHERE 1=1 AND d.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping " +
+                          " WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+          
+            var result = await _repASNDetail.Context.Ado.GetScalarAsync(Sql5);
+            // 更安全的null检查和类型转换
+            if (result == null || result == DBNull.Value)
+            {
+
+                itemOutput.CurrentReceiptAmount = 0;
+            }
+            itemOutput.CurrentReceiptAmount  = Convert.ToDouble(result);
+
+            //itemOutput.CurrentReceiptAmount = await GetCurrentReceiptAmount(input);
         }
         catch (Exception ex)
         {
+            Logger.LogMessage("查询大屏汇总5报错" + ex.Message + "执行sql:" + Sql5, logFilePath);
             itemOutput.CurrentReceiptAmount = 0;
         }
         #endregion
 
+        string Sql6 = string.Empty;
         #region 当月出库总金额
         try
         {
-            itemOutput.CurrentOrderAmount = await GetCurrentOrderAmount(input);
+
+            string data6Month = targetDate.ToString("yyyyMM");
+
+            Sql6 = " SELECT SUM(od.OrderQty * p.[Price]) AS [TotalAmount] " +
+                          " FROM WMS_OrderDetail od WITH (NOLOCK)  " +
+                          " INNER JOIN [wms_product] p WITH (NOLOCK)  ON od.[CustomerId] = p.[CustomerId]  " +
+                          " AND od.[SKU] = p.[SKU] " +
+                          " INNER JOIN WMS_Order o WITH (NOLOCK)  ON o.[Id] = od.OrderId  AND o.OrderStatus = 99 " +
+                          " INNER JOIN WMS_HachAccountDate h WITH (NOLOCK)  ON AccountDate = '" + data6Month + "' " +
+                          " AND o.[CreationTime] >= h.StartDate  AND o.[CreationTime] <= h.EndDate  " +
+                          " WHERE 1=1 AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping " +
+                          " WHERE type='HachDashBoard' " + sqlWhereSql + ")";
+            var result = await _repOrderDetail.Context.Ado.GetScalarAsync(Sql6);
+
+            // 更安全的null检查和类型转换
+            if (result == null || result == DBNull.Value)
+            {
+                itemOutput.CurrentOrderAmount = 0;
+            }
+            
+            itemOutput.CurrentOrderAmount = Convert.ToDouble(result);
+
+            //itemOutput.CurrentOrderAmount = await GetCurrentOrderAmount(input);
         }
         catch (Exception ex)
         {
+
+            Logger.LogMessage("查询大屏汇总6报错" + ex.Message + "执行sql:" + Sql6, logFilePath);
+
             itemOutput.CurrentOrderAmount = 0;
         }
         #endregion
