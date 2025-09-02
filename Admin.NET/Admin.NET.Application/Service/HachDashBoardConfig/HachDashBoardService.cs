@@ -1483,9 +1483,9 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        ci.FirstAccountDate),
                        MonthlySummary AS ( SELECT p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType,
                        -- 累计到当月的新增客户数量
-                       COUNT(DISTINCT CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.CustomerIdentifier END) AS Qty,
+                      Cast( COUNT(DISTINCT CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.CustomerIdentifier END) as bigint) AS Qty,
                        -- 累计到当月的新增客户金额
-                       SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) AS Amount
+                       Cast(SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) as bigint) AS Amount
                        FROM Periods p
                        LEFT JOIN MonthlyData md ON md.AccountDate = p.AccountDate
                        GROUP BY p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType)

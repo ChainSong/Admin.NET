@@ -102,14 +102,13 @@ public class OBProvinceOutput
 public class OBProvinceList
 {
     public string? Month { get; set; }
-
     public string? ObProvince { get; set; }
     public long? CustomerId { get; set; }
     public string? CustomerName { get; set; }
     public string? CompanyName { get; set; }
     public string? CompanyType { get; set; }
-    public double? Amount { get; set; }
-    public double? Qty { get; set; }
+    public long? Amount { get; set; }
+    public long? Qty { get; set; }
 }
 /// <summary>
 /// 计算省份的总金额，总数量
