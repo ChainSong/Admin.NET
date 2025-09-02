@@ -1305,7 +1305,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
     /// 如果1月份的用户 在2月或者后面的月份出现了 那么后面的月份的count减去对应的用户数量
     #endregion
 
-    #region 大屏二 下面第二张柱状图
+    #region 大屏二 下面第二张表格
     [HttpPost]
     [AllowAnonymous]
     [ApiDescriptionSettings(Name = "GetMonthlyNewUserTrendTb")]
@@ -1419,7 +1419,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
     #endregion
 
-    #region 大屏二 下面第三张柱状图
+    #region 大屏二 下面第三张表格
     /// <summary>
     /// 当年月份累计新增用户数量 根据省份来分组
     /// </summary>
@@ -1503,60 +1503,43 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             var raw = dt.TableToList<OBProvinceList>();
 
             list = raw
-                .Select(x => new OBProvinceList
-                {
-                    Month = x.Month,
-                    CustomerId = x.CustomerId,
-                    CustomerName = x.CustomerName,
-                    ObProvince = FormatProvinceName(x.ObProvince),
-                    Amount = x.Amount,
-                    Qty = x.Qty,
-                    CompanyName=x.CompanyName,
-                    CompanyType=x.CompanyType
-                })
-                .GroupBy(g => new
-                {
-                    g.Month,
-                    g.CustomerId,
-                    g.CustomerName,
-                    g.ObProvince,
-                    g.CompanyType,
-                    g.CompanyName,
-                })
-                .Select(g => new OBProvinceList
-                {
-                    Month = g.Key.Month,
-                    CustomerId = g.Key.CustomerId,
-                    CustomerName = g.Key.CustomerName,
-                    ObProvince = g.Key.ObProvince,
-                    Amount = g.Sum(z => z.Amount),
-                    Qty = g.Sum(z => z.Qty),
-                    CompanyName=g.Key.CompanyName,
-                    CompanyType=g.Key.CompanyType
-                })
-                .ToList();
-
-            var result = list
-                .GroupBy(k => new { k.CustomerId, k.CustomerName, k.ObProvince,k.CompanyType,k.CompanyName })
-                .SelectMany(g =>
-                {
-                    int running = 0;
-                    return g.OrderBy(x => x.Month).Select(x =>
-                    {
-                        running += (int)x.Qty;
-                        x.Qty = running;
-                        return x;
-                    });
-                })
-                .OrderBy(x => x.Month)
-                .ThenByDescending(x => x.Amount)
-                .ToList();
-            foreach (var item in result)
+             .Select(x => new OBProvinceList
+             {
+                 Month = x.Month,
+                 ObProvince = FormatProvinceName(x.ObProvince),
+                 Amount = x.Amount,
+                 Qty = x.Qty,
+                 CustomerId = x.CustomerId,
+                 CustomerName = x.CustomerName,
+                 CompanyType = x.CompanyType
+             })
+             .GroupBy(g => new
+             {
+                 g.Month,
+                 g.CustomerId,
+                 g.CustomerName,
+                 g.ObProvince,
+                 g.CompanyType,
+             })
+             .Select(g => new OBProvinceList
+             {
+                 Month = g.Key.Month,
+                 CustomerId = g.Key.CustomerId,
+                 CustomerName = g.Key.CustomerName,
+                 ObProvince = g.Key.ObProvince,
+                 Amount = g.Sum(z => z.Amount),
+                 Qty = g.Sum(z => z.Qty),
+                 CompanyType = g.Key.CompanyType,
+             })
+             .OrderBy(x => x.Month)
+             .ThenByDescending(x => x.Amount)
+             .ToList();
+            foreach (var item in list)
             {
                 item.Month=ConvertMonthNumberToName(item.Month);
             }
-            oBProvinceOutput.oBProvinceList = result;
-            oBProvinceOutput.TotalQty = (long?)result.Sum(a => a.Qty);
+            oBProvinceOutput.oBProvinceList = list;
+            oBProvinceOutput.TotalQty = (long)list.Sum(a => a.Qty);
         }
         catch
         {
