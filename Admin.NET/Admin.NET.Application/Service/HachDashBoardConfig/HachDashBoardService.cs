@@ -1326,45 +1326,115 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             var targetMonth = DateTime.Parse(input.Month.Value.ToString("yyyy-MM-01"));
 
             string sql = $@"DECLARE @TargetMonth     DATE = @Month;
-                        DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
-                        DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
-                        DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
-                        DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum; 
-                        ;WITH Periods AS ( SELECT h.AccountDate, h.StartDate, h.EndDate, CAST(RIGHT(CAST(h.AccountDate AS CHAR(6)), 2) AS INT)AS MonthNum,   
-                        STUFF(CAST(h.AccountDate AS CHAR(6)), 5, 0, '-') AS MonthLabel  
-                        FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
-                        AllowedCustomers AS ( SELECT DISTINCT customerid AS CustomerId FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK) 
-                        WHERE [type] = 'HachDashBoard' {sqlWhereSql}),
-                        Events AS ( SELECT h.AccountDate,oa.Province    AS ObProvince,oa.CompanyName ,oa.CompanyType,o.CustomerId,o.CustomerName,
-                        REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') 
-                        AS CustomerIdentifier, o.OrderQty,ISNULL(pdt.Price, 0)AS Price FROM dbo.WMS_OrderDetail AS o  WITH (NOLOCK)
-                        JOIN AllowedCustomers       ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
-                        JOIN dbo.WMS_OrderAddress   oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
-                        JOIN dbo.WMS_Product       pdt WITH (NOLOCK) ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
-                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK)
-                        ON  o.CreationTime >= h.StartDate
-                        AND o.CreationTime <  DATEADD(DAY, 1, h.EndDate)  
-                        WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
-                        CustomerIdentifiers AS ( 
-                        SELECT REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') 
-                        AS CustomerIdentifier, MIN(h.AccountDate) AS FirstAccountDate FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
-                        JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
-                        JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
-                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
-                        GROUP BY REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''))
-                        SELECT top 200 pds.MonthNum as Month,pds.MonthLabel, e.CustomerId,e.CustomerName, e.ObProvince, e.CompanyName,e.CompanyType,
-                        MAX(OrderData.OrderQty) as Qty,MAX(OrderData.price) as Amount  
-                        FROM Periods pds JOIN Events e ON e.AccountDate = pds.AccountDate 
-                        LEFT JOIN CustomerIdentifiers ci ON ci.CustomerIdentifier = e.CustomerIdentifier
-                        outer apply (
-                        select SUM(OrderQty) OrderQty, max(isnull(OrderQty,0)*isnull(WMS_Product.Price,0)) price from WMS_Order left join WMS_OrderDetail
-                        on WMS_Order.PreOrderNumber=WMS_OrderDetail.PreOrderNumber
-                        left join WMS_OrderAddress on WMS_Order.PreOrderNumber=WMS_OrderAddress.PreOrderNumber
-                        outer apply (select top 1 Price from WMS_Product where WMS_Product.SKU=WMS_OrderDetail.SKU and WMS_Product.CustomerId =WMS_OrderDetail.CustomerId)  WMS_Product
-                        where  CONVERT(VARCHAR(7),WMS_OrderDetail.CreationTime, 23)=pds.MonthLabel and WMS_OrderAddress.CompanyName=e.CompanyName
-                        ) OrderData 
-                        GROUP BY pds.AccountDate, pds.MonthNum, pds.MonthLabel, e.ObProvince, e.CustomerId, e.CustomerName, e.CompanyName,e.CompanyType
-                        ORDER BY pds.AccountDate DESC;";
+                      DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
+DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
+DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;
+DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum;
+
+;WITH Periods AS (
+SELECT
+h.AccountDate,
+h.StartDate,
+h.EndDate,
+CAST(RIGHT(CAST(h.AccountDate AS CHAR(6)), 2) AS INT) AS MonthNum,
+STUFF(CAST(h.AccountDate AS CHAR(6)), 5, 0, '-') AS MonthLabel
+FROM dbo.WMS_HachAccountDate h WITH (NOLOCK)
+WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
+),
+AllowedCustomers AS (
+SELECT /*DISTINCT*/ customerid AS CustomerId
+FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
+WHERE [type] = 'HachDashBoard'  {sqlWhereSql}
+),
+-- 为 SKU / Customer 选择一个稳定价格（若多条，取 MAX；你也可改为最新价）
+ProductPrice AS (
+SELECT CustomerId, SKU, MAX(Price) AS Price
+FROM dbo.WMS_Product WITH (NOLOCK)
+GROUP BY CustomerId, SKU
+),
+-- 统一生成客户标识（姓名+电话的归一化），并取最早出现月份
+CustomerIdentifiers AS (
+SELECT
+REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')
++ '|' +
+REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') AS CustomerIdentifier,
+MIN(h.AccountDate) AS FirstAccountDate
+FROM dbo.WMS_OrderDetail o WITH (NOLOCK)
+JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK)
+ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
+WHERE oa.Province IS NOT NULL AND oa.Province <> ''
+AND oa.CompanyName IS NOT NULL AND oa.CompanyName <> ''
+AND h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
+GROUP BY
+REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')
++ '|' +
+REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+),
+-- 明细：用 HachAccountDate 的分期来做“按月”归档（完全可索引）
+Detail AS (
+SELECT
+p.AccountDate,
+p.MonthNum,
+p.MonthLabel,
+oa.Province      AS ObProvince,
+oa.CompanyName,
+oa.CompanyType,
+o.CustomerId,
+o.CustomerName,
+-- 归一化标识，和上面完全一致
+REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')
++ '|' +
+REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '') AS CustomerIdentifier,
+CAST(o.OrderQty AS BIGINT) AS OrderQty,
+ISNULL(pp.Price, 0)        AS Price
+FROM dbo.WMS_OrderDetail o WITH (NOLOCK)
+JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
+JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK)
+ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
+JOIN Periods p ON p.AccountDate = h.AccountDate
+LEFT JOIN ProductPrice pp
+ON pp.CustomerId = o.CustomerId AND pp.SKU = o.SKU
+WHERE oa.Province IS NOT NULL AND oa.Province <> ''
+AND oa.CompanyName IS NOT NULL AND oa.CompanyName <> ''
+),
+-- 月聚合：一次性 SUM，不要再做相关子查询
+Monthly AS (
+SELECT
+d.AccountDate,
+d.MonthNum,
+d.MonthLabel,
+d.ObProvince,
+d.CompanyName,
+d.CompanyType,
+d.CustomerId,
+d.CustomerName,
+d.CustomerIdentifier,
+SUM(d.OrderQty)                          AS Qty,
+SUM(d.OrderQty * ISNULL(d.Price,0.0))    AS Amount
+FROM Detail d
+-- 若你需要“累计到当月”的新客/金额，可在这里连 CustomerIdentifiers 并加条件
+JOIN CustomerIdentifiers ci ON ci.CustomerIdentifier = d.CustomerIdentifier
+GROUP BY
+d.AccountDate, d.MonthNum, d.MonthLabel,
+d.ObProvince, d.CompanyName, d.CompanyType,
+d.CustomerId, d.CustomerName, d.CustomerIdentifier
+)
+SELECT TOP 200
+m.MonthNum         AS Month,
+m.MonthLabel,
+m.CustomerId,
+m.CustomerName,
+m.ObProvince,
+m.CompanyName,
+m.CompanyType,
+m.Qty,
+CAST(m.Amount AS DECIMAL(18,2)) AS Amount
+FROM Monthly m
+ORDER BY m.AccountDate DESC, m.Amount DESC
+OPTION (RECOMPILE);   ";
 
             // 4) 仅传 @Month 参数
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
@@ -1471,6 +1541,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        AS CustomerIdentifier,MIN(h.AccountDate) AS FirstAccountDate  FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
                        JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
                        JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                        AND PROVINCE IS NOT NULL AND Province <>'' AND CompanyName IS NOT NULL AND CompanyName<>''
                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
                        GROUP BY  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
                        ),
@@ -1481,9 +1552,10 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
                        JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
                        JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                        AND PROVINCE IS NOT NULL AND Province <>'' AND CompanyName IS NOT NULL AND CompanyName<>''
                        JOIN dbo.WMS_Product pdt WITH (NOLOCK) ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
                        JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
-                       LEFT JOIN CustomerIdentifiers ci ON  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
+                       INNER JOIN CustomerIdentifiers ci ON  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
                        = ci.CustomerIdentifier
                        WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
                        GROUP BY  h.AccountDate,oa.Province,oa.CompanyType,o.CustomerId,o.CustomerName,
@@ -1495,7 +1567,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                        -- 累计到当月的新增客户金额
                        Cast(SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) as bigint) AS Amount
                        FROM Periods p
-                       LEFT JOIN MonthlyData md ON md.AccountDate = p.AccountDate
+                       INNER JOIN MonthlyData md ON md.AccountDate = p.AccountDate
                        GROUP BY p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType)
                        SELECT top 200 MonthNum as Month,CustomerId,CustomerName,CompanyType,Qty,Amount
                        FROM MonthlySummary
