@@ -90,7 +90,7 @@ namespace Admin.NET.Application.Strategy
                         if (Georesponse != null && Georesponse.status == "1")
                         {
                             item.OrderAddress.Province = Georesponse.geocodes[0].province;
-                            item.OrderAddress.City = Georesponse.geocodes[0].city;
+                            item.OrderAddress.City = Georesponse.geocodes[0]?.city?.ToString() ?? item.OrderAddress.City;
                             //item.OrderAddress.County = Georesponse.geocodes[0].district;
                         }
                         else

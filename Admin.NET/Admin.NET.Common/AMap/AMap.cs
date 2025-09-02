@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XAct.Messages;
 
 namespace Admin.NET.Common.AMap;
 /// <summary>
@@ -24,47 +25,109 @@ namespace Admin.NET.Common.AMap;
 public class AMap
 {
     public static readonly string GeoUrl = App.GetConfig<string>("AMap:GeoUrl");
-    public static readonly string GeoKey = App.GetConfig<string>("AMap:GeoKey");
+    public static readonly string GeoPOIUrl = App.GetConfig<string>("AMap:GeoPOIUrl");
+    public static readonly string GeoDistrictUrl = App.GetConfig<string>("AMap:GeoDistrictUrl");
+    public static readonly string GeoWebServicesAPI = App.GetConfig<string>("AMap:GeoWebServicesAPI");
+
+    public static readonly string GeonamesUrl = App.GetConfig<string>("AMap:GeonamesUrl");
+    public static readonly string GeonamesUserName = App.GetConfig<string>("AMap:GeonamesUserName");
+    public static string logFilePath = @"C:\HachLogs\OrderAddress_Format_Logs\OrderAddressRequestGeocodeJob.log";
+
     /// <summary>
-    /// 请求高德地图 地理编码
+    /// 请求高德地图地理编码
     /// </summary>
     /// <param name="address"></param>
     /// <param name="city"></param>
     /// <returns></returns>
-    public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city)
+    public async Task<GeoCodeResponse> RequestGeoCode(string address, string? city = null)
     {
-        GeoCodeResponse response = new GeoCodeResponse();
-        string RequestUrl = string.Empty;
-        //将字符串中的特殊字符转换为符合 URL 规范的格式
-        var encodedAddress = Uri.EscapeDataString(address);
-        //获取请求Url
-        RequestUrl = BuildRequestUrl(encodedAddress, city);
-
-        // 检查请求 URL 是否为空
-        if (string.IsNullOrEmpty(RequestUrl))
+        LogMessage("请求高德 开始：" + DateTime.Now + "," + address + "", logFilePath);
+        try
         {
-            throw new InvalidOperationException("请求 URL 不能为空");
-        }
-        // 创建 HttpClient
-        using (var client = new HttpClient())
+            if (string.IsNullOrWhiteSpace(address)) return null;
+            var encodedAddress = EncodeUrlParam(address);
+            var requestUrl = BuildUrl(GeoUrl, new Dictionary<string, string>
         {
-            // 发送 GET 请求
-           var  GeoRresponse = await client.GetAsync(RequestUrl);
+            { "address", encodedAddress },
+            { "key", GeoWebServicesAPI },
+            { "city", city }
+        });
+            LogMessage("请求高德Url 开始：" + DateTime.Now + "," + requestUrl + "", logFilePath);
 
-            // 读取响应内容
-            var content = await GeoRresponse.Content.ReadAsStringAsync();
-
-            // 反序列化响应内容
-            var geoResponse = JsonConvert.DeserializeObject<GeoCodeResponse>(content);
-
-            // 检查反序列化结果
-            if (geoResponse == null)
-            {
-                throw new InvalidOperationException("反序列化响应内容失败");
-            }
-
-            return geoResponse;
+            return await SendRequestAsync<GeoCodeResponse>(requestUrl);
         }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    /// <summary>
+    /// 请求高德地图POI 地理编码
+    /// </summary>
+    /// <param name="address"></param>
+    /// <param name="city"></param>
+    /// <returns></returns>
+    public async Task<GeoCodePOIResponse> RequestGeoCodePOI(string KeyWords)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+            var encodedKeywords = EncodeUrlParam(KeyWords);
+            var requestUrl = BuildUrl(GeoPOIUrl, new Dictionary<string, string>
+        {
+            { "keywords", encodedKeywords },
+            { "types", "公司" },
+            { "key", GeoWebServicesAPI }
+        });
+            return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    /// <summary>
+    /// 行政区域查询 API 服务地址
+    /// </summary>
+    /// <param name="KeyWords"></param>
+    /// <returns></returns>
+    public async Task<GeoDistrictCodeResponse> RequestGeoCodeDistrict(string KeyWords, string? Subdistrict = "1", string? Extensions = "base")
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+            var encodedKeywords = EncodeUrlParam(KeyWords);
+            var requestUrl = BuildUrl(GeoDistrictUrl, new Dictionary<string, string>
+        {
+            { "keywords", encodedKeywords },
+            { "subdistrict",Subdistrict},
+            { "extensions",Extensions },
+            { "key", GeoWebServicesAPI }
+        });
+            return await SendRequestAsync<GeoDistrictCodeResponse>(requestUrl);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    /// <summary>
+    /// 请求 Geonames查询国家行政区   免费  用不了
+    /// </summary>
+    /// <param name="KeyWords"></param>
+    /// <returns></returns>
+    public async Task<GeoCodePOIResponse> RequestGeonames(string KeyWords)
+    {
+        if (string.IsNullOrWhiteSpace(KeyWords)) return null;
+        var encodedKeywords = EncodeUrlParam(KeyWords);
+        var requestUrl = BuildUrl(GeoPOIUrl, new Dictionary<string, string>
+        {
+            { "GeonamesUrl", KeyWords },
+            { "username",GeonamesUserName },
+        });
+        return await SendRequestAsync<GeoCodePOIResponse>(requestUrl);
     }
 
     /// <summary>
@@ -75,17 +138,95 @@ public class AMap
     /// <returns></returns>
     public string BuildRequestUrl(string address, string? city)
     {
-        string RequestUrl = string.Empty;
-        //如果地址为空 那么就返回报错
-        if (string.IsNullOrEmpty(address))
+        try
         {
-            return null;
+            string RequestUrl = string.Empty;
+            //如果地址为空 那么就返回报错
+            if (string.IsNullOrEmpty(address))
+            {
+                return null;
+            }
+            RequestUrl = GeoUrl + $"?address={address}&key={GeoWebServicesAPI}";
+            if (!string.IsNullOrEmpty(city))
+            {
+                RequestUrl += $"&city={city}";
+            }
+            return RequestUrl;
         }
-        RequestUrl = GeoUrl + $"?address={address}&key={GeoKey}";
-        if (!string.IsNullOrEmpty(city))
+        catch (Exception ex)
         {
-            RequestUrl += $"&city={city}";
+
+            throw;
         }
-        return RequestUrl;
     }
+
+    #region 公共方法封装
+
+    /// <summary>
+    /// URL参数编码
+    /// </summary>
+    private string EncodeUrlParam(string value)
+    {
+        return Uri.EscapeDataString(value);
+    }
+
+    /// <summary>
+    /// 构建 URL 参数字符串
+    /// </summary>
+    private string BuildUrl(string baseUrl, Dictionary<string, string?> parameters)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentNullException(nameof(baseUrl));
+
+        var query = string.Join("&", parameters
+            .Where(p => !string.IsNullOrWhiteSpace(p.Value))
+            .Select(p => $"{p.Key}={p.Value}"));
+
+        return $"{baseUrl}?{query}";
+    }
+
+    /// <summary>
+    /// 通用的 HTTP GET 请求发送和 JSON 解析
+    /// </summary>
+    private async Task<T> SendRequestAsync<T>(string url) where T : class
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(url)) throw new InvalidOperationException("请求 URL 不能为空");
+            using var client = new HttpClient();
+            LogMessage("发送请求开始：" + DateTime.Now + "，" + url + "", logFilePath);
+            var response = await client.GetAsync(url);
+            LogMessage("请求结果：" + DateTime.Now + "，" + response + "", logFilePath);
+            var content = await response.Content.ReadAsStringAsync();
+            LogMessage("序列化报文的结果：" + DateTime.Now + "，" + content + "", logFilePath);
+            var result = JsonConvert.DeserializeObject<T>(content);
+            if (result == null)
+            {
+            LogMessage("反序列化响应内容失败：" + DateTime.Now + "，" + content + "", logFilePath);
+                throw new InvalidOperationException("反序列化响应内容失败");
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            LogMessage("错误：" + DateTime.Now + "，" + ex.ToString() + "", logFilePath);
+            throw ex;
+        }
+    }
+
+    private void LogMessage(string message, string logFilePath)
+    {
+        // 确保日志目录存在
+        string directory = Path.GetDirectoryName(logFilePath);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        // 将日志写入文件
+        using (var writer = new StreamWriter(logFilePath, true))
+        {
+            writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+        }
+    }
+    #endregion
 }

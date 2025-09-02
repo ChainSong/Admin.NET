@@ -11,59 +11,48 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Utf8Json.Internal;
 
-namespace Admin.NET.Common.AMap.Response;
+namespace Admin.NET.Core.Entity;
 /// <summary>
-/// 地理编码信息
+/// 出库地址对接高德信息关联表
 /// </summary>
-public class GeoCodes
+[SugarTable("WMS_OrderAddress_GaoDe_Mapping", "出库地址对接高德信息关联表")]
+public class WMSOrderAddressGaoDeMapping : ITenantIdFilter
 {
     /// <summary>
-    /// 国内地址默认返回中国 国家
+    /// Id
     /// </summary>
-    public string country {get; set;}
-    /// <summary>
-    /// 地址所在的省份名
-    /// 中国的四大直辖市也算作省级单位。
-    /// </summary>
-    public string province { get; set; }
-    /// <summary>
-    /// 地址所在的城市名
-    /// </summary>
-    public object city { get; set; }
-    /// <summary>
-    /// 城市编码
-    /// </summary>
-    public string citycode { get; set; }
-    /// <summary>
-    /// 地址所在的区
-    /// </summary>
-    public object district { get; set; }
-    /// <summary>
-    /// 街道
-    /// </summary>
-    [JsonConverter(typeof(NumberConverter))]
-    public object street { get; set; }
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public virtual long Id { get; set; }
 
     /// <summary>
-    /// 门牌
+    /// 出库地址关联ID
     /// </summary>
-    [JsonConverter(typeof(NumberConverter))]
-    public object number { get; set; }
+    [SugarColumn(ColumnDescription = "出库地址关联ID")]
+    public long? OrderAddressId { get; set; }
+
     /// <summary>
-    /// 区域编码
+    /// 是否对接
     /// </summary>
-    public string adcode { get; set; }
+    [SugarColumn(ColumnDescription = "是否对接")]
+    public bool? IsConnected { get; set; }
+
     /// <summary>
-    /// 坐标点
+    /// 公司名称
     /// </summary>
-    public string location { get; set; }
+    [SugarColumn(ColumnDescription = "公司名称", Length = 200)]
+    public string? CompanyName { get; set; }
+
     /// <summary>
-    /// 匹配级别
+    /// 创建时间
     /// </summary>
-    public string level { get; set; }
+    [SugarColumn(ColumnDescription = "创建时间")]
+    public DateTime? CreationTime { get; set; } = DateTime.Now;
+
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id")]
+    public long? TenantId { get; set; }
 }
-
