@@ -1518,7 +1518,7 @@ Base AS (
         fr.CustomerName,
         fr.CompanyName,
         fr.CompanyType,
-        fr.Province,
+        fr.Province ,
         SUM(COALESCE(amt.OrderPrice, 0))   AS TotalAmount
     FROM FirstOrderInRange AS fr
     JOIN Months            AS m   ON m.AccountDate = fr.AccountDate
@@ -1549,7 +1549,7 @@ SELECT
     b.CustomerName,
     b.CompanyName,
     b.CompanyType,
-    b.Province,
+    b.Province as ObProvince,
     SUM(b.TotalAmount)           AS [Amount],
     COUNT(*)                     AS [Qty] 
 FROM Base AS b
