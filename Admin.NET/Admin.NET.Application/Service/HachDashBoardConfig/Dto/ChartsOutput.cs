@@ -95,9 +95,11 @@ public class ChartIndex
 }
 public class OBProvinceOutput
 {
-    public long? TotalQty { get; set; }
-    public List<OBProvinceList> oBProvinceList { get; set; }
-   
+    public long? TwoTotalQty { get; set; }
+    public List<OBProvinceList> TwoBProvinceList { get; set; }
+    public long? ThreeTotalQty { get; set; }
+    public List<OBProvinceList> ThreeoBProvinceList { get; set; }
+
 }
 public class OBProvinceList
 {
