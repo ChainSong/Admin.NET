@@ -20,6 +20,7 @@ namespace Admin.NET.Application.Interface
         UserManager _userManager { get; set; }
         ////asn仓储
         SqlSugarRepository<WMSASN> _repASN { get; set; }
+        SqlSugarRepository<WMSProduct> _repProduct { get; set; }
         ////客户用户关系仓储
         //SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
         ////仓库用户关系仓储

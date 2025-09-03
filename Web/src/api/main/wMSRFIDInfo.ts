@@ -10,6 +10,10 @@ enum Api {
 	reportScreen = '/api/wMSReport/reportScreen',
 	reportScreenSecond = '/api/wMSReport/reportScreenSecond',
 	ExportRFID = '/api/wMSRFIDInfo/ExportRFID',
+	ExportRFID = '/api/wMSRFIDInfo/ExportRFID',
+	SetRFIDTID = '/api/wMSRFIDInfo/SetRFIDTID',
+
+
 }
 
 // 增加WMSRFIDInfo
@@ -86,9 +90,16 @@ export const reportScreenSecond = () =>
 		// data: params,  params?: any
 	});
 
+	
 
-// 大屏接口2版本
-// export const  = () => 
+
+// 
+export const setRFIDTID = (params?: any) =>
+	request({
+		url: Api.SetRFIDTID,
+		method: 'post',
+		data: params,
+	});
 // 	request({
 // 		url: Api.RFIDImport,
 // 		method: 'post',

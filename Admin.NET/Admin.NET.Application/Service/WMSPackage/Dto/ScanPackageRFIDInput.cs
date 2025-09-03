@@ -27,6 +27,7 @@ public class ScanPackageRFIDInput
     /// 拣货单号
     /// </summary>
     public string PickTaskNumber { get; set; }
+    public string ReceiptNumber { get; set; }
 
     /// <summary>
     /// 包装单号
