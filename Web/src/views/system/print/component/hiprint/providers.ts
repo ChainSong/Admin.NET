@@ -61,6 +61,7 @@ export const aProvider = function () {
 							{ text: '库位', field: 'location' },
 							{ text: '批次号', field: 'batchCode' },
 							{ text: '是否SN', field: 'isSN' },
+							{ text: 'CN805', field: 'cN805' },
 						],
 					},
 					editable: true,
@@ -87,7 +88,8 @@ export const aProvider = function () {
 							{ title: '库位', align: 'center', field: 'location' , width: 150 },
 							{ title: '批次号', align: 'center', field: 'batchCode' , width: 150 },
 							{ title: '是否SN', align: 'center', field: 'isSN' , width: 150 },
-							
+							{ title: 'CN805', align: 'center', field: 'cN805' , width: 150 },
+
 							// { title: '名称', align: 'center', field: 'NAME', width: 150 },
 							// { title: '数量', align: 'center', field: 'SL', width: 80 },
 							// { title: '规格', align: 'center', field: 'GG', width: 80, checked: false },

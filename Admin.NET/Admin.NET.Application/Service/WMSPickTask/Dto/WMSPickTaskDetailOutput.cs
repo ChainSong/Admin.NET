@@ -307,6 +307,7 @@ public class WMSPickTaskDetailOutput
     public DateTime? UpdateTime { get; set; }
 
     public string IsSN { get; set; }
+    public string CN805 { get; set; }
 
 
     /// <summary>

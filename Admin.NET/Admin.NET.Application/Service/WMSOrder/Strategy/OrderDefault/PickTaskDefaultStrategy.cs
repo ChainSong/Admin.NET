@@ -85,7 +85,7 @@ namespace Admin.NET.Application.Strategy
             //新需求，按照同客户地址拣货任务合并，
             orderData.ForEach(data =>
             {
-                if (pickTasks == null || pickTasks.Where(a => a.Str1 == (data.OrderAddress.Phone +""+ data.OrderAddress.City + data.OrderAddress.Address).Trim()).ToList().Count == 0)
+                if (pickTasks == null || pickTasks.Where(a => a.Str1 == (data.OrderAddress.Name + "" + data.OrderAddress.Phone +""+ data.OrderAddress.City + data.OrderAddress.Address).Trim()).ToList().Count == 0)
                 {
                     var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
                     //将需要分配的订单发送到分配队列
@@ -122,7 +122,7 @@ namespace Admin.NET.Application.Strategy
                         //EndTime
                         PrintNum = 0,
                         SerialNumber = "1",
-                        Str1 = (data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim(),
+                        Str1 = (data.OrderAddress.Name + "" + data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim(),
                         //PrintTime
                         //PrintPersonnel
                         //PickPlanPersonnel
@@ -137,7 +137,7 @@ namespace Admin.NET.Application.Strategy
                 }
                 else
                 {
-                    var pickTasksdata = pickTasks.Where(a => a.Str1 == (data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim()).First();
+                    var pickTasksdata = pickTasks.Where(a => a.Str1 == (data.OrderAddress.Name + ""+data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim()).First();
                     //将需要分配的订单发送到分配队列
                     //获取需要分配的订单，采用自动分配
                     var config = new MapperConfiguration(cfg =>
@@ -157,7 +157,7 @@ namespace Admin.NET.Application.Strategy
                     var mapper = new Mapper(config);
                     var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation);
 
-                    pickTasks.Where(a => a.Str1 == (data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim()).First().Details.AddRange(detaildata);
+                    pickTasks.Where(a => a.Str1 == (data.OrderAddress.Name + "" + data.OrderAddress.Phone + "" + data.OrderAddress.City + data.OrderAddress.Address).Trim()).First().Details.AddRange(detaildata);
 
                 }
 

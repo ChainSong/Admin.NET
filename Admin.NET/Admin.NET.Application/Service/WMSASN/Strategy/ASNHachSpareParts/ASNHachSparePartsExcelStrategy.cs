@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ASNExcelDefaultStrategy : IASNExcelInterface
+    public class ASNHachSparePartsExcelStrategy : IASNExcelInterface
     {
         //注入数据库实例
         //public ISqlSugarClient _db { get; set; }
@@ -24,9 +24,7 @@ namespace Admin.NET.Application.Strategy
         ////注入ASN仓储
 
         public SqlSugarRepository<WMSASN> _repASN { get; set; }
-
         public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
-
         ////注入仓库关系仓储
 
         //public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
@@ -36,7 +34,7 @@ namespace Admin.NET.Application.Strategy
         static List<string> _tableNames = new List<string>() { "WMS_ASN", "WMS_ASNDetail" };
 
 
-        public ASNExcelDefaultStrategy()
+        public ASNHachSparePartsExcelStrategy()
         {
 
         }
@@ -380,6 +378,23 @@ namespace Admin.NET.Application.Strategy
             }
             var orderData = query.Includes(a => a.Details).ToList();
 
+
+            //哈希备件仓需求，需要将明细的金额显示出来
+            foreach (var collection in orderData)
+            {
+                //获取product信息
+                var product = _repProduct.AsQueryable().Where(a => collection.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == collection.CustomerId).ToList();
+
+                foreach (var item in collection.Details)
+                {
+                    var price = product.Where(a => a.SKU == item.SKU).FirstOrDefault();
+                    //if (price.Price == null)
+                    //{
+
+                    //}
+                    item.Str1 = (item.ExpectedQty * price.Price) + "";
+                }
+            }
 
             DataTable dt = new DataTable();
             DataColumn dc = new DataColumn();

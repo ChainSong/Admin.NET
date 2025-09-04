@@ -801,8 +801,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             }
             TextHelper.WrittxtFor("准备更新RFID +request", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
-            TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
-            TextHelper.WrittxtFor(JsonSerializer.Serialize(pickData.First().RFIDs), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            //TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            //TextHelper.WrittxtFor(JsonSerializer.Serialize(pickData.First().RFIDs), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
 
             var mapper = new Mapper(config);
             var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);

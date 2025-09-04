@@ -21,6 +21,8 @@ public class ScanPackageOutput
     public string SKU { get; set; }
     public string PickTaskNumber { get; set; }
     public double Weight { get; set; }
+    public double Qty { get; set; }
+    public double TotalQty { get; set; }
 
     public string SN { get; set; }
     public string Lot { get; set; }

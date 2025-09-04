@@ -1,13 +1,16 @@
-﻿using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using FluentEmail.Core;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using StackExchange.Profiling.Internal;
 using System.Collections.Generic;
 using System.Linq;
+using XAct;
 //using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 
 namespace Admin.NET.Application;
@@ -19,12 +22,15 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSWarehouse> _rep;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
+    private readonly SqlSugarRepository<WMSShelf> _repShelf;
+
     private readonly UserManager _userManager;
-    public WMSWarehouseService(SqlSugarRepository<WMSWarehouse> rep, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser)
+    public WMSWarehouseService(SqlSugarRepository<WMSWarehouse> rep, UserManager userManager, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<WMSShelf> repShelf)
     {
         _rep = rep;
         _userManager = userManager;
         _repWarehouseUser = repWarehouseUser;
+        _repShelf = repShelf;
     }
 
     /// <summary>
@@ -93,7 +99,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
                 a.CreateTime = DateTime.Now;
             });
         }
-        await _rep.Context.InsertNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
+        await _rep.Context.InsertNav(entity).Include(a => a.Details).ExecuteCommandAsync();
 
         //给自己添加仓库权限
         WarehouseUserMapping warehouseUserMapping = new WarehouseUserMapping();
@@ -150,7 +156,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
                 a.CreateTime = DateTime.Now;
             });
         }
-        await _rep.Context.UpdateNav(entity).Include(a=>a.Details).ExecuteCommandAsync();
+        await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
         //});
     }
@@ -164,7 +170,7 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Query")]
     public async Task<WMSWarehouse> Get(long id)
     {
-        var entity = await _rep.AsQueryable().Includes(a=>a.Details).Where(u => u.Id == id).FirstAsync();
+        var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
     }
 
@@ -222,10 +228,74 @@ public class WMSWarehouseService : IDynamicApiController, ITransient
         {
             throw Oops.Oh("请选择仓库");
         }
-       
+
     }
 
+    /// <summary>
+    /// 获取WMSWarehouse列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetShelf")]
+    public async Task<List<WMSShelfMapDto>> GetShelf()
+    {
+        List<WMSShelfMapDto> mapDto = new List<WMSShelfMapDto>();
 
+        var SheIf = await _repShelf.AsQueryable().Select<WMSShelf>().ToListAsync();
+        mapDto = SheIf.GroupBy(a => new { a.ShelfNo, a.LocationX, a.LocationY, a.LocationZ, a.Direction }).Select(a => new WMSShelfMapDto
+        {
+            ShelfNo = a.Key.ShelfNo,
+            x = a.Key.LocationX,
+            y = a.Key.LocationY,
+            z = a.Key.LocationZ,
+            direction = a.Key.Direction,
+        }).Distinct().ToList();
+
+        foreach (var item in mapDto)
+        {
+            layers layers = new layers();
+            var layersData = SheIf.Where(a => a.ShelfNo == item.ShelfNo).GroupBy(a => new
+            {
+                a.ShelfNo,
+                a.SlotX,
+                a.SlotY,
+                a.SlotZ
+            }).Select(a => new layers
+            {
+                slotX = a.Key.SlotX,
+                slotY = a.Key.SlotY,
+                slotZ = a.Key.SlotZ,
+            }).Distinct().ToList();
+
+            foreach (var itemlocation in layersData)
+            {
+                var locationData = SheIf.Where(a => a.ShelfNo == item.ShelfNo && a.SlotX == itemlocation.slotX && a.SlotZ == itemlocation.slotZ).GroupBy(a => new
+                {
+                    a.Location,
+                    a.SlotY
+                }).OrderBy(a => a.Key.SlotY).Select(a => new boxes
+                {
+                    code = a.Key.Location,
+                    count = "10"
+                }).Distinct().ToList();
+
+                itemlocation.boxes = new List<List<boxes>>();
+                var aaa = new List<boxes>();
+                aaa.Add(locationData[0]);
+                var bbb = new List<boxes>();
+                bbb.Add(locationData[1]);
+                itemlocation.boxes.Add(aaa);
+                itemlocation.boxes.Add(bbb);
+
+            }
+
+
+            item.layers = layersData;
+
+        }
+        return mapDto;
+    }
 
 }
 

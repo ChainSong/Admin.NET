@@ -746,8 +746,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
       );
 
-        TextHelper.WrittxtFor("请求记录第一步", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
-        TextHelper.WrittxtFor(JsonSerializer.Serialize(input), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+        //TextHelper.WrittxtFor("请求记录第一步", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+        //TextHelper.WrittxtFor(JsonSerializer.Serialize(input), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
 
         //新流程，都见RFID 数据
         //得到rfid数据 里面包含rfid  和tid

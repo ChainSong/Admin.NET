@@ -48,9 +48,11 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     //private readonly ISqlSugarClient _db;
     private readonly SysCacheService _sysCacheService;
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
+    private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct)
+    private readonly SysWorkFlowService _repWorkFlowService;
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail)
     {
         _rep = rep;
         _userManager = userManager;
@@ -58,6 +60,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repWarehouseUser = repWarehouseUser;
         _repCustomerUser = repCustomerUser;
         _repOrder = repOrder;
+        _repOrderDetail = repOrderDetail;
         _repPickTaskDetail = repPickTaskDetail;
         _repPackage = repPackage;
         _repPackageDetail = repPackageDetail;
@@ -65,7 +68,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repRFIDInfo = repRFIDInfo;
         _repOrderAddress = repOrderAddress;
         _repProduct = repProduct;
-
+        _repWorkFlowService = repWorkFlowService;
     }
 
     /// <summary>
@@ -238,6 +241,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
         //await _rep.DeleteAsync(entity);
         //await _rep.FakeDeleteAsync(entity);   //假删除
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(orderData.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_PreOrder_ForOrder_ALL, orderData.OrderType);
 
         List<DeleteWMSPickTaskInput> request = new List<DeleteWMSPickTaskInput>();
         request.Add(input);
@@ -330,33 +334,86 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     {
         var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => ids.Contains(u.Id)).ToListAsync();
         var data = entity.Adapt<List<WMSPickTaskOutput>>();
-        foreach (var item in data)
+        if (entity.First().CustomerName == "哈希")
         {
-            var order = await _repOrder.AsQueryable().Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
-            var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
-            var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b=>b.SKU).Contains(a.SKU) && a.CustomerId==item.CustomerId).ToListAsync();
-            item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+            foreach (var item in data)
             {
-                SKU = a.Key.SKU,
-                GoodsName = a.Key.GoodsName,
-                GoodsType = a.Key.GoodsType,
-                Area = a.Key.Area,
-                Location = a.Key.Location,
-                BatchCode = a.Key.BatchCode,
-                PickTaskNumber = a.Key.PickTaskNumber,
-                PickTaskId = a.Key.PickTaskId,
-                Qty = a.Sum(b => b.Qty),
-                IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU).First().IsSN).ToString()
-            }).OrderBy(a=>a.Location).ToList();
-            //foreach (var items in item.Details)
-            //{
-            //    items.IsSN = SqlFunc.Subqueryable<WMSProduct>().Where(s => s.SKU == items.SKU && s.CustomerId == items.CustomerId).Max(s => Convert.ToBoolean(s.IsSN)).ToString();
-            //}
-            item.PrintTime = DateTime.Now;
-            //item.OrderAddress=new WMSOrderAddress();
-            item.OrderAddress = orderadrress;
-            item.Remark = order.Remark;
+                var order = await _repOrder.AsQueryable().Includes(a => a.Details).Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
+                var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
+                var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+                //var product = await _repOrderDetail.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+
+                //if (product == null)
+                //{
+                //     throw Oops.Oh(item.ExternOrderNumber+"中有SKU ")
+                //}
+
+                item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+                {
+                    SKU = a.Key.SKU,
+                    GoodsName = a.Key.GoodsName,
+                    GoodsType = a.Key.GoodsType,
+                    Area = a.Key.Area,
+                    Location = a.Key.Location,
+                    BatchCode = a.Key.BatchCode,
+                    PickTaskNumber = a.Key.PickTaskNumber,
+                    PickTaskId = a.Key.PickTaskId,
+                    Qty = a.Sum(b => b.Qty),
+                    IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
+                    CN805 = Convert.ToBoolean(order.Details.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First()?.PoCode.Contains("CN805")).ToString()
+                }).OrderBy(a => a.Location).ToList();
+
+                //foreach (var items in item.Details)
+                //{
+                //    items.IsSN = SqlFunc.Subqueryable<WMSProduct>().Where(s => s.SKU == items.SKU && s.CustomerId == items.CustomerId).Max(s => Convert.ToBoolean(s.IsSN)).ToString();
+                //}
+                item.PrintTime = DateTime.Now;
+                //item.OrderAddress=new WMSOrderAddress();
+                item.OrderAddress = orderadrress;
+                item.Remark = order.Remark;
+            }
         }
+        else
+        {
+
+            foreach (var item in data)
+            {
+                var order = await _repOrder.AsQueryable().Includes(a => a.Details).Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
+                var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
+                var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+                //var product = await _repOrderDetail.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+
+                //if (product == null)
+                //{
+                //     throw Oops.Oh(item.ExternOrderNumber+"中有SKU ")
+                //}
+
+                item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+                {
+                    SKU = a.Key.SKU,
+                    GoodsName = a.Key.GoodsName,
+                    GoodsType = a.Key.GoodsType,
+                    Area = a.Key.Area,
+                    Location = a.Key.Location,
+                    BatchCode = a.Key.BatchCode,
+                    PickTaskNumber = a.Key.PickTaskNumber,
+                    PickTaskId = a.Key.PickTaskId,
+                    Qty = a.Sum(b => b.Qty),
+                    IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
+                    CN805 = ""
+                }).OrderBy(a => a.Location).ToList();
+
+                //foreach (var items in item.Details)
+                //{
+                //    items.IsSN = SqlFunc.Subqueryable<WMSProduct>().Where(s => s.SKU == items.SKU && s.CustomerId == items.CustomerId).Max(s => Convert.ToBoolean(s.IsSN)).ToString();
+                //}
+                item.PrintTime = DateTime.Now;
+                //item.OrderAddress=new WMSOrderAddress();
+                item.OrderAddress = orderadrress;
+                item.Remark = order.Remark;
+            }
+        }
+
         return data;
     }
     /// <summary>

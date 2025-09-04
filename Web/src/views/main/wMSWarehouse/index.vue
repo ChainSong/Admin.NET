@@ -103,13 +103,16 @@
             </el-table-column>
           </template>
         </template>
-        <el-table-column fixed="right" label="操作" width="200">
+        <el-table-column fixed="right" label="操作" width="250">
 
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit"  
                 type="text" size="small">编辑</el-button> 
+                   <el-button @click="warehouseMapDialog(scope.row)" class="el-icon-edit"  
+                type="text" size="small">查看地图</el-button> 
+                
               <!--   <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="handleDelete(scope.row)" title="确定删除吗？">
                 <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
@@ -126,6 +129,7 @@
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
+      <wMSWarehouseMapDialog ref="wMSWarehouseMapRef" :title="queryTitle" @reloadTable="handleQuery" />
     </el-card>
   </div>
 </template>
@@ -139,6 +143,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSWarehouse/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSWarehouse/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSWarehouse/component/queryDialog.vue'
+import wMSWarehouseMapDialog from '/@/views/main/wMSWarehouse/component/wMSWarehouseMap.vue'
 import { pageWMSWarehouse, deleteWMSWarehouse } from '/@/api/main/wMSWarehouse';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 
@@ -177,6 +182,7 @@ const state = ref({
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
+const wMSWarehouseMapRef = ref();
 const loading = ref(false);
 // const tableData = ref<any>
 // ([]);
@@ -232,6 +238,12 @@ const openEdit = (row: any) => {
 const openQuery = (row: any) => {
   queryTitle.value = '查看';
   queryDialogRef.value.openDialog(row);
+};
+
+// 打开查询页面
+const warehouseMapDialog = (row: any) => {
+  queryTitle.value = '查看';
+  wMSWarehouseMapRef.value.openDialog(row);
 };
 
 // 删除

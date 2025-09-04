@@ -14,18 +14,18 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using XSystem.Security.Cryptography;
+//using XSystem.Security.Cryptography;
 
 namespace Admin.NET.Common.ExpressInterfaceUtils;
 public static class SFExpressHelper
 {
-    public static string MD5ToBase64String(string str)
-    {
-        MD5 md5 = new MD5CryptoServiceProvider();
-        byte[] MD5 = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(str));//MD5(注意UTF8编码)
-        string result = Convert.ToBase64String(MD5);//Base64
-        return result;
-    }
+    //public static string MD5ToBase64String(string str)
+    //{
+    //    MD5 md5 = new MD5CryptoServiceProvider();
+    //    byte[] MD5 = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(str));//MD5(注意UTF8编码)
+    //    string result = Convert.ToBase64String(MD5);//Base64
+    //    return result;
+    //}
     public static string GetTimeStamp()
     {
         TimeSpan ts = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
