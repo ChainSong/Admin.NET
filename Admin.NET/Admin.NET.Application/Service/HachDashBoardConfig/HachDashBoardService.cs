@@ -1474,7 +1474,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                             FirstOrderInRange AS (
                             SELECT
                             m.AccountDate,
-                            CONVERT(char(7), m.StartDate, 120) AS MonthLabel,  -- yyyy-MM
+                            STUFF(CONVERT(char(6), m.AccountDate), 5, 0, '-') AS MonthLabel,  -- yyyy-MM
                             fo.CustomerKey,
                             fo.CustomerName,
                             fo.CompanyName,
@@ -1510,7 +1510,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
                             Base AS (
                             SELECT
                             m.AccountDate,
-                            CONVERT(char(7), m.StartDate, 120) AS MonthLabel,
+                            STUFF(CONVERT(char(6), m.AccountDate), 5, 0, '-') AS MonthLabel,
                             fr.CustomerKey,
                             fr.CustomerName,
                             fr.CompanyName,
@@ -1664,6 +1664,7 @@ OrdersRaw AS (
         oa.CompanyName,
         oa.CompanyType,
         oa.CreationTime,
+		o.customerName,
         CustomerKey =
             REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
             +
@@ -1674,7 +1675,7 @@ OrdersRaw AS (
       AND o.CustomerId IN (
             SELECT CustomerId
             FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
-            WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
+            WHERE [Type] = 'HachDashBoard'  {sqlWhereSql}
       )
       AND oa.[Name] IS NOT NULL
       AND oa.Phone  IS NOT NULL
@@ -1690,10 +1691,11 @@ FirstOrder AS (
 FirstOrderInRange AS (
     SELECT
         m.AccountDate,
-        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,  -- yyyy-MM
+        STUFF(CONVERT(char(6), m.AccountDate), 5, 0, '-') AS MonthLabel,  -- yyyy-MM
         fo.CustomerKey,
         fo.CompanyName,
-        fo.CompanyType 
+        fo.CompanyType ,
+		fo.CustomerName 
     FROM FirstOrder AS fo
     JOIN Months    AS m
       ON fo.CreationTime >= m.StartDate
@@ -1714,19 +1716,20 @@ OrderAmtMonth AS (
     WHERE o.CustomerId IN (
               SELECT CustomerId
               FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
-              WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
+              WHERE [Type] = 'HachDashBoard'  {sqlWhereSql}
           )
       AND o.OrderStatus NOT IN (-1, 1)
-    GROUP BY m.AccountDate, o.PreOrderId 
+    GROUP BY m.AccountDate, o.PreOrderId
 ),
 -- 以“当月新增客户”为粒度，累加该客户在“成为新增的那个自然月”内的订单金额
 Base AS (
     SELECT
         m.AccountDate,
-        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,
+       STUFF(CONVERT(char(6), m.AccountDate), 5, 0, '-') AS MonthLabel,
         fr.CustomerKey,
         fr.CompanyName,
         fr.CompanyType,
+		fr.customerName,
         SUM(COALESCE(amt.OrderPrice, 0))   AS TotalAmount
     FROM FirstOrderInRange AS fr
     JOIN Months            AS m   ON m.AccountDate = fr.AccountDate
@@ -1748,22 +1751,23 @@ Base AS (
         CONVERT(char(7), m.StartDate, 120),
         fr.CustomerKey,
         fr.CompanyName,
-        fr.CompanyType
+        fr.CompanyType,fr.CustomerName
 )
 SELECT  
     b.MonthLabel                 AS [Month],
     b.CompanyName,
     b.CompanyType,
+	b.customerName,
     SUM(b.TotalAmount)           AS [Amount],
     COUNT(*)                     AS [Qty] 
 FROM Base AS b
 GROUP BY
     b.MonthLabel,
     b.CompanyName,
+	b.customerName,
     b.CompanyType
 ORDER BY
-    b.MonthLabel;
-";
+    b.MonthLabel;";
             // 4) 仅传 @Month 参数
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
                 sql,
