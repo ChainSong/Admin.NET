@@ -1563,7 +1563,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             // 4) 仅传 @Month 参数
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
                 sql,
-                new List<SugarParameter> { new SugarParameter("@AccountMonth", targetStartMonth),
+                new List<SugarParameter> { new SugarParameter("@AccountMonth", targetEndMonth),
                 }
             );
             var result = dt.TableToList<OBProvinceList>();
