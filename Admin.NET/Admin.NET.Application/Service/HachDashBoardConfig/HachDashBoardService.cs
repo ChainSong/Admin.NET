@@ -1423,7 +1423,6 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         try
         {
             #region 第二
-
             List<OBProvinceList> list = new List<OBProvinceList>();
             var sqlWhereSql = string.Empty;
             if (input.CustomerId.HasValue && input.CustomerId > 0)
@@ -1435,142 +1434,139 @@ public class HachDashBoardService : IDynamicApiController, ITransient
 
             var targetEndMonth = input.Month.Value.ToString("yyyyMM");
             var targetStartMonth = new DateTime(input.Month.Value.Year, 1, 1).ToString("yyyyMM");
-            string sql = $@"DECLARE @FromAccountDate INT = @StartMonth;  -- 起始账期（含）
-DECLARE @ToAccountDate   INT = @EndMonth;  -- 结束账期（含）
-;WITH Months AS (
-    SELECT d.AccountDate, d.StartDate, d.EndDate
-    FROM dbo.WMS_HachAccountDate AS d WITH (NOLOCK)
-    WHERE d.AccountDate BETWEEN @FromAccountDate AND @ToAccountDate
-),
--- 清洗出稳定的 CustomerKey（Name+Phone），限定状态与客户范围
-OrdersRaw AS (
-    SELECT
-        oa.PreOrderId,
-        oa.Province,
-        oa.CompanyName,
-        oa.CompanyType,
-        o.CustomerName,
-        oa.CreationTime,
-        CustomerKey =
-            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
-            +
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
-    FROM dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
-    JOIN dbo.WMS_Order        AS o  WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
-    WHERE o.OrderStatus NOT IN (-1, 1)
-      AND o.CustomerId IN (
-            SELECT CustomerId
-            FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
-            WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
-      )
-      AND oa.[Name] IS NOT NULL
-      AND oa.Phone  IS NOT NULL
-),
--- 取每个客户（CustomerKey）的首单
-FirstOrder AS (
-    SELECT
-        r.*,
-        ROW_NUMBER() OVER (PARTITION BY r.CustomerKey ORDER BY r.CreationTime) AS rn
-    FROM OrdersRaw AS r
-),
--- 首单映射到账期月份，仅保留首单发生在查询区间内的行，并保留展示所需字段
-FirstOrderInRange AS (
-    SELECT
-        m.AccountDate,
-        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,  -- yyyy-MM
-        fo.CustomerKey,
-        fo.CustomerName,
-        fo.CompanyName,
-        fo.CompanyType,
-        fo.Province
-    FROM FirstOrder AS fo
-    JOIN Months    AS m
-      ON fo.CreationTime >= m.StartDate
-     AND fo.CreationTime <  DATEADD(DAY, 1, m.EndDate)
-    WHERE fo.rn = 1
-),
--- 各月内订单金额（按订单聚合），仅统计指定客户范围与状态
-OrderAmtMonth AS (
-    SELECT
-        m.AccountDate,
-        o.PreOrderId,
-        o.CustomerName,
-        SUM(od.OrderQty * p.Price) AS OrderPrice
-    FROM dbo.WMS_Order        AS o  WITH (NOLOCK)
-    JOIN dbo.WMS_OrderDetail  AS od WITH (NOLOCK) ON o.Id = od.OrderId
-    JOIN dbo.WMS_Product      AS p  WITH (NOLOCK) ON od.Sku = p.Sku AND od.CustomerId = p.CustomerId
-    JOIN Months               AS m                 ON od.CreationTime >= m.StartDate
-                                                 AND od.CreationTime <  DATEADD(DAY, 1, m.EndDate)
-    WHERE o.CustomerId IN (
-              SELECT CustomerId
-              FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
-              WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
-          )
-      AND o.OrderStatus NOT IN (-1, 1)
-    GROUP BY m.AccountDate, o.PreOrderId, o.CustomerName
-),
--- 以“当月新增客户”为粒度，累加该客户在“成为新增的那个自然月”内的订单金额
-Base AS (
-    SELECT
-        m.AccountDate,
-        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,
-        fr.CustomerKey,
-        fr.CustomerName,
-        fr.CompanyName,
-        fr.CompanyType,
-        fr.Province ,
-        SUM(COALESCE(amt.OrderPrice, 0))   AS TotalAmount
-    FROM FirstOrderInRange AS fr
-    JOIN Months            AS m   ON m.AccountDate = fr.AccountDate
-    -- 找到该客户在该月内的所有地址记录：用于匹配订单
-    JOIN dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
-      ON oa.CreationTime >= m.StartDate
-     AND oa.CreationTime <  DATEADD(DAY, 1, m.EndDate)
-     AND (
-            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
-            +
-            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
-         ) = fr.CustomerKey
-    -- 关联到当月该地址所对应的订单金额
-    JOIN OrderAmtMonth AS amt
-      ON amt.AccountDate = m.AccountDate
-     AND amt.PreOrderId  = oa.PreOrderId
-    GROUP BY
-        m.AccountDate,
-        CONVERT(char(7), m.StartDate, 120),
-        fr.CustomerKey,
-        fr.CustomerName,
-        fr.CompanyName,
-        fr.CompanyType,
-        fr.Province
-)
-SELECT  
-    b.MonthLabel                 AS [Month],
-    b.CustomerName,
-    b.CompanyName,
-    b.CompanyType,
-    b.Province as ObProvince,
-    SUM(b.TotalAmount)           AS [Amount],
-    COUNT(*)                     AS [Qty] 
-FROM Base AS b
-GROUP BY
-    b.MonthLabel,
-    b.CustomerName,
-    b.CompanyName,
-    b.CompanyType,
-    b.Province
-ORDER BY
-    b.MonthLabel,
-    b.Province,
-    b.CustomerName;";
+            string sql = $@"DECLARE @AccountDate INT = @AccountMonth;  -- 起始账期（含）
+                            ;WITH Months AS (
+                            SELECT d.AccountDate, d.StartDate, d.EndDate
+                            FROM dbo.WMS_HachAccountDate AS d WITH (NOLOCK)
+                            WHERE d.AccountDate =@AccountDate
+                            ),
+                            OrdersRaw AS (
+                            SELECT
+                            oa.PreOrderId,
+                            oa.Province,
+                            oa.CompanyName,
+                            oa.CompanyType,
+                            o.CustomerName,
+                            oa.CreationTime,
+                            CustomerKey =
+                            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
+                            +
+                            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
+                            FROM dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
+                            JOIN dbo.WMS_Order        AS o  WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+                            WHERE o.OrderStatus NOT IN (-1, 1)
+                            AND o.CustomerId IN (
+                            SELECT CustomerId
+                            FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
+                            WHERE [Type] = 'HachDashBoard'  {sqlWhereSql}
+                            )
+                            AND oa.[Name] IS NOT NULL
+                            AND oa.Phone  IS NOT NULL
+                            ),
+                            -- 取每个客户（CustomerKey）的首单
+                            FirstOrder AS (
+                            SELECT
+                            r.*,
+                            ROW_NUMBER() OVER (PARTITION BY r.CustomerKey ORDER BY r.CreationTime) AS rn
+                            FROM OrdersRaw AS r
+                            ),
+                            -- 首单映射到账期月份，仅保留首单发生在查询区间内的行，并保留展示所需字段
+                            FirstOrderInRange AS (
+                            SELECT
+                            m.AccountDate,
+                            CONVERT(char(7), m.StartDate, 120) AS MonthLabel,  -- yyyy-MM
+                            fo.CustomerKey,
+                            fo.CustomerName,
+                            fo.CompanyName,
+                            fo.CompanyType,
+                            fo.Province
+                            FROM FirstOrder AS fo
+                            JOIN Months    AS m
+                            ON fo.CreationTime >= m.StartDate
+                            AND fo.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+                            WHERE fo.rn = 1
+                            ),
+                            -- 各月内订单金额（按订单聚合），仅统计指定客户范围与状态
+                            OrderAmtMonth AS (
+                            SELECT
+                            m.AccountDate,
+                            o.PreOrderId,
+                            o.CustomerName,
+                            SUM(od.OrderQty * p.Price) AS OrderPrice
+                            FROM dbo.WMS_Order        AS o  WITH (NOLOCK)
+                            JOIN dbo.WMS_OrderDetail  AS od WITH (NOLOCK) ON o.Id = od.OrderId
+                            JOIN dbo.WMS_Product      AS p  WITH (NOLOCK) ON od.Sku = p.Sku AND od.CustomerId = p.CustomerId
+                            JOIN Months               AS m                 ON od.CreationTime >= m.StartDate
+                                                        AND od.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+                            WHERE o.CustomerId IN (
+                            SELECT CustomerId
+                            FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
+                            WHERE [Type] = 'HachDashBoard'  {sqlWhereSql}
+                            )
+                            AND o.OrderStatus NOT IN (-1, 1)
+                            GROUP BY m.AccountDate, o.PreOrderId, o.CustomerName
+                            ),
+                            -- 以“当月新增客户”为粒度，累加该客户在“成为新增的那个自然月”内的订单金额
+                            Base AS (
+                            SELECT
+                            m.AccountDate,
+                            CONVERT(char(7), m.StartDate, 120) AS MonthLabel,
+                            fr.CustomerKey,
+                            fr.CustomerName,
+                            fr.CompanyName,
+                            fr.CompanyType,
+                            fr.Province ,
+                            SUM(COALESCE(amt.OrderPrice, 0))   AS TotalAmount
+                            FROM FirstOrderInRange AS fr
+                            JOIN Months            AS m   ON m.AccountDate = fr.AccountDate
+                            -- 找到该客户在该月内的所有地址记录：用于匹配订单
+                            JOIN dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
+                            ON oa.CreationTime >= m.StartDate
+                            AND oa.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+                            AND (
+                            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
+                            +
+                            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
+                            ) = fr.CustomerKey
+                            -- 关联到当月该地址所对应的订单金额
+                            JOIN OrderAmtMonth AS amt
+                            ON amt.AccountDate = m.AccountDate
+                            AND amt.PreOrderId  = oa.PreOrderId
+                            GROUP BY
+                            m.AccountDate,
+                            CONVERT(char(7), m.StartDate, 120),
+                            fr.CustomerKey,
+                            fr.CustomerName,
+                            fr.CompanyName,
+                            fr.CompanyType,
+                            fr.Province
+                            )
+                            SELECT  
+                            b.MonthLabel                 AS [Month],
+                            b.CustomerName,
+                            b.CompanyName,
+                            b.CompanyType,
+                            b.Province as ObProvince,
+                            SUM(b.TotalAmount)           AS [Amount],
+                            COUNT(*)                     AS [Qty] 
+                            FROM Base AS b
+                            GROUP BY
+                            b.MonthLabel,
+                            b.CustomerName,
+                            b.CompanyName,
+                            b.CompanyType,
+                            b.Province
+                            ORDER BY
+                            b.MonthLabel,
+                            b.Province,
+                            b.CustomerName;";
             // 4) 仅传 @Month 参数
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
                 sql,
-                new List<SugarParameter> { new SugarParameter("@StartMonth", targetStartMonth), new SugarParameter("@EndMonth", targetEndMonth),
+                new List<SugarParameter> { new SugarParameter("@AccountMonth", targetStartMonth),
                 }
             );
             var result = dt.TableToList<OBProvinceList>();
-
             list = result
                 .OrderByDescending(x=>x.Month)
                 .Select(x => new OBProvinceList
@@ -1604,46 +1600,14 @@ ORDER BY
                     CompanyType = g.Key.CompanyType,
                     CompanyName = g.Key.CompanyName
                 })
-                .Take(200)
                 .ToList();
-
             foreach (var item in list)
             {
                 item.Month = ConvertMonthNumberToName(item.Month);
             }
-
             oBProvince.TwoBProvinceList = list;
             oBProvince.TwoTotalQty = (long)result.Sum(a => a.Qty);
             #endregion
-
-            var threeData = result
-                .OrderByDescending(x => x.Month)
-                .Select(x => new
-                {
-                    Year = x.Month.Substring(0, 4), // 提取前4位作为年份
-                    CustomerName = x.CustomerName,
-                    CompanyType = x.CompanyType,
-                    Qty = x.Qty,
-                    Amount = x.Amount
-                })
-                .GroupBy(x => new
-                {
-                    x.Year,  // 使用年份分组
-                    x.CustomerName,
-                    x.CompanyType
-                })
-                .Select(g => new OBProvinceList
-                {
-                    Month = g.Key.Year,  // 这里存储的是年份
-                    CustomerName = g.Key.CustomerName,
-                    CompanyType = g.Key.CompanyType,
-                    Qty = g.Sum(x => x.Qty),
-                    Amount = g.Sum(x => x.Amount)
-                }).ToList();
-
-            oBProvince.ThreeoBProvinceList = threeData;
-            oBProvince.ThreeTotalQty = (long)result.Sum(a => a.Qty);
-
             return oBProvince;
         }
         catch (Exception ex)
@@ -1670,121 +1634,180 @@ ORDER BY
     [ApiDescriptionSettings(Name = "GetMonthlyCumulativeNewUserTrendTb")]
     public async Task<OBProvinceOutput> GetMonthlyCumulativeNewUserTrendTb(ChartsInput input)
     {
-        OBProvinceOutput oBProvinceOutput = new OBProvinceOutput();
-        List<OBProvinceList> list = new List<OBProvinceList>();
-        // 1) 标准化“最后月份”为该月第一天（yyyy-MM-01）
-        if (!input.Month.HasValue)
-            input.Month = DateTime.Parse(DateTime.Today.ToString("yyyy-MM-01"));
-        var targetMonth = DateTime.Parse(input.Month.Value.ToString("yyyy-MM-01"));
-
-        // 2) 客户过滤片段（按你要求拼接）
-        var sqlWhereSql = string.Empty;
-        if (input.CustomerId.HasValue && input.CustomerId > 0)
-        {
-            sqlWhereSql = " AND customerId = " + input.CustomerId.Value;
-        }
-
-        // 3) 主查询 SQL：计算每月窗口内的金额与“当月新增 Qty”
-        var sql = $@"  DECLARE @TargetMonth     DATE = @Month;
-                       DECLARE @TargetYear      INT  = YEAR(@TargetMonth);
-                       DECLARE @TargetMonthNum  INT  = MONTH(@TargetMonth);
-                       DECLARE @StartAccountDate INT = @TargetYear * 100 + 1;   
-                       DECLARE @EndAccountDate   INT = @TargetYear * 100 + @TargetMonthNum; 
-                       ;WITH Periods AS ( SELECT h.AccountDate,h.StartDate,h.EndDate,
-                       CAST(left(CAST(h.AccountDate AS CHAR(6)), 4) AS varchar) AS MonthNum   FROM dbo.WMS_HachAccountDate AS h WITH (NOLOCK) 
-                       WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate),
-                       AllowedCustomers AS ( SELECT DISTINCT customerid AS CustomerId  FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK) WHERE [type] = 'HachDashBoard' {sqlWhereSql}),
-                       CustomerIdentifiers AS ( SELECT 
-                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
-                       AS CustomerIdentifier,MIN(h.AccountDate) AS FirstAccountDate  FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
-                       JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
-                       JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
-                        AND PROVINCE IS NOT NULL AND Province <>'' AND CompanyName IS NOT NULL AND CompanyName<>''
-                       JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
-                       GROUP BY  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
-                       ),
-                       MonthlyData AS (SELECT h.AccountDate,  oa.CompanyType,o.CustomerId,o.CustomerName,
-                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
-                       AS CustomerIdentifier,
-                       SUM(o.OrderQty) AS MonthlyOrderQty,SUM(o.OrderQty * ISNULL(pdt.Price, 0)) AS MonthlyAmount,ci.FirstAccountDate
-                       FROM dbo.WMS_OrderDetail AS o WITH (NOLOCK)
-                       JOIN AllowedCustomers ac WITH (NOLOCK) ON ac.CustomerId = o.CustomerId
-                       JOIN dbo.WMS_OrderAddress oa WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
-                        AND PROVINCE IS NOT NULL AND Province <>'' AND CompanyName IS NOT NULL AND CompanyName<>''
-                       JOIN dbo.WMS_Product pdt WITH (NOLOCK) ON pdt.SKU = o.SKU AND pdt.CustomerId = o.CustomerId
-                       JOIN dbo.WMS_HachAccountDate h WITH (NOLOCK) ON o.CreationTime >= h.StartDate AND o.CreationTime < DATEADD(DAY, 1, h.EndDate)
-                       INNER JOIN CustomerIdentifiers ci ON  REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', '')
-                       = ci.CustomerIdentifier
-                       WHERE h.AccountDate BETWEEN @StartAccountDate AND @EndAccountDate
-                       GROUP BY  h.AccountDate,oa.Province,oa.CompanyType,o.CustomerId,o.CustomerName,
-                       REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.name))), ',', ''), '，', ''), ' ', '')+ '|' + REPLACE(REPLACE(REPLACE(REPLACE(oa.phone, ' ', ''), '-', ''), '(', ''), ')', ''),
-                       ci.FirstAccountDate),
-                       MonthlySummary AS ( SELECT p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType,
-                       -- 累计到当月的新增客户数量
-                      Cast( COUNT(DISTINCT CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.CustomerIdentifier END) as bigint) AS Qty,
-                       -- 累计到当月的新增客户金额
-                       Cast(SUM(CASE WHEN md.FirstAccountDate <= p.AccountDate THEN md.MonthlyAmount ELSE 0 END) as bigint) AS Amount
-                       FROM Periods p
-                       INNER JOIN MonthlyData md ON md.AccountDate = p.AccountDate
-                       GROUP BY p.AccountDate,p.MonthNum,md.CustomerId,md.CustomerName,md.CompanyType)
-                       SELECT top 200 MonthNum as Month,CustomerId,CustomerName,CompanyType,Qty,Amount
-                       FROM MonthlySummary
-                       ORDER BY AccountDate DESC, Amount DESC;";
+        OBProvinceOutput oBProvince = new OBProvinceOutput();
         try
         {
+            #region 第二
+
+            List<OBProvinceList> list = new List<OBProvinceList>();
+            var sqlWhereSql = string.Empty;
+            if (input.CustomerId.HasValue && input.CustomerId > 0)
+            {
+                sqlWhereSql = " AND customerId = " + input.CustomerId.Value;
+            }
+            if (!input.Month.HasValue)
+                input.Month = DateTime.Parse(DateTime.Today.ToString("yyyy-MM-01"));
+
+            var targetEndMonth = input.Month.Value.ToString("yyyyMM");
+            var targetStartMonth = new DateTime(input.Month.Value.Year, 1, 1).ToString("yyyyMM");
+            string sql = $@"DECLARE @FromAccountDate INT = @StartMonth;  -- 起始账期（含）
+DECLARE @ToAccountDate   INT = @EndMonth;  -- 结束账期（含）
+;WITH Months AS (
+    SELECT d.AccountDate, d.StartDate, d.EndDate
+    FROM dbo.WMS_HachAccountDate AS d WITH (NOLOCK)
+    WHERE d.AccountDate BETWEEN @FromAccountDate AND @ToAccountDate
+),
+-- 清洗出稳定的 CustomerKey（Name+Phone），限定状态与客户范围
+OrdersRaw AS (
+    SELECT
+        oa.PreOrderId,
+        oa.CompanyName,
+        oa.CompanyType,
+        oa.CreationTime,
+        CustomerKey =
+            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
+            +
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
+    FROM dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
+    JOIN dbo.WMS_Order        AS o  WITH (NOLOCK) ON oa.PreOrderId = o.PreOrderId
+    WHERE o.OrderStatus NOT IN (-1, 1)
+      AND o.CustomerId IN (
+            SELECT CustomerId
+            FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
+            WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
+      )
+      AND oa.[Name] IS NOT NULL
+      AND oa.Phone  IS NOT NULL
+),
+-- 取每个客户（CustomerKey）的首单
+FirstOrder AS (
+    SELECT
+        r.*,
+        ROW_NUMBER() OVER (PARTITION BY r.CustomerKey ORDER BY r.CreationTime) AS rn
+    FROM OrdersRaw AS r
+),
+-- 首单映射到账期月份，仅保留首单发生在查询区间内的行，并保留展示所需字段
+FirstOrderInRange AS (
+    SELECT
+        m.AccountDate,
+        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,  -- yyyy-MM
+        fo.CustomerKey,
+        fo.CompanyName,
+        fo.CompanyType 
+    FROM FirstOrder AS fo
+    JOIN Months    AS m
+      ON fo.CreationTime >= m.StartDate
+     AND fo.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+    WHERE fo.rn = 1
+),
+-- 各月内订单金额（按订单聚合），仅统计指定客户范围与状态
+OrderAmtMonth AS (
+    SELECT
+        m.AccountDate,
+        o.PreOrderId,
+        SUM(od.OrderQty * p.Price) AS OrderPrice
+    FROM dbo.WMS_Order        AS o  WITH (NOLOCK)
+    JOIN dbo.WMS_OrderDetail  AS od WITH (NOLOCK) ON o.Id = od.OrderId
+    JOIN dbo.WMS_Product      AS p  WITH (NOLOCK) ON od.Sku = p.Sku AND od.CustomerId = p.CustomerId
+    JOIN Months               AS m                 ON od.CreationTime >= m.StartDate
+                                                 AND od.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+    WHERE o.CustomerId IN (
+              SELECT CustomerId
+              FROM dbo.WMS_Hach_Customer_Mapping WITH (NOLOCK)
+              WHERE [Type] = 'HachDashBoard' {sqlWhereSql}
+          )
+      AND o.OrderStatus NOT IN (-1, 1)
+    GROUP BY m.AccountDate, o.PreOrderId 
+),
+-- 以“当月新增客户”为粒度，累加该客户在“成为新增的那个自然月”内的订单金额
+Base AS (
+    SELECT
+        m.AccountDate,
+        CONVERT(char(7), m.StartDate, 120) AS MonthLabel,
+        fr.CustomerKey,
+        fr.CompanyName,
+        fr.CompanyType,
+        SUM(COALESCE(amt.OrderPrice, 0))   AS TotalAmount
+    FROM FirstOrderInRange AS fr
+    JOIN Months            AS m   ON m.AccountDate = fr.AccountDate
+    -- 找到该客户在该月内的所有地址记录：用于匹配订单
+    JOIN dbo.WMS_OrderAddress AS oa WITH (NOLOCK)
+      ON oa.CreationTime >= m.StartDate
+     AND oa.CreationTime <  DATEADD(DAY, 1, m.EndDate)
+     AND (
+            REPLACE(REPLACE(REPLACE(REPLACE(UPPER(LTRIM(RTRIM(oa.[Name]))), ',', ''), N'，', ''), ' ', ''), ';', '')
+            +
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(oa.Phone, ' ', ''), '-', ''), '(', ''), ')', ''), ';', '')
+         ) = fr.CustomerKey
+    -- 关联到当月该地址所对应的订单金额
+    JOIN OrderAmtMonth AS amt
+      ON amt.AccountDate = m.AccountDate
+     AND amt.PreOrderId  = oa.PreOrderId
+    GROUP BY
+        m.AccountDate,
+        CONVERT(char(7), m.StartDate, 120),
+        fr.CustomerKey,
+        fr.CompanyName,
+        fr.CompanyType
+)
+SELECT  
+    b.MonthLabel                 AS [Month],
+    b.CompanyName,
+    b.CompanyType,
+    SUM(b.TotalAmount)           AS [Amount],
+    COUNT(*)                     AS [Qty] 
+FROM Base AS b
+GROUP BY
+    b.MonthLabel,
+    b.CompanyName,
+    b.CompanyType
+ORDER BY
+    b.MonthLabel;
+";
+            // 4) 仅传 @Month 参数
             var dt = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(
                 sql,
-                new List<SugarParameter> {
-                new SugarParameter("@Month", targetMonth)
-                });
-
-            var raw = dt.TableToList<OBProvinceList>();
-
-            list = raw
-             .Select(x => new OBProvinceList
+                new List<SugarParameter> { new SugarParameter("@StartMonth", targetStartMonth), new SugarParameter("@EndMonth", targetEndMonth),
+                }
+            );
+            var result = dt.TableToList<OBProvinceList>();
+ 
+            var threeData = result
+             .OrderByDescending(x => x.Month)
+             .Select(x => new
              {
-                 Month = x.Month,
-                 ObProvince = FormatProvinceName(x.ObProvince),
-                 Amount = x.Amount,
-                 Qty = x.Qty,
-                 CustomerId = x.CustomerId,
+                 Year = x.Month.Substring(0, 4), // 提取前4位作为年份
                  CustomerName = x.CustomerName,
-                 CompanyType = x.CompanyType
+                 CompanyType = x.CompanyType,
+                 Qty = x.Qty,
+                 Amount = x.Amount
              })
-             .GroupBy(g => new
+             .GroupBy(x => new
              {
-                 g.Month,
-                 g.CustomerId,
-                 g.CustomerName,
-                 g.ObProvince,
-                 g.CompanyType,
+                 x.Year,  // 使用年份分组
+                 x.CustomerName,
+                 x.CompanyType
              })
              .Select(g => new OBProvinceList
              {
-                 Month = g.Key.Month,
-                 CustomerId = g.Key.CustomerId,
+                 Month = g.Key.Year,  // 这里存储的是年份
                  CustomerName = g.Key.CustomerName,
-                 ObProvince = g.Key.ObProvince,
-                 Amount = g.Sum(z => z.Amount),
-                 Qty = g.Sum(z => z.Qty),
                  CompanyType = g.Key.CompanyType,
-             })
-             .OrderBy(x => x.Month)
-             .ThenByDescending(x => x.Amount)
-             .ToList();
-            foreach (var item in list)
-            {
-                item.Month=ConvertMonthNumberToName(item.Month);
-            }
-            oBProvinceOutput.ThreeoBProvinceList = list;
-            oBProvinceOutput.ThreeTotalQty = (long)list.Sum(a => a.Qty);
+                 Qty = g.Sum(x => x.Qty),
+                 Amount = g.Sum(x => x.Amount)
+             }).ToList();
+
+            oBProvince.ThreeoBProvinceList = threeData;
+            oBProvince.ThreeTotalQty = (long)result.Sum(a => a.Qty);
+            #endregion
+         
+            return oBProvince;
         }
-        catch
+        catch (Exception ex)
         {
-            return oBProvinceOutput;
-            throw; // 保留原始堆栈
+            return oBProvince;
+            throw;
         }
-        return oBProvinceOutput;
     }
 
     #endregion
