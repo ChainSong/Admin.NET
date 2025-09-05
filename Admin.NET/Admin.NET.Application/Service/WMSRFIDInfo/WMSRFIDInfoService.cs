@@ -578,15 +578,16 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "SetRFIDTID")]
-    [Idempotent("s", 3)]
-    [UnitOfWork]
-    public async Task<Response<ScanPackageOutput>> SetRFIDTID(ScanPackageRFIDInput input)
+    [AllowAnonymous]
+    //[Idempotent("s", 3)]
+    //[UnitOfWork]
+    public async Task<Response<ScanPackageOutput>> SetRFIDTID(PackageRFIDInput input)
     {
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
         //新流程，都见RFID 数据
         //得到rfid数据 里面包含rfid  和tid
         var rfidInfo = input.RFIDStr;
-        input.RFIDInfo = new List<WMSRFIDInfo>();
+        //input.RFIDInfo = new List<WMSRFIDInfo>();
 
         foreach (var item in rfidInfo.Split(","))
         {
@@ -619,7 +620,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         //input.RFIDStr = string.Join(",", input.RFIDInfo.Select(item => item.RFID)).TrimEnd(',');
         await _rep.UpdateRangeAsync(rfiddata);
         response.Data.Qty = await _rep.AsQueryable().Where(a => a.PackageNumber == input.PackageNumber && a.RFID != a.Sequence).CountAsync();
-        response.Data.TotalQty = packageDetail.Sum(a=>a.Qty);
+        response.Data.TotalQty = packageDetail.Sum(a => a.Qty);
         return response;
     }
 
@@ -630,7 +631,7 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
     /// <returns></returns>
 
     [HttpPost]
-    [ApiDescriptionSettings(Name = "SetRFIDTID")]
+    [ApiDescriptionSettings(Name = "GetRFIDAll")]
     [Idempotent("s", 3)]
     [UnitOfWork]
     public async Task<Response<ScanPackageOutput>> GetRFIDAll(WMSRFIDInfoInput input)

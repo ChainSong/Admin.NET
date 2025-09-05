@@ -279,9 +279,11 @@ const getRFIDInfoData = async () => {
       audio_success.play(); // 播放音频
 
       allPackage(state.value.vm.form);
-      state.value.vm.form = res.data.result.data;
+      if (res.data.result.data != null) {
+        state.value.vm.form = res.data.result.data;
 
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
 
     } else if (res.data.result.code == 99) {
       audio_success.play(); // 播放音频
@@ -311,23 +313,33 @@ const getRFIDInfoData = async () => {
 
       audio_error.play(); // 播放音频
       // signalR.send("echo", 5)
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
       ElMessage.error(res.data.result.msg);
     } else if (res.data.result.code == 5) {
 
       audio_error.play(); // 播放音频
       // signalR.send("echo", 5)
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
       ElMessage.error(res.data.result.msg);
     } else if (res.data.result.code == -1) {
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
       ElMessage.warning(res.data.result.msg);
     } else {
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
       ElMessage.warning(res.data.result.msg);
     }
   } catch (error) {
@@ -358,9 +370,11 @@ const shortagePackage = async () => {
   // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
     audio_success.play(); // 播放音频
+    if (res.data.result.data != null) {
 
-    state.value.vm.form = res.data.result.data;
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+      state.value.vm.form = res.data.result.data;
+      state.value.vm.tableData = res.data.result.data.packageDatas;
+    }
   } else if (res.data.result.code == 99) {
     audio_success.play(); // 播放音频
 
@@ -374,8 +388,10 @@ const shortagePackage = async () => {
 
     ElMessage.success(res.data.result.msg);
   } else {
-    state.value.vm.form = res.data.result.data;
-    state.value.vm.tableData = res.data.result.data.packageDatas;
+    if (res.data.result.data != null) {
+      state.value.vm.form = res.data.result.data;
+      state.value.vm.tableData = res.data.result.data.packageDatas;
+    }
     ElMessage.error(res.data.result.msg);
   }
   input.value = true;
@@ -429,8 +445,10 @@ const addPackage = async (data: any) => {
     // let res = await scanPackageData(state.value.vm.form);
     if (res.data.result.code == 1) {
       signalR.send("echo", 5);
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
     } else if (res.data.result.code == 99) {
       state.value.vm.form.input = "";
       state.value.vm.form.sku = "";
@@ -440,8 +458,10 @@ const addPackage = async (data: any) => {
       state.value.vm.tableData = res.data.result.data.packageDatas;
       ElMessage.success(res.data.result.msg);
     } else {
-      state.value.vm.form = res.data.result.data;
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+      if (res.data.result.data != null) {
+        state.value.vm.form = res.data.result.data;
+        state.value.vm.tableData = res.data.result.data.packageDatas;
+      }
       ElMessage.error(res.data.result.msg);
     }
     input.value = true;

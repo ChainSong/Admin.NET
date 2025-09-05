@@ -10,9 +10,7 @@ enum Api {
 	reportScreen = '/api/wMSReport/reportScreen',
 	reportScreenSecond = '/api/wMSReport/reportScreenSecond',
 	ExportRFID = '/api/wMSRFIDInfo/ExportRFID',
-	ExportRFID = '/api/wMSRFIDInfo/ExportRFID',
 	SetRFIDTID = '/api/wMSRFIDInfo/SetRFIDTID',
-
 
 }
 
