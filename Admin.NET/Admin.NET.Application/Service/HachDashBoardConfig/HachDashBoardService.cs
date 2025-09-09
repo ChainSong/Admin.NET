@@ -1389,11 +1389,11 @@ public class HachDashBoardService : IDynamicApiController, ITransient
             "  AND  AccountDate='"+ lastMonthString + "'" +
             " LEFT JOIN [WMS_OrderAddress] oa ON o.[PreOrderId] = oa.[PreOrderId] " +
             " LEFT JOIN [WMS_OrderDetail] od ON o.[Id] = od.[OrderId] " +
-            " WHERE 1=1   AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")  " +
+            " WHERE 1=1  and oa.Province is not null and oa.Province <>''  AND o.customerId in (SELECT customerid FROM WMS_Hach_Customer_Mapping WHERE type='HachDashBoard' " + sqlWhereSql + ")  " +
             " AND o.[OrderStatus] = 99 GROUP BY oa.[Province]), " +
             " ProvinceRank AS (SELECT [ObProvince],[Qty],ROW_NUMBER() OVER (ORDER BY [Qty] DESC) AS RankNum FROM ProvinceSummary) " +
-            " SELECT CASE WHEN RankNum <= 5 THEN [ObProvince] ELSE '其它' END AS Xseries,SUM([Qty]) AS Yseries FROM ProvinceRank " +
-            " GROUP BY CASE WHEN RankNum <= 5 THEN [ObProvince] ELSE '其它' END ORDER BY SUM([Qty]) DESC";
+            " SELECT CASE WHEN RankNum <= 10 THEN [ObProvince] ELSE '其它' END AS Xseries,SUM([Qty]) AS Yseries FROM ProvinceRank " +
+            " GROUP BY CASE WHEN RankNum <= 10 THEN [ObProvince] ELSE '其它' END ORDER BY SUM([Qty]) DESC";
         try
         {
             chartIndices = _repInventoryUsableSnapshot.Context.Ado.GetDataTable(query).TableToList<ChartIndex>();
