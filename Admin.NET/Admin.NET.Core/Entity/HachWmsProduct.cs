@@ -145,9 +145,15 @@ public class HachWmsProduct : EntityTenant
     public string Attribute9 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
     public string Attribute10 { get; set; }
+    [SugarColumn(ColumnDescription = "状态")]
+    public bool Status { get; set; }
+    [SugarColumn(ColumnDescription = "接收时间")]
+    public DateTime? ReceivingTime{get; set;}
+
     /// <summary>
     /// 租户Id
     /// </summary>
+    
     [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
     public virtual long? TenantId { get; set; }
 }

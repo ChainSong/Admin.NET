@@ -57,5 +57,17 @@
     "GeonamesUrl": "http://api.geonames.org/childrenJSON",
     "GeonamesUserName": "HACH",
     "GeonamesPassword": "HACH666888@"
-  }
+  },
+  "HachWmsAuthorization": [
+    {
+      "AppId": "app1",
+      "AppSecret": "secret1",
+      "TenantId": "1300000000001"
+    },
+    {
+      "AppId": "app2",
+      "AppSecret": "secret2",
+      "TenantId": "1300000000001"
+    }
+  ]
 }
