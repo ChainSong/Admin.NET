@@ -60,14 +60,21 @@
   },
   "HachWmsAuthorization": [
     {
-      "AppId": "app1",
+      "AppId": "00001",
       "AppSecret": "secret1",
-      "TenantId": "1300000000001"
+      "TenantId": "1300000000001",
+      "CustomerType": "HachWMSApi"
     },
     {
-      "AppId": "app2",
+      "AppId": "00002",
       "AppSecret": "secret2",
-      "TenantId": "1300000000001"
+      "TenantId": "1300000000001",
+      "CustomerType": "HachWMSApi"
     }
-  ]
+  ],
+  "HachDanger": {
+    "CustomerId": 99,
+    "CustomerName": "哈希危险品仓",
+    "CustomerCode": "HachDangerWarehouse"
+  }
 }

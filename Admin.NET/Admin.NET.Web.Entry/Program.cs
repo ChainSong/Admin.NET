@@ -8,6 +8,11 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Minio;
+using System.Text;
 
 Serve.Run(RunOptions.Default.AddWebComponent<WebComponent>());
 

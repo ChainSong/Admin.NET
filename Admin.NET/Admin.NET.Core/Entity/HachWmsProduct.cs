@@ -21,7 +21,7 @@ public class HachWmsProduct : EntityTenant
     /// <summary>
     /// 雪花id
     /// </summary>
-    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true)]
+    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true)]
     public override long Id { get; set; }
     /// <summary>
     /// 组织ID
@@ -56,7 +56,7 @@ public class HachWmsProduct : EntityTenant
     /// <summary>
     /// 中文描述
     /// </summary>
-    [SugarColumn(ColumnDescription = "中文描述", Length = 400 )]
+    [SugarColumn(ColumnDescription = "中文描述", Length = 400)]
     public string DescriptionZhs { get; set; }
     /// <summary>
     /// 长中文描述
@@ -147,13 +147,13 @@ public class HachWmsProduct : EntityTenant
     public string Attribute10 { get; set; }
     [SugarColumn(ColumnDescription = "状态")]
     public bool Status { get; set; }
-    [SugarColumn(ColumnDescription = "接收时间")]
-    public DateTime? ReceivingTime{get; set;}
+    [SugarColumn(ColumnDescription = "接收时间", IsOnlyIgnoreUpdate = true)]
+    public DateTime? ReceivingTime { get; set; } = DateTime.Now;
 
     /// <summary>
     /// 租户Id
     /// </summary>
-    
+
     [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
     public virtual long? TenantId { get; set; }
 }

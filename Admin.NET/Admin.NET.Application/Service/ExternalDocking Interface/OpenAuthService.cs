@@ -51,7 +51,7 @@ public class OpenAuthService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "open-auth")]
     public async Task<TokenOutput> Token([FromBody] OpenAuthInput input)
     {
-        if (string.IsNullOrEmpty(input.AppId) || string.IsNullOrEmpty(input.AppSecret))
+        if (input.AppId!=null || string.IsNullOrEmpty(input.AppSecret))
         {
             throw Oops.Oh(ErrorCode.UnauthorizedEmpty);
         }
@@ -88,7 +88,7 @@ public class OpenAuthService : IDynamicApiController, ITransient
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresIn = (long)TimeSpan.FromMinutes(tokenExpire).TotalSeconds,
+            ExpiresIn = 1200000,
             TokenType = "Bearer"
         };
     }
