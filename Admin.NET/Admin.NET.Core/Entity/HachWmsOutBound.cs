@@ -21,7 +21,7 @@ public class HachWmsOutBound : EntityTenant
     /// <summary>
     /// 雪花id
     /// </summary>
-    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true)]
+    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true, IsPrimaryKey = true)]
     public override long Id { get; set; }
     //为销售单号与发运编号拼接
     [SugarColumn(ColumnDescription = "挑库单号",Length =120)]

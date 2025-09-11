@@ -16,13 +16,14 @@ using System.Threading.Tasks;
 namespace Admin.NET.Core.Entity;
 
 [SugarTable("hach_wms_product", "产品主数据对接表")]
-public class HachWmsProduct : EntityTenant
+public class HachWmsProduct : EntityBase
 {
     /// <summary>
     /// 雪花id
     /// </summary>
-    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true)]
+    [SugarColumn(ColumnDescription = "雪花id", ColumnName = "Id", IsIdentity = true, IsPrimaryKey = true)]
     public override long Id { get; set; }
+
     /// <summary>
     /// 组织ID
     /// </summary>
@@ -158,6 +159,4 @@ public class HachWmsProduct : EntityTenant
     /// 租户Id
     /// </summary>
 
-    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
-    public virtual long? TenantId { get; set; }
 }

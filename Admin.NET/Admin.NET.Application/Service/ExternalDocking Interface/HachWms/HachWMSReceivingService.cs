@@ -19,6 +19,7 @@ using Admin.NET.Application.Service.ExternalDocking_Interface.HachWms.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
+using XAct;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 
@@ -32,19 +33,21 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<HachWmsReceiving> _hachWmsReceivingRep;
     private readonly SqlSugarRepository<WMSASN> _wMSASNRep;
     private readonly SqlSugarRepository<WMSProduct> _wMSProductRep;
-    public static readonly long CustomerId = App.GetConfig<long>("HachDanger:CustomerId");
-    public static readonly string CustomerCode = App.GetConfig<string>("HachDanger:CustomerCode");
-    public static readonly string CustomerName = App.GetConfig<string>("HachDanger:CustomerName");
-    public static readonly long WarehouseId = App.GetConfig<long>("HachDanger:WarehouseId");
-    public static readonly string WarehouseName = App.GetConfig<string>("HachDanger:WarehouseName");
+    private readonly UserManager _userManager;
+    private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
+
     public HachWMSReceivingService(
         SqlSugarRepository<HachWmsReceiving> hachWmsReceivingRep,
         SqlSugarRepository<WMSASN> wMSASNRep,
-        SqlSugarRepository<WMSProduct> wMSProductRep)
+        SqlSugarRepository<WMSProduct> wMSProductRep,
+        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep,
+        UserManager userManager)
     {
         _hachWmsReceivingRep = hachWmsReceivingRep;
         _wMSASNRep = wMSASNRep;
         _wMSProductRep = wMSProductRep;
+        _userManager = userManager;
+        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
     }
     [HttpPost]
     //[Authorize]
@@ -55,16 +58,21 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
-            Result = "成功"
         };
         HachWmsReceiving receiving = new HachWmsReceiving();
+        HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
+
+        wmsAuthorizationConfig = await GetCustomerInfo("putASNData");
+
         foreach (var asn in input)
         {
             string syncOrderNo = asn.OrderNo == null ? asn.ShipmentNum + asn.ReceiptNum + asn.DocNumber : asn.OrderNo;
-            var existing = await _wMSASNRep.GetFirstAsync(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo);
+            var existing = await _wMSASNRep
+                .GetFirstAsync(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo);
             if (existing != null)
             {
                 response.Result += $"订单号：{syncOrderNo}对接失败：订单号:{syncOrderNo} 已存在;";
+                response.Success = false;
                 continue;
             }
             else
@@ -75,27 +83,28 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 var skuSet = new HashSet<string>(Skus);
 
                 var products = await _wMSProductRep.AsQueryable()
-                    .Where(p => p.CustomerId == CustomerId && skuSet.Contains(p.SKU))
+                    .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId && skuSet.Contains(p.SKU))
                     .Where(p => p.ProductStatus == 1)
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 // 如果产品数量少于 SKU 数量，查找缺少的 SKU
                 if (products.Count < Skus.Count)
                 {
                     var missingSkus = Skus.Except(products.Select(p => p.SKU)).ToList();  // 查找缺失的 SKU
-
                     response.Result += $"订单号：{syncOrderNo} 对接失败：系统缺失SKU: {string.Join(", ", missingSkus)};";
-
+                    response.Success = false;
                     continue; // 跳过当前循环，处理下一个 ASN
                 }
-                receiving = input.Adapt<HachWmsReceiving>();
-                receiving.ReceiptNum = syncOrderNo;
+                receiving = asn.Adapt<HachWmsReceiving>();
+                receiving.OrderNo = syncOrderNo;
+                receiving.CreateUserId = _userManager.UserId;
                 //写入对接表
-                var syncDockData = await SyncHachWmsReceiving(receiving);
+                var syncDockData = await SyncHachWmsReceiving(receiving, wmsAuthorizationConfig);
                 //写入业务表
-                var syncBusinessData = await SyncWmsAsn(receiving);
+                var syncBusinessData = await SyncWmsAsn(receiving, wmsAuthorizationConfig);
             }
         }
+        response.Result = "成功";
         return response;
     }
     /// <summary>
@@ -103,8 +112,9 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="receiving"></param>
     /// <returns></returns>
-    private async Task<HachWmsReceiving> SyncHachWmsReceiving(HachWmsReceiving receiving)
+    private async Task<HachWmsReceiving> SyncHachWmsReceiving(HachWmsReceiving receiving, HachWmsAuthorizationConfig wmsAuthorizationConfig)
     {
+        var sql= _hachWmsReceivingRep.Context.InsertNav(receiving).Include(a => a.items).ToSqlValue();
         return await _hachWmsReceivingRep.Context.InsertNav(receiving).Include(a => a.items).ExecuteReturnEntityAsync();
     }
     /// <summary>
@@ -112,7 +122,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="receiving"></param>
     /// <returns></returns>
-    private async Task<HachWMSResponse> SyncWmsAsn(HachWmsReceiving receiving)
+    private async Task<HachWMSResponse> SyncWmsAsn(HachWmsReceiving receiving, HachWmsAuthorizationConfig wmsAuthorizationConfig)
     {
         HachWMSResponse hachWMSResponse = new HachWMSResponse()
         {
@@ -125,32 +135,32 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         wMSASN = new WMSASN
         {
             ASNNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString(),
-            ExternReceiptNumber = receiving.ReceiptNum,
-            CustomerId = CustomerId,
-            CustomerName = CustomerName,
-            WarehouseId = WarehouseId,
-            WarehouseName = WarehouseName,
+            ExternReceiptNumber = receiving.OrderNo,
+            CustomerId = wmsAuthorizationConfig.CustomerId.Value,
+            CustomerName = wmsAuthorizationConfig.CustomerName,
+            WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
+            WarehouseName = wmsAuthorizationConfig.WarehouseName,
             ASNStatus = 1,
             ReceiptType = receiving.DocType,
-            Creator = "HachWMSApi",
+            Creator = _userManager.UserId.ToString(),
             CreationTime = DateTime.Now,
             TenantId = 1300000000001
         };
         foreach (var item in receiving.items)
         {
             wMSProduct = await _wMSProductRep.AsQueryable()
-            .Where(p => p.CustomerId == CustomerId && p.SKU == item.ItemNum)
+            .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId.Value && p.SKU == item.ItemNum)
             .Where(p => p.ProductStatus == 1)
             .OrderByDescending(p => p.Id)
             .FirstAsync();
             wMSASNDetail.Add(new WMSASNDetail
             {
                 ASNNumber = wMSASN.ASNNumber,
-                ExternReceiptNumber = receiving.ReceiptNum,
-                CustomerId = CustomerId,
-                CustomerName = CustomerName,
-                WarehouseId = WarehouseId,
-                WarehouseName = WarehouseName,
+                ExternReceiptNumber = receiving.OrderNo,
+                CustomerId = wmsAuthorizationConfig.CustomerId.Value,
+                CustomerName = wmsAuthorizationConfig.CustomerName,
+                WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
+                WarehouseName = wmsAuthorizationConfig.WarehouseName,
                 LineNumber = item.LineNum,
                 SKU = item.ItemNum,
                 UPC = "",
@@ -163,12 +173,33 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 ReceivedQty = 0,
                 ReceiptQty = 0,
                 CreationTime = DateTime.Now,
-                Creator = "HachWMSApi",
+                Creator = _userManager.UserId.ToString(),
                 TenantId = 1300000000001
             });
         }
         wMSASN.Details = wMSASNDetail;
         var asnResult = await _wMSASNRep.Context.InsertNav(wMSASN).Include(a => a.Details).ExecuteReturnEntityAsync();
         return hachWMSResponse;
+    }
+
+    private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type)
+    {
+        HachWmsAuthorizationConfig hachCustomerMappings = new HachWmsAuthorizationConfig();
+
+        if (string.IsNullOrEmpty(Type))
+        {
+            return hachCustomerMappings;
+        }
+
+        hachCustomerMappings = await _hachWmsAuthorizationConfigRep.AsQueryable()
+            .Where(a => a.AppId == _userManager.UserId)
+            .Where(a => a.Status == true)
+            .Where(a => a.IsDelete == false)
+            .Where(a => a.Type == "HachWMSApi")
+            .Where(a => a.InterFaceName == Type)
+            .OrderByDescending(a => a.Id)
+            .FirstAsync();
+
+        return hachCustomerMappings;
     }
 }

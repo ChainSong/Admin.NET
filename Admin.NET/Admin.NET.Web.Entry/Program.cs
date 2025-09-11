@@ -34,21 +34,21 @@ public class WebComponent : IWebComponent
             u.Limits.MaxRequestBodySize = null;
         });
 
-        var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        //var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-        // 获取项目根目录，假设根目录是项目的父级
-        var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..\..\"));
+        //// 获取项目根目录，假设根目录是项目的父级
+        //var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..\..\"));
 
-        // 将路径与配置文件结合
-        var appJsonPath = Path.Combine(projectRoot, "Admin.NET.Application", "Configuration", "App.json");
-        // 加载 app.json 配置文件
-        builder.Configuration.AddJsonFile(appJsonPath, optional: false, reloadOnChange: true);
+        //// 将路径与配置文件结合
+        //var appJsonPath = Path.Combine(projectRoot, "Admin.NET.Application", "Configuration", "App.json");
+        //// 加载 app.json 配置文件
+        //builder.Configuration.AddJsonFile(appJsonPath, optional: false, reloadOnChange: true);
 
-        // 获取配置，并绑定到 AppSettings 类
-        var appSettings = builder.Configuration.GetSection("HachWmsAuthorization").Get<List<AppCredential>>();
+        //// 获取配置，并绑定到 AppSettings 类
+        //var appSettings = builder.Configuration.GetSection("HachWmsAuthorization").Get<List<AppCredential>>();
 
-        // 将配置添加到服务容器中
-        builder.Services.Configure<List<AppCredential>>(builder.Configuration.GetSection("HachWmsAuthorization"));
+        //// 将配置添加到服务容器中
+        //builder.Services.Configure<List<AppCredential>>(builder.Configuration.GetSection("HachWmsAuthorization"));
 
     }
 }

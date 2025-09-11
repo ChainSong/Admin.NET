@@ -16,6 +16,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Common.SnowflakeCommon;
+using Microsoft.AspNetCore.Identity;
+using StackExchange.Profiling.Internal;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms.Dto;
 
@@ -28,22 +30,22 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<HachWmsOutBound> _hachWmsOutBoundRep;
     private readonly SqlSugarRepository<WMSPreOrder> _wMSPreorderRep;
-
     private readonly SqlSugarRepository<WMSProduct> _wMSProductRep;
-    public static readonly long CustomerId = App.GetConfig<long>("HachDanger:CustomerId");
-    public static readonly string CustomerCode = App.GetConfig<string>("HachDanger:CustomerCode");
-    public static readonly string CustomerName = App.GetConfig<string>("HachDanger:CustomerName");
-    public static readonly long WarehouseId = App.GetConfig<long>("HachDanger:WarehouseId");
-    public static readonly string WarehouseName = App.GetConfig<string>("HachDanger:WarehouseName");
+    private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
+    private readonly UserManager _userManager;
     public HachWmsOutBoundService(
         SqlSugarRepository<HachWmsOutBound> hachWmsOutBoundRep,
         SqlSugarRepository<WMSPreOrder> wMSPreorderRep,
         SqlSugarRepository<WMSProduct> wMSProductRep,
-        SqlSugarRepository<WMSOrderAddress> wMSOrderAddressRep)
+        SqlSugarRepository<WMSOrderAddress> wMSOrderAddressRep,
+         UserManager userManager,
+        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
         _hachWmsOutBoundRep = hachWmsOutBoundRep;
         _wMSPreorderRep = wMSPreorderRep;
         _wMSProductRep = wMSProductRep;
+        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _userManager = userManager;
     }
 
     [HttpPost]
@@ -57,6 +59,11 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             Result = "成功"
         };
         HachWmsOutBound outBound = new HachWmsOutBound();
+
+        HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
+
+        wmsAuthorizationConfig = await GetCustomerInfo("putASNData");
+
         foreach (var order in input)
         {
             string syncOrderNo = order.OrderNumber == null ? order.SoNumber + order.DeliveryNumber : order.OrderNumber;
@@ -73,7 +80,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 var skuSet = new HashSet<string>(Skus);
 
                 var products = await _wMSProductRep.AsQueryable()
-                    .Where(p => p.CustomerId == CustomerId && skuSet.Contains(p.SKU))
+                    .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId && skuSet.Contains(p.SKU))
                     .Where(p => p.ProductStatus == 1)
                     .ToListAsync();
 
@@ -88,15 +95,17 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 }
                 else
                 {
-                    outBound = input.Adapt<HachWmsOutBound>();
+                    outBound = order.Adapt<HachWmsOutBound>();
                     outBound.OrderNumber = syncOrderNo;
+                    outBound.CreateUserId = _userManager.UserId;
                     //写入对接表
-                    var syncDockData = await SyncHachWmsOutBound(outBound);
+                    var syncDockData = await SyncHachWmsOutBound(outBound, wmsAuthorizationConfig);
                     //写入业务表
-                    var syncBusinessData = await SyncWmsPreOrder(outBound);
+                    var syncBusinessData = await SyncWmsPreOrder(outBound, wmsAuthorizationConfig);
                 }
             }
         }
+
         return response;
     }
 
@@ -105,7 +114,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="receiving"></param>
     /// <returns></returns>
-    private async Task<HachWmsOutBound> SyncHachWmsOutBound(HachWmsOutBound outBound)
+    private async Task<HachWmsOutBound> SyncHachWmsOutBound(HachWmsOutBound outBound, HachWmsAuthorizationConfig wmsAuthorizationConfig)
     {
         return await _hachWmsOutBoundRep.Context.InsertNav(outBound).Include(a => a.items).ExecuteReturnEntityAsync();
     }
@@ -114,7 +123,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="receiving"></param>
     /// <returns></returns>
-    private async Task<HachWMSResponse> SyncWmsPreOrder(HachWmsOutBound outBound)
+    private async Task<HachWMSResponse> SyncWmsPreOrder(HachWmsOutBound outBound, HachWmsAuthorizationConfig wmsAuthorizationConfig)
     {
         HachWMSResponse hachWMSResponse = new HachWMSResponse()
         {
@@ -132,17 +141,17 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         {
             PreOrderNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString(),
             ExternOrderNumber = outBound.OrderNumber,
-            CustomerId = CustomerId,
-            CustomerName = CustomerName,
-            WarehouseId = WarehouseId,
-            WarehouseName = WarehouseName,
+            CustomerId = wmsAuthorizationConfig.CustomerId.Value,
+            CustomerName = wmsAuthorizationConfig.CustomerName,
+            WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
+            WarehouseName = wmsAuthorizationConfig.WarehouseName,
             OrderType = "",
             PreOrderStatus = 1,
             OrderTime = Convert.ToDateTime(outBound.ScheduleShippingDate),
             Po = "",
             So = outBound.SoNumber,//销售单号
             DetailCount = outBound.items.Count,
-            Creator = "HachWMSApi",
+            Creator = _userManager.UserId.ToString(),
             CreationTime = DateTime.Now,
             TenantId = 1300000000001
         };
@@ -159,14 +168,14 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             Phone = outBound.Telephone,
             Address = outBound.Address,
             CreationTime = DateTime.Now,
-            Creator = "HachWMSApi",
+            Creator = _userManager.UserId.ToString(),
             TenantId = 1300000000001
         };
         //明细信息
         foreach (var item in outBound.items)
         {
             wMSProduct = await _wMSProductRep.AsQueryable()
-            .Where(p => p.CustomerId == CustomerId && p.SKU == item.ItemNumber)
+            .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId && p.SKU == item.ItemNumber)
             .Where(p => p.ProductStatus == 1)
             .OrderByDescending(p => p.Id)
             .FirstAsync();
@@ -174,10 +183,10 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             {
                 PreOrderNumber = wMSPreOrder.PreOrderNumber,
                 ExternOrderNumber = wMSPreOrder.ExternOrderNumber,
-                CustomerId = CustomerId,
-                CustomerName = CustomerName,
-                WarehouseId = WarehouseId,
-                WarehouseName = WarehouseName,
+                CustomerId = wMSPreOrder.CustomerId,
+                CustomerName = wMSPreOrder.CustomerName,
+                WarehouseId = wMSPreOrder.WarehouseId,
+                WarehouseName = wmsAuthorizationConfig.WarehouseName,
                 LineNumber = item.LineNumber,
                 SKU = item.ItemNumber,
                 GoodsName = item.ItemDescription,
@@ -190,9 +199,9 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 Volume = 0,
                 UnitCode = item.Uom,
                 CreationTime = DateTime.Now,
-                Creator = "HachWMSApi",
-                Str2 = item.ParentItemNumber,
-                Int2 = item.ParentItemId,
+                Creator = _userManager.UserId.ToString(),
+                Str2 = !string.IsNullOrEmpty(item.ParentItemNumber) ? item.ParentItemNumber : "",
+                Int2 = item.ParentItemId.HasValue ? item.ParentItemId : 0,
             });
         }
 
@@ -205,5 +214,26 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             .ExecuteReturnEntityAsync();
 
         return hachWMSResponse;
+    }
+
+    private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type)
+    {
+        HachWmsAuthorizationConfig hachCustomerMappings = new HachWmsAuthorizationConfig();
+
+        if (string.IsNullOrEmpty(Type))
+        {
+            return hachCustomerMappings;
+        }
+
+        hachCustomerMappings = await _hachWmsAuthorizationConfigRep.AsQueryable()
+            .Where(a => a.AppId == _userManager.UserId)
+            .Where(a => a.Status == true)
+            .Where(a => a.IsDelete == false)
+            .Where(a => a.Type == "HachWMSApi")
+            .Where(a => a.InterFaceName == Type)
+            .OrderByDescending(a => a.Id)
+            .FirstAsync();
+
+        return hachCustomerMappings;
     }
 }

@@ -10,6 +10,7 @@
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using Admin.NET.Core;
+using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using Furion.DataEncryption;
 using Furion.DependencyInjection;
@@ -36,14 +37,16 @@ public class OpenAuthService : IDynamicApiController, ITransient
     private readonly SysAuthService _sysAuthRep;
     private readonly SqlSugarRepository<SysUser> _sysUserRep;
     private readonly SysConfigService _sysConfigService;
-    private readonly List<AppCredential> _appSettings;
+    private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
+
     public OpenAuthService(SysAuthService sysAuthRep, SqlSugarRepository<SysUser> sysUserRep,
-        IOptions<List<AppCredential>> appSettings, SysConfigService sysConfigService)
+      SysConfigService sysConfigService,
+        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
         _sysAuthRep = sysAuthRep;
         _sysUserRep = sysUserRep;
         _sysConfigService = sysConfigService;
-        _appSettings = appSettings.Value;
+        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
     }
 
     [HttpPost]
@@ -51,11 +54,21 @@ public class OpenAuthService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "open-auth")]
     public async Task<TokenOutput> Token([FromBody] OpenAuthInput input)
     {
-        if (input.AppId==null || string.IsNullOrEmpty(input.AppSecret))
+        if (input.AppId == null || string.IsNullOrEmpty(input.AppSecret))
         {
             throw Oops.Oh(ErrorCode.UnauthorizedEmpty.GetDescription());
         }
-        var app = _appSettings.FirstOrDefault(a => a.AppId == input.AppId && a.AppSecret == input.AppSecret);
+
+        var app = await _hachWmsAuthorizationConfigRep
+                  .AsQueryable()
+                  .Where(a => a.Type == "HachWMSApi")
+                  .Where(a => a.Status == true)
+                  .Where(a => a.IsDelete == false)
+                  .Where(a => a.AppId == input.AppId)
+                  .Where(a => a.AppSecret == input.AppSecret)
+                  .OrderByDescending(a => a.CreateTime) // 按创建时间倒序
+                  .FirstAsync();
+
         if (app == null)
         {
             throw Oops.Oh(ErrorCode.Unauthorized.GetDescription()); // 无效的凭证
@@ -69,7 +82,7 @@ public class OpenAuthService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="appId">应用 ID</param>
     /// <returns>Token 输出</returns>
-    private async Task<TokenOutput> CreateToken(AppCredential input)
+    private async Task<TokenOutput> CreateToken(HachWmsAuthorizationConfig input)
     {
         var tokenExpire = await _sysConfigService.GetTokenExpire();// 生成Token令牌
 

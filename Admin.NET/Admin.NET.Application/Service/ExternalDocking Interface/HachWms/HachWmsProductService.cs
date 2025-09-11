@@ -35,13 +35,20 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<HachWmsProduct> _hachWmsProductRep;
     private readonly SqlSugarRepository<WMSProduct> _wMSProductRep;
     private readonly SqlSugarRepository<WMSHachCustomerMapping> _wMSHachCustomerMappingRep;
+    private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
+    private readonly UserManager _userManager;
+
     public HachWmsProductService(SqlSugarRepository<HachWmsProduct> hachWmsProductRep
         , SqlSugarRepository<WMSHachCustomerMapping> wMSHachCustomerMappingRep,
-        SqlSugarRepository<WMSProduct> wMSProductRep)
+        SqlSugarRepository<WMSProduct> wMSProductRep,
+        UserManager userManager,
+        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
         _hachWmsProductRep = hachWmsProductRep;
         _wMSHachCustomerMappingRep = wMSHachCustomerMappingRep;
         _wMSProductRep = wMSProductRep;
+        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _userManager = userManager;
     }
     #endregion
 
@@ -60,7 +67,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
             Result = "成功"
         };
 
-        List<WMSHachCustomerMapping> hachCustomerList = new List<WMSHachCustomerMapping>();
+        List<HachWmsAuthorizationConfig> hachCustomerList = new List<HachWmsAuthorizationConfig>();
         HachWmsProduct hachWmsProductInput = new HachWmsProduct();
         WMSProduct wMSProduct = new WMSProduct();
         HachWmsProduct hachWmsProduct = new HachWmsProduct();
@@ -105,8 +112,11 @@ public class HachWmsProductService : IDynamicApiController, ITransient
             {
                 product.Status = false;  // 例如将状态改为 false 表示过时
             }
-            // 批量更新旧的对接记录
-            await _hachWmsProductRep.UpdateRangeAsync(hachProductList);
+
+            await _hachWmsProductRep.AsUpdateable(hachProductList)
+                 .IgnoreColumns(p => p.Id)  // 不更新 Id 字段
+                 .WhereColumns(it => new { it.Id })  // 根据 Id 进行条件匹配
+                 .ExecuteCommandAsync();
         }
 
         input.Status = true; // 设置新记录的状态为有效
@@ -118,7 +128,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    private async Task<WMSProduct> asyncSyncWmsProduct(HachWmsProduct input, WMSHachCustomerMapping customer)
+    private async Task<WMSProduct> asyncSyncWmsProduct(HachWmsProduct input, HachWmsAuthorizationConfig customer)
     {
         WMSProduct wMSProduct = new WMSProduct();
         WMSProduct wMSAddProduct = new WMSProduct();
@@ -135,7 +145,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
         {
             wMSAddProduct = new WMSProduct
             {
-                CustomerId = customer.Id,
+                CustomerId = customer.CustomerId.Value,
                 CustomerName = customer.CustomerName,
                 SKU = input.ItemNumber,
                 ProductStatus = 1,
@@ -220,16 +230,21 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="Type"></param>
     /// <returns></returns>
-    private async Task<List<WMSHachCustomerMapping>> GetCustomerInfo(string Type)
+    private async Task<List<HachWmsAuthorizationConfig>> GetCustomerInfo(string Type)
     {
-        List<WMSHachCustomerMapping> hachCustomerMappings = new List<WMSHachCustomerMapping>();
+        List<HachWmsAuthorizationConfig> hachCustomerMappings = new List<HachWmsAuthorizationConfig>();
+
         if (string.IsNullOrEmpty(Type))
         {
             return hachCustomerMappings;
         }
-        hachCustomerMappings = await _wMSHachCustomerMappingRep.AsQueryable()
-            .Where(a => a.Type == Type)
+
+        hachCustomerMappings = await _hachWmsAuthorizationConfigRep.AsQueryable()
+            .Where(a => a.AppId == _userManager.UserId)
+            .Where(a => a.Type == "HachWMSApi")
+            .Where(a => a.InterFaceName == Type)
             .ToListAsync();
+
         return hachCustomerMappings;
     }
 }

@@ -21,7 +21,7 @@ public class HachWmsProductBomDetail : EntityTenant
     /// <summary>
     /// 雪花id
     /// </summary>
-    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true)]
+    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true, IsIdentity = true, IsPrimaryKey = true)]
     public override long Id { get; set; }
     /// <summary>
     /// 主表Id
