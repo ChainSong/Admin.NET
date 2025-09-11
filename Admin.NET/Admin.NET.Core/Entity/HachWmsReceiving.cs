@@ -14,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Core.Entity;
+
+[SugarTable("hach_wms_receiving", "入库对接数据表")]
 public class HachWmsReceiving : EntityTenant
 {
     /// <summary>

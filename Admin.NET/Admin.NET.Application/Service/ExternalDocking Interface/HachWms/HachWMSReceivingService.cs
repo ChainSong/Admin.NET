@@ -25,7 +25,8 @@ namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 /// <summary>
 /// EXTERNAL DOCKING INTERFACE : HACHWMS RECEIVING 
 /// </summary>
-[ApiDescriptionSettings("achWMSReceiving", Order = 3, Groups = new[] { "HACHWMS INTERFACE" })]
+
+[ApiDescriptionSettings("hachWMSReceiving", Order = 3, Groups = new[] { "HACHWMS INTERFACE" })]
 public class HachWMSReceivingService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<HachWmsReceiving> _hachWmsReceivingRep;
@@ -63,7 +64,8 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             var existing = await _wMSASNRep.GetFirstAsync(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo);
             if (existing != null)
             {
-                response.Result += $"订单号:{syncOrderNo} 已存在;";
+                response.Result += $"订单号：{syncOrderNo}对接失败：订单号:{syncOrderNo} 已存在;";
+                continue;
             }
             else
             {
@@ -75,7 +77,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 var products = await _wMSProductRep.AsQueryable()
                     .Where(p => p.CustomerId == CustomerId && skuSet.Contains(p.SKU))
                     .Where(p => p.ProductStatus == 1)
-                    .ToListAsync(); // 不需要 Distinct()
+                    .ToListAsync(); 
 
                 // 如果产品数量少于 SKU 数量，查找缺少的 SKU
                 if (products.Count < Skus.Count)
@@ -83,8 +85,11 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                     var missingSkus = Skus.Except(products.Select(p => p.SKU)).ToList();  // 查找缺失的 SKU
 
                     response.Result += $"订单号：{syncOrderNo} 对接失败：系统缺失SKU: {string.Join(", ", missingSkus)};";
+
+                    continue; // 跳过当前循环，处理下一个 ASN
                 }
                 receiving = input.Adapt<HachWmsReceiving>();
+                receiving.ReceiptNum = syncOrderNo;
                 //写入对接表
                 var syncDockData = await SyncHachWmsReceiving(receiving);
                 //写入业务表
@@ -109,15 +114,18 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     /// <returns></returns>
     private async Task<HachWMSResponse> SyncWmsAsn(HachWmsReceiving receiving)
     {
-        HachWMSResponse hachWMSResponse = new HachWMSResponse();
+        HachWMSResponse hachWMSResponse = new HachWMSResponse()
+        {
+            Success = true,
+            Result = "成功"
+        };
         WMSASN wMSASN = new WMSASN();
         List<WMSASNDetail> wMSASNDetail = new List<WMSASNDetail>();
         WMSProduct wMSProduct = new WMSProduct();
-        string syncOrderNo = receiving.ShipmentNum + receiving.ReceiptNum + receiving.DocNumber;
         wMSASN = new WMSASN
         {
             ASNNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString(),
-            ExternReceiptNumber = syncOrderNo,
+            ExternReceiptNumber = receiving.ReceiptNum,
             CustomerId = CustomerId,
             CustomerName = CustomerName,
             WarehouseId = WarehouseId,
@@ -138,7 +146,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             wMSASNDetail.Add(new WMSASNDetail
             {
                 ASNNumber = wMSASN.ASNNumber,
-                ExternReceiptNumber = syncOrderNo,
+                ExternReceiptNumber = receiving.ReceiptNum,
                 CustomerId = CustomerId,
                 CustomerName = CustomerName,
                 WarehouseId = WarehouseId,

@@ -27,6 +27,7 @@ namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 /// <summary>
 /// EXTERNAL DOCKING INTERFACE : HACHWMS PRODUCT 
 /// </summary>
+
 [ApiDescriptionSettings("HachWmsProduct", Order = 2, Groups = new[] { "HACHWMS INTERFACE" })]
 public class HachWmsProductService : IDynamicApiController, ITransient
 {

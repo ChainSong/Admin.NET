@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Core.Entity;
 
-[SugarTable("HachWms_Product", "产品主数据对接表")]
+[SugarTable("hach_wms_product", "产品主数据对接表")]
 public class HachWmsProduct : EntityTenant
 {
     /// <summary>

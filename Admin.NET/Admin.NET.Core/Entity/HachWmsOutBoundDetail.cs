@@ -14,9 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Core.Entity;
-
-[SugarTable("hach_wms_receiving_detail", "入库明细对接数据表")]
-public class HachWmsReceivingDetail : EntityTenant
+[SugarTable("hach_wms_outBound_detail", "出库对接明细数据表")]
+public class HachWmsOutBoundDetail : EntityTenant
 {
     /// <summary>
     /// 雪花id
@@ -27,39 +26,33 @@ public class HachWmsReceivingDetail : EntityTenant
     /// 主表Id
     /// </summary>
     [SugarColumn(ColumnDescription = "主表Id", IsNullable = false)]
-    public long ReceivingId { get; set; }
+    public long OutBoundId { get; set; }
 
-    [SugarColumn(ColumnDescription = "Key值，主要id", IsNullable = false, Length = 11)]
-    public int TransactionId { get; set; }
-    [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int SourceHeaderId { get; set; }
-    [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int SourceLineId { get; set; }
-    [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int ShipmentHeaderId { get; set; }
-    [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int ShipmentLineId { get; set; }
-
-    [SugarColumn(ColumnDescription = "行号", IsNullable = false, Length = 100)]
-    public string LineNum { get; set; }
-
-    [SugarColumn(ColumnDescription = "组织编码", IsNullable = false, Length = 20)]
-    public string OrganizationCode { get; set; }
-
-    [SugarColumn(ColumnDescription = "子仓库编码", Length = 50)]
-    public string subinventory { get; set; }
-    [SugarColumn(ColumnDescription = "产品id", IsNullable = false, Length = 11)]
-    public int ItemId { get; set; }
-    [SugarColumn(ColumnDescription = "产品编码", Length = 50, IsNullable = false)]
-    public string ItemNum { get; set; }
-    [SugarColumn(ColumnDescription = "产品描述", Length = 50)]
+    [SugarColumn(ColumnDescription = "发运Id", IsNullable = false)]
+    public long DeliveryDetailId { get; set; }
+    [SugarColumn(ColumnDescription = "行id", IsNullable = false)]
+    public long LineId { get; set; }
+    [SugarColumn(ColumnDescription = "行号", IsNullable = false)]
+    public string LineNumber { get; set; }
+    [SugarColumn(ColumnDescription = "商品id", IsNullable = false)]
+    public long ItemId { get; set; }
+    [SugarColumn(ColumnDescription = "商品编码", IsNullable = false)]
+    public string ItemNumber { get; set; }
+    [SugarColumn(ColumnDescription = "商品描述", IsNullable = false)]
     public string ItemDescription { get; set; }
-    [SugarColumn(ColumnDescription = "数量", IsNullable =false)]
-    public float Quantity { get; set; }
-    [SugarColumn(ColumnDescription = "单位", Length = 20)]
+    [SugarColumn(ColumnDescription = "账套ID", IsNullable = false)]
+    public long OrganizationId { get; set; }
+    [SugarColumn(ColumnDescription = "账套编码", IsNullable = false)]
+    public string OrganizationCode { get; set; }
+    [SugarColumn(ColumnDescription = "数量", IsNullable = false)]
+    public string Quantity { get; set; }
+    [SugarColumn(ColumnDescription = "单位", IsNullable = false)]
     public string Uom { get; set; }
-    [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Remark { get; set; }
+    [SugarColumn(ColumnDescription = "父阶商品编码", IsNullable = false)]
+    public string ParentItemNumber { get; set; }
+    [SugarColumn(ColumnDescription = "父阶商品id", IsNullable = false)]
+    public int ParentItemId { get; set; }
+
     [SugarColumn(ColumnDescription = "", Length = 240)]
     public string Attribute1 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
