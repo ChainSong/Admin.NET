@@ -45,5 +45,5 @@ public class AppCredential
     public long AppId { get; set; }
     public string AppSecret { get; set; }
     public string TenantId { get; set; }
-    public string CustomerType { get; set; }
+    public string  Type { get; set; }
 }

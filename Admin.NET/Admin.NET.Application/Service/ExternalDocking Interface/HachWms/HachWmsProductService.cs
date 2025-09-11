@@ -50,8 +50,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     /// </summary>
     /// <returns></returns>
     [HttpPost]
-    //[Authorize]
-    [AllowAnonymous]
+    [Authorize]
     [ApiDescriptionSettings(Name = "putSKUData")]
     public async Task<HachWMSResponse> asyncSyncProductData(HachWmsProductInput input)
     {
@@ -68,7 +67,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
 
         hachWmsProductInput = input.Adapt<HachWmsProduct>();
         hachWmsProduct = await asyncSyncHachWmsProduct(hachWmsProductInput);
-        hachCustomerList = await GetCustomerInfo("CustomerType");
+        hachCustomerList = await GetCustomerInfo("putSKUData");
 
         foreach (var customer in hachCustomerList)
         {

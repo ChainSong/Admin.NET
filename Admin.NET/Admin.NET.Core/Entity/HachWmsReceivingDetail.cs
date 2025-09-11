@@ -29,16 +29,16 @@ public class HachWmsReceivingDetail : EntityTenant
     [SugarColumn(ColumnDescription = "主表Id", IsNullable = false)]
     public long ReceivingId { get; set; }
 
-    [SugarColumn(ColumnDescription = "Key值，主要id", IsNullable = false, Length = 11)]
-    public int TransactionId { get; set; }
+    [SugarColumn(ColumnDescription = "Key值，主要id", IsNullable = false)]
+    public long TransactionId { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int SourceHeaderId { get; set; }
+    public long SourceHeaderId { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int SourceLineId { get; set; }
+    public long SourceLineId { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int ShipmentHeaderId { get; set; }
+    public long ShipmentHeaderId { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public int ShipmentLineId { get; set; }
+    public long ShipmentLineId { get; set; }
 
     [SugarColumn(ColumnDescription = "行号", IsNullable = false, Length = 100)]
     public string LineNum { get; set; }
@@ -47,27 +47,27 @@ public class HachWmsReceivingDetail : EntityTenant
     public string OrganizationCode { get; set; }
 
     [SugarColumn(ColumnDescription = "子仓库编码", Length = 50)]
-    public string subinventory { get; set; }
-    [SugarColumn(ColumnDescription = "产品id", IsNullable = false, Length = 11)]
-    public int ItemId { get; set; }
+    public string? subinventory { get; set; }
+    [SugarColumn(ColumnDescription = "产品id", IsNullable = false)]
+    public long ItemId { get; set; }
     [SugarColumn(ColumnDescription = "产品编码", Length = 50, IsNullable = false)]
     public string ItemNum { get; set; }
     [SugarColumn(ColumnDescription = "产品描述", Length = 50)]
-    public string ItemDescription { get; set; }
+    public string? ItemDescription { get; set; }
     [SugarColumn(ColumnDescription = "数量", IsNullable =false)]
     public float Quantity { get; set; }
     [SugarColumn(ColumnDescription = "单位", Length = 20)]
-    public string Uom { get; set; }
+    public string? Uom { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Remark { get; set; }
+    public string? Remark { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute1 { get; set; }
+    public string? Attribute1 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute2 { get; set; }
+    public string? Attribute2 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute3 { get; set; }
+    public string? Attribute3 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute4 { get; set; }
+    public string? Attribute4 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute5 { get; set; }
+    public string? Attribute5 { get; set; }
 }

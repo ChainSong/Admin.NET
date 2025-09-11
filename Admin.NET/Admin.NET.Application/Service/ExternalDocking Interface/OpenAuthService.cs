@@ -51,14 +51,14 @@ public class OpenAuthService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "open-auth")]
     public async Task<TokenOutput> Token([FromBody] OpenAuthInput input)
     {
-        if (input.AppId!=null || string.IsNullOrEmpty(input.AppSecret))
+        if (input.AppId==null || string.IsNullOrEmpty(input.AppSecret))
         {
-            throw Oops.Oh(ErrorCode.UnauthorizedEmpty);
+            throw Oops.Oh(ErrorCode.UnauthorizedEmpty.GetDescription());
         }
         var app = _appSettings.FirstOrDefault(a => a.AppId == input.AppId && a.AppSecret == input.AppSecret);
         if (app == null)
         {
-            throw Oops.Oh(ErrorCode.Unauthorized); // 无效的凭证
+            throw Oops.Oh(ErrorCode.Unauthorized.GetDescription()); // 无效的凭证
         }
         var tokenOutput = await CreateToken(app);
         return tokenOutput;

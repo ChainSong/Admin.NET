@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Core.Entity;
+
 [SugarTable("hach_wms_outBound_detail", "出库对接明细数据表")]
 public class HachWmsOutBoundDetail : EntityTenant
 {
@@ -27,7 +28,6 @@ public class HachWmsOutBoundDetail : EntityTenant
     /// </summary>
     [SugarColumn(ColumnDescription = "主表Id", IsNullable = false)]
     public long OutBoundId { get; set; }
-
     [SugarColumn(ColumnDescription = "发运Id", IsNullable = false)]
     public long DeliveryDetailId { get; set; }
     [SugarColumn(ColumnDescription = "行id", IsNullable = false)]
@@ -49,18 +49,17 @@ public class HachWmsOutBoundDetail : EntityTenant
     [SugarColumn(ColumnDescription = "单位", IsNullable = false)]
     public string Uom { get; set; }
     [SugarColumn(ColumnDescription = "父阶商品编码", IsNullable = false)]
-    public string ParentItemNumber { get; set; }
-    [SugarColumn(ColumnDescription = "父阶商品id", IsNullable = false)]
-    public int ParentItemId { get; set; }
-
+    public string? ParentItemNumber { get; set; }
+    [SugarColumn(ColumnDescription = "父阶商品id")]
+    public int? ParentItemId { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute1 { get; set; }
+    public string? Attribute1 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute2 { get; set; }
+    public string? Attribute2 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute3 { get; set; }
+    public string? Attribute3 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute4 { get; set; }
+    public string? Attribute4 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
-    public string Attribute5 { get; set; }
+    public string? Attribute5 { get; set; }
 }

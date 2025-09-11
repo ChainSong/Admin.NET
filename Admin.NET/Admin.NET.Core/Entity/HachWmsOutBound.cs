@@ -53,7 +53,7 @@ public class HachWmsOutBound : EntityTenant
     [SugarColumn(ColumnDescription = ("子仓库"))]
     public string Subinventory { get; set; }
     [SugarColumn(ColumnDescription = "最终用户", IsNullable = false)]
-    public string EndUserName { get; set; }
+    public string? EndUserName { get; set; }
 
     [Navigate(NavigateType.OneToMany, nameof(HachWmsOutBoundDetail.OutBoundId))]
     public virtual List<HachWmsOutBoundDetail> items { get; set; }

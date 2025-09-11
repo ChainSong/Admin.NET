@@ -380,7 +380,7 @@ public class WMSPreOrderDetail : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public int Int2 { get; set; }
+    public int? Int2 { get; set; }
     
     /// <summary>
     /// 
