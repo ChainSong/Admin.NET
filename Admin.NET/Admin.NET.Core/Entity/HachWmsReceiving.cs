@@ -49,6 +49,10 @@ public class HachWmsReceiving : EntityTenant
     /// </summary>
     [SugarColumn(ColumnDescription = "订单号", Length = 120, IsNullable = false)]
     public string OrderNo { get; set; }
+    [SugarColumn(ColumnDescription = "是否回传")]
+    public bool? IsReturn { get; set; } = false;
+    [SugarColumn(ColumnDescription = "回传时间")]
+    public DateTime? ReturnDate { get; set; }
 
     [Navigate(NavigateType.OneToMany, nameof(HachWmsReceivingDetail.ReceivingId))]
     public virtual List<HachWmsReceivingDetail> items { get; set; }
