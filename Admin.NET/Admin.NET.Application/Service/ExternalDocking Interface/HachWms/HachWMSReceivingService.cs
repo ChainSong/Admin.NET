@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using XAct;
+using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 
@@ -50,15 +51,27 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
     }
     [HttpPost]
-    //[Authorize]
-    [AllowAnonymous]
+    [Authorize]
     [ApiDescriptionSettings(Name = "putASNData")]
     public async Task<HachWMSResponse> asyncSyncReceiving(List<HachWmsReceivingInput> input)
     {
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
+            Result = "success",
+            Items = new List<HachWMSDetailResponse>()
         };
+        // 0) 基础校验
+        const int MaxBatch = 20; // 或 20，看你业务
+
+        //入参不能为空
+        if (input == null || input.Count == 0)
+            return new HachWMSResponse { Success = false, Result = ErrorCode.BadRequest.GetDescription() };
+
+        //单次请求最多允许20条，当前21条
+        if (input.Count > MaxBatch) 
+            return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
+
         HachWmsReceiving receiving = new HachWmsReceiving();
         HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
 
@@ -66,122 +79,231 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
 
         foreach (var asn in input)
         {
-            string syncOrderNo = asn.OrderNo == null ? asn.ShipmentNum + asn.ReceiptNum + asn.DocNumber : asn.OrderNo;
-            var existing = await _wMSASNRep
-                .GetFirstAsync(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo);
-            if (existing != null)
+            var orderResult = new HachWMSDetailResponse { Success = true };
+            try
             {
-                response.Result += $"订单号：{syncOrderNo}对接失败：订单号:{syncOrderNo} 已存在;";
-                response.Success = false;
-                continue;
-            }
-            else
-            {
-                var Skus = asn.items.Select(x => x.ItemNum).Distinct().ToList(); // Ensure Skus is distinct
+                string syncOrderNo = asn.OrderNo == null ? asn.ShipmentNum + asn.ReceiptNum + asn.DocNumber : asn.OrderNo;
+
+
+                if (string.IsNullOrWhiteSpace(syncOrderNo))
+                {
+                    orderResult.Success = false;
+                    orderResult.Message = "orderNo is missing（(OrderNo/ShipmentNum-ReceiptNum-DocNumber) at least one set）";
+                    orderResult.OrderNo = "";
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+
+                // 安全截断（假设库里 ExternReceiptNumber nvarchar(100)）
+                if (syncOrderNo.Length > 100) syncOrderNo = syncOrderNo[..100];
+
+                orderResult.OrderNo = syncOrderNo;
+
+                // 2.2) 输入校验
+                if (asn.items == null || asn.items.Count == 0)
+                {
+                    //订单明细不能为空
+                    orderResult.Message = $"orderNo：{syncOrderNo} details are empty";
+                    orderResult.Success = false;
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+                if (asn.items.Any(i => string.IsNullOrWhiteSpace(i.ItemNum)))
+                {
+                    //订单明细行物料编码不能为空
+                    orderResult.Success = false;
+                    orderResult.Message = $"orderNo：{syncOrderNo} There is an empty <ItemNum>";
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+                if (asn.items.Any(i => i.Quantity <= 0))
+                {
+                    //订单明细行数量必须大于0
+                    orderResult.Success = false;
+                    orderResult.Message = $"orderNo：{syncOrderNo} There is an illegal quantity（Quantity <= 0）";
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+                // LineNum 去重检查
+                var dupLines = asn.items.GroupBy(i => i.LineNum).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+                if (dupLines.Count > 0)
+                {
+                    //订单明细行号重复
+                    orderResult.Success = false;
+                    orderResult.Message = $"orderNo：{syncOrderNo} duplicate detailed line numbers：{string.Join(",", dupLines)}";
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+                // 2.3) 幂等：先查已存在（DB 有唯一约束时也要提前查）
+                var existing = await _wMSASNRep.AsQueryable()
+                    .Where(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo)
+                    .AnyAsync();
+                //await _wMSASNRep
+                //.GetFirstAsync(x => x.ASNStatus != -1 && x.ExternReceiptNumber == syncOrderNo);
+                if (existing)
+                {
+                    // 视为幂等：直接返回成功或提示已存在
+                    orderResult.Success = false;
+                    orderResult.Message = $"orderNo：{syncOrderNo} already exists (idempotent)";
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+
+                // 2.4) SKU 校验（统一大小写）
+                var skus = asn.items
+                           .Select(x => x.ItemNum?.Trim())
+                           .Where(x => !string.IsNullOrWhiteSpace(x))
+                           .Select(x => x.ToUpper()).Distinct().ToList();
 
                 // 使用 HashSet 优化 Contains 操作
-                var skuSet = new HashSet<string>(Skus);
-
+                var skuSet = new HashSet<string>(skus);
                 var products = await _wMSProductRep.AsQueryable()
-                    .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId && skuSet.Contains(p.SKU))
-                    .Where(p => p.ProductStatus == 1)
-                    .ToListAsync();
+                              .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId 
+                              && skus.Contains(SqlFunc.ToUpper(p.SKU)))
+                              .Where(p => p.ProductStatus == 1)
+                              .ToListAsync();
 
-                // 如果产品数量少于 SKU 数量，查找缺少的 SKU
-                if (products.Count < Skus.Count)
+                var foundSkuSet = new HashSet<string>(products.Select(p => p.SKU.ToUpper()));
+
+                var missingSkus = skus.Where(s => !foundSkuSet.Contains(s)).ToList();
+
+                if (missingSkus.Count > 0)
                 {
-                    var missingSkus = Skus.Except(products.Select(p => p.SKU)).ToList();  // 查找缺失的 SKU
-                    response.Result += $"订单号：{syncOrderNo} 对接失败：系统缺失SKU: {string.Join(", ", missingSkus)};";
-                    response.Success = false;
-                    continue; // 跳过当前循环，处理下一个 ASN
+                    orderResult.Message = $"OrderNo：{syncOrderNo} Missing SKU：{string.Join(", ", missingSkus)}";
+                    response.Items.Add(orderResult);
+                    continue;
                 }
-                receiving = asn.Adapt<HachWmsReceiving>();
-                receiving.OrderNo = syncOrderNo;
-                receiving.CreateUserId = _userManager.UserId;
-                //写入对接表
-                var syncDockData = await SyncHachWmsReceiving(receiving, wmsAuthorizationConfig);
-                //写入业务表
-                var syncBusinessData = await SyncWmsAsn(receiving, wmsAuthorizationConfig);
+                // 2.5) 事务写入（对接表 + 业务表）
+                var tranRes = await _wMSASNRep.Context.Ado.UseTranAsync(async () =>
+                {
+                    // 对接表
+                    var receiving = MapReceiving(asn, syncOrderNo, _userManager?.UserId);
+                    await _hachWmsReceivingRep.Context.InsertNav(receiving)
+                        .Include(a => a.items)
+                        .ExecuteReturnEntityAsync();
+
+                    // 业务表（细化到产品映射）
+                    var result = await SyncWmsAsnTransactional(receiving, wmsAuthorizationConfig, products);
+                    if (!result.Success)
+                    {
+                        // 业务表失败时抛异常以回滚事务
+                        throw new Exception(result.Result ?? "business table processing failed");
+                    }
+                });
+                if (!tranRes.IsSuccess)
+                {
+                    orderResult.Success = false;
+                    var msg = tranRes.ErrorMessage;
+                    if (msg != null && (msg.Contains("UNIQUE") || msg.Contains("唯一") || msg.Contains("duplicate")))
+                        orderResult.Message = $"orderNo：{syncOrderNo} already exists (unique constraint)";//已存在（唯一约束）
+                    else
+                        orderResult.Message = $"orderNo：{syncOrderNo} processing failed：{msg}";//处理失败
+                }
+                else
+                {
+                    orderResult.Success = true;
+                    orderResult.Message = $"orderNo：{syncOrderNo} processed successfully";//处理成功
+                }
+
+                response.Items.Add(orderResult);
+            }
+            catch (Exception ex)
+            {
+                // 兜底异常
+                orderResult.Message = $"orderNo：{orderResult.OrderNo} handle exceptions：{ex.Message}";
+                orderResult.Success = false;
+                response.Items.Add(orderResult);
             }
         }
-        response.Result = "成功";
+        // 汇总成功与否
+        response.Success = response.Items.All(i => i.Success);
+        response.Result = response.Success ? "success" : "partial/complete failure";
         return response;
     }
-    /// <summary>
-    /// 写入对接表
-    /// </summary>
-    /// <param name="receiving"></param>
-    /// <returns></returns>
-    private async Task<HachWmsReceiving> SyncHachWmsReceiving(HachWmsReceiving receiving, HachWmsAuthorizationConfig wmsAuthorizationConfig)
+
+    private HachWmsReceiving MapReceiving(HachWmsReceivingInput asn, string orderNo, long? userId)
     {
-        var sql= _hachWmsReceivingRep.Context.InsertNav(receiving).Include(a => a.items).ToSqlValue();
-        return await _hachWmsReceivingRep.Context.InsertNav(receiving).Include(a => a.items).ExecuteReturnEntityAsync();
+        var receiving = asn.Adapt<HachWmsReceiving>(); // 确保 Mapster 配置包含 items
+        receiving.OrderNo = orderNo;
+        receiving.CreateUserId = userId ?? 0;
+        return receiving;
     }
+
     /// <summary>
-    /// 写入业务表
+    /// 在事务中写业务表，外层已开启事务
+    /// 传入已查好的产品列表避免重复查询
     /// </summary>
-    /// <param name="receiving"></param>
-    /// <returns></returns>
-    private async Task<HachWMSResponse> SyncWmsAsn(HachWmsReceiving receiving, HachWmsAuthorizationConfig wmsAuthorizationConfig)
+    private async Task<HachWMSResponse> SyncWmsAsnTransactional(
+        HachWmsReceiving receiving,
+        HachWmsAuthorizationConfig cfg,
+        List<WMSProduct> productLight)
     {
-        HachWMSResponse hachWMSResponse = new HachWMSResponse()
+        var res = new HachWMSResponse { Success = true, Result = "OK" };
+
+        var now = DateTime.UtcNow;
+        var asnNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+
+        var wmsAsn = new WMSASN
         {
-            Success = true,
-            Result = "成功"
-        };
-        WMSASN wMSASN = new WMSASN();
-        List<WMSASNDetail> wMSASNDetail = new List<WMSASNDetail>();
-        WMSProduct wMSProduct = new WMSProduct();
-        wMSASN = new WMSASN
-        {
-            ASNNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString(),
+            ASNNumber = asnNumber,
             ExternReceiptNumber = receiving.OrderNo,
-            CustomerId = wmsAuthorizationConfig.CustomerId.Value,
-            CustomerName = wmsAuthorizationConfig.CustomerName,
-            WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
-            WarehouseName = wmsAuthorizationConfig.WarehouseName,
-            ASNStatus = 1,
+            CustomerId = cfg.CustomerId!.Value,
+            CustomerName = cfg.CustomerName,
+            WarehouseId = cfg.WarehouseId!.Value,
+            WarehouseName = cfg.WarehouseName,
+            ASNStatus = 1, // TODO: 常量化/枚举化
             ReceiptType = receiving.DocType,
-            Creator = _userManager.UserId.ToString(),
-            CreationTime = DateTime.Now,
-            TenantId = 1300000000001
+            Creator = (_userManager?.UserId ?? 0).ToString(),
+            CreationTime = now,
+            TenantId = cfg.TenantId ?? 1300000000001 // 尽量从配置/上下文取
         };
+
+        var prodMap = productLight.ToDictionary(p => ((string)p.SKU).ToUpper(), p => p);
+        var details = new List<WMSASNDetail>(receiving.items.Count);
         foreach (var item in receiving.items)
         {
-            wMSProduct = await _wMSProductRep.AsQueryable()
-            .Where(p => p.CustomerId == wmsAuthorizationConfig.CustomerId.Value && p.SKU == item.ItemNum)
-            .Where(p => p.ProductStatus == 1)
-            .OrderByDescending(p => p.Id)
-            .FirstAsync();
-            wMSASNDetail.Add(new WMSASNDetail
+            var skuKey = item.ItemNum.Trim().ToUpper();
+            if (!prodMap.TryGetValue(skuKey, out var prod))
             {
-                ASNNumber = wMSASN.ASNNumber,
-                ExternReceiptNumber = receiving.OrderNo,
-                CustomerId = wmsAuthorizationConfig.CustomerId.Value,
-                CustomerName = wmsAuthorizationConfig.CustomerName,
-                WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
-                WarehouseName = wmsAuthorizationConfig.WarehouseName,
+                return new HachWMSResponse { Success = false, Result = $"SKU 不存在：{item.ItemNum}" };
+            }
+
+            details.Add(new WMSASNDetail
+            {
+                ASNNumber = wmsAsn.ASNNumber,
+                ExternReceiptNumber = wmsAsn.ExternReceiptNumber,
+                CustomerId = wmsAsn.CustomerId,
+                CustomerName = wmsAsn.CustomerName,
+                WarehouseId = wmsAsn.WarehouseId,
+                WarehouseName = wmsAsn.WarehouseName,
                 LineNumber = item.LineNum,
                 SKU = item.ItemNum,
                 UPC = "",
-                GoodsName = "",
-                GoodsType = wMSProduct.GoodsType,
+                GoodsName = "", // TODO: 需要则从产品取
+                GoodsType = prod.GoodsType,
                 PoCode = "",
                 Weight = 0,
                 Volume = 0,
                 ExpectedQty = item.Quantity,
                 ReceivedQty = 0,
                 ReceiptQty = 0,
-                CreationTime = DateTime.Now,
-                Creator = _userManager.UserId.ToString(),
-                TenantId = 1300000000001
+                CreationTime = now,
+                Creator = wmsAsn.Creator,
+                TenantId = wmsAsn.TenantId
             });
         }
-        wMSASN.Details = wMSASNDetail;
-        var asnResult = await _wMSASNRep.Context.InsertNav(wMSASN).Include(a => a.Details).ExecuteReturnEntityAsync();
-        return hachWMSResponse;
+
+        wmsAsn.Details = details;
+
+        // 一次 Nav 写入
+        await _wMSASNRep.Context.InsertNav(wmsAsn)
+            .Include(a => a.Details)
+            .ExecuteReturnEntityAsync();
+
+        return res;
     }
 
+    //获取客户信息
     private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type)
     {
         HachWmsAuthorizationConfig hachCustomerMappings = new HachWmsAuthorizationConfig();

@@ -23,4 +23,11 @@ public class HachWMSResponse
     {
         get; set;
     }
+    public List<HachWMSDetailResponse> Items { get; set; } = new();
+}
+public class HachWMSDetailResponse
+{
+    public string? OrderNo { get; set; }
+    public bool Success { get; set; }
+    public string Message { get; set; } = "";
 }

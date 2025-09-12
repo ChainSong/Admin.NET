@@ -15,6 +15,7 @@ using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using Furion.DependencyInjection;
+using Furion.FriendlyException;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using System;
@@ -22,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.ComponentTCBBatchCreateContainerServiceVersionResponse.Types;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 /// <summary>
@@ -61,32 +63,145 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "putSKUData")]
     public async Task<HachWMSResponse> asyncSyncProductData(HachWmsProductInput input)
     {
+        if (_userManager.UserId==null)
+        {
+            throw Oops.Oh(ErrorCode.Unauthorized);
+        }
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
-            Result = "成功"
+            Result = "成功",
+            Items = new List<HachWMSDetailResponse>()
         };
-
-        List<HachWmsAuthorizationConfig> hachCustomerList = new List<HachWmsAuthorizationConfig>();
-        HachWmsProduct hachWmsProductInput = new HachWmsProduct();
-        WMSProduct wMSProduct = new WMSProduct();
-        HachWmsProduct hachWmsProduct = new HachWmsProduct();
-
-        hachWmsProductInput = input.Adapt<HachWmsProduct>();
-        hachWmsProduct = await asyncSyncHachWmsProduct(hachWmsProductInput);
-        hachCustomerList = await GetCustomerInfo("putSKUData");
-
-        foreach (var customer in hachCustomerList)
+        try
         {
-            var wMSProductInfo = await asyncSyncWmsProduct(hachWmsProduct, customer);
-            if (wMSProductInfo == null)
+            if (input == null || string.IsNullOrWhiteSpace(input.ItemNumber))
+                return new HachWMSResponse { Success = false, Result = "ItemNumber 不能为空" };
+
+            List<HachWmsAuthorizationConfig> hachCustomerList = new List<HachWmsAuthorizationConfig>();
+            HachWmsProduct hachWmsProductInput = new HachWmsProduct();
+            WMSProduct wMSProduct = new WMSProduct();
+            HachWmsProduct hachWmsProduct = new HachWmsProduct();
+
+            hachWmsProductInput = input.Adapt<HachWmsProduct>();
+            hachWmsProduct = await asyncSyncHachWmsProduct(hachWmsProductInput);
+            hachCustomerList = await GetCustomerInfo("putSKUData");
+
+            if (hachCustomerList == null || hachCustomerList.Count == 0)
+                return new HachWMSResponse { Success = false, Result = "未匹配到可用客户配置（AppId/接口权限）" };
+
+            // 5. 开启事务（跨两个表的一致性）
+            var db = _hachWmsProductRep.Context; // Sq
+            try
             {
-                response = new HachWMSResponse
+                await db.Ado.BeginTranAsync();
+
+                // 5.1 原子地“失效旧记录 + 写入新对接记录”
+                // 先将相同 ItemNumber 的有效记录置为无效（单条 SQL，避免遍历导致的并发空窗）
+                await db.Updateable<HachWmsProduct>()
+                    .SetColumns(p => new HachWmsProduct { Status = false })
+                    .Where(p => p.ItemNumber == input.ItemNumber && p.Status == true)
+                    .ExecuteCommandAsync();
+
+                var hachEntity = input.Adapt<HachWmsProduct>();
+                hachEntity.Status = true;
+                hachEntity.ReceivingTime = DateTime.Now;
+                var newHach = await _hachWmsProductRep.InsertReturnEntityAsync(hachEntity);
+                // 5.2 同步业务表
+                // 5.2 针对每个客户，Upsert WMSProduct（用 Storageable/Saveable 提高健壮性）
+                foreach (var customer in hachCustomerList)
+                {
+                    var detail = new HachWMSDetailResponse();
+
+                    try
+                    {
+                        // 尝试查已存在记录（注意空结果安全）
+                        var exists = await _wMSProductRep.AsQueryable()
+                            .Where(p => p.CustomerId == customer.CustomerId && p.SKU == input.ItemNumber && p.ProductStatus == 1)
+                            .OrderByDescending(p => p.Id)
+                            .FirstAsync(); // 若你的 FirstAsync 抛异常，则改用 ToListAsync().FirstOrDefault()
+
+                        if (exists == null)
+                        {
+                            var insert = new WMSProduct
+                            {
+                                CustomerId = customer.CustomerId!.Value,
+                                CustomerName = customer.CustomerName,
+                                SKU = input.ItemNumber,
+                                ProductStatus = 1,
+                                GoodsName = string.IsNullOrWhiteSpace(input.DescriptionZhs) ? input.DescriptionEn : input.DescriptionZhs, // 多语言回退
+                                GoodsType = input.ItemType,
+                                SKUClassification = input.MakeOrBuy,
+                                // …其余字段尽量用 null，而非 ""，避免无意义脏值
+                                Creator = _userManager.UserId.ToString(),
+                                CreationTime = DateTime.Now,
+                                TenantId = customer.TenantId ?? 1300000000001 // 不要硬编码，尽量从客户配置取
+                            };
+
+                            await _wMSProductRep.InsertAsync(insert);
+                            detail = new HachWMSDetailResponse()
+                            {
+                                Success = true,
+                                Message= "Insert Successes",
+                            };
+                        }
+                        else
+                        {
+                            exists.GoodsName = string.IsNullOrWhiteSpace(input.DescriptionZhs) ? input.DescriptionEn : input.DescriptionZhs;
+                            exists.GoodsType = input.ItemType;
+                            exists.SKUClassification = input.MakeOrBuy;
+                            exists.DateTime1 = DateTime.Now; // 若有更新时间字段
+                            await _wMSProductRep.UpdateAsync(exists);
+                            detail = new HachWMSDetailResponse()
+                            {
+                                Success = true,
+                                Message = "Update Successes",
+                            };
+                        }
+                    }
+                    catch (Exception exPerCustomer)
+                    {
+                        detail = new HachWMSDetailResponse()
+                        {
+                            Success = false,
+                            Message = "Faild:"+ exPerCustomer .Message+ "",
+                        };
+                        response.Success = false;
+                        response.Result = "失败："+exPerCustomer.Message+"";
+                    }
+                    finally
+                    {
+                        response.Items.Add(detail);
+                    }
+                }
+                // 若存在部分失败，可选择策略：整体回滚 or 局部提交
+                // 此处示例：允许局部失败也提交；如需全有或全无，则在出现失败时 Rollback 并返回
+                await db.Ado.CommitTranAsync();
+            }
+            catch (Exception ex)
+            {
+                await db.Ado.RollbackTranAsync();
+                return new HachWMSResponse
                 {
                     Success = false,
-                    Result = "" + hachWmsProduct.ItemNumber + "对接失败"
+                    Result = "INTERNAL_ERROR",
                 };
             }
+            // 汇总消息
+            if (response.Items.Any(d => !d.Success))
+            {
+                response.Success = false;
+                response.Result = "部分处理失败，请查看明细";
+            }
+            else
+            {
+                response.Success = true;
+                response.Result = "成功";
+            }
+        }
+        catch (Exception ex)
+        {
+            return new HachWMSResponse { Success = false, Result = "处理错误："+ ex.Message+ "" };
         }
         return response;
     }
