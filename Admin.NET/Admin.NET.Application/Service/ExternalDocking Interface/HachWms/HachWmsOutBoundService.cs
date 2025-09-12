@@ -21,6 +21,7 @@ using StackExchange.Profiling.Internal;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using XAct;
 using Microsoft.AspNetCore.Authorization;
+using Furion.FriendlyException;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms.Dto;
 
@@ -56,6 +57,10 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "putSOData")]
     public async Task<HachWMSResponse> asyncSyncOutBound(List<HachWmsOutBoundInput> input)
     {
+        if (_userManager.UserId == null)
+        {
+            throw Oops.Oh(ErrorCode.Unauthorized);
+        }
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
@@ -93,13 +98,13 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 {
                     orderResult.Success = false;
                     orderResult.Message = "orderNo is missing（(OrderNo/ShipmentNum-ReceiptNum-DocNumber) at least one set）";
-                    orderResult.OrderNo = "";
+                    orderResult.Remark = "";
                     response.Items.Add(orderResult);
                     continue;
                 }
                 // 安全截断（假设库里 ExternReceiptNumber nvarchar(100)）
                 if (syncOrderNo.Length > 120) syncOrderNo = syncOrderNo[..120];
-                orderResult.OrderNo = syncOrderNo;
+                orderResult.Remark = syncOrderNo;
 
                 // 2.2) 输入校验
                 if (order.items == null || order.items.Count == 0)
@@ -211,7 +216,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             catch (Exception ex)
             {
                 // 兜底异常
-                orderResult.Message = $"orderNo：{orderResult.OrderNo} handle exceptions：{ex.Message}";
+                orderResult.Message = $"orderNo：{orderResult.Remark} handle exceptions：{ex.Message}";
                 orderResult.Success = false;
                 response.Items.Add(orderResult);
             }

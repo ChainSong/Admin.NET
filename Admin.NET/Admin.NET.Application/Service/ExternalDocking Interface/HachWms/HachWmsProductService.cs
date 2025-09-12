@@ -136,7 +136,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
                             await _wMSProductRep.InsertAsync(insert);
                             detail = new HachWMSDetailResponse()
                             {
-                                OrderNo = "CustomerName:" + customer.CustomerName,
+                                Remark = "CustomerName:" + customer.CustomerName,
                                 Success = true,
                                 Message = "Added successfully"
                             };
@@ -151,9 +151,9 @@ public class HachWmsProductService : IDynamicApiController, ITransient
                             await _wMSProductRep.UpdateAsync(exists);
                             detail = new HachWMSDetailResponse()
                             {
-                                OrderNo = "CustomerName:" + customer.CustomerName,
+                                Remark = "CustomerName:" + customer.CustomerName,
                                 Success = true,
-                                Message = "Update successful"
+                                Message = "Updated successful"
                             };
                         }
                     }
@@ -161,7 +161,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
                     {
                         detail = new HachWMSDetailResponse()
                         {
-                            OrderNo = "CustomerName:" + customer.CustomerName,
+                            Remark = "CustomerName:" + customer.CustomerName,
                             Success = false,
                             Message = "Processing failed: " + exPerCustomer.Message
                         };

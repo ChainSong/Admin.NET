@@ -21,6 +21,7 @@ using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using XAct;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
+using Furion.FriendlyException;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 
@@ -55,6 +56,10 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "putASNData")]
     public async Task<HachWMSResponse> asyncSyncReceiving(List<HachWmsReceivingInput> input)
     {
+        if (_userManager.UserId == null)
+        {
+            throw Oops.Oh(ErrorCode.Unauthorized);
+        }
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
@@ -62,7 +67,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             Items = new List<HachWMSDetailResponse>()
         };
         // 0) 基础校验
-        const int MaxBatch = 20; // 或 20，看你业务
+        const int MaxBatch = 20;
 
         //入参不能为空
         if (input == null || input.Count == 0)
@@ -89,14 +94,14 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 {
                     orderResult.Success = false;
                     orderResult.Message = "orderNo is missing（(OrderNo/ShipmentNum-ReceiptNum-DocNumber) at least one set）";
-                    orderResult.OrderNo = "";
+                    orderResult.Remark = "";
                     response.Items.Add(orderResult);
                     continue;
                 }
 
                 // 安全截断（假设库里 ExternReceiptNumber nvarchar(100)）
                 if (syncOrderNo.Length > 120) syncOrderNo = syncOrderNo[..120];
-                orderResult.OrderNo = syncOrderNo;
+                orderResult.Remark = syncOrderNo;
 
                 // 2.2) 输入校验
                 if (asn.items == null || asn.items.Count == 0)
@@ -210,7 +215,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             catch (Exception ex)
             {
                 // 兜底异常
-                orderResult.Message = $"orderNo：{orderResult.OrderNo} handle exceptions：{ex.Message}";
+                orderResult.Message = $"orderNo：{orderResult.Remark} handle exceptions：{ex.Message}";
                 orderResult.Success = false;
                 response.Items.Add(orderResult);
             }

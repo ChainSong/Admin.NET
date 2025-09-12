@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Admin.NET.Core.Entity;
 [SugarTable("hach_wms_product_bom", "产品Bom数据对接主表")]
-public class HachWmsProductBom : EntityTenant
+public class HachWmsProductBom : EntityBase
 {
     /// <summary>
     /// 雪花id
@@ -32,4 +32,17 @@ public class HachWmsProductBom : EntityTenant
     /// </summary>
     [SugarColumn(ColumnDescription = "单位编码", Length = 255)]
     public string? UomCode { get; set; }
+
+    [SugarColumn(ColumnDescription = "状态")]
+    public bool Status { get; set; } = true;
+    [SugarColumn(ColumnDescription = "接收时间", IsOnlyIgnoreUpdate = true)]
+    public DateTime? ReceivingTime { get; set; } = DateTime.Now;
+    /// <summary>
+    /// 租户Id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
+
+    [Navigate(NavigateType.OneToMany, nameof(HachWmsProductBomDetail.BomId))]
+    public virtual List<HachWmsProductBomDetail> items { get; set; }
 }

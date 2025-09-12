@@ -37,7 +37,7 @@ public class HachWmsProductBomDetail : EntityTenant
     /// 组织编码
     /// </summary>
     [SugarColumn(ColumnDescription = "组织编码", Length = 255)]
-    public string OrganizationCode { get; set; }
+    public string? OrganizationCode { get; set; }
     /// <summary>
     /// 
     /// </summary>
@@ -47,40 +47,40 @@ public class HachWmsProductBomDetail : EntityTenant
     /// BOM描述
     /// </summary>
     [SugarColumn(ColumnDescription = "BOM描述", IsNullable = false, Length = 255)]
-    public string BomDescription { get; set; }
+    public string? BomDescription { get; set; }
 
     [SugarColumn(ColumnDescription = "")]
-    public long ComponentSeq { get; set; }
+    public string? ComponentSeq { get; set; } = "";
     [SugarColumn(ColumnDescription = "", IsNullable = false, Length = 255)]
     public string ComponentItem { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false, Length = 255)]
-    public string ComponentDesc { get; set; }
+    public string ComponentDesc { get; set; } = "";
     [SugarColumn(ColumnDescription = "", IsNullable = false, Length = 255)]
-    public string ComponentUom { get; set; }
+    public string ComponentUom { get; set; } = "";
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
     public long ComponentQuantity { get; set; }
     [SugarColumn(ColumnDescription = "", IsNullable = false)]
-    public DateTime DateFrom { get; set; }
+    public DateTime DateFrom { get; set; } = DateTime.Now;
     [SugarColumn(ColumnDescription = "")]
-    public DateTime DateTo { get; set; }
+    public DateTime? DateTo { get; set; } = DateTime.Now;
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute1 { get; set; }
+    public string? Attribute1 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute2 { get; set; }
+    public string? Attribute2 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute3 { get; set; }
+    public string? Attribute3 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute4 { get; set; }
+    public string? Attribute4 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute5 { get; set; }
+    public string? Attribute5 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute6 { get; set; }
+    public string? Attribute6 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute7 { get; set; }
+    public string? Attribute7 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute8 { get; set; }
+    public string? Attribute8 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute9 { get; set; }
+    public string? Attribute9 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
-    public string Attribute10 { get; set; }
+    public string? Attribute10 { get; set; }
 }
