@@ -95,8 +95,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 }
 
                 // 安全截断（假设库里 ExternReceiptNumber nvarchar(100)）
-                if (syncOrderNo.Length > 100) syncOrderNo = syncOrderNo[..100];
-
+                if (syncOrderNo.Length > 120) syncOrderNo = syncOrderNo[..120];
                 orderResult.OrderNo = syncOrderNo;
 
                 // 2.2) 输入校验
@@ -169,6 +168,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
 
                 if (missingSkus.Count > 0)
                 {
+                    orderResult.Success = false;
                     orderResult.Message = $"OrderNo：{syncOrderNo} Missing SKU：{string.Join(", ", missingSkus)}";
                     response.Items.Add(orderResult);
                     continue;

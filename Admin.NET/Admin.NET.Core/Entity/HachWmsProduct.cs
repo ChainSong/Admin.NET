@@ -158,5 +158,6 @@ public class HachWmsProduct : EntityBase
     /// <summary>
     /// 租户Id
     /// </summary>
-
+    [SugarColumn(ColumnDescription = "租户Id", IsOnlyIgnoreUpdate = true)]
+    public virtual long? TenantId { get; set; }
 }

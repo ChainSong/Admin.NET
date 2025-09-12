@@ -98,6 +98,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
 
                 var hachEntity = input.Adapt<HachWmsProduct>();
                 hachEntity.Status = true;
+                hachEntity.TenantId = 1300000000001;
                 hachEntity.ReceivingTime = DateTime.Now;
 
                 // 插入对接表数据
