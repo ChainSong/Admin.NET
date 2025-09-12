@@ -52,19 +52,19 @@ public class WMSProduct : ITenantIdFilter
     /// 
     /// </summary>
     [Required]
-    [SugarColumn(ColumnDescription = "", Length = 100)]
+    [SugarColumn(ColumnDescription = "", Length = 200)]
     public string GoodsName { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? GoodsType { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 50)]
+    [SugarColumn(ColumnDescription = "", Length = 100)]
     public string? SKUClassification { get; set; }
     
     /// <summary>
