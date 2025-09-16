@@ -37,6 +37,8 @@ public class HachWmsOutBound : EntityTenant
     //oms合同号
     [SugarColumn(ColumnDescription = "oms合同号", Length = 120)]
     public string ContractNo { get; set; }
+    [SugarColumn(ColumnDescription = "发运编号", Length = 120)]
+    public string DocType { get; set; } = "SH Direct Sales Orders";
     //job号
     [SugarColumn(ColumnDescription = "发运编号", Length = 120)]
     public string DeliveryNumber { get; set; }

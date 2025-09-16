@@ -264,7 +264,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             CustomerName = wmsAuthorizationConfig.CustomerName,
             WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
             WarehouseName = wmsAuthorizationConfig.WarehouseName,
-            OrderType = "",
+            OrderType = outBound.DocType,
             PreOrderStatus = 1,
             OrderTime = Convert.ToDateTime(outBound.ScheduleShippingDate),
             Po = "",
