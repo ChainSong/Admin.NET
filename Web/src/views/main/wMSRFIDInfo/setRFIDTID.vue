@@ -58,7 +58,7 @@ onMounted(async () => {
 // 查询操作
 const handleQuery = async () => {
 
-  var res = await setRFIDTID(Object.assign(queryParams.value));
+  var res = await setRFIDTID(queryParams.value);
   if (res.code == 200) {
     
     ElMessage.success("设置成功"+res.data.data.qty);

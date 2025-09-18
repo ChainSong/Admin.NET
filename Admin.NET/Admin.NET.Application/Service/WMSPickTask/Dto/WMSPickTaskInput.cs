@@ -254,21 +254,21 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// StartTime
     /// </summary>
-    public DateTime? StartTime { get; set; }
+    //public DateTime? StartTime { get; set; }
 
     /// <summary>
     /// StartTime范围
     /// </summary>
-    public List<DateTime?> StartTimeRange { get; set; }
+    public List<DateTime?> StartTime { get; set; }
     /// <summary>
     /// EndTime
     /// </summary>
-    public DateTime? EndTime { get; set; }
+    //public DateTime? EndTime { get; set; }
 
     /// <summary>
     /// EndTime范围
     /// </summary>
-    public List<DateTime?> EndTimeRange { get; set; }
+    public List<DateTime?> EndTime { get; set; }
     /// <summary>
     /// PrintNum
     /// </summary>
@@ -277,12 +277,13 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// PrintTime
     /// </summary>
-    public DateTime? PrintTime { get; set; }
+    //public DateTime? PrintTime { get; set; }
 
     /// <summary>
     /// PrintTime范围
     /// </summary>
-    public List<DateTime?> PrintTimeRange { get; set; }
+    public List<DateTime?> PrintTime { get; set; }
+    //public List<DateTime?> PrintTimeRange { get; set; }
     /// <summary>
     /// PrintPersonnel
     /// </summary>
@@ -311,12 +312,12 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// CreationTime
     /// </summary>
-    public DateTime? CreationTime { get; set; }
+    //public DateTime? CreationTime { get; set; }
 
     /// <summary>
     /// CreationTime范围
     /// </summary>
-    public List<DateTime?> CreationTimeRange { get; set; }
+    public List<DateTime?> CreationTime { get; set; }
     /// <summary>
     /// Updator
     /// </summary>
@@ -375,48 +376,48 @@ public class WMSPickTaskInput : BasePageInput
     /// <summary>
     /// DateTime1
     /// </summary>
-    public DateTime? DateTime1 { get; set; }
+    //public DateTime? DateTime1 { get; set; }
 
     /// <summary>
     /// DateTime1范围
     /// </summary>
-    public List<DateTime?> DateTime1Range { get; set; }
+    public List<DateTime?> DateTime1 { get; set; }
     /// <summary>
     /// DateTime2
     /// </summary>
-    public DateTime? DateTime2 { get; set; }
+    //public DateTime? DateTime2 { get; set; }
 
     /// <summary>
     /// DateTime2范围
     /// </summary>
-    public List<DateTime?> DateTime2Range { get; set; }
+    public List<DateTime?> DateTime2 { get; set; }
     /// <summary>
     /// DateTime3
     /// </summary>
-    public DateTime? DateTime3 { get; set; }
+    //public DateTime? DateTime3 { get; set; }
 
     /// <summary>
     /// DateTime3范围
     /// </summary>
-    public List<DateTime?> DateTime3Range { get; set; }
+    public List<DateTime?> DateTime3 { get; set; }
     /// <summary>
     /// DateTime4
     /// </summary>
-    public DateTime? DateTime4 { get; set; }
+    //public DateTime? DateTime4 { get; set; }
 
     /// <summary>
     /// DateTime4范围
     /// </summary>
-    public List<DateTime?> DateTime4Range { get; set; }
+    public List<DateTime?> DateTime4 { get; set; }
     /// <summary>
     /// DateTime5
     /// </summary>
-    public DateTime? DateTime5 { get; set; }
+    //public DateTime? DateTime5 { get; set; }
 
     /// <summary>
     /// DateTime5范围
     /// </summary>
-    public List<DateTime?> DateTime5Range { get; set; }
+    public List<DateTime?> DateTime5 { get; set; }
     /// <summary>
     /// Int1
     /// </summary>
