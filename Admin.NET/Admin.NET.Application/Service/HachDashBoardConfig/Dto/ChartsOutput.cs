@@ -85,6 +85,12 @@ public class MonthVSLast
     public List<ChartIndex> LastYear { get; set; }
     public List<ChartIndex> CurrentYear { get; set; }
 }
+public class MonthVSLastVSTarget
+{
+    public List<ChartIndex> LastYear { get; set; }
+    public List<ChartIndex> CurrentYear { get; set; }
+    public List<ChartIndex> Target { get; set; }
+}
 /// <summary>
 /// 图标的x 与 y
 /// </summary>
