@@ -667,7 +667,7 @@ public class HachDashBoardService : IDynamicApiController, ITransient
         }
         catch (Exception ex)
         {
-            throw; // 直接throw而不是throw ex以保留原始堆栈跟踪
+            throw; 
         }
 
         #endregion
