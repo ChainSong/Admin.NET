@@ -474,6 +474,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrder = _rep;
         factory._repOrderDetail = _repOrderDetail;
         factory._repInstruction = _repInstruction;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTask = _repPickTask;
         var response = await factory.Strategy(input);
         return response;
 

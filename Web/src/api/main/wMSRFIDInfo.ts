@@ -11,6 +11,7 @@ enum Api {
 	reportScreenSecond = '/api/wMSReport/reportScreenSecond',
 	ExportRFID = '/api/wMSRFIDInfo/ExportRFID',
 	SetRFIDTID = '/api/wMSRFIDInfo/SetRFIDTID',
+	SetReceiptRFIDTID = '/api/wMSRFIDInfo/SetReceiptRFIDTID',
 
 }
 
@@ -89,7 +90,12 @@ export const reportScreenSecond = () =>
 	});
 
 	
-
+export const setReceiptRFIDTID = (params?: any) =>
+	request({
+		url: Api.SetReceiptRFIDTID,
+		method: 'post',
+		data: params,
+	});
 
 // 
 export const setRFIDTID = (params?: any) =>

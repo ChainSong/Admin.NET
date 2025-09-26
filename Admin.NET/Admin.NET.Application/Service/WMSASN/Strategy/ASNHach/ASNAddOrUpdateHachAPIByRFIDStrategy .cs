@@ -63,7 +63,7 @@ namespace Admin.NET.Application.Strategy
             List<OrderStatusDto> orderStatus = new List<OrderStatusDto>();
 
             //判断客户存不存在
-            var customerCheck = _repCustomer.AsQueryable().Where(a =>  request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)
+            var customerCheck = _repCustomer.AsQueryable().Where(a => request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)
             ).ToList();
             //var customerCheck = _repCustomerUser.AsQueryable().Where(a =>  request.Select(r => r.CustomerName).ToList().Contains(a.CustomerName)).ToList();
             if (customerCheck.GroupBy(a => a.CustomerName).Count() != request.GroupBy(a => a.CustomerName).Count())
@@ -179,7 +179,7 @@ namespace Admin.NET.Application.Strategy
                        .Where(b => a.SKU == b.SKU && b.CustomerId == customerId)
                        .First();
                     //校验产品信息
-                    if (productInfo == null)
+                    if (productInfo == null || productInfo.SKU != a.SKU)
                     {
                         response.Data.Add(new OrderStatusDto()
                         {
@@ -188,7 +188,7 @@ namespace Admin.NET.Application.Strategy
                             Type = item.ReceiptType,
                             StatusCode = StatusCode.Error,
                             //StatusMsg = StatusCode.warning.ToString(),
-                            Msg =a.SKU+"产品信息未维护"
+                            Msg = a.SKU + "产品信息未维护或大小写不正确"
                         });
                         return;
                     }

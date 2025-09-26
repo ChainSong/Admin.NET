@@ -176,7 +176,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanHachPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -371,37 +371,11 @@ const addPackage = async (data: any) => {
 
 
 const scanPackage = async () => {
- if (state.value.vm.form.input == "2035600-CN") {
 
-    if ('speechSynthesis' in window) {
-      // this.speech = window.speechSynthesis;
-      var utterance = new SpeechSynthesisUtterance("货号要扫描防伪码");
-      window.speechSynthesis.speak(utterance);
-      // if (window.speechSynthesis) {
-      //   window.speechSynthesis.cancel(); // 停止当前正在播放的语音
-      // }
-    } 
-    ElMessage.warning("货号要扫描防伪码");
-    ElMessage.warning("货号要扫描防伪码");
-    ElMessage.warning("货号要扫描防伪码");
-  }
   state.value.vm.form.expressCompany = expressValue.value;
-  let res = await scanPackageData(state.value.vm.form);
+  let res = await scanHachPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
-if (res.data.result.data.sku == "2035600-CN") {
 
-    if ('speechSynthesis' in window) {
-      // this.speech = window.speechSynthesis;
-      var utterance = new SpeechSynthesisUtterance("货号要扫描防伪码");
-      window.speechSynthesis.speak(utterance);
-      // if (window.speechSynthesis) {
-      //   window.speechSynthesis.cancel(); // 停止当前正在播放的语音
-      // }
-    } 
-    ElMessage.warning("货号要扫描防伪码");
-    ElMessage.warning("货号要扫描防伪码");
-    ElMessage.warning("货号要扫描防伪码");
-  }
     audio_success.play(); // 播放音频
 
     allPackage(state.value.vm.form);

@@ -3,8 +3,8 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
 
-        <el-form-item label="入库单号">
-          <el-input v-model="queryParams.receiptNumber" clearable="" placeholder="请输入入库单号" />
+        <el-form-item label="拣货任务号">
+          <el-input v-model="queryParams.pickTaskNumber" clearable="" placeholder="请输入拣货任务号" />
         </el-form-item>
       </el-form>
     </el-card>
@@ -15,7 +15,7 @@
   </div>
 </template>
 
-<script lang="ts" setup="" name="wMSRFIDInfo">
+<script lang="ts" setup="" name="setRFIDTIDOrder">
 import { ref, onMounted, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';

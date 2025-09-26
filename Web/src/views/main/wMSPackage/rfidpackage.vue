@@ -110,9 +110,7 @@
       <printDialog ref="printDialogRef" :title="ptintTitle" />
 
       <el-dialog title="扫描SN" v-model="state.dialogVisible" width="50%">
-
         <div>
-
           <label style="padding-left:5px;font-size:20px">有二维码的时候请不要扫描SKU</label>
           <table style="height:350px;width: 450px;">
             <tr>
@@ -145,7 +143,7 @@
 </template>
 
 <script lang="ts" setup="" name="wMSPackagerfid">
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted,onBeforeUnmount, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
@@ -479,7 +477,11 @@ const addPackage = async (data: any) => {
     // ElMessage.error("发生了一个错误，请联系管理员。");
   }
 };
-
+onBeforeUnmount(async () => {
+  if (signalR.state == "Connected") {
+    signalR.stop();
+  }
+});
 // const getSummaries = async (param:any) => {
 //   const { columns, data } = param;
 //   const sums = [];

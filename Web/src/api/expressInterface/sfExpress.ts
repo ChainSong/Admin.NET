@@ -72,7 +72,7 @@ export const getExpress = async (express: any) => {
 // 鎵撳嵃
 export const print = async (express: any) => {
   //获取token；
-   await getExpress(express);
+  await getExpress(express);
   //  console.log("expressConfig.value");
   //  console.log(expressConfig.value);
   //  console.log(express);
@@ -117,8 +117,6 @@ export const print = async (express: any) => {
     express.details.forEach(a => {
       data.documents[0].remark += (a.sku + "*" + a.qty + ";")
     })
-
-
   }
 
   console.log("expressData");
@@ -130,6 +128,76 @@ export const print = async (express: any) => {
   console.log(printSdk);
   console.log(printSdk.print(data, callback, options));
 };
+export const printBatch = async (express: any) => {
+  //获取token；
+  await getExpress(express[0]);
+  //  console.log("expressConfig.value");
+  //  console.log(expressConfig.value);
+  //  console.log(express);
+  let data = {};
+  console.log("express");
+  console.log(express);
+  if (express[0].sumOrder == 1) {
+    data = {
+      requestID: expressConfig.value.partnerId,
+      accessToken: expressConfig.value.token,
+      templateCode: expressConfig.value.templateCode,
+      templateVersion: "",
+      documents: [
+        {
+          masterWaybillNo: express.expressNumber,
+          seq: 1,
+          sum: 1,
+        }
+      ],
+      extJson: {},
+      customTemplateCode: ""
+    };
+  } else {
+    data = {
+      requestID: expressConfig.value.partnerId,
+      accessToken: expressConfig.value.token,
+      templateCode: expressConfig.value.templateCode,
+      templateVersion: "",
+      documents: [
+        // {
+        //   masterWaybillNo: express.expressNumber,
+        //   seq: express.waybillOrder,
+        //   sum: express.sumOrder,
+        // }
+      ],
+      extJson: {},
+      customTemplateCode: ""
+    };
+    forEach(express, (item, index) => {
+      let expressData = {
+        masterWaybillNo: item.expressNumber,
+        seq: item.waybillOrder,
+        sum: item.sumOrder,
+        remark: item.packageNumber + ":"
+      }
+      item.details.forEach(a => {
+        expressData.remark += (a.sku + "*" + a.qty + ";")
+      });
+      data.documents.push(expressData);
 
+    });
+  }
+  // if (express.details.length > 0) {
+  //   data.documents[0].remark = express.packageNumber + "::";
+  //   express.details.forEach(a => {
+  //     data.documents[0].remark += (a.sku + "*" + a.qty + ";")
+  //   })
+  // }
+
+  console.log("expressData");
+  console.log(data);
+  const callback = function (result) { };
+  const options = {
+    lodopFn: "PRINT" // 榛樿鎵撳嵃锛岄瑙堜紶PREVIEW
+  };
+  console.log(printSdk);
+  console.log(printSdk.print(data, callback, options));
+};
 // 导出   实例
-export default { print, getExpress };
+export default { print, getExpress, printBatch };
