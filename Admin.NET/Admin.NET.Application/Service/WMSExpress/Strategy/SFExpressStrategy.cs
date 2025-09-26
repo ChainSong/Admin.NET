@@ -278,6 +278,7 @@ public class SFExpressStrategy : IExpressInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
+   
     public async Task<Response> GetExpressDataList(ScanPackageInput request)
     {
         Response response = new Response();
@@ -980,6 +981,7 @@ public class SFExpressStrategy : IExpressInterface
                 await _repPackage.UpdateAsync(item);
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillType = getExpressDelivery.WaybillType;
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().SumOrder = getExpressDelivery.SumOrder ?? 1;
+                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
             }
             else
             {
@@ -989,7 +991,7 @@ public class SFExpressStrategy : IExpressInterface
                 return response;
             }
         }
-        response.Data = result;
+        response.Data = result.OrderBy(a=>a.SumOrder).ToList();
         response.Msg = "成功";
         response.Code = StatusCode.Success;
         return response;
@@ -1057,7 +1059,7 @@ public class SFExpressStrategy : IExpressInterface
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
             result.WaybillType = getExpressDelivery.WaybillType;
-            result.WaybillOrder = getExpressDelivery.WaybillOrder ?? 1;
+            result.WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
             result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
             response.Data = result;

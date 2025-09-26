@@ -24,8 +24,8 @@ internal static class PackageOperationFactory
     {
         switch (FactoryName)
         {
-            //case "Default":
-            //return new PackageOperationDefaultStrategy();
+            case "Hach":
+                return new PackageOperationDefaultStrategy();
             case "RFID":
                 return new PackageOperationRFIDStrategy();
             default:

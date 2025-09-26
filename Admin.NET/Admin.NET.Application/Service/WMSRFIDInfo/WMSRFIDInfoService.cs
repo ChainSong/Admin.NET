@@ -588,7 +588,10 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         //得到rfid数据 里面包含rfid  和tid
         var rfidInfo = input.RFIDStr;
         //input.RFIDInfo = new List<WMSRFIDInfo>();
-
+        if (rfidInfo == null)
+        {
+            return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "" };
+        }
         foreach (var item in rfidInfo.Split(","))
         {
             if (item.Split(":").Length > 1)
@@ -623,6 +626,67 @@ public class WMSRFIDInfoService : IDynamicApiController, ITransient
         response.Data.TotalQty = packageDetail.Sum(a => a.Qty);
         return response;
     }
+
+
+
+
+
+    /// <summary>
+    /// 根据RFID 获取RFID 信息
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "SetReceiptRFIDTID")]
+    [AllowAnonymous]
+    [Idempotent("s", 3)]
+    //[UnitOfWork]
+    public async Task<Response<ScanPackageOutput>> SetReceiptRFIDTID(PackageRFIDInput input)
+    {
+        Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
+        //新流程，都见RFID 数据
+        //得到rfid数据 里面包含rfid  和tid
+        var rfidInfo = input.RFIDStr;
+        input.RFIDInfo = new List<WMSRFIDInfo>();
+        if (rfidInfo == null)
+        {
+            return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "请输入RFID" };
+        }
+        foreach (var item in rfidInfo.Split(","))
+        {
+            if (item.Split(":").Length > 1)
+            {
+                if (!string.IsNullOrEmpty(item.Split(":")[0]))
+                {
+                    input.RFIDInfo.Add(new WMSRFIDInfo() { RFID = item.Split(":")[0], Sequence = item.Split(":")[1] });
+                }
+            }
+            else
+            {
+                return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "请使用最新的RFID小程序" };
+            }
+        }
+
+        var rfiddata = await _rep.AsQueryable().Where(p => p.ReceiptNumber == input.ReceiptNumber).ToListAsync();
+        //var packageDetail = await _repPackageDetail.AsQueryable().Where(p => p.PackageNumber == input.PackageNumber).ToListAsync();
+        foreach (var item in rfiddata)
+        {
+            var RFIDInfo = input.RFIDInfo.Where(a => a.RFID == item.RFID).FirstOrDefault();
+            if (RFIDInfo != null)
+            {
+                item.Sequence = input.RFIDInfo.Where(a => a.RFID == item.RFID).First().Sequence;
+            }
+
+        }
+        //input.RFIDStr = string.Join(",", input.RFIDInfo.Select(item => item.RFID)).TrimEnd(',');
+        await _rep.UpdateRangeAsync(rfiddata);
+        rfiddata = await _rep.AsQueryable().Where(p => p.ReceiptNumber == input.ReceiptNumber).ToListAsync();
+        response.Data.Qty = await _rep.AsQueryable().Where(a => a.ReceiptNumber == input.ReceiptNumber && a.RFID != a.Sequence).CountAsync();
+        response.Data.TotalQty = rfiddata.Sum(a => a.Qty) ?? 0;
+        return response;
+    }
+
 
     /// <summary>
     /// 根据RFID 获取RFID 信息

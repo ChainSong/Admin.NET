@@ -369,6 +369,38 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
     }
 
+    /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ScanHachPackageData")]
+    //[Idempotent("ms", 500)]
+    public async Task<Response<ScanPackageOutput>> ScanHachPackageData(ScanPackageInput input)
+    {
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("Hach");
+        factory._repPackage = _rep;
+        factory._repPreOrder = _repPreOrder;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.GetPackage(input);
+        return response;
+
+        //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
+    }
 
 
     /// <summary>
@@ -479,8 +511,30 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "PrintExpress")]
+    [Idempotent("s", 2)]
     public async Task<Response<dynamic>> PrintExpress(ScanPackageInput input)
     {
+
+        // 1. 生成请求唯一标识
+        string requestFingerprint = "PrintBatchExpress";
+
+        // 2. 设置Redis键（格式：防重:用户:路径:指纹）
+        string redisKey = $"antidupe:{_userManager.Account}:{"PrintBatchExpress"}:{requestFingerprint}";
+
+        // 3. 原子性防重检查（SETNX + EXPIRE）
+        bool isNewRequest = _sysCacheService.ExistKey(redisKey);
+        _sysCacheService.Set(
+        redisKey,
+        "1",
+        TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
+    );
+
+        if (isNewRequest)
+        {
+            throw Oops.Oh("你操作频率过快，请稍后重试！");  //
+
+            //return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "你操作频率过快，请稍后重试！" };
+        }
         Response<dynamic> response = new Response<dynamic>();
         IExpressInterface factory = ExpressFactory.GetExpress((ExpressEnum)Enum.Parse(typeof(ExpressEnum), input.ExpressCompany));
         factory._repPackage = _rep;
@@ -542,8 +596,30 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "PrintBatchExpress")]
+    [Idempotent("s", 2)]
     public async Task<Response<dynamic>> PrintBatchExpress(List<long> input)
     {
+
+        // 1. 生成请求唯一标识
+        string requestFingerprint = "PrintBatchExpress";
+
+        // 2. 设置Redis键（格式：防重:用户:路径:指纹）
+        string redisKey = $"antidupe:{_userManager.Account}:{"PrintBatchExpress"}:{requestFingerprint}";
+
+        // 3. 原子性防重检查（SETNX + EXPIRE）
+        bool isNewRequest = _sysCacheService.ExistKey(redisKey);
+        _sysCacheService.Set(
+        redisKey,
+        "1",
+        TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
+    );
+
+        if (isNewRequest)
+        {
+            throw Oops.Oh("你操作频率过快，请稍后重试！");  //
+
+            //return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "你操作频率过快，请稍后重试！" };
+        }
         var dataPackage = await _rep.GetListAsync(a => input.Contains(a.Id));
         Response<dynamic> response = new Response<dynamic>();
         IExpressInterface factory = ExpressFactory.GetExpress((ExpressEnum)Enum.Parse(typeof(ExpressEnum), dataPackage.First().ExpressCompany));
@@ -732,7 +808,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _sysCacheService.Set(
         redisKey,
         "1",
-        TimeSpan.FromSeconds(20)  // 根据业务需求调整过期时间
+        TimeSpan.FromSeconds(2)  // 根据业务需求调整过期时间
     );
 
         if (isNewRequest)
@@ -740,11 +816,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
             return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "你操作频率过快，请稍后重试！" };
         }
         // 3. 原子性防重检查（SETNX + EXPIRE）
-        _sysCacheService.Set(
-        redisKey,
-        "1",
-        TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
-      );
+        //  _sysCacheService.Set(
+        //  redisKey,
+        //  "1",
+        //  TimeSpan.FromSeconds(5)  // 根据业务需求调整过期时间
+        //);
 
         //TextHelper.WrittxtFor("请求记录第一步", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
         //TextHelper.WrittxtFor(JsonSerializer.Serialize(input), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
@@ -935,88 +1011,88 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             request.SKU = "";
         }
-        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.SKU))
+        //if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.SKU))
+        //{
+        //var skuInfo = request.Input.Split('|');
+        if (request.Input.Split(' ').Length > 1 || request.Input.Split('|').Length > 1)
         {
-            //var skuInfo = request.Input.Split('|');
-            if (request.Input.Split(' ').Length > 1 || request.Input.Split('|').Length > 1)
+
+            string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+                                                                                                                  //string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+            string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+            string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+            MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
+            //request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
+            //request.Input = request.SKU;
+
+            MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
+            request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
+            MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
+            request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+            //request.Input = request.SKU;
+
+        }
+            ;
+
+        //扫描的是HTTP 二维码，那么从中解析SKU
+        if (request.Input.Contains("http"))
+        {
+
+            Uri uri = new Uri(request.Input);
+            var collection = HttpUtility.ParseQueryString(uri.Query);
+            var p = collection["p"];
+            if (p.Count() > 0)
             {
-
-                string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
-                //string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
-                string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
-                string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
-                MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
-                request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
-                //request.Input = request.SKU;
-
-                MatchCollection matchesExpirationDateRegex = Regex.Matches(request.Input, ExpirationDateRegex);
-                request.AcquisitionData = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
-                MatchCollection matchesLOT = Regex.Matches(request.Input, LOTRegex);
-                request.Lot = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+                //request.SKU = collection["p"].Split(':')[1];
+                request.SN = collection["p"].Split(':')[0];
                 request.Input = request.SKU;
-
             }
+        }
             ;
 
-            //扫描的是HTTP 二维码，那么从中解析SKU
-            if (request.Input.Contains("http"))
-            {
-
-                Uri uri = new Uri(request.Input);
-                var collection = HttpUtility.ParseQueryString(uri.Query);
-                var p = collection["p"];
-                if (p.Count() > 0)
-                {
-                    request.SKU = collection["p"].Split(':')[1];
-                    request.SN = collection["p"].Split(':')[0];
-                    request.Input = request.SKU;
-                }
-            }
-            ;
-
-        }
-        else
-        {
-            //request.SKU = collection["p"].Split(':')[1];
-            request.SN = request.Input;
-        }
+        //}
+        //else
+        //{
+        //    //request.SKU = collection["p"].Split(':')[1];
+        //    request.SN = request.Input;
+        //}
         if (string.IsNullOrEmpty(request.SKU))
         {
             return new Response() { Code = StatusCode.Error, Msg = "二维码没有SN" };
         }
         //查看任务号存不存在
-        var checkPickTaskNumber = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
-        if (checkPickTaskNumber.Result == null || string.IsNullOrEmpty(checkPickTaskNumber.Result.PickTaskNumber))
+        var checkPickTaskNumber = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
+        if (checkPickTaskNumber == null || string.IsNullOrEmpty(checkPickTaskNumber.PickTaskNumber))
         {
             return new Response() { Code = StatusCode.Error, Msg = "任务号不存在" };
         }
-        var checkSKU = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SKU == request.SKU).FirstAsync();
+        var checkSKU =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SKU == request.SKU).FirstAsync();
         //if (checkSKU.Result == null || string.IsNullOrEmpty(checkSKU.Result.PickTaskNumber))
         //{
         //    return new Response() { Code = StatusCode.Error, Msg = "SKU不存在" };
         //}
-        var sndata = _sysCacheService.Get<string>(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.snCode);
+        var sndata = _sysCacheService.Get<string>(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.SN);
         //判断是不是已经扫描过了 
         if (!string.IsNullOrEmpty(sndata))
         {
             return new Response() { Code = StatusCode.Error, Msg = "已扫描" };
         }
 
-        var packahe = _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
-        if (packahe.Result == null || string.IsNullOrEmpty(packahe.Result.PackageNumber))
+        var packahe =await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
+        if (packahe == null || string.IsNullOrEmpty(packahe.PackageNumber))
         {
             return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };
         }
 
         WMSRFPackageAcquisition packageAcquisition = new WMSRFPackageAcquisition();
-        packageAcquisition = packahe.Result.Adapt<WMSRFPackageAcquisition>();
+        packageAcquisition = packahe.Adapt<WMSRFPackageAcquisition>();
         packageAcquisition.SKU = request.SKU;
         packageAcquisition.SN = request.SN;
         packageAcquisition.Qty = 1;
         packageAcquisition.Creator = _userManager.Account;
         packageAcquisition.CreationTime = DateTime.Now;
         await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
-        _sysCacheService.Set(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.snCode, request.SN);
+        _sysCacheService.Set(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.SN, request.SN);
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
 
     }

@@ -30,7 +30,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Admin.NET.Application.Strategy;
-internal class PackageOperationDefaultStrategy : IPackageOperationInterface
+internal class PackageOperationHachStrategy : IPackageOperationInterface
 {
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
@@ -257,7 +257,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 {
                     if (item.ScanPackageInput != null)
                     {
-                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN || a.RFID == request.RFID).FirstOrDefault();
                         if (count != null && !string.IsNullOrEmpty(count.SN))
                         {
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -265,9 +265,27 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             response.Msg = "不能重复扫描同一个条码";
                             return response;
                         }
+
+
                     }
                 }
+                //判断RFID 是不是可用
+                var checkRFID = await _repRFIDInfo.AsQueryable().Where(a => a.RFID == request.RFID).FirstAsync();
+                if (checkRFID == null)
+                {
+                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                    response.Code = StatusCode.Error;
+                    response.Msg = "RFID 不存在";
+                    return response;
+                }
 
+                if (checkRFID.Status != 1)
+                {
+                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                    response.Code = StatusCode.Error;
+                    response.Msg = "RFID 不可用";
+                    return response;
+                }
 
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
@@ -556,6 +574,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             });
 
             List<WMSRFPackageAcquisition> PackageAcquisitions = new List<WMSRFPackageAcquisition>();
+            List<WMSRFIDInfo> wMSRFIDs = new List<WMSRFIDInfo>();
             foreach (var item in pickData)
             {
                 var PackageAcquisition = item.ScanPackageInput.Adapt<List<WMSRFPackageAcquisition>>();
@@ -577,10 +596,32 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         //p.SN = item;
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
+
                     }
                     PackageAcquisitions.AddRange(PackageAcquisition);
+                    foreach (var r in item.ScanPackageInput)
+                    {
+                        wMSRFIDs.Add(new WMSRFIDInfo() { RFID = r.RFID });
+                    }
                 }
             }
+
+            //获取RFID
+            var rfiddata = await _repRFIDInfo.AsQueryable().Where(a => wMSRFIDs.Select(b => b.RFID).Contains(a.RFID)).ToListAsync();
+            foreach (var item in rfiddata)
+            {
+                item.Status = (int)RFIDStatusEnum.出库;
+                item.PackageNumber = packageNumber;
+                //item.Sequence = pickData.First().RFIDInfo.Where(a => a.RFID.Contains(item.RFID)).FirstOrDefault().Sequence;
+                item.ExternOrderNumber = packageData.ExternOrderNumber;
+                item.PickTaskNumber = packageData.PickTaskNumber;
+                item.OrderTime = DateTime.Now;
+                item.OrderPerson = _userManager.Account;
+                //item.PickTaskNumber = pickData.FirstOrDefault().PickTaskNumber;
+                item.OrderNumber = packageData.OrderNumber;
+            }
+            await _repRFIDInfo.UpdateRangeAsync(rfiddata);
+
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;

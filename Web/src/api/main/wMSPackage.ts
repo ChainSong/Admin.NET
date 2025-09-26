@@ -18,6 +18,8 @@ enum Api {
 	ExportPackage = '/api/wMSPackage/ExportPackage',
 	PrintPackageList = '/api/wMSPackage/PrintPackageList',
 	ScanSNPackage = '/api/wMSPackage/ScanSNPackage',
+	ScanHachPackageData = '/api/wMSPackage/ScanHachPackageData',
+
 
 
 }
@@ -57,6 +59,13 @@ export const pageWMSPackage = (params?: any) =>
 export const scanPackageData = (params?: any) =>
 	request({
 		url: Api.ScanPackageData,
+		method: 'post',
+		data: params,
+	});
+
+export const scanHachPackageData = (params?: any) =>
+	request({
+		url: Api.ScanHachPackageData,
 		method: 'post',
 		data: params,
 	});
@@ -175,4 +184,3 @@ export const scanSNPackage = (params?: any) =>
 		data: params,
 	});
 
-	

@@ -799,8 +799,8 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 }
                 item.RFIDInfoOld.AddRange(item.RFIDInfo);
             }
-            TextHelper.WrittxtFor("准备更新RFID +request", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
-            TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            //TextHelper.WrittxtFor("准备更新RFID +request", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
+            //TextHelper.WrittxtFor(JsonSerializer.Serialize(request), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             //TextHelper.WrittxtFor("准备更新RFID +pickData", "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
             //TextHelper.WrittxtFor(JsonSerializer.Serialize(pickData.First().RFIDs), "/File/TextLog", "RFIDLog" + DateTime.Now.ToString("yyyyMMddhh") + ".txt");
 
