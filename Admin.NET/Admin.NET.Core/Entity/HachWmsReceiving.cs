@@ -1,0 +1,60 @@
+﻿// 麻省理工学院许可证
+//
+// 版权所有 (c) 2021-2023 zuohuaijun，大名科技（天津）有限公司  联系电话/微信：18020030720  QQ：515096995
+//
+// 特此免费授予获得本软件的任何人以处理本软件的权利，但须遵守以下条件：在所有副本或重要部分的软件中必须包括上述版权声明和本许可声明。
+//
+// 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
+// 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Admin.NET.Core.Entity;
+
+[SugarTable("hach_wms_receiving", "入库对接数据表")]
+public class HachWmsReceiving : EntityTenant
+{
+    /// <summary>
+    /// 雪花id
+    /// </summary>
+    [SugarColumn(ColumnDescription = "雪花id", IsOnlyIgnoreUpdate = true,IsIdentity =true, IsPrimaryKey = true)]
+    public override long Id { get; set; }
+
+    /// <summary>
+    /// 接收号
+    /// </summary>
+    [SugarColumn(ColumnDescription = "接收号", Length = 20, IsNullable = false)]
+    public string ReceiptNum { get; set; }
+    /// <summary>
+    /// 接收号
+    /// </summary>
+    [SugarColumn(ColumnDescription = "运单号", Length = 20, IsNullable = false)]
+    public string ShipmentNum { get; set; }
+    /// <summary>
+    /// PO编码
+    /// </summary>
+    [SugarColumn(ColumnDescription = "PO编码", Length = 20, IsNullable = false)]
+    public string DocNumber { get; set; }
+    /// <summary>
+    /// 单据类型
+    /// </summary>
+    [SugarColumn(ColumnDescription = "单据类型", Length = 20, IsNullable = false)]
+    public string DocType { get; set; }
+    /// <summary>
+    /// 订单号
+    /// </summary>
+    [SugarColumn(ColumnDescription = "订单号", Length = 120, IsNullable = false)]
+    public string OrderNo { get; set; }
+    [SugarColumn(ColumnDescription = "是否回传")]
+    public bool? IsReturn { get; set; } = false;
+    [SugarColumn(ColumnDescription = "回传时间")]
+    public DateTime? ReturnDate { get; set; }
+
+    [Navigate(NavigateType.OneToMany, nameof(HachWmsReceivingDetail.ReceivingId))]
+    public virtual List<HachWmsReceivingDetail> items { get; set; }
+
+}

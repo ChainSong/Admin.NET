@@ -96,7 +96,11 @@ public class WMSRFPackageAcquisition : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? WarehouseName { get; set; }
+
     
+    [SugarColumn(ColumnDescription = "类型：SN序列号，AFC防伪码", Length = 50)]
+    public string? Type { get; set; }
+
     /// <summary>
     /// 
     /// </summary>

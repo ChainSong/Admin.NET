@@ -7,6 +7,13 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Minio;
+using System.Text;
+
 Serve.Run(RunOptions.Default.AddWebComponent<WebComponent>());
 
 public class WebComponent : IWebComponent
@@ -26,5 +33,22 @@ public class WebComponent : IWebComponent
             u.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(30);
             u.Limits.MaxRequestBodySize = null;
         });
+
+        //var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        //// 获取项目根目录，假设根目录是项目的父级
+        //var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..\..\"));
+
+        //// 将路径与配置文件结合
+        //var appJsonPath = Path.Combine(projectRoot, "Admin.NET.Application", "Configuration", "App.json");
+        //// 加载 app.json 配置文件
+        //builder.Configuration.AddJsonFile(appJsonPath, optional: false, reloadOnChange: true);
+
+        //// 获取配置，并绑定到 AppSettings 类
+        //var appSettings = builder.Configuration.GetSection("HachWmsAuthorization").Get<List<AppCredential>>();
+
+        //// 将配置添加到服务容器中
+        //builder.Services.Configure<List<AppCredential>>(builder.Configuration.GetSection("HachWmsAuthorization"));
+
     }
 }
