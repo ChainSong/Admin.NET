@@ -2081,7 +2081,7 @@ ORDER BY
     /// <summary>
     /// 月份名称映射表
     /// </summary>
-    private static readonly Dictionary<string, string> MonthNameMap = new Dictionary<string, string>
+    public  Dictionary<string, string> MonthNameMap = new Dictionary<string, string>
         {
             { "Jan", "01" },
             { "Feb", "02" },
