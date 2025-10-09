@@ -77,7 +77,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         if (input.Count > MaxBatch) 
             return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
 
-        HachWmsReceiving receiving = new HachWmsReceiving();
+        //HachWmsReceiving receiving = new HachWmsReceiving();
         HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
 
         wmsAuthorizationConfig = await GetCustomerInfo("putASNData");

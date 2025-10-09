@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <el-card class="card-form">
             <el-form :inline="true" :model="formInline" class="demo-form-inline">
                 <el-form-item label="客户名称">
@@ -20,103 +19,33 @@
         </el-card>
 
         <el-card class="card-table">
-            <el-table :data="tableData" style="width: 100%" height="250" v-loading="tbLoading" border>
-                <el-table-column fixed prop="customerName" label="Operational Tracker 经销商出库扫描率"
-                    width="350" align="center" />
+            <el-table :data="tableData" style="width: 100%" v-loading="tbLoading" border>
+                <el-table-column fixed prop="customerName" label="Operational Tracker 经销商配件 Sell Thru" width="350"
+                    align="center" />
                 <el-table-column prop="type" label="" align="center" />
-                <el-table-column prop="ytd" label="YTD" align="center">
-                    <template #default="scope">
-                        <span>{{ scope.row.ytd }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="jan" label="Jan" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.jan">{{ scope.row.jan }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="feb" label="Feb" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.feb">{{ scope.row.feb }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="mar" label="Mar" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.Mar">{{ scope.row.Mar }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="apr" label="Apr" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.Apr">{{ scope.row.Apr }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="may" label="May" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.may">{{ scope.row.may }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="jun" label="Jun" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.jun">{{ scope.row.jun }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="jul" label="Jul" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.jul">{{ scope.row.jul }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="aug" label="Aug" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.aug">{{ scope.row.aug }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="sep" label="Sep" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.sep">{{ scope.row.sep }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="oct" label="Oct" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.oct">{{ scope.row.oct }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="nov" label="Nov" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.nov">{{ scope.row.nov }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="dec" label="Dec" align="center">
-                    <template #default="scope">
-                        <span v-if="scope.row.dec">{{ scope.row.dec }}</span>
-                        <span style="color: red;" v-else>未维护</span>
-                    </template>
-                </el-table-column>
+                <!-- 动态生成Week1到Week53的列 -->
+                <!-- <el-table-column v-for="week in 53" :key="'week' + week" :prop="'week' + week" :label="'Week' + week"
+                    align="center" width="100"/> -->
+                <!-- 动态生成月份列 -->
+                <template v-for="month in monthColumns" :key="month.monthName">
+                    <el-table-column :label="month.monthName" align="center">
+                        <el-table-column v-for="week in month.weeks" :key="'week' + week.weekNum"
+                            :prop="'week' + week.weekNum" :label="'Week' + week.weekNum" align="center" width="80" />
+                    </el-table-column>
+                </template>
             </el-table>
-
             <el-pagination style="text-align: right" background @size-change="onHandleSizeChange"
                 @current-change="onHandleCurrentChange" :page-sizes="[10, 20, 30]" :current-page="formInline.page"
                 :page-size="formInline.pageSize" layout="total, sizes, prev, pager, next, jumper"
                 :total="tableDataTotal">
             </el-pagination>
         </el-card>
-
     </div>
-
 </template>
 
-<script lang="ts" name="obScanningRate" setup>
+<script lang="ts" name="operationalTrackerSellThru" setup>
 import { onMounted, reactive, ref } from 'vue'
-import { QueryOperationalTrackerList, GetCustomerSelectList, ExportOperationalTrackerList } from '/@/api/main/hachRepport'
+import { QueryOperationalTrackerSellThruList, GetCustomerSelectList, ExportOperationalTrackerSellThruList } from '/@/api/main/hachRepport'
 const formInline = reactive({
     customerId: null,
     page: 1,
@@ -133,10 +62,27 @@ const tbLoading = ref(false)
 const tableData = ref([])
 const tableDataTotal = ref(0)
 
+// 定义月份和周数的映射关系
+const monthColumns = ref([
+    { monthName: 'Jan', weeks: [{ weekNum: 1 }, { weekNum: 2 }, { weekNum: 3 }, { weekNum: 4 }] },
+    { monthName: 'Feb', weeks: [{ weekNum: 5 }, { weekNum: 6 }, { weekNum: 7 }, { weekNum: 8 }] },
+    { monthName: 'Mar', weeks: [{ weekNum: 9 }, { weekNum: 10 }, { weekNum: 11 }, { weekNum: 12 }] },
+    { monthName: 'Apr', weeks: [{ weekNum: 13 }, { weekNum: 14 }, { weekNum: 15 }, { weekNum: 16 }] },
+    { monthName: 'May', weeks: [{ weekNum: 17 }, { weekNum: 18 }, { weekNum: 19 }, { weekNum: 20 }] },
+    { monthName: 'Jun', weeks: [{ weekNum: 21 }, { weekNum: 22 }, { weekNum: 23 }, { weekNum: 24 }] },
+    { monthName: 'July', weeks: [{ weekNum: 25 }, { weekNum: 26 }, { weekNum: 27 }, { weekNum: 28 }] },
+    { monthName: 'Aug', weeks: [{ weekNum: 29 }, { weekNum: 30 }, { weekNum: 31 }, { weekNum: 32 }] },
+    { monthName: 'Sep', weeks: [{ weekNum: 33 }, { weekNum: 34 }, { weekNum: 35 }, { weekNum: 36 }] },
+    { monthName: 'Oct', weeks: [{ weekNum: 37 }, { weekNum: 38 }, { weekNum: 39 }, { weekNum: 40 }] },
+    { monthName: 'Nov', weeks: [{ weekNum: 41 }, { weekNum: 42 }, { weekNum: 43 }, { weekNum: 44 }] },
+    { monthName: 'Dec', weeks: [{ weekNum: 45 }, { weekNum: 46 }, { weekNum: 47 }, { weekNum: 48 }] },
+])
+
+
 const getTableData = async (params: any) => {
     tbLoading.value = true
     try {
-        var res = await QueryOperationalTrackerList(params)
+        var res = await QueryOperationalTrackerSellThruList(params)
         tableData.value = res.data.result.data
         tableDataTotal.value = res.data.result.total ?? 0
     } catch (error) {
@@ -154,7 +100,7 @@ const Search = async (params: any) => {
 import { downloadByData, getFileName } from '/@/utils/download';
 
 const Export = async (params: any) => {
-    let res = await ExportOperationalTrackerList(params);
+    let res = await ExportOperationalTrackerSellThruList(params);
     var fileName = getFileName(res.headers);
     downloadByData(res.data as any, fileName);
 }
