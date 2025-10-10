@@ -23,14 +23,22 @@
                 <el-table-column fixed prop="customerName" label="Operational Tracker 经销商配件 Sell Thru" width="350"
                     align="center" />
                 <el-table-column prop="type" label="" align="center" />
-                <!-- 动态生成Week1到Week53的列 -->
-                <!-- <el-table-column v-for="week in 53" :key="'week' + week" :prop="'week' + week" :label="'Week' + week"
-                    align="center" width="100"/> -->
                 <!-- 动态生成月份列 -->
                 <template v-for="month in monthColumns" :key="month.monthName">
                     <el-table-column :label="month.monthName" align="center">
                         <el-table-column v-for="week in month.weeks" :key="'week' + week.weekNum"
-                            :prop="'week' + week.weekNum" :label="'Week' + week.weekNum" align="center" width="80" />
+                            :prop="'week' + week.weekNum" :label="'Week' + week.weekNum" align="center" width="80">
+                            <template #default="scope">
+                                <span
+                                    v-if="scope.row.customerName && scope.row.customerName.includes('Sell Thru')">
+                                    <!-- 如果是Sell Thru行，显示为百分比 -->
+                                    {{ formatToPercentage(scope.row['week' + week.weekNum]) }}
+                                </span>
+                                <span v-else>
+                                    {{ scope.row['week' + week.weekNum] }}
+                                </span>
+                            </template>
+                        </el-table-column>
                     </el-table-column>
                 </template>
             </el-table>
@@ -45,7 +53,7 @@
 
 <script lang="ts" name="operationalTrackerSellThru" setup>
 import { onMounted, reactive, ref } from 'vue'
-import { QueryOperationalTrackerSellThruList, GetCustomerSelectList, ExportOperationalTrackerSellThruList } from '/@/api/main/hachRepport'
+import { QueryOperationalOBScanningRateList, GetCustomerSelectList, ExportOperationalOBScanningRateList } from '/@/api/main/hachRepport'
 const formInline = reactive({
     customerId: null,
     page: 1,
@@ -82,7 +90,7 @@ const monthColumns = ref([
 const getTableData = async (params: any) => {
     tbLoading.value = true
     try {
-        var res = await QueryOperationalTrackerSellThruList(params)
+        var res = await QueryOperationalOBScanningRateList(params)
         tableData.value = res.data.result.data
         tableDataTotal.value = res.data.result.total ?? 0
     } catch (error) {
@@ -97,10 +105,25 @@ const Search = async (params: any) => {
     await getTableData(params)
 }
 
+const formatToPercentage = (value: any) => {
+    if (value === null || value === undefined || value === '') {
+        return '0.00%';
+    }
+
+    // 将数值转换为百分比格式
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+        return '0.00%';
+    }
+
+    // 格式化为两位小数的百分比
+    return (numValue * 100).toFixed(2) + '%';
+}
+
 import { downloadByData, getFileName } from '/@/utils/download';
 
 const Export = async (params: any) => {
-    let res = await ExportOperationalTrackerSellThruList(params);
+    let res = await ExportOperationalOBScanningRateList(params);
     var fileName = getFileName(res.headers);
     downloadByData(res.data as any, fileName);
 }

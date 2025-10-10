@@ -330,7 +330,7 @@ public class HachReportService : IDynamicApiController, ITransient
             var fs = new MemoryStream(result.Result);
             return new FileStreamResult(fs, "application/octet-stream")
             {
-                FileDownloadName = "Parts Traceability Tracking.xlsx" // 配置文件下载显示名
+                FileDownloadName = "Operational Tracker 经销商配件库存健康度 2.5X Month.xlsx" // 配置文件下载显示名
             };
         }
         catch (Exception ex)
@@ -580,7 +580,7 @@ EXEC sp_executesql @SQL;";
             var fs = new MemoryStream(result.Result);
             return new FileStreamResult(fs, "application/octet-stream")
             {
-                FileDownloadName = "Parts Traceability Tracking OutBound Scanning Ratio.xlsx" // 配置文件下载显示名
+                FileDownloadName = "Operational Tracker 经销商配件 Sell Thru.xlsx" // 配置文件下载显示名
             };
         }
         catch (Exception ex)
@@ -617,82 +617,70 @@ EXEC sp_executesql @SQL;";
             foreach (var item in customerList)
             {
                 var sql = $@"
-                            DECLARE @Year INT = YEAR(GETDATE()); -- 动态获取当前年份
-                            DECLARE @SQL NVARCHAR(MAX);
-                            DECLARE @PivotColumns NVARCHAR(MAX) = '';
-                            DECLARE @PivotSelectColumns NVARCHAR(MAX) = '';
-                            
-                            -- 动态生成Week1到Week53的列名
-                            SELECT @PivotColumns = @PivotColumns + '[Week' + CAST(Number AS VARCHAR) + '],',
-                            @PivotSelectColumns = @PivotSelectColumns + 'ISNULL(Outbound.[Week' + CAST(Number AS VARCHAR) + '], 0) / NULLIF(ISNULL(Inbound.[Week' + CAST(Number AS VARCHAR) + '], 0), 0) AS [Week' + CAST(Number AS VARCHAR) + '],'
-                            FROM master.dbo.spt_values
-                            WHERE type = 'P' AND number BETWEEN 1 AND 53
-                            ORDER BY Number;
-                            
-                            -- 移除最后一个逗号
-                            SET @PivotColumns = LEFT(@PivotColumns, LEN(@PivotColumns) - 1);
-                            SET @PivotSelectColumns = LEFT(@PivotSelectColumns, LEN(@PivotSelectColumns) - 1);
-                            
-                            -- 构建动态SQL
-                            SET @SQL = N'
-                            -- 入库部分
-                            WITH Inbound_WeekData AS (SELECT ' + CAST(@Year AS VARCHAR) + ' AS Year,
-                            ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Week FROM master.dbo.spt_values WHERE type = ''P'' AND number <= 53),
-                            Inbound_CustomerData AS (SELECT DISTINCT CustomerName FROM WMS_Receipt WHERE CustomerId = {item.Id}),
-                            Inbound_AggregatedData AS (SELECT r.CustomerName, ''Actual'' AS Type,SUM(ReceivedQty * p.Price) AS TotalAmount,
-                            DATEPART(YEAR, r.CreationTime) AS Year,DATEPART(WEEK, r.CreationTime) AS Week FROM WMS_Receipt r
-                            LEFT JOIN  WMS_ReceiptDetail rd ON r.id = rd.ReceiptId
-                            LEFT JOIN  WMS_Product p ON p.CustomerId = r.CustomerId AND rd.SKU = p.SKU
-                            WHERE r.CustomerId IN (SELECT CustomerId FROM WMS_Hach_Customer_Mapping WHERE type = ''hachReport'') AND r.ReceiptStatus NOT IN (-1, 1)
-                            GROUP BY r.CustomerId, r.CustomerName,DATEPART(YEAR, r.CreationTime),DATEPART(WEEK, r.CreationTime)),
-                            Inbound_Result AS (SELECT CustomerName + ''入库金额（KRMB）'' as CustomerName,Type,Year,' + @PivotColumns + 'FROM (
-                            SELECT cd.CustomerName,''Actual'' as Type,wd.Year,''Week'' + CAST(wd.Week AS VARCHAR) AS WeekColumn,ISNULL(ad.TotalAmount, 0) AS TotalAmount
-                            FROM  Inbound_WeekData wd CROSS JOIN  Inbound_CustomerData cd
-                            LEFT JOIN Inbound_AggregatedData ad ON ad.Week = wd.Week AND ad.CustomerName = cd.CustomerName AND ad.Year = wd.Year) AS SourceData
-                            PIVOT (MAX(TotalAmount)FOR WeekColumn IN (' + @PivotColumns + ')) AS PivotTable),
-                            -- 出库部分
-                            Outbound_WeekData AS (SELECT ' + CAST(@Year AS VARCHAR) + ' AS Year, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Week 
-                            FROM master.dbo.spt_values WHERE type = ''P'' AND number <= 53),
-                            Outbound_CustomerData AS (SELECT DISTINCT CustomerName FROM WMS_Order WHERE CustomerId = {item.Id}),
-                            Outbound_AggregatedData AS (
-                            SELECT o.CustomerName,''Actual'' AS Type,SUM(AllocatedQty * p.Price) AS TotalAmount,DATEPART(YEAR, o.CreationTime) AS Year,
-                            DATEPART(WEEK, o.CreationTime) AS Week FROM 
-                            WMS_Order o LEFT JOIN  WMS_OrderDetail od ON o.id = od.OrderId
-                            LEFT JOIN   WMS_Product p ON p.CustomerId = o.CustomerId AND od.SKU = p.SKU
-                            WHERE o.CustomerId IN (SELECT CustomerId FROM WMS_Hach_Customer_Mapping WHERE type = ''hachReport'')
-                            AND o.orderstatus NOT IN (-1, 1) GROUP BY o.CustomerId, 
-                            o.CustomerName,DATEPART(YEAR, o.CreationTime),DATEPART(WEEK, o.CreationTime)),
-                            Outbound_Result AS (SELECT CustomerName + ''出库金额（KRMB）'' as CustomerName,Type,Year,' + @PivotColumns + '
-                            FROM (SELECT cd.CustomerName,''Actual'' as Type,wd.Year,''Week'' + CAST(wd.Week AS VARCHAR) AS WeekColumn,ISNULL(ad.TotalAmount, 0) AS TotalAmount
-                            FROM  Outbound_WeekData wd CROSS JOIN  Outbound_CustomerData cd
-                            LEFT JOIN Outbound_AggregatedData ad ON ad.Week = wd.Week AND ad.CustomerName = cd.CustomerName AND ad.Year = wd.Year) AS SourceData
-                            PIVOT (MAX(TotalAmount)FOR WeekColumn IN (' + @PivotColumns + ')) AS PivotTable),
-                            -- 库存部分
-                            Inventory_WeekData AS (SELECT ' + CAST(@Year AS VARCHAR) + ' AS Year, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Week  
-                            FROM master.dbo.spt_values WHERE type = ''P'' AND number <= 53),
-                            Inventory_CustomerData AS (SELECT DISTINCT CustomerName FROM WMS_Inventory_Usable WHERE CustomerId = {item.Id}),
-                            Inventory_AggregatedData AS (
-                            SELECT o.CustomerName,''Actual'' AS Type,SUM(Qty * p.Price) AS TotalAmount,DATEPART(YEAR, o.CreationTime) AS Year,DATEPART(WEEK, o.CreationTime) AS Week
-                            FROM WMS_Inventory_Usable o LEFT JOIN  WMS_Product p ON p.CustomerId = o.CustomerId AND o.SKU = p.SKU
-                            WHERE o.CustomerId IN (SELECT CustomerId FROM WMS_Hach_Customer_Mapping WHERE type = ''hachReport'')
-                            AND o.inventorystatus NOT IN (99)
-                            GROUP BY o.CustomerId, o.CustomerName,DATEPART(YEAR, o.CreationTime),DATEPART(WEEK, o.CreationTime)),
-                            Inventory_Result AS (SELECT CustomerName + ''库存金额（KRMB）'' as CustomerName,Type,Year,' + @PivotColumns + '
-                            FROM (SELECT cd.CustomerName,''Actual'' as Type,wd.Year,''Week'' + CAST(wd.Week AS VARCHAR) AS WeekColumn,ISNULL(ad.TotalAmount, 0) AS TotalAmount
-                            FROM  Inventory_WeekData wd CROSS JOIN  Inventory_CustomerData cd LEFT JOIN 
-                            Inventory_AggregatedData ad ON ad.Week = wd.Week AND ad.CustomerName = cd.CustomerName AND ad.Year = wd.Year) AS SourceData
-                            PIVOT (MAX(TotalAmount)FOR WeekColumn IN (' + @PivotColumns + ')) AS PivotTable),
-                            -- 出库/入库比率部分
-                            Ratio_Result AS (SELECT Outbound.CustomerName + '' Sell Thru '' as CustomerName,
-                            ''Actual'' as Type,Outbound.Year,' + @PivotSelectColumns + '
-                            FROM Outbound_Result Outbound CROSS JOIN Inbound_Result Inbound
-                            WHERE REPLACE(Outbound.CustomerName, ''出库金额（KRMB）'', '''') = REPLACE(Inbound.CustomerName, ''入库金额（KRMB）'', ''''))
-                            -- 合并四个结果集
-                            SELECT * FROM Ratio_Result UNION ALL
-                            SELECT * FROM Inbound_Result UNION ALL
-                            SELECT * FROM Outbound_Result UNION ALL
-                            SELECT * FROM Inventory_Result
-                            '; EXEC sp_executesql @SQL;";
+                           
+                    DECLARE @Year INT = YEAR(GETDATE()); -- 动态获取当前年份
+                    DECLARE @SQL NVARCHAR(MAX);
+                    DECLARE @PivotColumns NVARCHAR(MAX) = '';
+                    DECLARE @PivotSelectColumns NVARCHAR(MAX) = '';
+                                                
+                    -- 动态生成Week1到Week53的列名
+                    SELECT @PivotColumns = @PivotColumns + '[Week' + CAST(Number AS VARCHAR) + '],',
+                    @PivotSelectColumns = @PivotSelectColumns + 'ISNULL(Outbound.[Week' + CAST(Number AS VARCHAR) + '], 0) / NULLIF(ISNULL(Inbound.[Week' + CAST(Number AS VARCHAR) + '], 0), 0) AS [Week' + CAST(Number AS VARCHAR) + '],'
+                    FROM master.dbo.spt_values
+                    WHERE type = 'P' AND number BETWEEN 1 AND 53
+                    ORDER BY Number;
+                                                
+                    -- 移除最后一个逗号
+                    SET @PivotColumns = LEFT(@PivotColumns, LEN(@PivotColumns) - 1);
+                    SET @PivotSelectColumns = LEFT(@PivotSelectColumns, LEN(@PivotSelectColumns) - 1);
+                                                
+                    -- 构建动态SQL
+                    SET @SQL = N'
+                    -- 入库部分
+                    WITH Inbound_WeekData AS (SELECT ' + CAST(@Year AS VARCHAR) + ' AS Year,
+                    ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Week FROM master.dbo.spt_values WHERE type = ''P'' AND number <= 53),
+                    Inbound_CustomerData AS (SELECT DISTINCT CustomerName FROM WMS_Receipt WHERE CustomerId = {item.Id}),
+                    Inbound_AggregatedData AS (SELECT r.CustomerName, ''入库数量'' AS Type,sum(isnull(rrf.qty,0)) AS TotalAmount,
+                    DATEPART(YEAR, r.CreationTime) AS Year,DATEPART(WEEK, r.CreationTime) AS Week FROM WMS_Receipt r
+                    LEFT JOIN  WMS_ReceiptDetail rd ON r.id = rd.ReceiptId
+                    LEFT JOIN  WMS_RFReceiptAcquisition rrf ON rrf.CustomerId = rrf.CustomerId AND rd.SKU = rrf.SKU and rd.id=rrf.receiptdetailid
+                    WHERE r.CustomerId IN (SELECT CustomerId FROM WMS_Hach_Customer_Mapping WHERE type = ''hachReport'') AND r.ReceiptStatus NOT IN (-1, 1)
+                    GROUP BY r.CustomerId, r.CustomerName,DATEPART(YEAR, r.CreationTime),DATEPART(WEEK, r.CreationTime)),
+                    Inbound_Result AS (SELECT CustomerName   as CustomerName,Type,Year,' + @PivotColumns + 'FROM (
+                    SELECT cd.CustomerName,''入库数量'' as Type,wd.Year,''Week'' + CAST(wd.Week AS VARCHAR) AS WeekColumn,ISNULL(ad.TotalAmount, 0) AS TotalAmount
+                    FROM  Inbound_WeekData wd CROSS JOIN  Inbound_CustomerData cd
+                    LEFT JOIN Inbound_AggregatedData ad ON ad.Week = wd.Week AND ad.CustomerName = cd.CustomerName AND ad.Year = wd.Year) AS SourceData
+                    PIVOT (MAX(TotalAmount)FOR WeekColumn IN (' + @PivotColumns + ')) AS PivotTable)
+                     ,
+                    -- 出库部分
+                    Outbound_WeekData AS (SELECT ' + CAST(@Year AS VARCHAR) + ' AS Year, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Week 
+                    FROM master.dbo.spt_values WHERE type = ''P'' AND number <= 53),
+                    Outbound_CustomerData AS (SELECT DISTINCT CustomerName FROM WMS_Order WHERE CustomerId = {item.Id}),
+                    Outbound_AggregatedData AS (
+                    SELECT o.CustomerName,''出库数量'' AS Type,SUM(isnull(prf.qty,0)) AS TotalAmount,DATEPART(YEAR, o.CreationTime) AS Year,
+                    DATEPART(WEEK, o.CreationTime) AS Week FROM 
+                    WMS_Order o LEFT JOIN  WMS_OrderDetail od ON o.id = od.OrderId
+                    LEFT JOIN   WMS_RFPackageAcquisition  prf ON prf.CustomerId = o.CustomerId AND od.SKU = prf.SKU and o.id =prf.orderid
+                    WHERE o.CustomerId IN (SELECT CustomerId FROM WMS_Hach_Customer_Mapping WHERE type = ''hachReport'')
+                    AND o.orderstatus NOT IN (-1, 1) GROUP BY o.CustomerId, 
+                    o.CustomerName,DATEPART(YEAR, o.CreationTime),DATEPART(WEEK, o.CreationTime)),
+                    Outbound_Result AS (SELECT CustomerName   as CustomerName,Type,Year,' + @PivotColumns + '
+                    FROM (SELECT cd.CustomerName,''出库数量'' as Type,wd.Year,''Week'' + CAST(wd.Week AS VARCHAR) AS WeekColumn,ISNULL(ad.TotalAmount, 0) AS TotalAmount
+                    FROM  Outbound_WeekData wd CROSS JOIN  Outbound_CustomerData cd
+                    LEFT JOIN Outbound_AggregatedData ad ON ad.Week = wd.Week AND ad.CustomerName = cd.CustomerName AND ad.Year = wd.Year) AS SourceData
+                    PIVOT (MAX(TotalAmount)FOR WeekColumn IN (' + @PivotColumns + ')) AS PivotTable),
+                    ---- 出库/入库比率部分
+                    Ratio_Result AS (SELECT Outbound.CustomerName  as CustomerName,
+                    ''Actual'' as Type,Outbound.Year,' + @PivotSelectColumns + '
+                    FROM Outbound_Result Outbound CROSS JOIN Inbound_Result Inbound
+                    WHERE REPLACE(Outbound.CustomerName, ''出库金额（KRMB）'', '''') = REPLACE(Inbound.CustomerName, ''入库数量（KRMB）'', ''''))
+                    SELECT * FROM Ratio_Result UNION ALL
+                    SELECT * FROM Inbound_Result 
+                    UNION ALL
+                    SELECT * FROM Outbound_Result  
+                    '; 
+                    print @sql
+                    EXEC sp_executesql @SQL;";
                 var result = _rep.Context.Ado.GetDataTable(sql);
                 // 第一次循环时，将mergedData的结构设置为与result相同
                 if (mergedData.Columns.Count == 0)
@@ -706,6 +694,53 @@ EXEC sp_executesql @SQL;";
                     mergedData.ImportRow(row);
                 }
             }
+
+            #region 计算汇总数据
+            // 创建汇总行，分别为比值、入库、出库
+            DataRow ratioRow = mergedData.NewRow();
+            ratioRow["CustomerName"] = "Hach Core （6 CPs）"; // 汇总行
+            ratioRow["Type"] = "Actual"; // 比值类型
+
+            DataRow inboundRow = mergedData.NewRow();
+            inboundRow["CustomerName"] = "Total"; // 汇总行
+            inboundRow["Type"] = "入库数量"; // 入库数据类型
+
+            DataRow outboundRow = mergedData.NewRow();
+            outboundRow["CustomerName"] = "Total"; // 汇总行
+            outboundRow["Type"] = "出库数量"; // 出库数据类型
+
+            // 汇总每周的入库数据和出库数据，并计算比率
+            for (int week = 1; week <= 53; week++)
+            {
+                // 汇总每周的入库数据
+                var totalInbound = mergedData.AsEnumerable()
+                    .Where(row => row["Type"].ToString() == "入库数量")
+                    .Sum(row => Convert.ToDecimal(row["Week" + week]));
+
+                // 汇总每周的出库数据
+                var totalOutbound = mergedData.AsEnumerable()
+                    .Where(row => row["Type"].ToString() == "出库数量")
+                    .Sum(row => Convert.ToDecimal(row["Week" + week]));
+
+                // 计算比率
+                var ratio = totalOutbound / (totalInbound == 0 ? 1 : totalInbound); // 避免除以零
+                ratioRow["Week" + week] = ratio;
+
+                // 设置入库数据行的每周数据
+                inboundRow["Week" + week] = totalInbound;
+
+                // 设置出库数据行的每周数据
+                outboundRow["Week" + week] = totalOutbound;
+            }
+
+            // 将汇总行添加到数据中
+            // 将汇总行插入到 mergedData 的最前面
+            mergedData.Rows.InsertAt(ratioRow, 0);    // 插入比值行
+            mergedData.Rows.InsertAt(inboundRow, 1);  // 插入入库数据行
+            mergedData.Rows.InsertAt(outboundRow, 2); // 插入出库数据行
+
+            #endregion
+
             data.data = mergedData;
             // 计算总条数
             data.Total = data.data.Rows.Count;
@@ -845,7 +880,7 @@ EXEC sp_executesql @SQL;";
             var fs = new MemoryStream(result.Result);
             return new FileStreamResult(fs, "application/octet-stream")
             {
-                FileDownloadName = "Parts Traceability Tracking Sell Thru.xlsx" // 配置文件下载显示名
+                FileDownloadName = "Operational Tracker 经销商出库扫描率.xlsx" // 配置文件下载显示名
             };
         }
         catch (Exception ex)

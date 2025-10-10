@@ -6,7 +6,10 @@ enum Api {
   ExportOperationalTracker = '/api/hachReport/ExportOperationalTrackerList',
   
   QueryOperationalTrackerSellThru = '/api/hachReport/OperationalTrackerSellThruList',
-  ExportOperationalTrackerSellThru = '/api/hachReport/ExportOperationalTrackerSellThruList'
+  ExportOperationalTrackerSellThru = '/api/hachReport/ExportOperationalTrackerSellThruList',
+
+   QueryOperationalOBScanningRate = '/api/hachReport/OperationalTrackerOBScanningRateList',
+  ExportOperationalOBScanningRate = '/api/hachReport/ExportOperationalTrackerOBScanningRateList'
 }
 // 分页查询客户用户关系
 export const GetCustomerSelectList = () =>
@@ -44,6 +47,24 @@ export const QueryOperationalTrackerSellThruList = (params?: any) =>
 export const ExportOperationalTrackerSellThruList = (params?: any) =>
   request({
     url: Api.ExportOperationalTrackerSellThru,
+    method: 'post',
+    data: params,
+    responseType: 'blob',
+  });
+
+
+    // 查询经销商出库扫描率
+export const QueryOperationalOBScanningRateList = (params?: any) =>
+  request({
+    url: Api.QueryOperationalOBScanningRate,
+    method: 'post',
+    data: params,
+  });
+  
+// 导出经销商出库扫描率
+export const ExportOperationalOBScanningRateList = (params?: any) =>
+  request({
+    url: Api.ExportOperationalOBScanningRate,
     method: 'post',
     data: params,
     responseType: 'blob',
