@@ -69,7 +69,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         };
 
         // 0) 基础校验
-        const int MaxBatch = 20; 
+        const int MaxBatch = 20;
 
         //入参不能为空
         if (input == null || input.Count == 0)
@@ -83,7 +83,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
 
         wmsAuthorizationConfig = await GetCustomerInfo("putSOData");
-        if (wmsAuthorizationConfig == null )
+        if (wmsAuthorizationConfig == null)
             return new HachWMSResponse { Success = false, Result = "no available customer configuration (AppId/interface permissions) matched" };
 
         foreach (var order in input)
@@ -324,7 +324,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 CreationTime = DateTime.Now,
                 Creator = _userManager.UserId.ToString(),
                 Str2 = !string.IsNullOrEmpty(item.ParentItemNumber) ? item.ParentItemNumber : "",
-                Int2 = item.ParentItemId.HasValue ? item.ParentItemId : 0,
+                Int2 = item.ParentItemId.HasValue ? item.ParentItemId.Value : 0,
             });
         }
         wMSPreOrder.Details = details;

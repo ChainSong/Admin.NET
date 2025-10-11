@@ -11,25 +11,25 @@
                 </el-form-item>
               </template>
               <template v-if="i.type == 'DropDownListInt'">
-                <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                <el-form-item style="width: 80%"  :label="i.displayName">
+                  <el-select v-model="state.header[i.columnName]"   v-if="i.isSearchCondition" size="small"
                     placeholder="请选择">
-                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
+                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
                   </el-select>
                 </el-form-item>
               </template>
               <template v-if="i.type == 'DropDownListStrRemote'">
-                <el-form-item class="mb-0" :label="i.displayName">
+                <el-form-item style="width: 80%" :label="i.displayName">
                   <select-Remote :whereData="state.header" :isDisabled="i.isSearchCondition" :columnData="i"
                     :defaultvValue="state.header[i.columnName]"
                     @select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote>
                 </el-form-item>
               </template>
               <template v-if="i.type == 'DropDownListStr'">
-                <el-form-item class="mb-0" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
+                <el-form-item style="width: 80%" :label="i.displayName">
+                  <el-select v-model="state.header[i.columnName]"  style="width: 100%" v-if="i.isSearchCondition" size="small"
                     placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">

@@ -10,7 +10,7 @@
 									v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)"
 									v-bind:key="i.id">
 									<el-form-item :label="i.displayName" v-if="i.isCreate"
-										style="width: 90%;height: 45px;" :prop="i.columnName">
+										style="width: 90%;height: 55px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input placeholder="请输入内容" size="small" style="width:90%"
 												v-model="state.header[i.columnName]" v-if="i.isCreate">
