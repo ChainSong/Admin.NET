@@ -39,6 +39,9 @@
 <script>
 	import SelectCustomerAndWarehouse from '@/pages/wMsRFAdjust/move/component/selectCustomerAndWarehouse.vue'
 	import AddAdjustmentModal from '@/pages/wMsRFAdjust/move/component/addAdjustMove.vue'
+	import {
+		pageAdjustList
+	} from '@/services/wMsRFAdjust/move/move.js'
 	export default {
 		components: {
 			SelectCustomerAndWarehouse,
@@ -48,39 +51,13 @@
 			return {
 				showAddModal: false,
 				// 可以从API获取这些数据
-				warehouseList: [{
-						label: '主仓库',
-						value: 'MAIN'
-					},
-					{
-						label: '备件库',
-						value: 'SPARE'
-					},
-					{
-						label: '成品库',
-						value: 'PRODUCT'
-					}
-				],
-				materialList: [{
-						label: 'M001-原材料A',
-						value: 'M001'
-					},
-					{
-						label: 'M002-原材料B',
-						value: 'M002'
-					}
-				],
+				warehouseList: [],
+				materialList: [],
 				form: {
-					adjustmentNumber: ''
+					adjustmentNumber: '',
+					adjustmentStatus: 1
 				},
-				tableData: [{
-					createTime: '2016-05-02',
-					adjustmentNumber: 'ADJ110',
-				}, {
-					createTime: '2016-05-04',
-					adjustmentNumber: 'ADJ111',
-
-				}]
+				tableData: []
 			}
 		},
 		// methods 是一些用来更改状态与触发更新的函数 它们可以在模板中作为事件处理器绑定
@@ -102,7 +79,7 @@
 					title: '加载中...'
 				});
 				try {
-
+					await this.searchAdj(this.form)
 				} catch {
 
 				} finally {
@@ -110,15 +87,17 @@
 				}
 			},
 			//查询调整单的方法
-			async searchAdj() {
-
+			async searchAdj(formParams) {
+				await pageAdjustList(formParams).then((res) => {
+					this.tableData = res?.data?.result?.items ?? []
+				})
 			},
 			// 新增成功回调
 			handleAddSuccess(formData) {
-				console.log('新增的数据:', formData)
 				uni.navigateTo({
-					url: '/pages/wMsRFAdjust/move/component/addAdjustMove'
+					url: `/pages/wMsRFAdjust/move/component/addAdjustMove?customer=${formData.customer}&warehouse=${formData.warehouse}`
 				});
+
 			},
 			// 弹窗关闭回调
 			handleModalClose() {
@@ -126,7 +105,9 @@
 			},
 		},
 		// 生命周期钩子会在组件生命周期的各个不同阶段被调用 例如这个函数就会在组件挂载完成后被调用
-		mounted() {}
+		async mounted() {
+			await this.searchAdj(this.form)
+		}
 	}
 </script>
 

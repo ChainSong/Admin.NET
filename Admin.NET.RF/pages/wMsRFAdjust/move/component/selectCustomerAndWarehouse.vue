@@ -12,10 +12,10 @@
 				<view class="cu-form-group">
 					<view class="title">客&nbsp;&nbsp;户</view>
 					<view class="picker-wrapper">
-						<select v-model="formData.customer">
+						<select v-model="formData.customer" @focus="clickCustomerLoad">
 							<option value="">请选择客户</option>
 							<option v-for="(item, index) in customerOptions" :key="index" :value="item.value">
-								{{ item.label }}
+								{{ item.text }}
 							</option>
 						</select>
 					</view>
@@ -25,10 +25,10 @@
 				<view class="cu-form-group">
 					<view class="title">仓&nbsp;&nbsp;库</view>
 					<view class="picker-wrapper">
-						<select v-model="formData.warehouse">
+						<select v-model="formData.warehouse" @focus="clickWarehouseLoad">
 							<option value="">请选择源仓库</option>
 							<option v-for="(item, index) in warehouseOptions" :key="index" :value="item.value">
-								{{ item.label }}
+								{{ item.text }}
 							</option>
 						</select>
 					</view>
@@ -48,6 +48,8 @@
 </template>
 
 <script>
+	import { selectCustomerList, selectWarehouseList } from '@/services/wMsRFAdjust/move/move.js'
+
 	export default {
 		name: 'SelectCustomerAndWarehouse',
 		props: {
@@ -71,40 +73,8 @@
 					customer: '',
 					warehouse: ''
 				},
-				customerOptions: [{
-						label: '客户A',
-						value: 'CUSTOMER_A'
-					},
-					{
-						label: '客户B',
-						value: 'CUSTOMER_B'
-					},
-					{
-						label: '客户C',
-						value: 'CUSTOMER_C'
-					}
-				],
-				warehouseOptions: [{
-						label: '原材料仓库',
-						value: 'RAW_MATERIAL'
-					},
-					{
-						label: '成品仓库',
-						value: 'FINISHED_GOODS'
-					},
-					{
-						label: '半成品仓库',
-						value: 'SEMI_FINISHED'
-					},
-					{
-						label: '退货仓库',
-						value: 'RETURN_GOODS'
-					},
-					{
-						label: '待检仓库',
-						value: 'INSPECTION'
-					}
-				]
+				customerOptions: [],
+				warehouseOptions: []
 			};
 		},
 		watch: {
@@ -125,6 +95,18 @@
 			}
 		},
 		methods: {
+			async clickCustomerLoad() {
+				// 模拟API调用，获取客户数据
+				await selectCustomerList({}).then((res) => {
+					this.customerOptions = res.data.result ?? []
+				})
+			},
+			async clickWarehouseLoad() {
+				// 模拟API调用，获取仓库数据
+				await selectWarehouseList({}).then((res) => {
+					this.warehouseOptions = res.data.result ?? []
+				})
+			},
 			onCustomerChange(e) {
 				this.formData.customer = e.target.value;
 			},
@@ -191,5 +173,7 @@
 		border-radius: 5px;
 		border: 1px solid #ccc;
 		width: 100%;
+		max-height: 200px; /* 设置最大高度 */
+		overflow-y: auto; /* 启用垂直滚动条 */
 	}
 </style>

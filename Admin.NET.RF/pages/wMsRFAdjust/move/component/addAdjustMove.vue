@@ -53,7 +53,9 @@
 			return {
 				loading: false,
 				formData: {
-					scanValue: ''
+					customerId: 0, // 默认空值，稍后从 URL 参数中获取
+					warehouseId: 0, // 默认空值，稍后从 URL 参数中获取
+					scanValue: '' // 扫描值
 				},
 				// 用于存储扫描数据
 				scanData: []
@@ -68,6 +70,12 @@
 			}
 		},
 		methods: {
+			// 获取当前页面加载的参数
+			onLoad(options) {
+				// 从 URL 参数获取传递的值
+				this.formData.customerId = options.customer || '';
+				this.formData.warehouseId = options.warehouse || '';
+			},
 			// 表单验证
 			validateForm() {
 				if (!this.formData.targetWarehouse) {
