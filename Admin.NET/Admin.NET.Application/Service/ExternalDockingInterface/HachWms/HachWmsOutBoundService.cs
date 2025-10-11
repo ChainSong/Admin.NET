@@ -176,6 +176,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
 
                 if (missingSkus.Count > 0)
                 {
+                    orderResult.Success = false;
                     orderResult.Message = $"OrderNo：{syncOrderNo} Missing SKU：{string.Join(", ", missingSkus)}";
                     response.Items.Add(orderResult);
                     continue;

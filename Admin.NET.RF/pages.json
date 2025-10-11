@@ -163,7 +163,11 @@
 		}, {
 			"path": "pages/wMSRFStockCheck/component/editDialog",
 			"style": {}
+		}, {
+			"path": "pages/wMsRFAdjust/move/index",
+			"style": {}
 		}
+		
 		
 	],
 	"globalStyle": {
