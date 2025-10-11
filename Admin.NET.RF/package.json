@@ -2,7 +2,8 @@
   "dependencies": {
     "@dcloudio/uni-ui": "^1.5.5",
     "sm-crypto": "^0.3.13",
-    "uni-ajax": "^2.5.1"
+    "uni-ajax": "^2.5.1",
+    "uview-ui": "^2.0.38"
   },
   "devDependencies": {
     "sass": "^1.77.4"
