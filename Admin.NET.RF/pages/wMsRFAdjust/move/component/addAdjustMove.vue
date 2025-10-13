@@ -8,16 +8,9 @@
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
 			<view class="cu-form-group">
 				<view class="title">请扫描</view>
-				<input placeholder="源库位/SKU/目标库位" v-model="formData.location"></input>
+				<input placeholder="源库位 / SKU / 目标库位" v-model.trim="formData.scanValue" @confirm="handleScanConfirm"
+					@input="handleScanInput" confirm-type="done" type="text" focus />
 			</view>
-			<!-- <view class="cu-bar bg-white justify-end">
-				<view class="action">
-					<button class="cu-btn line-green text-green" @tap="handleClose">取消</button>
-					<button class="cu-btn bg-green margin-left" @tap="handleSubmit" :disabled="loading">
-						{{ loading ? '提交中...' : '确定' }}
-					</button>
-				</view>
-			</view> -->
 			<!-- 扫描数据展示表格 -->
 			<view class="scan-table-container">
 				<uni-table border>
@@ -40,6 +33,9 @@
 </template>
 
 <script>
+	import {
+		checkScanValue
+	} from '@/services/wMsRFAdjust/move/move.js'
 	export default {
 		name: 'AddAdjustmentModal',
 		props: {
@@ -55,10 +51,13 @@
 				formData: {
 					customerId: 0, // 默认空值，稍后从 URL 参数中获取
 					warehouseId: 0, // 默认空值，稍后从 URL 参数中获取
-					scanValue: '' // 扫描值
+					scanValue: '', // 扫描值
+					type:'库存移动',
+					opSerialNumber :'',
 				},
 				// 用于存储扫描数据
-				scanData: []
+				scanData: [],
+				scanTimer: ''
 			}
 		},
 		watch: {
@@ -94,6 +93,52 @@
 				}
 
 				return true
+			},
+			// 监听输入事件：防抖处理（防止连续扫描重复触发）
+			handleScanInput(e) {
+				if (this.scanTimer) clearTimeout(this.scanTimer)
+				this.scanTimer = setTimeout(() => {
+					if (e.detail.value && e.detail.value.length > 3) {
+						this.handleScanConfirm()
+					}
+				}, 500)
+			},
+			async handleScanConfirm() {
+				const value = this.formData.scanValue?.trim();
+				if (!value) return
+
+				this.loading = true
+				try {
+					const res = await checkScanValue({
+						customerId: this.formData.customerId,
+						warehouseId: this.formData.warehouseId,
+						scanValue: value,
+						type: this.formData.type
+					})
+					console.log("res",res)
+					if (res?.result === 'Success') {
+						uni.showToast({
+							title: res.message || '扫描成功',
+							icon: 'success'
+						})
+
+						// 更新操作序列号（后端生成的）
+						if (res.serialNumber)
+							this.formData.opSerialNumber = res.serialNumber
+
+						// 更新展示数据（后端返回 outputs）
+						if (res.outputs && res.outputs.length > 0) {
+							this.scanData = res.outputs
+						}
+					} else {
+						uni.showToast({
+							title: res?.message || `${res.data.result.result,res.data.result.message}`,
+							icon: 'none'
+						})
+					}
+				} catch {} finally {
+					this.loading = false;
+				}
 			},
 			// 提交表单
 			handleSubmit() {

@@ -1,12 +1,13 @@
 import request from '@/utils/request'
 
-let adjustList = '/api/wMSAdjustment/page';
-let selectCustomer = '/api/wMsCustomer/selectCustomer'
-let selectWarehouse = '/api/wMsWarehouse/selectWarehouse'
+let adjustListApi = '/api/wMSAdjustment/page';
+let selectCustomerApi = '/api/wMsCustomer/selectCustomer'
+let selectWarehouseApi = '/api/wMsWarehouse/selectWarehouse'
+let checkScanValueApi = '/api/wMSRFAdjustMove/adjustMoveCheckScan'
 //  查询wMSAdjustmentMove
 export const pageAdjustList = (params) =>
 	request({
-		url: adjustList,
+		url: adjustListApi,
 		method: 'post',
 		data: params,
 	});
@@ -14,7 +15,7 @@ export const pageAdjustList = (params) =>
 //  查询客户下拉列表
 export const selectCustomerList = (params) =>
 	request({
-		url: selectCustomer,
+		url: selectCustomerApi,
 		method: 'post',
 		data: params,
 	});
@@ -22,7 +23,15 @@ export const selectCustomerList = (params) =>
 //  查询仓库下拉列表
 export const selectWarehouseList = (params) =>
 	request({
-		url: selectWarehouse,
+		url: selectWarehouseApi,
+		method: 'post',
+		data: params,
+	});
+
+//  校验扫描值
+export const checkScanValue = (params) =>
+	request({
+		url: checkScanValueApi,
 		method: 'post',
 		data: params,
 	});
