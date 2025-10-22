@@ -9,7 +9,7 @@
 								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
 									v-for="i in state.tableColumnHeaders" v-bind:key="i.id">
 									<el-form-item :label="i.displayName" v-if="i.isCreate"
-										style="width: 90%;height: 45px;" :prop="i.columnName">
+										style="width: 90%;height: 55px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input placeholder="请输入内容" size="small" style="width:90%"
 												v-model="state.header[i.columnName]" v-if="i.isCreate">

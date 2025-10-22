@@ -304,7 +304,21 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         {
             return result;
         }
+        List<WMSOrderAddress> orderAddresses = new List<WMSOrderAddress>();
+        orderAddresses.Add(input.OrderAddress);
+        var resultorderAddresses = await checkColumnsDefault.CheckColumns<WMSOrderAddress> (orderAddresses, "WMS_OrderAddress");
+        if (resultorderAddresses.Code == StatusCode.Error)
+        {
+            return resultorderAddresses;
+        }
 
+        List<WMSPreOrderDetail>  preOrderDetails = new List<WMSPreOrderDetail>();
+        preOrderDetails.AddRange(input.Details);
+        var resultpreOrderDetails = await checkColumnsDefault.CheckColumns<WMSPreOrderDetail>(preOrderDetails, "WMS_PreOrderDetail");
+        if (resultpreOrderDetails.Code == StatusCode.Error)
+        {
+            return resultpreOrderDetails;
+        }
         //var asnData = _rep.AsQueryable().Where(a => a.Id == input.).First();
         //根据订单类型判断是否存在该流程
         //var workflow = await _repWorkFlow.AsQueryable()

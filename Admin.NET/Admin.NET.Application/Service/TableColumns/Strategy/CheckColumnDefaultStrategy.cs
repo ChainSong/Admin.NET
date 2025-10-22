@@ -74,15 +74,31 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
                         rule.ErrorMessage = "时间格式不正确";
                         rule.Expression = "Convert.ToDateTime(" + item.DbColumnName + ").Year>2000";
                     }
+                    else if (item.Type == "InputNumber")
+                    {
+                        if (item.Min == 0 && item.Max == 0)
+                        {
+                            rule.ErrorMessage = item.DisplayName + "不能为空";
+                            rule.Expression = "" + item.DbColumnName.ToString() + ">" + "0";
+                        }
+                        else
+                        {
+                            rule.ErrorMessage = item.DisplayName + "不能为空";
+                            rule.Expression = "" + item.DbColumnName.ToString() + ">" + "0 && " + item.DbColumnName + ">" + item.Min + " && " + item.DbColumnName + "<" + item.Max;
+                        }
+                        //判断是否包含空格
+                        //rule.Expression = "string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
+                    }
                     else
                     {
                         rule.ErrorMessage = item.DisplayName + "不能为空";
-                        rule.Expression = "!string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
+                        rule.Expression = "!string.IsNullOrWhiteSpace(" + item.DbColumnName.ToString() + "" + ")";
                         //判断是否包含空格
                         //rule.Expression = "string.IsNullOrWhiteSpace(" + item.DbColumnName + ")";
                     }
                     rules.Add(rule);
                 }
+
             }
             if (rules.Count > 0)
             {
@@ -126,7 +142,8 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
                 //throw new NotImplementedException();
                 return response;
             }
-            else {
+            else
+            {
                 response.Code = StatusCode.Success;
                 response.Data = statusDtos;
                 response.Msg = "无需验证";
@@ -277,6 +294,8 @@ public class CheckColumnDefaultStrategy : ICheckColumnsDefaultInterface
               TableName = a.TableName,
               DbColumnName = a.DbColumnName,
               Validation = a.Validation,
+              Max = a.Max,
+              Min = a.Min,
               IsImportColumn = a.IsImportColumn,
               tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
               //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)

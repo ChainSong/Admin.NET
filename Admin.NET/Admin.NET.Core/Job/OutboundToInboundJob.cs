@@ -41,7 +41,7 @@ public class OutboundToInboundJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        //return;
+        return;
 
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
