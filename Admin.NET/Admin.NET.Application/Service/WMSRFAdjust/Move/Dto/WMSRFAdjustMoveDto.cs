@@ -7,6 +7,7 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Application.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,8 +38,12 @@ public class WMSRFAdjustMoveInput
     /// </summary>
     public string Type { get; set; }
 }
+public class WMSAddAdjustRFMoveInput: WMSRFAdjustMoveInput
+{
+    public WMSRFAdjustMove detail { get; set; }
+}
 
-public class WMSRFAdjustMoveOutput
+public class WMSRFAdjustMove
 {
     /// <summary>
     /// 扫描的数据
@@ -54,5 +59,35 @@ public class WMSRFAdjustMoveResponse
     public string Result { get; set; }
     public string? Message { get; set; }
     public string? SerialNumber { get; set; }
-    public List<WMSRFAdjustMoveOutput> outputs { get; set; } = new List<WMSRFAdjustMoveOutput>();
+    public List<WMSRFAdjustMove> outputs { get; set; } = new List<WMSRFAdjustMove>();
+}
+
+public class WMSRFAdjustAddResponse: OrderStatusDto
+{
+    public long AdjustmentId { get; set; }
+}
+
+public class WMSRFAdjustMoveCompleteInput
+{
+    public long Id { get; set; }
+    /// <summary>
+    /// 客户Id
+    /// </summary>
+    public long? CustomerId { get; set; }
+    /// <summary>
+    /// 仓库Id
+    /// </summary>
+    public long? WarehouseId { get; set; }
+    /// <summary>
+    /// 扫描的数据
+    /// </summary>
+    public string? ScanValue { get; set; }
+    /// <summary>
+    /// 操作序列号
+    /// </summary>
+    public string? OpSerialNumber { get; set; }
+    /// <summary>
+    /// 操作类型
+    /// </summary>
+    public string Type { get; set; }
 }

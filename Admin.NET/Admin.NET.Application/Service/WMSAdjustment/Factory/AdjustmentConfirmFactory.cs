@@ -31,6 +31,8 @@ namespace Admin.NET.Application.Factory
                     return new AdjustmentConfirmUnfreezeDefaultStrategy();
                 case (0, AdjustmentTypeEnum.库存移动):
                     return new AdjustmentConfirmMoveDefaultStrategy();
+                case (0, AdjustmentTypeEnum.RF库存移动):
+                    return new AdjustmentConfirmMoveDefaultStrategy();
                 default:
                     switch (Enum.Parse(typeof(AdjustmentTypeEnum), adjustmentType))
                     {
@@ -43,6 +45,8 @@ namespace Admin.NET.Application.Factory
                         case (AdjustmentTypeEnum.库存解冻):
                             return new AdjustmentConfirmUnfreezeDefaultStrategy();
                         case (AdjustmentTypeEnum.库存移动):
+                            return new AdjustmentConfirmMoveDefaultStrategy();
+                        case (AdjustmentTypeEnum.RF库存移动):
                             return new AdjustmentConfirmMoveDefaultStrategy();
                     }
                     return new AdjustmentConfirmDefaultStrategy();

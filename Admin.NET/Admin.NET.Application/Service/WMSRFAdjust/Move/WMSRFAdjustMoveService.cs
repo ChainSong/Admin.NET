@@ -38,6 +38,8 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SysCacheService _sysCacheService;
     private readonly UserManager _userManager;
+    private readonly WMSAdjustmentService _wmsAdjustmentService;
+    private readonly SqlSugarRepository<WMSAdjustment> _repAdjustment;
     public WMSRFAdjustMoveService(
         SqlSugarRepository<WMSInventoryUsable> inventoryRepo,
         SqlSugarRepository<WMSCustomer> customerRepo,
@@ -45,7 +47,9 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSLocation> locationRepo,
         SqlSugarRepository<WMSProduct> productRepo,
         SysCacheService sysCacheService,
-        UserManager userManager)
+        SqlSugarRepository<WMSAdjustment> repAdjustment,
+        UserManager userManager,
+        WMSAdjustmentService wmsAdjustmentService)
     {
         _repInventoryUsable = inventoryRepo;
         _repCustomer = customerRepo;
@@ -54,13 +58,14 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
         _repProduct = productRepo;
         _sysCacheService = sysCacheService;
         _userManager = userManager;
+        _wmsAdjustmentService = wmsAdjustmentService;
+        _repAdjustment = repAdjustment;
     }
     #endregion
 
     [HttpPost]
     [ApiDescriptionSettings(Name = "AdjustMoveCheckScan")]
     public async Task<WMSRFAdjustMoveResponse> AdjustMoveCheckScan(WMSRFAdjustMoveInput input)
-    
     {
         var typeEnum = Enum.TryParse<AdjustmentTypeEnum>(input.Type, out var parsedType)
        ? parsedType
@@ -68,15 +73,44 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
 
         IWMSRFAdjustMoveInterface factory = WMSRFAdjustMoveFactory.AddMove(typeEnum);
         factory.Init(
-            _repInventoryUsable, 
+            _repInventoryUsable,
             _repCustomer,
             _repWarehouse,
             _repLocation,
             _repProduct,
             _sysCacheService,
-            _userManager
+            _userManager,
+           _wmsAdjustmentService,
+           _repAdjustment
             );
         var response = await factory.CheckScanValue(input);
+        return response;
+    }
+
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "AdjustMove")]
+    public async Task<WMSRFAdjustMoveResponse> AdjustMove(WMSRFAdjustMoveCompleteInput input)
+    {
+        WMSRFAdjustMoveResponse response = new WMSRFAdjustMoveResponse();
+        var typeEnum = Enum.TryParse<AdjustmentTypeEnum>(input.Type, out var parsedType)
+       ? parsedType
+       : throw new ArgumentException($"无效的操作类型：{input.Type}");
+
+        IWMSRFAdjustMoveInterface factory = WMSRFAdjustMoveFactory.AddMove(typeEnum);
+        factory.Init(
+            _repInventoryUsable,
+            _repCustomer,
+            _repWarehouse,
+            _repLocation,
+            _repProduct,
+            _sysCacheService,
+            _userManager,
+           _wmsAdjustmentService,
+           _repAdjustment
+            );
+        List<long> Ids = new List<long>() { input.Id };
+        var result = await factory.CompleteAddjustmentMove(Ids);
         return response;
     }
 }

@@ -117,6 +117,9 @@ public class WMSAdjustmentDetail : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string PoCode { get; set; }
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string SoCode { get; set; } = "";
+
     /// <summary>
     /// 
     /// </summary>

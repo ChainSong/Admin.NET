@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Core.Service;
+using Admin.NET.Application.Dtos;
 
 namespace Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
 public interface IWMSRFAdjustMoveInterface
@@ -28,9 +29,12 @@ public interface IWMSRFAdjustMoveInterface
           SqlSugarRepository<WMSLocation> locationRepo,
           SqlSugarRepository<WMSProduct> productRepo,
           SysCacheService cacheService,
-          UserManager userManager
+          UserManager userManager,
+          WMSAdjustmentService wmsAdjustmentService,
+          SqlSugarRepository<WMSAdjustment> repAdjustment
       );
 
     Task<WMSRFAdjustMoveResponse> CheckScanValue(WMSRFAdjustMoveInput input);
-    Task<WMSRFAdjustMoveResponse> AddAdjustmentMove(WMSRFAdjustMoveInput input);
+    Task<WMSRFAdjustAddResponse> AddAdjustmentMove(WMSAddAdjustRFMoveInput input);
+    Task<Response<List<OrderStatusDto>>> CompleteAddjustmentMove(List<long> input);
 }

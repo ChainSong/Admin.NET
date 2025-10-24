@@ -8,11 +8,13 @@
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
 			<view class="cu-form-group">
 				<view class="title">请扫描</view>
+
 				<input placeholder="源库位 / SKU / 目标库位" v-model.trim="formData.scanValue" @confirm="handleScanConfirm"
 					@input="handleScanInput" confirm-type="done" type="text" focus />
 			</view>
 			<!-- 扫描数据展示表格 -->
 			<view class="scan-table-container">
+				{{this.formData}}
 				<uni-table border>
 					<uni-tr>
 						<uni-th width="80" align="center">源库位</uni-th>
@@ -21,10 +23,10 @@
 						<uni-th width="80" align="center">目标库位</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item, index) in scanData" :key="index">
-						<uni-td align="center">{{ item.sourceLocation }}</uni-td>
+						<uni-td align="center">{{ item.fromLocation }}</uni-td>
 						<uni-td align="center">{{ item.sku }}</uni-td>
 						<uni-td align="center">{{ item.qty }}</uni-td>
-						<uni-td align="center">{{ item.targetLocation }}</uni-td>
+						<uni-td align="center">{{ item.toLocation }}</uni-td>
 					</uni-tr>
 				</uni-table>
 			</view>
@@ -52,8 +54,8 @@
 					customerId: 0, // 默认空值，稍后从 URL 参数中获取
 					warehouseId: 0, // 默认空值，稍后从 URL 参数中获取
 					scanValue: '', // 扫描值
-					type:'库存移动',
-					opSerialNumber :'',
+					type: '库存移动',
+					opSerialNumber: '',
 				},
 				// 用于存储扫描数据
 				scanData: [],
@@ -109,30 +111,56 @@
 
 				this.loading = true
 				try {
-					const res = await checkScanValue({
+					let resReq = await checkScanValue({
 						customerId: this.formData.customerId,
 						warehouseId: this.formData.warehouseId,
 						scanValue: value,
-						type: this.formData.type
+						type: this.formData.type,
+						opSerialNumber: this.formData.opSerialNumber
 					})
-					console.log("res",res)
-					if (res?.result === 'Success') {
-						uni.showToast({
-							title: res.message || '扫描成功',
-							icon: 'success'
-						})
+					if (resReq.data.code === 200) {
+						let detailSkuRes = resReq.data.result
+						if (detailSkuRes.result === 'Success') {
 
-						// 更新操作序列号（后端生成的）
-						if (res.serialNumber)
-							this.formData.opSerialNumber = res.serialNumber
+							if (detailSkuRes.serialNumber)
+								this.formData.opSerialNumber = detailSkuRes.serialNumber
 
-						// 更新展示数据（后端返回 outputs）
-						if (res.outputs && res.outputs.length > 0) {
-							this.scanData = res.outputs
+							if (detailSkuRes.outputs && detailSkuRes.outputs.length > 0) {
+								this.scanData = detailSkuRes.outputs
+							}
+							uni.showToast({
+								title: detailSkuRes.message || '扫描成功',
+								icon: 'success'
+							})
+						} else {
+							uni.showToast({
+								title: detailSkuRes.message || `${detailSkuRes.result ,detailSkuRes.message}`,
+								icon: 'none'
+							})
+						}
+						console.log("detailSkuRes", detailSkuRes)
+						if (detailSkuRes.result === 'RFSuccess') {
+							//提示成功 并且清空当前扫描的数据
+							// 提示成功并且清空当前扫描的数据
+							uni.showToast({
+								title: '移库成功',
+								icon: 'success'
+							})
+							this.resetForm(); // 清空当前扫描的数据
+						}
+						if (detailSkuRes.result === 'RFFaild') {
+							//提示失败 清空当前扫描的数据并且返回上一层
+							// 提示失败，清空当前扫描的数据并返回上一层
+							uni.showToast({
+								title: '移库失败，请重试',
+								icon: 'none'
+							})
+							this.resetForm(); // 清空当前扫描的数据
+							this.comeBack(); // 关闭当前弹窗并返回
 						}
 					} else {
 						uni.showToast({
-							title: res?.message || `${res.data.result.result,res.data.result.message}`,
+							title: '扫描失败',
 							icon: 'none'
 						})
 					}
@@ -164,15 +192,17 @@
 					})
 
 					// 关闭弹窗
-					this.handleClose()
+					this.comeBack()
 
 				}, 1000)
 			},
 
 			// 关闭弹窗
-			handleClose() {
-				this.$emit('update:show', false)
-				this.$emit('close')
+			comeBack() {
+				// 扫描成功后返回上一层
+				uni.navigateBack({
+					delta: 1 // 返回上一层
+				});
 			},
 
 			// 重置表单

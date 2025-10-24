@@ -14,12 +14,11 @@
 				<uni-table border>
 					<uni-tr>
 						<uni-th width="100" align="center">移库单号</uni-th>
-						<uni-th width="100" align="center">创建时间</uni-th>
 						<uni-th width="100" align="center">操作</uni-th>
 					</uni-tr>
 					<uni-tr v-for="(item, index) in tableData" :key="index">
 						<uni-td align="center">{{ item.adjustmentNumber }}</uni-td>
-						<uni-td align="center">{{ item.createTime }}</uni-td>
+						<!-- <uni-td align="center">{{ item.creationTime }}</uni-td> -->
 						<uni-td align="center">
 							<button class="cu-btn bg-pink shadow round sm" @click="handleOperate(item)">
 								操作
@@ -55,7 +54,8 @@
 				materialList: [],
 				form: {
 					adjustmentNumber: '',
-					adjustmentStatus: 1
+					adjustmentStatus: 1,
+					adjustmentType:'RF库存移动'
 				},
 				tableData: []
 			}
