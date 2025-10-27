@@ -22,6 +22,7 @@ using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using XAct;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using Furion.FriendlyException;
+using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 
@@ -37,12 +38,13 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _wMSProductRep;
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
-
+    private readonly LogHelper _logHelper;
     public HachWMSReceivingService(
         SqlSugarRepository<HachWmsReceiving> hachWmsReceivingRep,
         SqlSugarRepository<WMSASN> wMSASNRep,
         SqlSugarRepository<WMSProduct> wMSProductRep,
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep,
+         LogHelper logHelper,
         UserManager userManager)
     {
         _hachWmsReceivingRep = hachWmsReceivingRep;
@@ -50,6 +52,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         _wMSProductRep = wMSProductRep;
         _userManager = userManager;
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _logHelper = logHelper;
     }
     [HttpPost]
     [Authorize]

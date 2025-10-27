@@ -21,6 +21,7 @@ using Admin.NET.Core.Service;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 
 namespace Admin.NET.Application.Service.WMSRFAdjust.Move.Strategy;
 public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
