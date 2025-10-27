@@ -4,6 +4,7 @@ let adjustListApi = '/api/wMSAdjustment/page';
 let selectCustomerApi = '/api/wMsCustomer/selectCustomer'
 let selectWarehouseApi = '/api/wMsWarehouse/selectWarehouse'
 let checkScanValueApi = '/api/wMSRFAdjustMove/adjustMoveCheckScan'
+let completeMoveApi = '/api/wMSRFAdjustMove/adjustMove'
 //  查询wMSAdjustmentMove
 export const pageAdjustList = (params) =>
 	request({
@@ -35,3 +36,12 @@ export const checkScanValue = (params) =>
 		method: 'post',
 		data: params,
 	});
+	
+	
+	//  校验扫描值
+	export const completeMove = (params) =>
+		request({
+			url: completeMoveApi,
+			method: 'post',
+			data: params,
+		});

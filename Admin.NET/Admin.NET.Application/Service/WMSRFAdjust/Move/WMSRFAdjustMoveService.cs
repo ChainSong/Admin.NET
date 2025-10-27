@@ -109,8 +109,11 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
            _wmsAdjustmentService,
            _repAdjustment
             );
+
         List<long> Ids = new List<long>() { input.Id };
-        var result = await factory.CompleteAddjustmentMove(Ids);
+        
+        response.response = await factory.CompleteAddjustmentMove(Ids);
+
         return response;
     }
 }

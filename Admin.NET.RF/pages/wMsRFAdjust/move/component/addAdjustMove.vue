@@ -14,7 +14,6 @@
 			</view>
 			<!-- 扫描数据展示表格 -->
 			<view class="scan-table-container">
-				{{this.formData}}
 				<uni-table border>
 					<uni-tr>
 						<uni-th width="80" align="center">源库位</uni-th>

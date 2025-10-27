@@ -18,10 +18,12 @@
 					</uni-tr>
 					<uni-tr v-for="(item, index) in tableData" :key="index">
 						<uni-td align="center">{{ item.adjustmentNumber }}</uni-td>
-						<!-- <uni-td align="center">{{ item.creationTime }}</uni-td> -->
 						<uni-td align="center">
 							<button class="cu-btn bg-pink shadow round sm" @click="handleOperate(item)">
-								操作
+								移库
+							</button>
+							<button class="cu-btn bg-pink shadow round sm" @click="handleOperateCancel(item)">
+								取消
 							</button>
 						</uni-td>
 					</uni-tr>
@@ -39,7 +41,8 @@
 	import SelectCustomerAndWarehouse from '@/pages/wMsRFAdjust/move/component/selectCustomerAndWarehouse.vue'
 	import AddAdjustmentModal from '@/pages/wMsRFAdjust/move/component/addAdjustMove.vue'
 	import {
-		pageAdjustList
+		pageAdjustList,
+		completeMove
 	} from '@/services/wMsRFAdjust/move/move.js'
 	export default {
 		components: {
@@ -55,7 +58,7 @@
 				form: {
 					adjustmentNumber: '',
 					adjustmentStatus: 1,
-					adjustmentType:'RF库存移动'
+					adjustmentType: 'RF库存移动'
 				},
 				tableData: []
 			}
@@ -102,6 +105,55 @@
 			// 弹窗关闭回调
 			handleModalClose() {
 				console.log('弹窗已关闭')
+			},
+			async handleOperate(item) {
+				uni.showModal({
+					title: '确认操作',
+					content: `是否确认移动订单【${item.adjustmentNumber}】？`,
+					confirmText: '确认',
+					cancelText: '取消',
+					success: async (res) => {
+						if (res.confirm) {
+							let result = await completeMove({
+								id: item.id,
+								type: "RF库存移动"
+							})
+							// console.log("移库：", result.data.result.response.msg);
+							// // 用户点击确认
+							console.log("移库结果：", result.data.result.response.data[0]);
+							// console.log("✅ 确认移库：", item);
+							uni.showToast({
+								title: `${result.data.result.response.data[0].msg}`,
+								icon: 'none'
+							});
+						} else {
+							// 用户点击取消
+							console.log("❌ 取消移库操作");
+						}
+					}
+				});
+			},
+			handleOperateCancel(item) {
+				uni.showModal({
+					title: '确认取消',
+					content: `确定要取消移库单【${item.adjustmentNumber}】吗？`,
+					confirmText: '确认取消',
+					cancelText: '返回',
+					success: async (res) => {
+						if (res.confirm) {
+							// 用户确认取消
+							console.log("🧹 已取消移库单：", item);
+							// 这里调用取消的API
+							// await cancelMove(item.adjustmentNumber);
+							uni.showToast({
+								title: '已取消移库',
+								icon: 'none'
+							});
+						} else {
+							console.log("❌ 用户返回，不取消");
+						}
+					}
+				});
 			},
 		},
 		// 生命周期钩子会在组件生命周期的各个不同阶段被调用 例如这个函数就会在组件挂载完成后被调用

@@ -23,6 +23,7 @@ using XAct;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using Furion.FriendlyException;
 using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
+using Admin.NET.Application.Service.ExternalDockingInterface.HachWms.Enumerate;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 
@@ -39,12 +40,15 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
     private readonly LogHelper _logHelper;
+    private readonly GetEnum _enumRep;
+
     public HachWMSReceivingService(
         SqlSugarRepository<HachWmsReceiving> hachWmsReceivingRep,
         SqlSugarRepository<WMSASN> wMSASNRep,
         SqlSugarRepository<WMSProduct> wMSProductRep,
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep,
          LogHelper logHelper,
+         GetEnum enumRep,
         UserManager userManager)
     {
         _hachWmsReceivingRep = hachWmsReceivingRep;
@@ -53,6 +57,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         _userManager = userManager;
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
         _logHelper = logHelper;
+        _enumRep = enumRep;
     }
     [HttpPost]
     [Authorize]
@@ -315,10 +320,11 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             WarehouseId = cfg.WarehouseId!.Value,
             WarehouseName = cfg.WarehouseName,
             ASNStatus = 1, // TODO: 常量化/枚举化
-            ReceiptType = receiving.DocType,
+            ReceiptType = _enumRep.GetEnumDescriptionOrDefault<IbOrderStatusEnum>(receiving.DocType,"收货入库"),
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = now,
-            TenantId = cfg.TenantId ?? 1300000000001 // 尽量从配置/上下文取
+            TenantId = cfg.TenantId ?? 1300000000001, // 尽量从配置/上下文取
+            ExpectDate=DateTime.Now
         };
 
         var prodMap = productLight.ToDictionary(p => ((string)p.SKU).ToUpper(), p => p);

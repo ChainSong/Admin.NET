@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service.ExternalDockingInterface.HachWms.Enumerate;
-public enum OrderStatusEnum
+public enum OrderRespStatusEnum
 {
     //请求数据不能为空
     [Description("The request data cannot be empty")]

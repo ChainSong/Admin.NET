@@ -40,6 +40,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
     private readonly UserManager _userManager;
     private readonly LogHelper _logHelper;
+    private readonly GetEnum _enumRep;
 
     public HachWmsOutBoundService(
         SqlSugarRepository<HachWmsOutBound> hachWmsOutBoundRep,
@@ -47,7 +48,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSProduct> wMSProductRep,
         SqlSugarRepository<WMSOrderAddress> wMSOrderAddressRep,
         UserManager userManager,
-        LogHelper logHelper,
+         GetEnum enumRep,
+    LogHelper logHelper,
 
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
@@ -57,6 +59,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
         _userManager = userManager;
         _logHelper = logHelper;
+        _enumRep = enumRep;
     }
 
     [HttpPost]
@@ -100,7 +103,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         var response = new HachWMSResponse { Success = true, Result = "success", Items = new List<HachWMSDetailResponse>() };
 
         if (input == null || input.Count == 0)
-            return new HachWMSResponse { Success = false, Result = OrderStatusEnum.RequestDataEmpty.GetDescription() };
+            return new HachWMSResponse { Success = false, Result = OrderRespStatusEnum.RequestDataEmpty.GetDescription() };
         if (input.Count > MaxBatch)
         {
             //单次最多允许 { MaxBatch}条请求，当前 { input.Count}条
@@ -110,7 +113,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         // 获取客户授权配置
         var wmsAuthorizationConfig = await GetCustomerInfo("putSOData");
         if (wmsAuthorizationConfig == null)
-            return new HachWMSResponse { Success = false, Result = OrderStatusEnum.NonPermissions.GetDescription() };
+            return new HachWMSResponse { Success = false, Result = OrderRespStatusEnum.NonPermissions.GetDescription() };
         #endregion
 
         #region 外层事务控制：整体批量回滚
@@ -128,7 +131,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 {
                     #region Step 1：参数与数据校验 
                     if (string.IsNullOrWhiteSpace(syncOrderNo))
-                        throw new Exception(OrderStatusEnum.OBMissingOrder.GetDescription());
+                        throw new Exception(OrderRespStatusEnum.OBMissingOrder.GetDescription());
                     //订单：｛syncOrderNo｝详细信息为空
                     if (order.items == null || order.items.Count == 0)
                         throw new Exception($"Order:  {syncOrderNo} details are empty");
@@ -211,7 +214,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                         ex.Message,
                         false
                     );
-                   
+
                     throw; // 抛出触发事务回滚
                 }
             }
@@ -248,8 +251,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 true
             );
         }
-        #endregion 
-            
+        #endregion
+
         return response;
     }
 
@@ -287,7 +290,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             CustomerName = wmsAuthorizationConfig.CustomerName,
             WarehouseId = wmsAuthorizationConfig.WarehouseId.Value,
             WarehouseName = wmsAuthorizationConfig.WarehouseName,
-            OrderType = outBound.DocType,
+            OrderType = _enumRep.GetEnumDescriptionOrDefault<ObOrderStatusEnum>(outBound.DocType, "大仓出库"),
             PreOrderStatus = 1,
             OrderTime = Convert.ToDateTime(outBound.ScheduleShippingDate),
             DetailCount = outBound.items.Count,
@@ -298,6 +301,22 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         // 构造明细表
         var prodMap = productLight.ToDictionary(p => p.SKU.ToUpper(), p => p);
         var details = new List<WMSPreOrderDetail>();
+
+        //构造地址
+        var address = new WMSOrderAddress()
+        {
+            PreOrderNumber = wMSPreOrder.PreOrderNumber,
+            ExternOrderNumber = wMSPreOrder.ExternOrderNumber,
+            Name = outBound.ContactName,
+            CompanyName = outBound.CustomerName,
+            CompanyType = "终端用户",
+            ShipType = "是",
+            Phone = outBound.Telephone,
+            Address = outBound.Address,
+            CreationTime = DateTime.Now,
+            Creator = _userManager.UserId.ToString()
+            ,TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
+        };
 
         foreach (var item in outBound.items)
         {
@@ -316,7 +335,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 LineNumber = item.LineNumber,
                 SKU = item.ItemNumber,
                 GoodsName = item.ItemDescription,
-                GoodsType = prod.GoodsType,
+                GoodsType = "A品",
                 OrderQty = Convert.ToDouble(item.Quantity),
                 ActualQty = 0,
                 PoCode = outBound.ContractNo,
@@ -330,7 +349,11 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         }
         // 导航写入主从表
         wMSPreOrder.Details = details;
-        await _wMSPreorderRep.Context.InsertNav(wMSPreOrder).Include(a => a.Details).ExecuteReturnEntityAsync();
+        wMSPreOrder.OrderAddress = address;
+        await _wMSPreorderRep.Context.InsertNav(wMSPreOrder)
+            .Include(a => a.Details)
+            .Include(a => a.OrderAddress)
+            .ExecuteReturnEntityAsync();
         return res;
     }
 
