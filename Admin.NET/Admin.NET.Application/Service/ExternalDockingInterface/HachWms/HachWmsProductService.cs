@@ -9,6 +9,7 @@
 
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using Admin.NET.Application.Service.ExternalDocking_Interface.HachWms.Dto;
+using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -39,11 +40,12 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSHachCustomerMapping> _wMSHachCustomerMappingRep;
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
     private readonly UserManager _userManager;
-
+    private readonly LogHelper _logHelper;
     public HachWmsProductService(SqlSugarRepository<HachWmsProduct> hachWmsProductRep
         , SqlSugarRepository<WMSHachCustomerMapping> wMSHachCustomerMappingRep,
         SqlSugarRepository<WMSProduct> wMSProductRep,
         UserManager userManager,
+        LogHelper logHelper,
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
         _hachWmsProductRep = hachWmsProductRep;
@@ -51,6 +53,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
         _wMSProductRep = wMSProductRep;
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
         _userManager = userManager;
+        _logHelper = logHelper;
     }
     #endregion
 
@@ -63,6 +66,24 @@ public class HachWmsProductService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "putSKUData")]
     public async Task<HachWMSResponse> asyncSyncProductData(List<HachWmsProductInput> input)
     {
+        // 生成批次号（日志追踪唯一标识）
+        string batchId = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
+        // 记录上游请求原始报文
+        string jsonPayload = System.Text.Json.JsonSerializer.Serialize(input, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        await _logHelper.LogAsync(
+            LogHelper.LogMainType.主档数据下发,
+            batchId,
+            "BATCH",
+            LogHelper.LogLevel.Info,
+            "收到上游请求报文",
+            true,
+            jsonPayload
+        );
+
         if (_userManager.UserId==null)
         {
             throw Oops.Oh(ErrorCode.Unauthorized);

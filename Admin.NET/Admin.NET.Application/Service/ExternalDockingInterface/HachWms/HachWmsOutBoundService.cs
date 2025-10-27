@@ -92,8 +92,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             LogHelper.LogLevel.Info,
            ErrorCode.Unauthorized.GetDescription(),
             true,
-            jsonPayload
-        );
+            "");
             throw Oops.Oh(ErrorCode.Unauthorized);
         }
 

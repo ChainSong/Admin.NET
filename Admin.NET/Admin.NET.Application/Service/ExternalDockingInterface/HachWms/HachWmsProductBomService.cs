@@ -21,6 +21,7 @@ using Furion.FriendlyException;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
 using Admin.NET.Express.Strategy.STExpress.Dto.STRequest;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchResponse.Types;
+using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 
 namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms;
 /// <summary>
@@ -33,16 +34,16 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
     #region 依赖注入
     private readonly SqlSugarRepository<HachWmsProductBom> _hachWmsProductBomRep;
     private readonly SqlSugarRepository<HachWmsProductBomDetail> _wMSProductBomDetailRep;
-
     private readonly SqlSugarRepository<WMSProduct> _wMSProductRep;
     private readonly SqlSugarRepository<WMSProductBom> _wMSProductBomRep;
-
     private readonly SqlSugarRepository<WMSHachCustomerMapping> _wMSHachCustomerMappingRep;
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
     private readonly UserManager _userManager;
+    private readonly LogHelper _logHelper;
 
     public HachWmsProductBomService(SqlSugarRepository<HachWmsProductBom> hachWmsProductBomRep
         , SqlSugarRepository<HachWmsProductBomDetail> wMSProductBomDetailRep,
+         LogHelper logHelper,
         SqlSugarRepository<WMSProduct> wMSProductRep, SqlSugarRepository<WMSProductBom> wMSProductBomRep,
         UserManager userManager, SqlSugarRepository<WMSHachCustomerMapping> wMSHachCustomerMappingRep,
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
@@ -54,6 +55,7 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
         _wMSProductBomRep = wMSProductBomRep;
         _wMSHachCustomerMappingRep = wMSHachCustomerMappingRep;
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _logHelper = logHelper;
     }
     #endregion
 
@@ -66,11 +68,25 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "putBOMData")]
     public async Task<HachWMSResponse> asyncSyncProductBomData(List<HachWmsProductBomInput> input)
     {
+        // 生成批次号（日志追踪唯一标识）
+        string batchId = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
+        // 记录上游请求原始报文
+        string jsonPayload = System.Text.Json.JsonSerializer.Serialize(input, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        await _logHelper.LogAsync(
+            LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+            LogHelper.LogLevel.Info, "收到上游请求报文", true);
+
         if (_userManager.UserId == null)
         {
+            await _logHelper.LogAsync(
+           LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+           LogHelper.LogLevel.Info, "未经授权", true);
             throw Oops.Oh(ErrorCode.Unauthorized);
         }
-
         HachWMSResponse response = new HachWMSResponse()
         {
             Success = true,
@@ -81,17 +97,33 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
         const int MaxBatch = 20;
         //入参不能为空
         if (input == null || input.Count == 0)
+        {
+            await _logHelper.LogAsync(
+         LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+         LogHelper.LogLevel.Info, "请求参数错误：入参不能为空", true);
             return new HachWMSResponse { Success = false, Result = ErrorCode.BadRequest.GetDescription() };
+        }
         //单次请求最多允许20条，当前21条
         if (input.Count > MaxBatch)
+        {
+            await _logHelper.LogAsync(
+             LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+             LogHelper.LogLevel.Info, $"单次请求最多允许 {MaxBatch}条，当前{input.Count}条", true);
             return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
+
+        }
 
         HachWmsProductBom hachWmsProductBom = new HachWmsProductBom();
         List<HachWmsAuthorizationConfig> wmsAuthorizationConfigList = new List<HachWmsAuthorizationConfig>();
         wmsAuthorizationConfigList = await GetCustomerInfo("putBOMData");
 
         if (wmsAuthorizationConfigList == null || wmsAuthorizationConfigList.Count == 0)
+        {
+            await _logHelper.LogAsync(
+          LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+          LogHelper.LogLevel.Info, $"没有匹配的可用客户配置（AppId/接口权限）", true);
             return new HachWMSResponse { Success = false, Result = "no available customer configuration (AppId/interface permissions) matched" };
+        }
 
         foreach (var bom in input)
         {
@@ -110,6 +142,9 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
                 }
                 catch (Exception ex)
                 {
+                     await _logHelper.LogAsync(
+                     LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+                     LogHelper.LogLevel.Info, $"ItemNumber：{bom.ItemNumber} 处理异常：{ex.Message}", true);
                     // 捕获异常并记录每个客户的失败情况
                     orderResult.Remark = $"CustomerName:{customer.CustomerName}";
                     orderResult.Message = $"ItemNumber：{bom.ItemNumber} 处理异常：{ex.Message}";

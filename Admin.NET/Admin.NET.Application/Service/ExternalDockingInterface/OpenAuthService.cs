@@ -9,6 +9,7 @@
 
 using Admin.NET.Application.Const;
 using Admin.NET.Application.Service.ExternalDocking_Interface.Dto;
+using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
@@ -38,15 +39,18 @@ public class OpenAuthService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<SysUser> _sysUserRep;
     private readonly SysConfigService _sysConfigService;
     private readonly SqlSugarRepository<HachWmsAuthorizationConfig> _hachWmsAuthorizationConfigRep;
+    private readonly LogHelper _logHelper;
 
     public OpenAuthService(SysAuthService sysAuthRep, SqlSugarRepository<SysUser> sysUserRep,
       SysConfigService sysConfigService,
+        LogHelper logHelper,
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
     {
         _sysAuthRep = sysAuthRep;
         _sysUserRep = sysUserRep;
         _sysConfigService = sysConfigService;
         _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _logHelper = logHelper;
     }
 
     [HttpPost]
@@ -54,8 +58,29 @@ public class OpenAuthService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "open-auth")]
     public async Task<TokenOutput> Token([FromBody] OpenAuthInput input)
     {
+        // 生成批次号（日志追踪唯一标识）
+        string batchId = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
+        // 记录上游请求原始报文
+        string jsonPayload = System.Text.Json.JsonSerializer.Serialize(input, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        await _logHelper.LogAsync(
+            LogHelper.LogMainType.身份鉴权,
+            batchId,
+            "BATCH",
+            LogHelper.LogLevel.Info,
+            "收到上游请求报文",
+            true,
+            jsonPayload
+        );
+
         if (input.AppId == null || string.IsNullOrEmpty(input.AppSecret))
         {
+            await _logHelper.LogAsync(LogHelper.LogMainType.身份鉴权, batchId, "BATCH", LogHelper.LogLevel.Info,
+          $"appId：{input.AppId}和appSecret：{input.AppSecret}不能为空", true, jsonPayload );
+
             throw Oops.Oh(ErrorCode.UnauthorizedEmpty.GetDescription());
         }
 
@@ -71,6 +96,8 @@ public class OpenAuthService : IDynamicApiController, ITransient
 
         if (app == null)
         {
+            await _logHelper.LogAsync(LogHelper.LogMainType.身份鉴权, batchId, "BATCH", LogHelper.LogLevel.Info,
+         $"appId：{input.AppId}和appSecret：{input.AppSecret} 无效的凭证 ", true, jsonPayload);
             throw Oops.Oh(ErrorCode.Unauthorized.GetDescription()); // 无效的凭证
         }
         var tokenOutput = await CreateToken(app);

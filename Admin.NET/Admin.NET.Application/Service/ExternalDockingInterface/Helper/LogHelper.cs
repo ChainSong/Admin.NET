@@ -30,6 +30,7 @@ namespace Admin.NET.Application.Service.ExternalDockingInterface.Helper
 
         public enum LogMainType
         {
+            身份鉴权,
             主档数据下发,
             主档BOM数据下发,
             入库订单下发,
