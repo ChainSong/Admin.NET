@@ -20,11 +20,11 @@
 						<uni-td align="center">{{ item.adjustmentNumber }}</uni-td>
 						<uni-td align="center">
 							<button class="cu-btn bg-pink shadow round sm" @click="handleOperate(item)">
-								移库
+								完成
 							</button>
-							<button class="cu-btn bg-pink shadow round sm" @click="handleOperateCancel(item)">
+							<!-- <button class="cu-btn bg-pink shadow round sm" @click="handleOperateCancel(item)">
 								取消
-							</button>
+							</button> -->
 						</uni-td>
 					</uni-tr>
 				</uni-table>
@@ -71,13 +71,13 @@
 			},
 			//查询
 			async clickQuery(adjustmentNumber) {
-				if (adjustmentNumber == '') {
-					uni.showToast({
-						title: '请输入移库单号',
-						icon: 'none'
-					});
-					return;
-				}
+				// if (adjustmentNumber == '') {
+				// 	uni.showToast({
+				// 		title: '请输入移库单号',
+				// 		icon: 'none'
+				// 	});
+				// 	return;
+				// }
 				uni.showLoading({
 					title: '加载中...'
 				});
@@ -118,9 +118,6 @@
 								id: item.id,
 								type: "RF库存移动"
 							})
-							// console.log("移库：", result.data.result.response.msg);
-							// // 用户点击确认
-							console.log("移库结果：", result.data.result.response.data[0]);
 							// console.log("✅ 确认移库：", item);
 							uni.showToast({
 								title: `${result.data.result.response.data[0].msg}`,
@@ -129,28 +126,6 @@
 						} else {
 							// 用户点击取消
 							console.log("❌ 取消移库操作");
-						}
-					}
-				});
-			},
-			handleOperateCancel(item) {
-				uni.showModal({
-					title: '确认取消',
-					content: `确定要取消移库单【${item.adjustmentNumber}】吗？`,
-					confirmText: '确认取消',
-					cancelText: '返回',
-					success: async (res) => {
-						if (res.confirm) {
-							// 用户确认取消
-							console.log("🧹 已取消移库单：", item);
-							// 这里调用取消的API
-							// await cancelMove(item.adjustmentNumber);
-							uni.showToast({
-								title: '已取消移库',
-								icon: 'none'
-							});
-						} else {
-							console.log("❌ 用户返回，不取消");
 						}
 					}
 				});

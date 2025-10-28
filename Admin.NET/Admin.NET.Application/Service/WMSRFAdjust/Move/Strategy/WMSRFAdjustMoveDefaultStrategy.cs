@@ -7,21 +7,15 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
 using Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
-using Admin.NET.Core.Entity;
+using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
-using System;
+using Admin.NET.Core.Entity;
+using Admin.NET.Core.Service;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
-using StackExchange.Profiling.Internal;
-using Admin.NET.Core.Service;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
-using Admin.NET.Common.SnowflakeCommon;
-using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.ExternalDockingInterface.Helper;
 
 namespace Admin.NET.Application.Service.WMSRFAdjust.Move.Strategy;
 public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
@@ -35,19 +29,11 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     private SysCacheService _sysCacheService;
     private UserManager _userManager;
     private WMSAdjustmentService _wmsAdjustmentService;
-
     private readonly TimeSpan timeSpan = TimeSpan.FromHours(72);
-
-    public void Init(
-        SqlSugarRepository<WMSInventoryUsable> inventoryRepo,
-          SqlSugarRepository<WMSCustomer> customerRepo,
-          SqlSugarRepository<WMSWarehouse> warehouseRepo,
-          SqlSugarRepository<WMSLocation> locationRepo,
-          SqlSugarRepository<WMSProduct> productRepo,
-          SysCacheService cacheService,
-          UserManager userManager,
-          WMSAdjustmentService wmsAdjustmentService,
-          SqlSugarRepository<WMSAdjustment> repAdjustment)
+    public void Init(SqlSugarRepository<WMSInventoryUsable> inventoryRepo,SqlSugarRepository<WMSCustomer> customerRepo,
+    SqlSugarRepository<WMSWarehouse> warehouseRepo,SqlSugarRepository<WMSLocation> locationRepo,
+    SqlSugarRepository<WMSProduct> productRepo,SysCacheService cacheService,UserManager userManager,
+    WMSAdjustmentService wmsAdjustmentService,SqlSugarRepository<WMSAdjustment> repAdjustment)
     {
         _repInventoryUsable = inventoryRepo;
         _repCustomer = customerRepo;
@@ -67,7 +53,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public async Task<WMSRFAdjustMoveResponse> CheckScanValue(WMSRFAdjustMoveInput input)
+    public  async Task<WMSRFAdjustMoveResponse> CheckScanValue(WMSRFAdjustMoveInput input)
     {
         var response = new WMSRFAdjustMoveResponse();
         var output = new WMSRFAdjustMove();
@@ -86,6 +72,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         }
         #endregion
 
+        #region 缓存操作信息
         //如果操作单号为空则生成新的操作单号
         if (string.IsNullOrEmpty(input.OpSerialNumber))
             input.OpSerialNumber = $"{Guid.NewGuid():N}".Substring(0, 5) + DateTime.Now.ToString("MMddyyyy");
@@ -94,6 +81,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
 
         // 获取缓存操作信息
         var opInfo = _sysCacheService.Get<WMSRFAdjustMove>(cacheKey);
+        #endregion
 
         #region 校验扫描值
         //不需要跟 customerId 和 warehouseId 进行关联校验
@@ -135,7 +123,6 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                 if (string.IsNullOrEmpty(opInfo.FromLocation))
                 {
                     output.FromLocation = FormLocation.Data;
-                    //_sysCacheService.Set(_userManager.Account + "WMSRFAdjust_Move" + input.OpSerialNumber, output, timeSpan);
                     UpdateCache(_userManager.Account + "WMSRFAdjust_Move" + input.OpSerialNumber, output);
                     return new WMSRFAdjustMoveResponse
                     {
@@ -145,25 +132,15 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                     };
                 }
                 //扫描目标库位
-                if (string.IsNullOrEmpty(opInfo.ToLocation))
+                if (!string.IsNullOrEmpty(opInfo.FromLocation) 
+                    && !string.IsNullOrEmpty(opInfo.SKU)
+                    && string.IsNullOrEmpty(opInfo.ToLocation))
                 {
-                    if (string.IsNullOrEmpty(opInfo.SKU))
-                    {
-                        return new WMSRFAdjustMoveResponse
-                        {
-                            Result = "Success",
-                            Message = "请先扫描SKU",
-                            SerialNumber = input.OpSerialNumber
-                        };
-                    }
-
                     opInfo.ToLocation = FormLocation.Data;
-                    //_sysCacheService.Set(cacheKey, opInfo, timeSpan);
                     UpdateCache(cacheKey, opInfo);
 
                     //扫描完目标库位之后就开始建单
                     WMSAddAdjustRFMoveInput addMoveOrder = new WMSAddAdjustRFMoveInput();
-
 
                     addMoveOrder = input.Adapt<WMSAddAdjustRFMoveInput>();
                     addMoveOrder.detail = _sysCacheService.Get<WMSRFAdjustMove>(cacheKey);
@@ -171,35 +148,67 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                     var addMoveRep = await AddAdjustmentMove(addMoveOrder);
                     if (addMoveRep.StatusCode == Dtos.Enum.StatusCode.Success)
                     {
-                        var CodeCompleteRep = await CompleteAddjustmentMove(new List<long> { addMoveRep.AdjustmentId });
-
-                        if (CodeCompleteRep.Code == Dtos.Enum.StatusCode.Success)
+                        // 新增移库单成功之后就清除缓存
+                        _sysCacheService.Remove(cacheKey);
+                        return new WMSRFAdjustMoveResponse
                         {
-                            // 完成移库后清除缓存
-                            _sysCacheService.Remove(cacheKey);
+                            Result = "RFSuccess",
+                            Message = "目标库位扫描完成，新增移库单成功",
+                            SerialNumber = input.OpSerialNumber,
+                            AdjustmentId= addMoveRep.AdjustmentId
+                        };
 
-                            return new WMSRFAdjustMoveResponse
-                            {
-                                Result = "RFSuccess",
-                                Message = "目标库位扫描完成，移动成功！",
-                                SerialNumber = input.OpSerialNumber
-                            };
-                        }
-                        else
-                        {
-                            return new WMSRFAdjustMoveResponse
-                            {
-                                Result = "RFFaild",
-                                Message = $"移库失败：{CodeCompleteRep.Data[0].Msg}",
-                                SerialNumber = input.OpSerialNumber
-                            };
-
-                        }
-                      
                     }
+                    else
+                    {
+                        return new WMSRFAdjustMoveResponse
+                        {
+                            Result = "RFFaild",
+                            Message = $"新增移库单失败：{addMoveRep.Msg}",
+                            SerialNumber = input.OpSerialNumber
+                        };
+                    }
+                }
+                //扫描目标库位不为空
+                if (!string.IsNullOrEmpty(opInfo.FromLocation)
+                    && !string.IsNullOrEmpty(opInfo.SKU)
+                    && !string.IsNullOrEmpty(opInfo.ToLocation))
+                {
+                    //更新目标库位
+                    opInfo.ToLocation = FormLocation.Data;
+                    UpdateCache(cacheKey, opInfo);
 
+                    //扫描完目标库位之后就开始建单
+                    WMSAddAdjustRFMoveInput addMoveOrder = new WMSAddAdjustRFMoveInput();
+
+                    addMoveOrder = input.Adapt<WMSAddAdjustRFMoveInput>();
+                    addMoveOrder.detail = _sysCacheService.Get<WMSRFAdjustMove>(cacheKey);
+
+                    var addMoveRep = await AddAdjustmentMove(addMoveOrder);
+                    if (addMoveRep.StatusCode == Dtos.Enum.StatusCode.Success)
+                    {
+                        // 新增移库单成功之后就清除缓存
+                        _sysCacheService.Remove(cacheKey);
+                        return new WMSRFAdjustMoveResponse
+                        {
+                            Result = "RFSuccess",
+                            Message = "目标库位扫描完成，新增移库单成功",
+                            SerialNumber = input.OpSerialNumber,
+                            AdjustmentId = addMoveRep.AdjustmentId
+                        };
+                    }
+                    else
+                    {
+                        return new WMSRFAdjustMoveResponse
+                        {
+                            Result = "RFFaild",
+                            Message = $"新增移库单失败：{addMoveRep.Msg}",
+                            SerialNumber = input.OpSerialNumber
+                        };
+                    }
                 }
             }
+            //扫描物料不为空
             if (SKU != null)
             {
                 if (string.IsNullOrEmpty(opInfo.FromLocation))
@@ -215,17 +224,22 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                 {
                     opInfo.SKU = SKU.Data;
                     opInfo.Qty = 1; // 避免空引用
-                    //_sysCacheService.Set(cacheKey, opInfo, timeSpan);
                     UpdateCache(cacheKey, opInfo);
-
                 }
                 else
                 {
-                    opInfo.SKU = SKU.Data;
-                    opInfo.Qty = (opInfo.Qty ?? 0) + 1; // 避免空引用
-                    //_sysCacheService.Set(cacheKey, opInfo, timeSpan);
-                    UpdateCache(cacheKey, opInfo);
-
+                    if (opInfo.SKU.Equals(SKU.Data))
+                    {
+                        opInfo.SKU = SKU.Data;
+                        opInfo.Qty = (opInfo.Qty ?? 0) + 1; // 避免空引用
+                        UpdateCache(cacheKey, opInfo);
+                    }
+                    else
+                    {
+                        opInfo.SKU = SKU.Data;
+                        opInfo.Qty = 1; // 避免空引用
+                        UpdateCache(cacheKey, opInfo);
+                    }
                 }
             }
         }
@@ -237,11 +251,8 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
             if (FormLocation != null)
             {
                 output.FromLocation = FormLocation.Data;
-                //_sysCacheService.Set(cacheKey, output, timeSpan);
                 UpdateCache(cacheKey, output);
-
             }
-
             if (SKU != null)
             {
                 return new WMSRFAdjustMoveResponse
@@ -262,13 +273,12 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         response.outputs.Add(opInfoed);
         return response;
     }
-
     /// <summary>
     /// 新增移库单
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public async Task<WMSRFAdjustAddResponse> AddAdjustmentMove(WMSAddAdjustRFMoveInput input)
+    public  async Task<WMSRFAdjustAddResponse> AddAdjustmentMove(WMSAddAdjustRFMoveInput input)
     {
         AddOrUpdateWMSAdjustmentInput addInput = new AddOrUpdateWMSAdjustmentInput();
 
@@ -290,7 +300,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         detail.WarehouseName = warehouseName;
 
         var (detailCustomerName, detailWarehouse) = await GetCustomerAndWarehouseNames(input.CustomerId.Value, input.WarehouseId.Value);
-        
+
         detail.CustomerName = detailCustomerName;
         detail.FromWarehouseName = detailWarehouse;
         detail.ToWarehouseName = detailWarehouse;
@@ -298,11 +308,11 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         detail.FromArea = _repLocation.AsQueryable().Where(a => a.Location == input.detail.FromLocation).Where(a => a.WarehouseId == input.WarehouseId).Select(a => a.AreaName).First();
         detail.ToArea = _repLocation.AsQueryable().Where(a => a.Location == input.detail.ToLocation).Where(a => a.WarehouseId == input.WarehouseId).Select(a => a.AreaName).First();
 
-        detail.FromGoodsType = _repProduct.AsQueryable().Where(a => a.SKU == input.detail.SKU).Where(a => a.CustomerId == input.CustomerId).Select(a => a.GoodsName).First();
-        detail.ToGoodsType = _repProduct.AsQueryable().Where(a => a.SKU == input.detail.SKU).Where(a => a.CustomerId == input.CustomerId).Select(a => a.GoodsName).First();
+        detail.FromGoodsType = "A品";
+        detail.ToGoodsType = "A品";
 
-        detail.FromUnitCode = "个";
-        detail.ToUnitCode = "个";
+        detail.FromUnitCode = "";
+        detail.ToUnitCode = "";
 
         detail.FromLocation = detail.FromLocation;
         detail.ToLocation = detail.ToLocation;
@@ -316,7 +326,9 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         detail.PoCode = "";
         detail.Weight = 0;
         detail.Volume = 0;
-
+        detail.BatchCode = "";
+        detail.FromOnwer = "";
+        detail.ToOnwer = "";
         detailList.Add(detail);
         addInput.Details = detailList;
 
@@ -332,8 +344,12 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                                 .First();
         return response;
     }
-
-    public async Task<Response<List<OrderStatusDto>>> CompleteAddjustmentMove(List<long> input)
+    /// <summary>
+    /// 完成移库单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    public  async Task<Response<List<OrderStatusDto>>> CompleteAddjustmentMove(List<long> input)
     {
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>();
         return await _wmsAdjustmentService.Confirm(input);
@@ -350,11 +366,8 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                                                 .FirstAsync();
         return (customerName, warehouseName);
     }
-
     private void UpdateCache(string cacheKey, WMSRFAdjustMove output)
     {
         _sysCacheService.Set(cacheKey, output, timeSpan);
     }
-
-
 }

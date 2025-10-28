@@ -59,6 +59,7 @@ public class WMSRFAdjustMoveResponse
     public string Result { get; set; }
     public string? Message { get; set; }
     public string? SerialNumber { get; set; }
+    public long AdjustmentId { get; set; }
     public List<WMSRFAdjustMove> outputs { get; set; } = new List<WMSRFAdjustMove>();
     public Response<List<OrderStatusDto>> response { get; set; } = new Response<List<OrderStatusDto>>();
 }

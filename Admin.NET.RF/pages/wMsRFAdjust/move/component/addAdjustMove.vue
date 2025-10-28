@@ -9,7 +9,7 @@
 			<view class="cu-form-group">
 				<view class="title">请扫描</view>
 
-				<input placeholder="源库位 / SKU / 目标库位" v-model.trim="formData.scanValue" @confirm="handleScanConfirm"
+				<input placeholder="源库位 / SKU / 目标库位" v-model.trim="formData.scanValue" @confirm="handleScanAdd"
 					@input="handleScanInput" confirm-type="done" type="text" focus />
 			</view>
 			<!-- 扫描数据展示表格 -->
@@ -24,7 +24,12 @@
 					<uni-tr v-for="(item, index) in scanData" :key="index">
 						<uni-td align="center">{{ item.fromLocation }}</uni-td>
 						<uni-td align="center">{{ item.sku }}</uni-td>
-						<uni-td align="center">{{ item.qty }}</uni-td>
+						<!-- <uni-td align="center">{{ item.qty }}</uni-td> -->
+						<view class="qty-operator">
+							<button class="btn" @click="decreaseQty(index)" :disabled="!item.sku">-</button>
+							<text class="qty">{{ item.qty }}</text>
+							<button class="btn" @click="increaseQty(index)" :disabled="!item.sku">+</button>
+						</view>
 						<uni-td align="center">{{ item.toLocation }}</uni-td>
 					</uni-tr>
 				</uni-table>
@@ -35,7 +40,8 @@
 
 <script>
 	import {
-		checkScanValue
+		checkScanValue,
+		completeMove
 	} from '@/services/wMsRFAdjust/move/move.js'
 	export default {
 		name: 'AddAdjustmentModal',
@@ -53,7 +59,7 @@
 					customerId: 0, // 默认空值，稍后从 URL 参数中获取
 					warehouseId: 0, // 默认空值，稍后从 URL 参数中获取
 					scanValue: '', // 扫描值
-					type: '库存移动',
+					type: 'RF库存移动',
 					opSerialNumber: '',
 				},
 				// 用于存储扫描数据
@@ -100,14 +106,31 @@
 				if (this.scanTimer) clearTimeout(this.scanTimer)
 				this.scanTimer = setTimeout(() => {
 					if (e.detail.value && e.detail.value.length > 3) {
-						this.handleScanConfirm()
+						this.handleScanAdd()
 					}
 				}, 500)
 			},
-			async handleScanConfirm() {
+			increaseQty(index) {
+				const item = this.scanData[index]
+				if (!item.qty) this.$set(this.scanData[index], 'qty', 0)
+				this.scanData[index].qty++
+			},
+
+			decreaseQty(index) {
+				const item = this.scanData[index]
+				if (!item.qty) this.$set(this.scanData[index], 'qty', 0)
+				if (this.scanData[index].qty > 0) {
+					this.scanData[index].qty--
+				} else {
+					uni.showToast({
+						title: '数量不能小于 0',
+						icon: 'none'
+					})
+				}
+			},
+			async handleScanAdd() {
 				const value = this.formData.scanValue?.trim();
 				if (!value) return
-
 				this.loading = true
 				try {
 					let resReq = await checkScanValue({
@@ -119,6 +142,7 @@
 					})
 					if (resReq.data.code === 200) {
 						let detailSkuRes = resReq.data.result
+						console.log("detailSkuRes", detailSkuRes)
 						if (detailSkuRes.result === 'Success') {
 
 							if (detailSkuRes.serialNumber)
@@ -137,25 +161,19 @@
 								icon: 'none'
 							})
 						}
-						console.log("detailSkuRes", detailSkuRes)
 						if (detailSkuRes.result === 'RFSuccess') {
-							//提示成功 并且清空当前扫描的数据
-							// 提示成功并且清空当前扫描的数据
 							uni.showToast({
-								title: '移库成功',
+								title: '新增移库单成功',
 								icon: 'success'
 							})
-							this.resetForm(); // 清空当前扫描的数据
+							const addMoveOrder = this.handleScanConfirm(detailSkuRes.adjustmentId)
 						}
 						if (detailSkuRes.result === 'RFFaild') {
-							//提示失败 清空当前扫描的数据并且返回上一层
 							// 提示失败，清空当前扫描的数据并返回上一层
 							uni.showToast({
-								title: '移库失败，请重试',
+								title: '新增移库单失败，请重试',
 								icon: 'none'
 							})
-							this.resetForm(); // 清空当前扫描的数据
-							this.comeBack(); // 关闭当前弹窗并返回
 						}
 					} else {
 						uni.showToast({
@@ -163,55 +181,53 @@
 							icon: 'none'
 						})
 					}
-				} catch {} finally {
+				} catch {
+					this.resetForm(); // 清空当前扫描的数据
+					// ✅ 延时 1 秒再返回，确保用户能看到提示
+					setTimeout(() => {
+						this.comeBack();
+					}, 1000);
+				} finally {
 					this.loading = false;
 				}
 			},
-			// 提交表单
-			handleSubmit() {
-				if (!this.validateForm()) {
-					return
-				}
-
-				this.loading = true
-
-				// 模拟API调用
-				setTimeout(() => {
-					this.loading = false
-
-					// 触发成功事件，传递表单数据
-					this.$emit('success', {
-						...this.formData,
-						createTime: this.getCurrentTime()
+			async handleScanConfirm(adjustmentId) {
+				this.loading = true;
+				try {
+					let result = await completeMove({
+						id: adjustmentId,
+						type: "RF库存移动"
 					})
-
 					uni.showToast({
-						title: '新增成功',
-						icon: 'success'
-					})
+						title: `${result.data.result.response.data[0].msg}`,
+						icon: 'none'
+					});
+					setTimeout(() => {
+						this.comeBack();
+					}, 1000);
+				} catch {
+					this.loading = false;
+				} finally {
+					this.loading = false;
 
-					// 关闭弹窗
-					this.comeBack()
-
-				}, 1000)
+					this.resetForm();
+				}
 			},
-
 			// 关闭弹窗
 			comeBack() {
-				// 扫描成功后返回上一层
+				console.log("返回上一层") // 扫描成功后返回上一层
 				uni.navigateBack({
 					delta: 1 // 返回上一层
 				});
 			},
-
 			// 重置表单
 			resetForm() {
 				this.formData = {
 					scanValue: ''
 				}
+				this.scanData = []
 				this.loading = false
 			},
-
 			// 获取当前时间
 			getCurrentTime() {
 				const now = new Date()
@@ -227,5 +243,29 @@
 <style scoped>
 	.cu-form-group .title {
 		min-width: calc(4em + 15px);
+	}
+
+	.qty-operator {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+	}
+
+	.qty-operator .btn {
+		width: 50rpx;
+		height: 50rpx;
+		line-height: 50rpx;
+		text-align: center;
+		background-color: #007aff;
+		color: #fff;
+		border-radius: 8rpx;
+		font-size: 28rpx;
+	}
+
+	.qty-operator .qty {
+		width: 60rpx;
+		text-align: center;
+		font-weight: bold;
 	}
 </style>
