@@ -35,7 +35,7 @@ public class PackagePrintDefaultStrategy : IPackagePrintInterface
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     //包装
-    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 

@@ -9,12 +9,13 @@
         "ConnectionString": "server=192.168.10.233;uid=sa;pwd=M5l4d4s3;database=AdminNetWMS", // 库连接字符串
         //"ConnectionString": "server=10.131.129.213,1433;uid=taicangwms;pwd=Hach123456wms;database=TaicangWMS", // 库连接字符串 测试
         //"ConnectionString": "server=10.131.129.191;uid=taicangwms;pwd=Hach123456wms;database=TaicangWMS", // 库连接字符串HACH 正式
-        //"ConnectionString": "server=192.168.10.208,12000;uid=sysdb;pwd=SYSdb;database=AdminNetWMS", // 库连接字符串
+        //"ConnectionString": "server=sh-mssql-c90f5whu.sql.tencentcdb.com,20570;uid=Admini_New;pwd=PIn6d3HA6XZLo2URV3;database=AdminNetWMS", // 库连接字符串
         "DbSettings": {
           "EnableInitDb": false, // 启用库初始化
           "EnableDiffLog": false, // 启用库表差异日志
           "EnableUnderLine": false // 启用驼峰转下划线
-        },        "TableSettings": {
+        },
+        "TableSettings": {
           "EnableInitTable": false, // 启用表初始化
           "EnableIncreTable": false // 启用表增量更新
         },

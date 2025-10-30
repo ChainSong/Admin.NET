@@ -40,7 +40,6 @@ public class AutomatedAllocationJob : IJob
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
         return;
-
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
         var repWarehouse = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSWarehouse>>();

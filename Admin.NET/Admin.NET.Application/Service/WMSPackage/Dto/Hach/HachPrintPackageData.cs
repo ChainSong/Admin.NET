@@ -30,6 +30,5 @@ public class HachPrintPackageData
     public string Phone { get; set; }
     public string PackageNumber { get; set; }
     public List<HachPrintPackageDataDetail> Detail { get; set; }
-
     public WMSCustomerConfig CustomerConfig { get; set; }
 }

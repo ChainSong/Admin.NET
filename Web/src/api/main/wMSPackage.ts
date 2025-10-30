@@ -19,9 +19,7 @@ enum Api {
 	PrintPackageList = '/api/wMSPackage/PrintPackageList',
 	ScanSNPackage = '/api/wMSPackage/ScanSNPackage',
 	ScanHachPackageData = '/api/wMSPackage/ScanHachPackageData',
-
-
-
+	PrintDGPackageList = '/api/wMSPackage/PrintDGPackageList',
 }
 
 // 增加WMSPackage
@@ -184,3 +182,10 @@ export const scanSNPackage = (params?: any) =>
 		data: params,
 	});
 
+//打印危险仓装箱清单
+export const printDGPackageList = (params?: any) =>
+	request({
+		url: Api.PrintDGPackageList,
+		method: 'post',
+		data: params,
+	});

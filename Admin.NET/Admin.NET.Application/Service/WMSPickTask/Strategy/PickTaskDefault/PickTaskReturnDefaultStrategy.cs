@@ -33,7 +33,7 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
 
 
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
-    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
     public async Task<Response<List<OrderStatusDto>>> PickTaskReturn(List<DeleteWMSPickTaskInput> request)

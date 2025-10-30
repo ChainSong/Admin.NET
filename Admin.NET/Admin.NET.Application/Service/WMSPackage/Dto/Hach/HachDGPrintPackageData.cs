@@ -7,34 +7,30 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
-
-using Admin.NET.Application.Interface;
-using Admin.NET.Application.Strategy;
+using Admin.NET.Core.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.Factory;
-internal static class PackagePrintFactory
+namespace Admin.NET.Application.Service;
+public class HachDGPrintPackageData
 {
-
-    public static IPackagePrintInterface PackagePrint(string FactoryName)
-    {
-        switch (FactoryName)
-        {
-            //case "Default":
-            //return new PackageOperationDefaultStrategy();
-            //case "RFID":
-            //    return new PackageOperationRFIDStrategy();
-            case "危险品仓出库打印装箱清单":
-            return new PackageDGPrintDefaultStrategy();
-            default:
-                return new PackagePrintDefaultStrategy();
-        }
-        //PackageOperationDefaultStrategy
-        //return new PackageOperationDefaultStrategy();
-        //return new PackageOperationDefaultStrategy();
-    }
+    public string CustomerId { get; set; }
+    public string CustomerName { get; set; }
+    public string ExternOrderNumber { get; set; }
+    public string Po { get; set; }
+    public string BoxCode { get; set; }
+    public string Str1 { get; set; }
+    public string CompleteTime { get; set; }
+    public string CompanyName { get; set; }
+    public string Address { get; set; }
+    public string ContactName { get; set; }
+    public string Phone { get; set; }
+    public string PackageNumber { get; set; }
+    public string JobNumber { get; set; }
+    public string HandoverTime { get; set; }
+    public List<HachDGPrintPackageDataDetail> Detail { get; set; }
+    public WMSCustomerConfig CustomerConfig { get; set; }
 }

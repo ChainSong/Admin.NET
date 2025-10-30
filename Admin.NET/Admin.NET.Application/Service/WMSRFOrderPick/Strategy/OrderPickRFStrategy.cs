@@ -165,7 +165,6 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
             }
         }
     }
-
     private async Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanSKU(WMSRFPickTaskDetailInput request)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
@@ -245,9 +244,6 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
         //throw new NotImplementedException();
         return response;
     }
-
-
-
     private async Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanLocation(WMSRFPickTaskDetailInput request)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };

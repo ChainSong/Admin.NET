@@ -263,9 +263,9 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     /// <param name="orderNo"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    private HachWmsOutBound MapOutBound(HachWmsOutBoundInput asn, string orderNo, long? userId)
+    private HachWmsOutBound MapOutBound(HachWmsOutBoundInput ob, string orderNo, long? userId)
     {
-        var outBound = asn.Adapt<HachWmsOutBound>();
+        var outBound = ob.Adapt<HachWmsOutBound>();
         outBound.OrderNumber = orderNo;
         outBound.CreateUserId = userId ?? 0;
         return outBound;
