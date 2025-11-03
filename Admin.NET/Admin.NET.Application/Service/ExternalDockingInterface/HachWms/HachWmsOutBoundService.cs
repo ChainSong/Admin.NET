@@ -40,6 +40,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     private readonly LogHelper _logHelper;
     private readonly GetEnum _enumRep;
+    private readonly GetConfig _getConfigRep;
 
     public HachWmsOutBoundService(
         SqlSugarRepository<HachWmsOutBound> hachWmsOutBoundRep,
@@ -49,17 +50,18 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         UserManager userManager,
         GetEnum enumRep,
         LogHelper logHelper,
-
-        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
-         {
-             _hachWmsOutBoundRep = hachWmsOutBoundRep;
-             _wMSPreorderRep = wMSPreorderRep;
-             _wMSProductRep = wMSProductRep;
-             _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
-             _userManager = userManager;
-             _logHelper = logHelper;
-             _enumRep = enumRep;
-         }
+        SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep,
+        GetConfig getConfig)
+    {
+        _hachWmsOutBoundRep = hachWmsOutBoundRep;
+        _wMSPreorderRep = wMSPreorderRep;
+        _wMSProductRep = wMSProductRep;
+        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+        _userManager = userManager;
+        _logHelper = logHelper;
+        _enumRep = enumRep;
+        _getConfigRep = getConfig;
+    }
 
     [HttpPost]
     [Authorize]
@@ -110,9 +112,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         }
 
         // 获取客户授权配置
-        var wmsAuthorizationConfig = await GetCustomerInfo("putSOData");
-        if (wmsAuthorizationConfig == null)
-            return new HachWMSResponse { Success = false, Result = OrderRespStatusEnum.NonPermissions.GetDescription() };
+        HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
+
         #endregion
 
         #region 外层事务控制：整体批量回滚
@@ -128,6 +129,16 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 string syncOrderNo = order.OrderNumber ?? (order.SoNumber + order.DeliveryNumber);
                 try
                 {
+                    if (string.IsNullOrEmpty(order.LocationCode))
+                    {
+                        throw new Exception($"orderNo：{syncOrderNo} “LocationCode” cannot be empty");
+                    }
+                    //根据仓库获取客户授权配置
+                    wmsAuthorizationConfig =await _getConfigRep.GetCustomerInfo("putSOData", order.LocationCode);
+                    if (wmsAuthorizationConfig == null)
+                    {
+                        throw new Exception($"orderNo：{syncOrderNo} Failed to obtain warehouse Location Code information");
+                    }
                     #region Step 1：参数与数据校验 
                     if (string.IsNullOrWhiteSpace(syncOrderNo))
                         throw new Exception(OrderRespStatusEnum.OBMissingOrder.GetDescription());
@@ -314,7 +325,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             Address = outBound.Address,
             CreationTime = DateTime.Now,
             Creator = _userManager.UserId.ToString()
-            ,TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
+            ,
+            TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
         };
 
         foreach (var item in outBound.items)
@@ -356,19 +368,19 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         return res;
     }
 
-    // <summary>
-    /// 获取授权客户信息
-    /// </summary>
-    private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type)
-    {
-        if (string.IsNullOrEmpty(Type))
-            return null;
+    //// <summary>
+    ///// 获取授权客户信息
+    ///// </summary>
+    //private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type)
+    //{
+    //    if (string.IsNullOrEmpty(Type))
+    //        return null;
 
-        return await _hachWmsAuthorizationConfigRep.AsQueryable()
-            .Where(a => a.AppId == _userManager.UserId)
-            .Where(a => a.Status && !a.IsDelete)
-            .Where(a => a.Type == "HachWMSApi" && a.InterFaceName == Type)
-            .OrderByDescending(a => a.Id)
-            .FirstAsync();
-    }
+    //    return await _hachWmsAuthorizationConfigRep.AsQueryable()
+    //        .Where(a => a.AppId == _userManager.UserId)
+    //        .Where(a => a.Status && !a.IsDelete)
+    //        .Where(a => a.Type == "HachWMSApi" && a.InterFaceName == Type)
+    //        .OrderByDescending(a => a.Id)
+    //        .FirstAsync();
+    //}
 }

@@ -142,6 +142,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 if (syncOrderNo.Length > 120) syncOrderNo = syncOrderNo[..120];
                 orderResult.Remark = syncOrderNo;
                 #endregion
+
                 #region 订单校验
               
                 // 2.2) 输入校验
@@ -170,6 +171,17 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 //    continue; 
                 //}
                 #endregion
+
+                if (string.IsNullOrEmpty(asn.LocationCode))
+                {
+                    await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,
+                                        $"订单:{syncOrderNo} 仓库LocationCode为空", true);
+                    orderResult.Message = $"orderNo：{syncOrderNo}  “LocationCode” cannot be empty ";
+                    orderResult.Success = false;
+                    response.Items.Add(orderResult);
+                    continue;
+                }
+
                 wmsAuthorizationConfig = await GetCustomerInfo("putASNData", asn.LocationCode);
                 if (wmsAuthorizationConfig==null)
                 {

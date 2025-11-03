@@ -60,6 +60,8 @@ public class HachWmsOutBound : EntityTenant
     public bool? IsReturn { get; set; }= false;
     [SugarColumn(ColumnDescription = "回传时间")]
     public DateTime? ReturnDate { get; set; }
+    [SugarColumn(ColumnDescription = ("仓库代码"))]
+    public string LocationCode { get; set; }
 
     [Navigate(NavigateType.OneToMany, nameof(HachWmsOutBoundDetail.OutBoundId))]
     public virtual List<HachWmsOutBoundDetail> items { get; set; }
