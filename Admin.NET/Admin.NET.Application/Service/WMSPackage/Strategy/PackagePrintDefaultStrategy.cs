@@ -27,8 +27,6 @@ using RulesEngine.Models;
 namespace Admin.NET.Application.Service;
 public class PackagePrintDefaultStrategy : IPackagePrintInterface
 {
-
-
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
@@ -105,7 +103,6 @@ where  WMS_Package.Id in (");
 
         return response;
     }
-
 
 }
 

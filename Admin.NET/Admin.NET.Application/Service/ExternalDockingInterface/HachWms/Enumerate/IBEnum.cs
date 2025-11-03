@@ -19,3 +19,13 @@ public enum IbOrderStatusEnum
     [Description("收货入库")]
     REQ
 }
+
+public enum IbOrderTypeEnum
+{
+    //江平仓库
+    [Description("Shanghai Jiangping")]
+    SHJP,
+    //青浦仓库
+    [Description("Qingpu Warehouse")]
+    SHQP
+}

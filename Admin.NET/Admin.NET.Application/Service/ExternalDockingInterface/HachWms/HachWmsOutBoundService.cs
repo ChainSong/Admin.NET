@@ -31,7 +31,6 @@ namespace Admin.NET.Application.Service.ExternalDocking_Interface.HachWms.Dto;
 /// EXTERNAL DOCKING INTERFACE : HACHWMS OUTBOUND 
 /// </summary>
 [ApiDescriptionSettings("hachWMSOutBound", Order = 4, Groups = new[] { "HACHWMS INTERFACE" })]
-
 public class HachWmsOutBoundService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<HachWmsOutBound> _hachWmsOutBoundRep;
@@ -48,19 +47,19 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSProduct> wMSProductRep,
         SqlSugarRepository<WMSOrderAddress> wMSOrderAddressRep,
         UserManager userManager,
-         GetEnum enumRep,
-    LogHelper logHelper,
+        GetEnum enumRep,
+        LogHelper logHelper,
 
         SqlSugarRepository<HachWmsAuthorizationConfig> hachWmsAuthorizationConfigRep)
-    {
-        _hachWmsOutBoundRep = hachWmsOutBoundRep;
-        _wMSPreorderRep = wMSPreorderRep;
-        _wMSProductRep = wMSProductRep;
-        _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
-        _userManager = userManager;
-        _logHelper = logHelper;
-        _enumRep = enumRep;
-    }
+         {
+             _hachWmsOutBoundRep = hachWmsOutBoundRep;
+             _wMSPreorderRep = wMSPreorderRep;
+             _wMSProductRep = wMSProductRep;
+             _hachWmsAuthorizationConfigRep = hachWmsAuthorizationConfigRep;
+             _userManager = userManager;
+             _logHelper = logHelper;
+             _enumRep = enumRep;
+         }
 
     [HttpPost]
     [Authorize]
