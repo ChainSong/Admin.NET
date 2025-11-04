@@ -29,7 +29,7 @@ public class PickTaskReturnDefaultStrategy : IPickTaskReturnInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
 
 
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }

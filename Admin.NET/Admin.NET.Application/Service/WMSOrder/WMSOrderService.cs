@@ -4,6 +4,8 @@ using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.WMSOrder.Factory;
+using Admin.NET.Application.Service.WMSOrder.Interface;
 using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -56,11 +58,29 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
     //private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
     private readonly SysWorkFlowService _repWorkFlowService;
-
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
+    private readonly SqlSugarRepository<HachWmsOutBound> _repOb;
 
-
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSInventoryUsable> repInventoryUsable, ISqlSugarClient db, UserManager userManager, SqlSugarRepository<WMSInventoryUsed> repInventoryUsed, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSOrderAllocation> repOrderAllocation, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysWorkFlowService repWorkFlowService)
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, 
+        SqlSugarRepository<WMSOrderDetail> repOrderDetail,
+        SqlSugarRepository<WMSCustomer> repCustomer,
+        SqlSugarRepository<CustomerUserMapping> repCustomerUser,
+        SqlSugarRepository<WarehouseUserMapping> repWarehouseUser,
+        SqlSugarRepository<TableColumns> repTableColumns,
+        SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail,
+        SqlSugarRepository<WMSInventoryUsable> repInventoryUsable,
+        ISqlSugarClient db, UserManager userManager,
+        SqlSugarRepository<WMSInventoryUsed> repInventoryUsed,
+        SqlSugarRepository<WMSInstruction> repInstruction,
+        SqlSugarRepository<WMSOrderAllocation> repOrderAllocation,
+        SqlSugarRepository<WMSPickTask> repPickTask,
+        SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail,
+        SqlSugarRepository<WMSPreOrderDetail> repPreOrderDetail,
+        SqlSugarRepository<WMSPreOrder> repPreOrder,
+        SqlSugarRepository<WMSWarehouse> repWarehouse,
+        SqlSugarRepository<WMSPackage> repPackage,
+        SqlSugarRepository<WMSPackageDetail> repPackageDetail,
+        SysWorkFlowService repWorkFlowService, SqlSugarRepository<HachWmsOutBound> repOb)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -86,7 +106,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repPackageDetail = repPackageDetail;
         //_repWorkFlow = repWorkFlow;
         _repWorkFlowService = repWorkFlowService;
-
+        _repOb = repOb;
     }
 
     /// <summary>
@@ -773,6 +793,43 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
 
 
+    [HttpPost]//List<PackageData>
+    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> input)
+    {
+
+        Response<PrintBase<List<WMSOrderPrintDto>>> data = new Response<PrintBase<List<WMSOrderPrintDto>>>();
+
+        var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
+         var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, order.OrderType);
+        IPrintJobOrderStrategy factory = PrintJobOrderFactory.PrintJobList(workflow);
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repPreOrder = _repPreOrder;
+        factory._reppreOrderDetail = _repPreOrderDetail;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAllocation = _repOrderAllocation;
+        factory._repWarehouse = _repWarehouse;
+        factory._repCustomer = _repCustomer;
+        factory._repWorkFlowService = _repWorkFlowService;
+        factory._repOb=_repOb;
+        factory._repPackage=_repPackage;
+        var response = await factory.PrintJobList(input);
+        if (response.Code == StatusCode.Success)
+        {
+            response.Data.PrintTemplate = workflow;
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
+        }
+        return data;
+    }
 
 
 }

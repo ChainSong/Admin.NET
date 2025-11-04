@@ -25,7 +25,7 @@ public interface IOrderPickRFInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }

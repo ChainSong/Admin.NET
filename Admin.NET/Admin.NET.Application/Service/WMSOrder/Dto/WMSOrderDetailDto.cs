@@ -337,17 +337,19 @@ public class WMSOrderDetailDto
     /// 
     /// </summary>
     public int? Int3 { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public int? Int4 { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public int? Int5 { get; set; }
-
-
     public int Sequence { get; set; }
+    /// <summary>
+    /// 完成时间
+    /// </summary>
+    public DateTime? CompleteTime { get; set; }
+    /// <summary>
+    /// Job总箱数
+    /// </summary>
+    public long? JobTotalQty { get; set; }
+    /// <summary>
+    /// 组合数量
+    /// </summary>
+    public long? CombinationQty { get; set; }
 }

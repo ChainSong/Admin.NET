@@ -11,36 +11,38 @@ using Admin.NET.Core.Entity;
 using Admin.NET.Core;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 
-namespace Admin.NET.Application.Service;
-public interface IPackagePrintInterface
+namespace Admin.NET.Application.Service.WMSOrder.Interface;
+public interface IPrintJobOrderStrategy
 {
+    public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
+    public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
+    //public ISqlSugarClient _db { get; set; }
+    public UserManager _userManager { get; set; }
+    public SysWorkFlowService _repWorkFlowService { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
-    public SqlSugarRepository<WMSCustomerConfig> _repCustomerConfig { get; set; } 
+    public SqlSugarRepository<WMSCustomer> _repCustomer { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
-
+    public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
+    public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+    public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
     public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
-    //包装
-    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
-    public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
-
-    public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
-    public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
-
-    public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-    public UserManager _userManager { get; set; }
+    public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
+    public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
+    public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<HachWmsOutBound> _repOb { get; set; }
 
     /// <summary>
-    /// 导出
+    /// 打印JOB汇总清单
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<Response<PrintBase<dynamic>>> Strategy(List<long> request);
-     
+    Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> request);
 }

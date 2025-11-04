@@ -13,7 +13,7 @@ enum Api {
 	ExportPackage = '/api/wMSOrder/ExportPackage',
 	GetOrderLocation = '/api/wMSOrder/GetOrderLocation',
 	ExportWMSOrderByRFID = '/api/WMSOrderReport/ExportWMSOrderByRFID',
-
+	PrintJobList='/api/wMSOrder/PrintJobList'
 }
 
 // 增加WMSOrder
@@ -122,3 +122,10 @@ export const exportWMSOrderByRFID = (params?: any) =>
 		responseType: 'blob',
 	});
 	
+	//打印JOB汇总清单
+export const printJobList = (params?: any) =>
+	request({
+		url: Api.PrintJobList,
+		method: 'post',
+		data: params,
+	});

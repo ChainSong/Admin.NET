@@ -33,7 +33,7 @@ public class OrderReturnStrategy : IOrderReturnInterface
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
 
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }

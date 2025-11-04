@@ -7,23 +7,22 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
-using Admin.NET.Application.Interface;
-using Admin.NET.Core.Entity;
+using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service.WMSOrder.Interface;
+using Admin.NET.Common;
 using Admin.NET.Core;
+using Admin.NET.Core.Entity;
+using Furion.FriendlyException;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service;
-using Admin.NET.Application.Enumerate;
-using Admin.NET.Application.Dtos.Enum;
-using Furion.FriendlyException;
-using Admin.NET.Common;
 
-namespace Admin.NET.Application.Service;
-public class PrintOrderStrategy : IPrintOrderInterface
+namespace Admin.NET.Application.Service.WMSOrder.Strategy.OrderDefault;
+public class PrintJobOrderStrategy : IPrintJobOrderStrategy
 {
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SysWorkFlowService _repWorkFlowService { get; set; }
@@ -42,16 +41,16 @@ public class PrintOrderStrategy : IPrintOrderInterface
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
-    public PrintOrderStrategy()
+    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<HachWmsOutBound> _repOb { get; set; }
+
+    public PrintJobOrderStrategy()
     {
     }
     //处理打印发运单
-    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> request)
+    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> request)
     {
         Response<PrintBase<List<WMSOrderPrintDto>>> response = new Response<PrintBase<List<WMSOrderPrintDto>>>();
-        //List<WMSOrderPrintDto> result = new List<WMSOrderPrintDto>();
-        //获取订单信息
-        //List<WMSOrder> orders = await _repOrder.GetListAsync(o => request.Contains(o.Id));
         List<Admin.NET.Core.Entity.WMSOrder> orders = await _repOrder.AsQueryable()
                  .Includes(a => a.Details)
                  .Includes(a => a.OrderAddress)
@@ -60,14 +59,7 @@ public class PrintOrderStrategy : IPrintOrderInterface
         {
             throw Oops.Oh("请选择同一个客户的订单进行打印！");
         }
-        //使用简单工厂定制化修改和新增的方法
-        //根据订单类型判断是否存在该流程
-        //var workflow = await _repWorkFlow.AsQueryable()
-        //   .Includes(a => a.SysWorkFlowSteps)
-        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
         var workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Order, orders.First().OrderType);
-
-
         //获取仓库信息
         WMSWarehouse warehouse = await _repWarehouse.AsQueryable().Where(o => o.Id == orders.First().WarehouseId).FirstAsync();
         //获取客户信息
@@ -75,24 +67,29 @@ public class PrintOrderStrategy : IPrintOrderInterface
                  .Includes(a => a.Details)
                  .Includes(a => a.CustomerConfig)
                  .Where(o => o.Id == orders.First().CustomerId).FirstAsync();
-        //获取客户配置信息
-        //WMSCustomerConfig customerConfig = await _re.AsQueryable().Where(o => o.Id == orders.First().CustomerId).FirstAsync();
         try
         {
             List<WMSOrderPrintDto> orderPrintDtos = new List<WMSOrderPrintDto>();
             orderPrintDtos = orders.Adapt<List<WMSOrderPrintDto>>();
-            orderPrintDtos.ForEach(order =>
+            orderPrintDtos.ForEach(async order =>
             {
                 order.Customer = customer;
                 order.Warehouse = warehouse;
                 order.CustomerConfig = customer.CustomerConfig;
                 order.CustomerDetail = customer.Details.FirstOrDefault();
-                order.OrderAddress.Address=order.OrderAddress.Province+order.OrderAddress.City+order.OrderAddress.County+order.OrderAddress.Address;
+                order.OrderAddress.Address = order.OrderAddress.Province + order.OrderAddress.City + order.OrderAddress.County + order.OrderAddress.Address;
+                //包装信息
+                order.package = await GetPackageSingleInfo(order.Id, order.ExternOrderNumber, "Desc");
+                //获取HACH出库对接信息表
+                order.outBound = await GetHachObInfo(order.Id, order.ExternOrderNumber);
                 int sequence = 0;
                 order.Details.ForEach(detail =>
                 {
                     sequence++;
                     detail.Sequence = sequence;
+                    detail.CompleteTime = order.CompleteTime;//完成时间
+                    detail.JobTotalQty=order.package.TotalCount;//JOB总箱数
+
                 });
             });
 
@@ -113,4 +110,47 @@ public class PrintOrderStrategy : IPrintOrderInterface
         return response;
     }
 
+    /// <summary>
+    /// 获取HACH出库对接信息表
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="OrderNumber"></param>
+    /// <returns></returns>
+    private async Task<HachWmsOutBound> GetHachObInfo(long? id = 0, string? OrderNumber = null)
+    {
+        HachWmsOutBound hachWmsOutBound = new HachWmsOutBound();
+        if (id > 0 || !string.IsNullOrEmpty(OrderNumber))
+        {
+            hachWmsOutBound = await _repOb.AsQueryable()
+         .WhereIF(id > 0, a => a.Id == id)
+         .WhereIF(!string.IsNullOrEmpty(OrderNumber), a => a.OrderNumber == OrderNumber)
+         .Includes(a => a.items)
+         .FirstAsync();
+        }
+        return hachWmsOutBound;
+    }
+    /// <summary>
+    /// 获取包装信息
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="OrderNumber"></param>
+    /// <param name="Sort"></param>
+    /// <returns></returns>
+    private async Task<WMSOrderPackageDto> GetPackageSingleInfo(long? id = 0, string? OrderNumber = null, string Sort = "Desc")
+    {
+        WMSOrderPackageDto wMSPackage = new WMSOrderPackageDto();
+
+        if (id > 0 || !string.IsNullOrEmpty(OrderNumber))
+        {
+            wMSPackage.package = await _repPackage.AsQueryable()
+                                 .WhereIF(id > 0, a => a.Id == id)
+                                 .WhereIF(!string.IsNullOrEmpty(OrderNumber), a => a.ExternOrderNumber == OrderNumber)
+                                 .OrderByIF(Sort.Equals("Desc"), a => a.CreationTime, OrderByType.Desc)
+                                 .ToListAsync();
+        }
+
+        wMSPackage.TotalCount = wMSPackage.package.Count;
+
+        return wMSPackage;
+    }
 }

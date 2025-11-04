@@ -33,7 +33,7 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }

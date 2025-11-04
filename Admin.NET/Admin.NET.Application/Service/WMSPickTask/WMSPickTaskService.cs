@@ -47,12 +47,12 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
     private readonly SysCacheService _sysCacheService;
-    private readonly SqlSugarRepository<WMSOrder> _repOrder;
+    private readonly SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SysWorkFlowService _repWorkFlowService;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail)
     {
         _rep = rep;
         _userManager = userManager;
@@ -301,7 +301,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
                 a.PickTime = DateTime.Now;
             });
 
-            await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b => b.OrderId).Contains(a.Id));
+            await _repOrder.UpdateAsync(a => new Admin.NET.Core.Entity.WMSOrder { OrderStatus = (int)OrderStatusEnum.已拣货 }, a => entity.Details.Select(b => b.OrderId).Contains(a.Id));
             //await _rep.UpdateAsync(entity).incIgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
             await _rep.Context.UpdateNav(entity).Include(a => a.Details).ExecuteCommandAsync();
         }

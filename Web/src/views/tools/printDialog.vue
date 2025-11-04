@@ -192,6 +192,7 @@ const print = async () => {
 // 获取打印模板
 const getPrintTemplate = async () => {
 	// var res = await getAPI(SysPrintApi).apiSysPrintPagePost({ "name": "拣货单打印模板" });
+	console.log("state.value：",state.value)
 	var res = await queryPrintTemplate(state.value.templateName);
 
 	let printData = res.data.result ?? {};

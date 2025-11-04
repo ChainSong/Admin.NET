@@ -20,11 +20,7 @@ using Admin.NET.Application.Service;
 namespace Admin.NET.Application.Service;
 public interface IPrintOrderInterface
 {
-
-
-
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
-
     public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
@@ -36,8 +32,7 @@ public interface IPrintOrderInterface
     public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
 
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }

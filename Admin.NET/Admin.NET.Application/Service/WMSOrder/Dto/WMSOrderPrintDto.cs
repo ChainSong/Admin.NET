@@ -279,8 +279,8 @@ public class WMSOrderPrintDto
     public WMSCustomer Customer { get; set; }
     public WMSCustomerConfig CustomerConfig { get; set; }
     public WMSCustomerDetail CustomerDetail { get; set; }
-
-
+    public WMSOrderPackageDto package { get; set; }
+    public HachWmsOutBound outBound { get; set; }
 
     //[Navigate(NavigateType.OneToMany, nameof(WMSOrderAllocation.OrderId))]
     //public List<WMSOrderAllocation> Allocation { get; set; }
@@ -305,4 +305,10 @@ public class WMSOrderPrintDto
     /// </summary>
     public string? ImgLogoUrl { get; set; }
 
+}
+
+public class WMSOrderPackageDto
+{
+    public long TotalCount { get; set; }
+    public List<WMSPackage> package { get; set; } = new List<WMSPackage>();
 }

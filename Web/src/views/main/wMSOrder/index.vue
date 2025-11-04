@@ -107,7 +107,13 @@
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun" v-auth="'wMSOrder:exportWMSOrderByRFID'"> 导出RFID
+          <el-button type="primary" icon="ele-Help" @click="openPrintJob" v-auth="'wMSOrder:page'"> 打印JOB汇总清单
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun"
+            v-auth="'wMSOrder:exportWMSOrderByRFID'">
+            导出RFID
           </el-button>
         </el-form-item>
       </el-form>
@@ -167,7 +173,7 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100,300]" small="" background=""
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100, 300]" small="" background=""
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper" />
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
@@ -178,7 +184,8 @@
 
 
     <el-dialog v-model="resultPopupShow" title="消息" :append-to-body="true">
-      <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder +':'+ i.msg" :type="i.statusMsg">
+      <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + ':' + i.msg"
+        :type="i.statusMsg">
       </el-alert>
     </el-dialog>
   </div>
@@ -193,7 +200,11 @@ import { auth } from '/@/utils/authFunction';
 // import editDialog from '/@/views/main/wMSOrder/component/editDialog.vue'
 // import addDialog from '/@/views/main/wMSOrder/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
-import { pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList, createPickTask, completeOrder, exportOrder, exportPackage,exportWMSOrderByRFID } from '/@/api/main/wMSOrder';
+import {
+  pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList,
+  createPickTask, completeOrder, exportOrder, exportPackage, exportWMSOrderByRFID
+  , printJobList
+} from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import printDialog from '/@/views/tools/printDialog.vue';
@@ -340,8 +351,8 @@ const del = (row: any) => {
 
 
 
- 
-const exportWMSOrderByRFIDFun = async () => { 
+
+const exportWMSOrderByRFIDFun = async () => {
   //1 获取选中的订单ID
   let ids = new Array<Number>();
   multipleTableRef.value.getSelectionRows().forEach(a => {
@@ -517,9 +528,6 @@ const openPrint = async () => {
   multipleTableRef.value.getSelectionRows().forEach(a => {
     ids.push(a.id);
   });
-
-  // console.log("ids");
-  // console.log(ids);
   if (ids.length == 0) {
     ElMessage.error("请勾选需要打印的订单");
     return;
@@ -548,6 +556,39 @@ const openPrint = async () => {
   }
 };
 
+// 打开打印询页面
+const openPrintJob = async () => {
+  ptintTitle.value = 'JOB汇总清单打印';
+  // let ids = ref(Array<Number>);
+  let ids = new Array<Number>();
+  // console.log("ids");
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  let printData = new Array<Header>();
+  printData.printTemplate = "";
+  let result = await printJobList(ids);
+  if (result.data.result != null) {
+    printData = result.data.result.data;
+    printData.data.forEach((a: any) => {
+      if (a.customerConfig != null) {
+        a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+      }
+    });
+  }
+  // 判断有没有配置客户自定义打印模板
+  if (printData.printTemplate != "") {
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+  } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+  } else {
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
+  }
+};
 
 
 // 改变页面容量
