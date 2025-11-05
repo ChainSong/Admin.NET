@@ -43,14 +43,15 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<HachWmsOutBound> _repOb { get; set; }
-
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public PrintJobOrderStrategy()
     {
     }
     //处理打印发运单
-    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> request)
+    public async Task<Response<PrintBase<List<WMSOrderJobPrintDto>>>> PrintJobList(List<long> request)
     {
-        Response<PrintBase<List<WMSOrderPrintDto>>> response = new Response<PrintBase<List<WMSOrderPrintDto>>>();
+        Response<PrintBase<List<WMSOrderJobPrintDto>>> response = new Response<PrintBase<List<WMSOrderJobPrintDto>>>();
+        //查出库信息
         List<Admin.NET.Core.Entity.WMSOrder> orders = await _repOrder.AsQueryable()
                  .Includes(a => a.Details)
                  .Includes(a => a.OrderAddress)
@@ -69,31 +70,22 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
                  .Where(o => o.Id == orders.First().CustomerId).FirstAsync();
         try
         {
-            List<WMSOrderPrintDto> orderPrintDtos = new List<WMSOrderPrintDto>();
-            orderPrintDtos = orders.Adapt<List<WMSOrderPrintDto>>();
-            orderPrintDtos.ForEach(async order =>
+            List<WMSOrderJobPrintDto> orderPrintDtos = new List<WMSOrderJobPrintDto>();
+            orderPrintDtos = orders.Adapt<List<WMSOrderJobPrintDto>>();
+            foreach (var order in orderPrintDtos)
             {
                 order.Customer = customer;
                 order.Warehouse = warehouse;
                 order.CustomerConfig = customer.CustomerConfig;
                 order.CustomerDetail = customer.Details.FirstOrDefault();
                 order.OrderAddress.Address = order.OrderAddress.Province + order.OrderAddress.City + order.OrderAddress.County + order.OrderAddress.Address;
-                //包装信息
-                order.package = await GetPackageSingleInfo(order.Id, order.ExternOrderNumber, "Desc");
-                //获取HACH出库对接信息表
-                order.outBound = await GetHachObInfo(order.Id, order.ExternOrderNumber);
-                int sequence = 0;
-                order.Details.ForEach(detail =>
-                {
-                    sequence++;
-                    detail.Sequence = sequence;
-                    detail.CompleteTime = order.CompleteTime;//完成时间
-                    detail.JobTotalQty=order.package.TotalCount;//JOB总箱数
+                // 获取包装信息
+                order.PackageInfo = await GetPackageSingleInfoAsync(order);
+                // 获取HACH出库对接信息表
+                order.outBound = await GetHachObInfo(order);
+            }
 
-                });
-            });
-
-            response.Data = new PrintBase<List<WMSOrderPrintDto>>()
+            response.Data = new PrintBase<List<WMSOrderJobPrintDto>>()
             {
                 PrintTemplate = string.IsNullOrEmpty(workflow) ? OutboundWorkFlowConst.Workflow_Print_Order : workflow,
                 Data = orderPrintDtos
@@ -116,16 +108,15 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
     /// <param name="id"></param>
     /// <param name="OrderNumber"></param>
     /// <returns></returns>
-    private async Task<HachWmsOutBound> GetHachObInfo(long? id = 0, string? OrderNumber = null)
+    private async Task<HachWmsOutBound> GetHachObInfo(WMSOrderJobPrintDto order)
     {
         HachWmsOutBound hachWmsOutBound = new HachWmsOutBound();
-        if (id > 0 || !string.IsNullOrEmpty(OrderNumber))
+        if (order != null)
         {
             hachWmsOutBound = await _repOb.AsQueryable()
-         .WhereIF(id > 0, a => a.Id == id)
-         .WhereIF(!string.IsNullOrEmpty(OrderNumber), a => a.OrderNumber == OrderNumber)
-         .Includes(a => a.items)
-         .FirstAsync();
+                              .Where(a => a.OrderNumber == order.ExternOrderNumber)
+                              .Includes(a => a.items)
+                              .FirstAsync();
         }
         return hachWmsOutBound;
     }
@@ -136,21 +127,143 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
     /// <param name="OrderNumber"></param>
     /// <param name="Sort"></param>
     /// <returns></returns>
-    private async Task<WMSOrderPackageDto> GetPackageSingleInfo(long? id = 0, string? OrderNumber = null, string Sort = "Desc")
+    private async Task<WMSOrderPrintJobPackageDto> GetPackageSingleInfoAsync(WMSOrderJobPrintDto order, string sort = "Desc")
     {
-        WMSOrderPackageDto wMSPackage = new WMSOrderPackageDto();
+        // 参数验证
+        if (order == null)
+            throw new ArgumentNullException(nameof(order));
 
-        if (id > 0 || !string.IsNullOrEmpty(OrderNumber))
+        // 获取包裹信息
+        var package = await GetPackageByOrderAsync(order, sort);
+        if (package == null)
+            return new WMSOrderPrintJobPackageDto();
+
+        // 构建返回结果
+        return await BuildPackageDto(package, order);
+    }
+
+    private async Task<WMSPackage> GetPackageByOrderAsync(Admin.NET.Core.Entity.WMSOrder order, string sort)
+    {
+        try
         {
-            wMSPackage.package = await _repPackage.AsQueryable()
-                                 .WhereIF(id > 0, a => a.Id == id)
-                                 .WhereIF(!string.IsNullOrEmpty(OrderNumber), a => a.ExternOrderNumber == OrderNumber)
-                                 .OrderByIF(Sort.Equals("Desc"), a => a.CreationTime, OrderByType.Desc)
-                                 .ToListAsync();
+            // 构建查询条件
+            var query = _repPackage.AsQueryable();
+
+            if (order.Id > 0)
+                query = query.Where(a => a.OrderId == order.Id);
+            else if (!string.IsNullOrEmpty(order.ExternOrderNumber))
+                query = query.Where(a => a.ExternOrderNumber == order.ExternOrderNumber);
+            else
+                return null; // 如果没有有效条件，直接返回null
+
+            // 排序并获取第一条记录
+            if (sort.Equals("Desc", StringComparison.OrdinalIgnoreCase))
+                query = query.OrderByDescending(a => a.CreationTime);
+            else
+                query = query.OrderBy(a => a.CreationTime);
+
+            return await query.Includes(a => a.Details).FirstAsync();
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+
+    private async Task<WMSOrderPrintJobPackageDto> BuildPackageDto(WMSPackage package, Admin.NET.Core.Entity.WMSOrder order)
+    {
+        var packageDto = new WMSOrderPrintJobPackageDto
+        {
+            Id = package.Id,
+            OId = package.OrderId,
+            PackageNumber = package.PackageNumber,
+            ExternOrderNumber = package.ExternOrderNumber,
+            OrderNumber = package.OrderNumber,
+            ExpressNumber = package.ExpressNumber,
+            ExpressCompany = package.ExpressCompany,
+            Details = await BuildPackageDetailsAsync(package, order) // 使用异步版本
+        };
+
+        return packageDto;
+    }
+
+    private async Task<List<WMSOrderPrintJobPackageDetailDto>> BuildPackageDetailsAsync(WMSPackage package, Admin.NET.Core.Entity.WMSOrder order)
+    {
+        if (package== null || !package.Details.Any())
+            return new List<WMSOrderPrintJobPackageDetailDto>();
+
+        var totalCount = package.Details.Count;
+        var details = new List<WMSOrderPrintJobPackageDetailDto>();
+        var sequenceIndex = 0;
+
+        foreach (var item in package.Details)
+        {
+            var combinationQty = await CalculateCombinationQty(item);
+
+            details.Add(new WMSOrderPrintJobPackageDetailDto
+            {
+                Sequence = sequenceIndex++,
+                PackageId = item.PackageId,
+                PackageNumber = item.PackageNumber,
+                CompleteTime = order.CompleteTime,
+                PoCode = item.PoCode,
+                BoxCode = item.PackageNumber,
+                SKU = item.SKU,
+                AllocatedQty = item.Qty,
+                CombinationQty = combinationQty,
+                Onwer = item.Onwer,
+                JobTotalQty = totalCount
+            });
         }
 
-        wMSPackage.TotalCount = wMSPackage.package.Count;
+        return details;
+    }
+    /// <summary>
+    /// 计算组合数量
+    /// </summary>
+    /// <returns></returns>
+    private async Task<double> CalculateCombinationQty(WMSPackageDetail detail)
+    {
+        if (string.IsNullOrEmpty(detail.SKU))
+            return 0;
 
-        return wMSPackage;
+        try
+        {
+            // 并行查询父SKU和子SKU
+            var parentTask = _repProductBom.AsQueryable()
+                .Where(a => a.CustomerId == detail.CustomerId && a.SKU == detail.SKU)
+                .Select(x => x.Qty)
+                .ToListAsync();
+
+            var childTask = _repProductBom.AsQueryable()
+                .Where(a => a.CustomerId == detail.CustomerId && a.ChildSKU == detail.SKU)
+                .Select(x => x.Qty)
+                .ToListAsync();
+
+            await Task.WhenAll(parentTask, childTask);
+
+            var parentQtys = await parentTask;
+            var childQtys = await childTask;
+
+            // 计算组合数量
+            if (parentQtys.Any())
+            {
+                var totalParentQty = parentQtys.Sum();
+                return totalParentQty > 0 ? detail.Qty % totalParentQty : 0;
+            }
+
+            if (childQtys.Any())
+            {
+                var totalChildQty = childQtys.Sum();
+                return totalChildQty > 0 ? detail.Qty % totalChildQty : 0;
+            }
+
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            return 0;
+        }
     }
 }

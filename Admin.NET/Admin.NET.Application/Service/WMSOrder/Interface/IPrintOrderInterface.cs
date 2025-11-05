@@ -41,6 +41,7 @@ public interface IPrintOrderInterface
 
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
 
     /// <summary>
     /// 打印发货单

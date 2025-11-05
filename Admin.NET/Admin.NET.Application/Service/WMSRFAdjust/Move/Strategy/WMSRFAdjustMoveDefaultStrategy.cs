@@ -30,10 +30,10 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     private UserManager _userManager;
     private WMSAdjustmentService _wmsAdjustmentService;
     private readonly TimeSpan timeSpan = TimeSpan.FromHours(72);
-    public void Init(SqlSugarRepository<WMSInventoryUsable> inventoryRepo,SqlSugarRepository<WMSCustomer> customerRepo,
-    SqlSugarRepository<WMSWarehouse> warehouseRepo,SqlSugarRepository<WMSLocation> locationRepo,
-    SqlSugarRepository<WMSProduct> productRepo,SysCacheService cacheService,UserManager userManager,
-    WMSAdjustmentService wmsAdjustmentService,SqlSugarRepository<WMSAdjustment> repAdjustment)
+    public void Init(SqlSugarRepository<WMSInventoryUsable> inventoryRepo, SqlSugarRepository<WMSCustomer> customerRepo,
+    SqlSugarRepository<WMSWarehouse> warehouseRepo, SqlSugarRepository<WMSLocation> locationRepo,
+    SqlSugarRepository<WMSProduct> productRepo, SysCacheService cacheService, UserManager userManager,
+    WMSAdjustmentService wmsAdjustmentService, SqlSugarRepository<WMSAdjustment> repAdjustment)
     {
         _repInventoryUsable = inventoryRepo;
         _repCustomer = customerRepo;
@@ -53,7 +53,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public  async Task<WMSRFAdjustMoveResponse> CheckScanValue(WMSRFAdjustMoveInput input)
+    public async Task<WMSRFAdjustMoveResponse> CheckScanValue(WMSRFAdjustMoveInput input)
     {
         var response = new WMSRFAdjustMoveResponse();
         var output = new WMSRFAdjustMove();
@@ -86,6 +86,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
         #region 校验扫描值
         //不需要跟 customerId 和 warehouseId 进行关联校验
         var FormLocation = await _repLocation.AsQueryable()
+            .Where(x => x.WarehouseId == input.WarehouseId)
             .Where(x => x.Location == input.ScanValue)
             .Where(x => x.LocationStatus == (int)LocationStatusEnum.可用)
             .Select(x => new
@@ -96,6 +97,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
             .FirstAsync();
 
         var SKU = await _repProduct.AsQueryable()
+        .Where(x => x.CustomerId == input.CustomerId)
         .Where(x => x.SKU == input.ScanValue)
         .Where(x => x.ProductStatus == (int)ProductStatusEnum.新增)
         .Select(x => new
@@ -132,7 +134,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                     };
                 }
                 //扫描目标库位
-                if (!string.IsNullOrEmpty(opInfo.FromLocation) 
+                if (!string.IsNullOrEmpty(opInfo.FromLocation)
                     && !string.IsNullOrEmpty(opInfo.SKU)
                     && string.IsNullOrEmpty(opInfo.ToLocation))
                 {
@@ -155,7 +157,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
                             Result = "RFSuccess",
                             Message = "目标库位扫描完成，新增移库单成功",
                             SerialNumber = input.OpSerialNumber,
-                            AdjustmentId= addMoveRep.AdjustmentId
+                            AdjustmentId = addMoveRep.AdjustmentId
                         };
 
                     }
@@ -278,7 +280,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public  async Task<WMSRFAdjustAddResponse> AddAdjustmentMove(WMSAddAdjustRFMoveInput input)
+    public async Task<WMSRFAdjustAddResponse> AddAdjustmentMove(WMSAddAdjustRFMoveInput input)
     {
         AddOrUpdateWMSAdjustmentInput addInput = new AddOrUpdateWMSAdjustmentInput();
 
@@ -349,7 +351,7 @@ public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    public  async Task<Response<List<OrderStatusDto>>> CompleteAddjustmentMove(List<long> input)
+    public async Task<Response<List<OrderStatusDto>>> CompleteAddjustmentMove(List<long> input)
     {
         Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>();
         return await _wmsAdjustmentService.Confirm(input);

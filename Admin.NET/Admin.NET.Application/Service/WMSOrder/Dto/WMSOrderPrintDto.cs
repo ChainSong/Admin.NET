@@ -279,7 +279,6 @@ public class WMSOrderPrintDto
     public WMSCustomer Customer { get; set; }
     public WMSCustomerConfig CustomerConfig { get; set; }
     public WMSCustomerDetail CustomerDetail { get; set; }
-    public WMSOrderPackageDto package { get; set; }
     public HachWmsOutBound outBound { get; set; }
 
     //[Navigate(NavigateType.OneToMany, nameof(WMSOrderAllocation.OrderId))]
@@ -306,6 +305,42 @@ public class WMSOrderPrintDto
     public string? ImgLogoUrl { get; set; }
 
 }
+public class WMSOrderJobPrintDto: Admin.NET.Core.Entity.WMSOrder
+{
+    public WMSCustomer Customer { get; set; }
+    public WMSWarehouse Warehouse { get; set; }
+    public WMSCustomerConfig CustomerConfig { get; set; }
+    public WMSCustomerDetail CustomerDetail { get; set; }
+    public WMSOrderAddress OrderAddress { get; set; }
+    public WMSOrderPrintJobPackageDto PackageInfo { get; set; }
+    public HachWmsOutBound outBound { get; set; }
+}
+public class WMSOrderPrintJobPackageDto
+{
+    public long Id { get; set; }
+    public long OId { get; set; }
+    public string ExternOrderNumber { get; set; }
+    public string OrderNumber { get; set; }
+    public string PackageNumber { get; set; }
+    public string ExpressNumber { get; set; }
+    public string ExpressCompany { get; set; }
+    public List<WMSOrderPrintJobPackageDetailDto> Details { get; set; }
+}
+public class WMSOrderPrintJobPackageDetailDto  
+{
+    public int Sequence { get; set; }
+    public long PackageId { get; set; }
+    public string PackageNumber { get; set; }
+    public DateTime? CompleteTime { get; set; }
+    public string PoCode { get; set; }
+    public string BoxCode { get; set; }
+    public string SKU { get; set; }
+    public double AllocatedQty { get; set; }
+    public double CombinationQty { get; set; }
+    public string Onwer { get; set; }
+    public double JobTotalQty { get; set; }
+}
+
 
 public class WMSOrderPackageDto
 {

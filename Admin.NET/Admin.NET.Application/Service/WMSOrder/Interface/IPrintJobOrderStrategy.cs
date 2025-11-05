@@ -38,11 +38,11 @@ public interface IPrintJobOrderStrategy
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<HachWmsOutBound> _repOb { get; set; }
-
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     /// <summary>
     /// 打印JOB汇总清单
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> request);
+    Task<Response<PrintBase<List<WMSOrderJobPrintDto>>>> PrintJobList(List<long> request);
 }

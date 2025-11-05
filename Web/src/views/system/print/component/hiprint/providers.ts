@@ -253,15 +253,15 @@ export const aProvider = function () {
 					isEnableMergeCell: true, //合并单元格
 					columns: [
 						[
-							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
-							{ title: '出库日期', align: 'center', field: 'completeTime', width: 150 },
-							{ title: '合同号', align: 'center', field: 'poCode', width: 150 },
-							{ title: '箱号', align: 'center', field: 'boxCode', width: 150 },
+							{ title: '序号', align: 'center', field: 'sequence', width: 60 },
+							{ title: '出库日期', align: 'center', field: 'completeTime', width: 200 },
+							{ title: '合同号', align: 'center', field: 'poCode', width: 200 },
+							{ title: '箱号', align: 'center', field: 'boxCode', width: 200 },
 							{ title: '货号', align: 'center', field: 'sku', width: 150 },
-							{ title: '出库数量', align: 'center', field: 'allocatedQty', width: 150 },
-							{ title: '组合箱数', align: 'center', field: 'combinationQty', width: 150 },
+							{ title: '出库数量', align: 'center', field: 'allocatedQty', width: 110 },
+							{ title: '组合箱数', align: 'center', field: 'combinationQty', width: 110 },
 							{ title: '类型', align: 'center', field: 'onwer', width: 150 },
-							{ title: 'JOB总箱', align: 'center', field: 'jobTotalQty', width: 150 }
+							{ title: 'JOB总箱', align: 'center', field: 'jobTotalQty', width: 110 }
 						],
 					],
 				}

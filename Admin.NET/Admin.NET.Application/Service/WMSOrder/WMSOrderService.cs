@@ -60,7 +60,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SysWorkFlowService _repWorkFlowService;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
     private readonly SqlSugarRepository<HachWmsOutBound> _repOb;
-
+    public readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     public WMSOrderService(SqlSugarRepository<WMSOrder> rep, 
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
         SqlSugarRepository<WMSCustomer> repCustomer,
@@ -80,7 +80,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSWarehouse> repWarehouse,
         SqlSugarRepository<WMSPackage> repPackage,
         SqlSugarRepository<WMSPackageDetail> repPackageDetail,
-        SysWorkFlowService repWorkFlowService, SqlSugarRepository<HachWmsOutBound> repOb)
+        SysWorkFlowService repWorkFlowService, 
+        SqlSugarRepository<HachWmsOutBound> repOb, 
+        SqlSugarRepository<WMSProductBom> repProductBom)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -107,6 +109,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         //_repWorkFlow = repWorkFlow;
         _repWorkFlowService = repWorkFlowService;
         _repOb = repOb;
+        _repProductBom = repProductBom;
     }
 
     /// <summary>
@@ -746,7 +749,6 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repWarehouse = _repWarehouse;
         factory._repCustomer = _repCustomer;
         factory._repWorkFlowService = _repWorkFlowService;
-
         var response = await factory.PrintShippingList(input);
 
         if (response.Code == StatusCode.Success)
@@ -794,10 +796,10 @@ public class WMSOrderService : IDynamicApiController, ITransient
 
 
     [HttpPost]//List<PackageData>
-    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintJobList(List<long> input)
+    public async Task<Response<PrintBase<List<WMSOrderJobPrintDto>>>> PrintJobList(List<long> input)
     {
 
-        Response<PrintBase<List<WMSOrderPrintDto>>> data = new Response<PrintBase<List<WMSOrderPrintDto>>>();
+        Response<PrintBase<List<WMSOrderJobPrintDto>>> data = new Response<PrintBase<List<WMSOrderJobPrintDto>>>();
 
         var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
          var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, order.OrderType);
@@ -818,6 +820,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repWorkFlowService = _repWorkFlowService;
         factory._repOb=_repOb;
         factory._repPackage=_repPackage;
+        factory._repProductBom=_repProductBom;
         var response = await factory.PrintJobList(input);
         if (response.Code == StatusCode.Success)
         {

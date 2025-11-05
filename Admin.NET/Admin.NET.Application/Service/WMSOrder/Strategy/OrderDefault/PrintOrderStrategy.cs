@@ -42,6 +42,7 @@ public class PrintOrderStrategy : IPrintOrderInterface
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public PrintOrderStrategy()
     {
     }
