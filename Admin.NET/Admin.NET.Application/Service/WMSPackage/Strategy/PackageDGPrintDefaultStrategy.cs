@@ -85,19 +85,19 @@ public class PackageDGPrintDefaultStrategy : IPackagePrintInterface
     (select COUNT(Id) from WMS_Package wp where wp.OrderId=(select orderid from WMS_Package where id=10425)) as TotalQty,
     hachObInfo.ParentItemNumber as parentSku, --父件SKU
     WMS_Package.Remark  
-from WMS_Package 
-left join WMS_PackageDetail on WMS_Package.PackageNumber=WMS_PackageDetail.PackageNumber
-outer apply(
+    from WMS_Package 
+    left join WMS_PackageDetail on WMS_Package.PackageNumber=WMS_PackageDetail.PackageNumber
+    outer apply(
     select 
-        hachobDetail.ItemNumber,
-        hachobDetail.ParentItemNumber 
+    hachobDetail.ItemNumber,
+    hachobDetail.ParentItemNumber 
     from hach_wms_outBound hachob 
     left join hach_wms_outBound_detail hachobDetail on hachob.Id=hachobDetail.OutBoundId
     where hachob.OrderNumber = (select externordernumber from WMS_Package where id=10425)
-        and hachobDetail.ItemNumber=WMS_PackageDetail.SKU
-) hachObInfo
-where WMS_Package.Id in ({string.Join(",", request)}) 
-group by SKU,GoodsName,WMS_Package.Remark,WMS_Package.PackageNumber,hachObInfo.ParentItemNumber,WMS_Package.SerialNumber";
+    and hachobDetail.ItemNumber=WMS_PackageDetail.SKU
+    ) hachObInfo
+    where WMS_Package.Id in ({string.Join(",", request)}) 
+    group by SKU,GoodsName,WMS_Package.Remark,WMS_Package.PackageNumber,hachObInfo.ParentItemNumber,WMS_Package.SerialNumber";
         
         var hachPrintPackageData = _repOrder.Context.Ado.SqlQuery<HachDGPrintPackageData>(sql.ToString());
         var hachPrintPackageDataDetail = _repOrder.Context.Ado.SqlQuery<HachDGPrintPackageDataDetail>(sqlDetail.ToString());
