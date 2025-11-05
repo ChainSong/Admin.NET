@@ -36,6 +36,9 @@ public interface ASNCountQuantityRFInterface
     //产品仓储
     SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
+    SqlSugarRepository<WMSRFReceiptAcquisition> _repRFReceiptAcquisition { get; set; }
+
+
     //仓库用户关系仓储
     SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     //Task<Response<OrderStatusDto>> AddStrategy(List<long> request);

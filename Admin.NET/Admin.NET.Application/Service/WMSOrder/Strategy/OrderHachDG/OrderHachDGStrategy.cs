@@ -19,7 +19,7 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetRespon
 
 namespace Admin.NET.Application.Strategy
 {
-    public class OrderDefaultStrategy : IOrderInterface
+    public class OrderHachDGStrategy : IOrderInterface
     {
 
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
@@ -43,7 +43,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
-        public OrderDefaultStrategy()
+        public OrderHachDGStrategy()
         {
 
         }
@@ -113,8 +113,8 @@ namespace Admin.NET.Application.Strategy
                 WMSInstruction wMSInstruction = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstruction.InstructionType = "HACH出库反馈";
-                wMSInstruction.BusinessType = "HACH出库反馈";
+                wMSInstruction.InstructionType = "出库单回传HachDG";
+                wMSInstruction.BusinessType = "出库单回传HachDG";
                 //wMSInstruction.InstructionTaskNo = DateTime.Now;
                 wMSInstruction.CustomerId = item.CustomerId;
                 wMSInstruction.CustomerName = item.CustomerName;
@@ -133,8 +133,8 @@ namespace Admin.NET.Application.Strategy
                 WMSInstruction wMSInstructionGRHach = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstructionGRHach.InstructionType = "出库单回传Hach";
-                wMSInstructionGRHach.BusinessType = "出库单回传Hach";
+                wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+                wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
                 wMSInstructionGRHach.CustomerId = item.CustomerId;
                 wMSInstructionGRHach.CustomerName = item.CustomerName;
                 wMSInstructionGRHach.WarehouseId = item.WarehouseId;
@@ -152,8 +152,8 @@ namespace Admin.NET.Application.Strategy
                 WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstructionAFCGRHach.InstructionType = "出库单防伪码回传Hach";
-                wMSInstructionAFCGRHach.BusinessType = "出库单防伪码回传Hach";
+                wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+                wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
                 wMSInstructionAFCGRHach.CustomerId = item.CustomerId;
                 wMSInstructionAFCGRHach.CustomerName = item.CustomerName;
                 wMSInstructionAFCGRHach.WarehouseId = item.WarehouseId;
@@ -170,8 +170,8 @@ namespace Admin.NET.Application.Strategy
                 WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstructionSNGRHach.InstructionType = "出库单防伪码回传Hach";
-                wMSInstructionSNGRHach.BusinessType = "出库单防伪码回传Hach";
+                wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+                wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
                 //wMSInstruction.InstructionTaskNo = DateTime.Now;
                 wMSInstructionSNGRHach.CustomerId = item.CustomerId;
                 wMSInstructionSNGRHach.CustomerName = item.CustomerName;
@@ -186,31 +186,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionSNGRHach.InstructionPriority = 0;
                 wMSInstructionSNGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionSNGRHach);
-                //}
-                if (item.OrderAddress.CompanyType == "分销商" && item.CustomerName == "哈希")
-                {
-                    //插入反馈指令
-                    WMSInstruction wMSInstructionIssue = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstructionIssue.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstructionIssue.InstructionType = "HACH出库同步下发";
-                    wMSInstructionIssue.BusinessType = "HACH出库同步下发";
-                    wMSInstructionIssue.OrderNumber = item.ExternOrderNumber;
-                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstructionIssue.CustomerId = item.CustomerId;
-                    wMSInstructionIssue.CustomerName = item.CustomerName;
-                    wMSInstructionIssue.WarehouseId = item.WarehouseId;
-                    wMSInstructionIssue.WarehouseName = item.WarehouseName;
-                    wMSInstructionIssue.OperationId = item.Id;
-                    wMSInstructionIssue.InstructionTaskNo = item.ExternOrderNumber;
-                    wMSInstructionIssue.Creator = _userManager.Account;
-                    wMSInstructionIssue.CreationTime = DateTime.Now;
-                    wMSInstructionIssue.InstructionTaskNo = item.ExternOrderNumber;
-                    wMSInstructionIssue.TableName = "WMS_Order";
-                    wMSInstructionIssue.InstructionPriority = 0;
-                    wMSInstructionIssue.Remark = "";
-                    wMSInstructions.Add(wMSInstructionIssue);
-                }
+
             }
             if (wMSInstructions.Count > 0)
             {

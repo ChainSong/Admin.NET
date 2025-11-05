@@ -1,13 +1,14 @@
-﻿using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Common.ExcelCommon;
-using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.ReceiptCore.Factory;
 using Admin.NET.Application.ReceiptCore.Interface;
 using Admin.NET.Application.ReceiptReceivingCore.Factory;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using Admin.NET.Applicationt.ReceiptReceivingCore.Factory;
+using Admin.NET.Common;
+using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DatabaseAccessor;
@@ -45,7 +46,10 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
-    public WMSReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo)
+    private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
+    private readonly SysWorkFlowService _repWorkFlowService;
+
+    public WMSReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSInstruction> repInstruction)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -62,6 +66,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         _repTableInventoryUsed = repTableInventoryUsed;
         _repTableInventoryUsable = repTableInventoryUsable;
         _repRFIDInfo = repRFIDInfo;
+        _repWorkFlowService = repWorkFlowService;
+        _repInstruction = repInstruction;
     }
 
     /// <summary>
@@ -430,7 +436,7 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repReceiptDetail = _repReceiptDetail;
         factory._repReceiptReceiving = _repReceiptReceiving;
         factory._repTableColumns = _repTableColumns;
-        factory._userManager = _userManager; 
+        factory._userManager = _userManager;
         factory._repLocation = _repLocation;
         return await factory.Strategy(input);
 
@@ -480,8 +486,16 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         {
             customerId = customerData.CustomerId;
         }
+        else
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "未获取到订单信息,请检查订单";
+            return response;
+        }
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(customerData.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_AddInventory, customerData.ReceiptType);
+
         //使用简单工厂定制化修改和新增的方法
-        IReceiptReceivingInventoryInterface factory = ReceiptReceivingInventoryFactory.AddInventory(customerData.CustomerId);
+        IReceiptReceivingInventoryInterface factory = ReceiptReceivingInventoryFactory.AddInventory(workflow);
         //factory._db = _db 
         factory._repASN = _repASN;
         factory._repASNDetail = _repASNDetail;
@@ -495,6 +509,8 @@ public class WMSReceiptReceivingService : IDynamicApiController, ITransient
         factory._repWarehouseUser = _repWarehouseUser;
         factory._userManager = _userManager;
         factory._repRFIDInfo = _repRFIDInfo;
+        factory._repInstruction = _repInstruction;
+
 
         //List<long> ids = new List<long>();
         //ids.Add(input);

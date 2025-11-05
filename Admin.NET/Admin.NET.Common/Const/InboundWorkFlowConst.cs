@@ -52,8 +52,16 @@ public class InboundWorkFlowConst
     /// 打印RFID
     /// </summary>
     public const string Workflow_PintRFID = "打印RFID";
+    /// <summary>
+    /// 创建RFID
+    /// </summary>
 
     public const string Workflow_CreateRFID = "创建RFID";
+   
+    /// <summary>
+    /// 加入库存
+    /// </summary>
+    public const string Workflow_AddInventory = "加入库存";
     /// <summary>
     /// 库存
     /// </summary>

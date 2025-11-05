@@ -15,7 +15,7 @@ namespace Admin.NET.Core;
 /// 清理在线用户作业任务
 /// </summary>
 [JobDetail("job_onlineUser", Description = "清理在线用户", GroupName = "default", Concurrent = false)]
-[PeriodSeconds(1, TriggerId = "trigger_onlineUser", Description = "清理在线用户", MaxNumberOfRuns = 1, RunOnStart = true)]
+[PeriodSeconds(5, TriggerId = "trigger_onlineUser", Description = "清理在线用户", MaxNumberOfRuns = 1, RunOnStart = true)]
 public class OnlineUserJob : IJob
 {
     private readonly IServiceProvider _serviceProvider;

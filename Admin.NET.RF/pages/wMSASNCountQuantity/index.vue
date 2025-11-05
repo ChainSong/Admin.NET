@@ -29,6 +29,9 @@
 						<view class="action">
 							 <button class="cu-btn bg-blue shadow-blur round" style="width: 60px;" @tap="goCollect(item)">点数</button>
 						</view>
+						<view class="action">
+							 <button class="cu-btn bg-blue shadow-blur round" style="width: 60px;" @tap="goSNCollect(item)">点数/SN</button>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -83,6 +86,14 @@
 			async goCollect (row) {
 				uni.navigateTo({
 					url: '/pages/wMSASNCountQuantity/component/editDialog?asnCountQuantityNumber='
+					+row.asnCountQuantityNumber+"&id="
+					+row.id+"&asnId="
+					+row.asnId
+				});
+			},
+			async goSNCollect (row) {
+				uni.navigateTo({
+					url: '/pages/wMSASNCountQuantity/component/editSNDialog?asnCountQuantityNumber='
 					+row.asnCountQuantityNumber+"&id="
 					+row.id+"&asnId="
 					+row.asnId

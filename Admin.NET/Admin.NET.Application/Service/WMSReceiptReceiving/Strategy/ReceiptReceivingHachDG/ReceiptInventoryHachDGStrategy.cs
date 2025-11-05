@@ -17,7 +17,7 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchRespon
 
 namespace Admin.NET.Application.Strategy
 {
-    public class ReceiptInventoryDefaultStrategy : IReceiptReceivingInventoryInterface
+    public class ReceiptInventoryHachDGStrategy : IReceiptReceivingInventoryInterface
     {
 
         public SqlSugarRepository<WMSReceipt> _repReceipt { get; set; }
@@ -41,15 +41,14 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
-
-        public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         //public ISqlSugarClient _db { get; set; }
 
 
-        public ReceiptInventoryDefaultStrategy(
+        public ReceiptInventoryHachDGStrategy(
 
         )
         {
@@ -146,7 +145,7 @@ namespace Admin.NET.Application.Strategy
                             .SetColumns(a => a.ReceiptTime == DateTime.Now)
                             .SetColumns(a => a.Updator == _userManager.Account)
                             .SetColumns(a => a.UpdateTime == DateTime.Now)
-                            .Where(a => receipt.ExternReceiptNumber==a.ExternReceiptNumber && receipt.CustomerId==a.CustomerId && a.Status==(int)RFIDStatusEnum.初始化)
+                            .Where(a => receipt.ExternReceiptNumber == a.ExternReceiptNumber && receipt.CustomerId == a.CustomerId && a.Status == (int)RFIDStatusEnum.初始化)
                             .ExecuteCommandAsync();
                         //修改入库单状态
                         await _repReceipt.AsUpdateable()
@@ -180,7 +179,7 @@ namespace Admin.NET.Application.Strategy
 
                         //修改ASN 明细中的实际入库数量
                         //_wms_asndetailRepository.GetAll().Where(a => request.Contains(a.Id)).BatchUpdate(v =>new WMS_ASNDetail{ ReceivedQty = _wms_receiptreceivingRepository.GetAll().Where(re => re.ASNDetailId == v.Id).Sum(c => c.ReceivedQty)});
-                        var asnDetailData =await _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToListAsync();
+                        var asnDetailData = await _repASNDetail.AsQueryable().Where(a => a.ASNId == receipt.ASNId).ToListAsync();
                         foreach (var item in asnDetailData)
                         {
                             item.ReceiptQty = item.ReceiptQty + _repReceiptReceiving.AsQueryable().Where(re => re.ASNDetailId == item.Id && re.ReceiptId == receipt.Id).Sum(c => c.ReceivedQty);
@@ -194,6 +193,48 @@ namespace Admin.NET.Application.Strategy
                         //    e.UpdateTime = DateTime.Now;
 
                         //});
+                        //插入反馈指令
+                        List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+                        wMSInstructions.Add(new WMSInstruction()
+                        {
+                            //wMSInstruction.OrderId = orderData[0].Id;
+                            InstructionStatus = (int)InstructionStatusEnum.新增,
+                            InstructionType = "入库单回传HachDG",
+                            BusinessType = "入库单回传HachDG",
+                            OrderNumber = receipt.ExternReceiptNumber,
+                            CustomerId = receipt.CustomerId,
+                            CustomerName = receipt.CustomerName,
+                            WarehouseId = receipt.WarehouseId,
+                            WarehouseName = receipt.WarehouseName,
+                            OperationId = receipt.Id,
+                            InstructionTaskNo = receipt.ExternReceiptNumber,
+                            Creator = _userManager.Account,
+                            CreationTime = DateTime.Now,
+                            TableName = "WMS_Receipt",
+                            InstructionPriority = 0,
+                            Remark = ""
+                        });
+                        wMSInstructions.Add(new WMSInstruction()
+                        {
+                            //wMSInstruction.OrderId = orderData[0].Id;
+                            InstructionStatus = (int)InstructionStatusEnum.新增,
+                            InstructionType = "入库单序列号回传HachDG",
+                            BusinessType = "入库单序列号回传HachDG",
+                            OrderNumber = receipt.ExternReceiptNumber,
+                            CustomerId = receipt.CustomerId,
+                            CustomerName = receipt.CustomerName,
+                            WarehouseId = receipt.WarehouseId,
+                            WarehouseName = receipt.WarehouseName,
+                            OperationId = receipt.Id,
+                            InstructionTaskNo = receipt.ExternReceiptNumber,
+                            Creator = _userManager.Account,
+                            CreationTime = DateTime.Now,
+                            TableName = "WMS_ASN",
+                            InstructionPriority = 0,
+                            Remark = ""
+                        });
+
+                        await _repInstruction.InsertRangeAsync(wMSInstructions);
                         await _repASNDetail.UpdateRangeAsync(asnDetailData);
 
                         //修改ASN 状态
@@ -260,7 +301,8 @@ namespace Admin.NET.Application.Strategy
                     //throw new NotImplementedException();
                     return response;
                 }
-            };
+            }
+            ;
 
             response.Data = orderStatuses;
             response.Code = StatusCode.Success;

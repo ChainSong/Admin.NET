@@ -80,6 +80,11 @@
 				</span>
 			</template>
 		</el-dialog>
+		<el-dialog v-model="resultPopupShow" title="结果" :append-to-body="true">
+			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg"
+				:type="i.statusMsg">
+			</el-alert>
+		</el-dialog>
 	</div>
 </template>
 
@@ -120,7 +125,7 @@ const state = ref({
 	header: new Header(),
 	headers: new Array<Header>(),
 	// details: new Array<Detail>(),
-
+	orderStatus: new Array<any>(),
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
@@ -246,9 +251,12 @@ const gettableColumn = async () => {
 // 上传结果
 const ImportExcel = (response, file, fileList) => {
 	closeDialog();
+	console.log("response");
+	console.log(response);
+	console.log(response.result.data != null && response.result.data.length > 0);
 	if (response.result.data != null && response.result.data.length > 0) {
-		// state.value.orderStatus = response.result.data;
-		// console.log(state.value.orderStatus);
+		state.value.orderStatus = response.result.data;
+		console.log(state.value.orderStatus);
 		//导入弹框提醒
 		resultPopupShow.value = true;
 	} else {

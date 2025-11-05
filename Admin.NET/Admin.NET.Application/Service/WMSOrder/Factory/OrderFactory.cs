@@ -23,6 +23,8 @@ namespace Admin.NET.Application.Factory
 
             switch (workFlowName)
             {
+                case "HachDG":
+                    return new OrderHachDGStrategy();
                 case "Hach":
                     return new OrderHachStrategy();
                 default:

@@ -123,6 +123,42 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
         //            and  WMS_PickTaskDetail.SKU=WMS_RFIDInfo.SKU and Status=99
         //            ) RFIDInfo
         //            where  WMS_Order.Id in (" + string.Join(",", ids) + ")";
+        //    string strSql = @"  select distinct
+        //            CompleteTime '出库日期',
+        //            WMS_OrderDetail.PoCode '合同号',
+        //            WMS_OrderDetail.ExternOrderNumber  'JOB号', 
+        //            WMS_OrderDetail.ExternOrderNumber  '出库单号', 
+        //            isnull(RFIDInfo.PackageNumber,Package.PackageNumber) '箱号', 
+        //            WMS_OrderDetail.SKU '货号',
+        //            (case isnull(RFID, '') when ''  then WMS_OrderDetail.AllocatedQty  else 1 end) '出库数量',
+        //            (select COUNT(1) from WMS_Package where ExternOrderNumber = WMS_Order.ExternOrderNumber) '组合箱数',
+        //WMS_OrderDetail.Onwer '类型',
+        //            OrderAddress.Name '收货人',
+        //            OrderAddress.Address '地址',
+        //            OrderAddress.Phone '电话',
+        //(select COUNT(1) from WMS_Package where ExternOrderNumber = WMS_Order.ExternOrderNumber)  'JOB号总箱数',	
+        //Package.ExpressCompany '承运人',
+        //WMS_OrderDetail.GoodsName '品名',
+        //Package.ExpressNumber '顺丰单号',	
+        //Package.ExpressCompany '顺丰单号',	
+        //RFIDInfo.RFID '防伪码',
+        //OrderAddress.CompanyName '最终用户名称'
+        //from
+        //            WMS_Order left join WMS_OrderDetail
+        //            on WMS_Order.Id = WMS_OrderDetail.OrderId
+        //            outer apply(select top 1 * from WMS_OrderAddress where ExternOrderNumber = WMS_Order.ExternOrderNumber) OrderAddress
+        //            left join WMS_PickTaskDetail  on WMS_OrderDetail.Id = WMS_PickTaskDetail.OrderDetailId
+        //              outer apply(
+        //            select distinct  rfid , PackageNumber, PickTaskNumber from WMS_RFIDInfo where  WMS_PickTaskDetail.PickTaskNumber= WMS_RFIDInfo.PickTaskNumber
+        //            and WMS_PickTaskDetail.SKU= WMS_RFIDInfo.SKU and Status = 99
+        //            ) RFIDInfo
+        //              outer apply(
+        //            select distinct top 1 PackageNumber, ExpressCompany, ExpressNumber from WMS_Package where WMS_PickTaskDetail.PickTaskNumber = WMS_Package.PickTaskNumber
+        //            and(isnull(RFIDInfo.PackageNumber, '') = '' or  WMS_Package.PackageNumber = RFIDInfo.PackageNumber)
+        //            ) Package
+        //            where  WMS_Order.Id in (" + string.Join(",", ids) + ")";
+
+
         string strSql = @"  select distinct
                 CompleteTime '出库日期',
                 WMS_OrderDetail.PoCode '合同号',
@@ -130,7 +166,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 WMS_OrderDetail.ExternOrderNumber  '出库单号', 
                 isnull(RFIDInfo.PackageNumber,Package.PackageNumber) '箱号', 
                 WMS_OrderDetail.SKU '货号',
-                (case isnull(RFID, '') when ''  then WMS_OrderDetail.AllocatedQty  else 1 end) '出库数量',
+                (case isnull(RFID, '') when ''  then Package.Qty  else 1 end) '出库数量',
                 (select COUNT(1) from WMS_Package where ExternOrderNumber = WMS_Order.ExternOrderNumber) '组合箱数',
 				WMS_OrderDetail.Onwer '类型',
                 OrderAddress.Name '收货人',
@@ -152,9 +188,13 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 select distinct  rfid , PackageNumber, PickTaskNumber from WMS_RFIDInfo where  WMS_PickTaskDetail.PickTaskNumber= WMS_RFIDInfo.PickTaskNumber
                 and WMS_PickTaskDetail.SKU= WMS_RFIDInfo.SKU and Status = 99
                 ) RFIDInfo
-                  outer apply(
-                select distinct top 1 PackageNumber, ExpressCompany, ExpressNumber from WMS_Package where WMS_PickTaskDetail.PickTaskNumber = WMS_Package.PickTaskNumber
-                and(isnull(RFIDInfo.PackageNumber, '') = '' or  WMS_Package.PackageNumber = RFIDInfo.PackageNumber)
+                 outer apply(
+                select distinct top 1 WMS_Package.PackageNumber, ExpressCompany, ExpressNumber,sum(Qty) Qty from WMS_Package
+				left join WMS_PackageDetail  on WMS_Package.Id=WMS_PackageDetail.PackageId
+				where WMS_PickTaskDetail.PickTaskNumber = WMS_Package.PickTaskNumber
+                and(isnull(RFIDInfo.PackageNumber, '') = '' or  WMS_Package.PackageNumber = RFIDInfo.PackageNumber) 
+				and  WMS_PackageDetail.SKU=WMS_OrderDetail.SKU
+				group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber
                 ) Package
                 where  WMS_Order.Id in (" + string.Join(",", ids) + ")";
 

@@ -20,18 +20,20 @@ public class SysMenuService : IDynamicApiController, ITransient
     private readonly SysRoleMenuService _sysRoleMenuService;
     private readonly SysUserRoleService _sysUserRoleService;
     private readonly SysCacheService _sysCacheService;
-
+    private readonly ILogger _logger;
+    
     public SysMenuService(UserManager userManager,
         SqlSugarRepository<SysMenu> sysMenuRep,
         SysRoleMenuService sysRoleMenuService,
         SysUserRoleService sysUserRoleService,
-        SysCacheService sysCacheService)
+        SysCacheService sysCacheService,ILogger<SysMenu> logger)
     {
         _userManager = userManager;
         _sysMenuRep = sysMenuRep;
         _sysRoleMenuService = sysRoleMenuService;
         _sysUserRoleService = sysUserRoleService;
         _sysCacheService = sysCacheService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,21 +43,34 @@ public class SysMenuService : IDynamicApiController, ITransient
     [DisplayName("获取登录菜单树")]
     public async Task<List<MenuOutput>> GetLoginMenuTree()
     {
-        if (_userManager.SuperAdmin)
+        try
         {
-            var menuList = await _sysMenuRep.AsQueryable()
-                .Where(u => u.Type != MenuTypeEnum.Btn && u.Status == StatusEnum.Enable)
-                .OrderBy(u => u.OrderNo).ToTreeAsync(u => u.Children, u => u.Pid, 0);
-            return menuList.Adapt<List<MenuOutput>>();
+
+            _logger.LogWarning("执行语句" + "开始");
+
+            if (_userManager.SuperAdmin)
+            {
+                var menuList = await _sysMenuRep.AsQueryable()
+                    .Where(u => u.Type != MenuTypeEnum.Btn && u.Status == StatusEnum.Enable)
+                    .OrderBy(u => u.OrderNo).ToTreeAsync(u => u.Children, u => u.Pid, 0);
+                _logger.LogWarning("反馈" + menuList.Count);
+                _logger.LogWarning("反馈" + menuList.Adapt<List<MenuOutput>>().ToJson());
+                return menuList.Adapt<List<MenuOutput>>();
+            }
+            else
+            {
+                var menuIdList = await GetMenuIdList();
+                var menuTree = await _sysMenuRep.AsQueryable()
+                    .Where(u => u.Status == StatusEnum.Enable)
+                    .OrderBy(u => u.OrderNo).ToTreeAsync(u => u.Children, u => u.Pid, 0, menuIdList.Select(d => (object)d).ToArray());
+                DeleteBtnFromMenuTree(menuTree);
+                return menuTree.Adapt<List<MenuOutput>>();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var menuIdList = await GetMenuIdList();
-            var menuTree = await _sysMenuRep.AsQueryable()
-                .Where(u => u.Status == StatusEnum.Enable)
-                .OrderBy(u => u.OrderNo).ToTreeAsync(u => u.Children, u => u.Pid, 0, menuIdList.Select(d => (object)d).ToArray());
-            DeleteBtnFromMenuTree(menuTree);
-            return menuTree.Adapt<List<MenuOutput>>();
+            _logger.LogWarning("执行语句" + ex.ToString());
+            throw;
         }
     }
 

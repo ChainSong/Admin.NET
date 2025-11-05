@@ -82,15 +82,15 @@ namespace Admin.NET.Application.Strategy
             }
             //判断有没有包装信息
             var package = await _repPackage.AsQueryable().Where(a => request.Contains(a.OrderId)).ToListAsync();
-            foreach (var item in request)
-            {
-                if (package.Where(a => a.OrderId == item).Count() == 0)
-                {
-                    response.Code = StatusCode.Error;
-                    response.Msg = "订单异常:没有完成包装信息";
-                    return response;
-                }
-            }
+            //foreach (var item in request)
+            //{
+            //    if (package.Where(a => a.OrderId == item).Count() == 0)
+            //    {
+            //        response.Code = StatusCode.Error;
+            //        response.Msg = "订单异常:没有完成包装信息";
+            //        return response;
+            //    }
+            //}
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime = DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));
             //await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime=DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));
@@ -124,7 +124,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstruction.Remark = "";
                 wMSInstructions.Add(wMSInstruction);
                 //}item.OrderAddress.CompanyType == "分销商" &&
-                if ( item.CustomerName == "哈希")
+                if (item.CustomerName == "哈希")
                 {
                     //插入反馈指令
                     WMSInstruction wMSInstructionIssue = new WMSInstruction();
@@ -148,6 +148,87 @@ namespace Admin.NET.Application.Strategy
                     wMSInstructionIssue.InstructionPriority = 0;
                     wMSInstructionIssue.Remark = "";
                     wMSInstructions.Add(wMSInstructionIssue);
+
+
+                    //if (item.CustomerName != "哈希")
+                    //{
+                    //插入反馈指令
+                    WMSInstruction wMSInstructionGI = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionGI.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionGI.InstructionType = "出库单回传HachDG";
+                    wMSInstructionGI.BusinessType = "出库单回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstructionGI.CustomerId = item.CustomerId;
+                    wMSInstructionGI.CustomerName = item.CustomerName;
+                    wMSInstructionGI.WarehouseId = item.WarehouseId;
+                    wMSInstructionGI.WarehouseName = item.WarehouseName;
+                    wMSInstructionGI.OperationId = item.Id;
+                    wMSInstructionGI.OrderNumber = item.ExternOrderNumber;
+                    wMSInstructionGI.Creator = _userManager.Account;
+                    wMSInstructionGI.CreationTime = DateTime.Now;
+                    wMSInstructionGI.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionGI.TableName = "WMS_Order";
+                    wMSInstructionGI.InstructionPriority = 0;
+                    wMSInstructionGI.Remark = "";
+                    wMSInstructions.Add(wMSInstructionGI);
+
+                    WMSInstruction wMSInstructionGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.CustomerId = item.CustomerId;
+                    wMSInstructionGRHach.CustomerName = item.CustomerName;
+                    wMSInstructionGRHach.WarehouseId = item.WarehouseId;
+                    wMSInstructionGRHach.WarehouseName = item.WarehouseName;
+                    wMSInstructionGRHach.OperationId = item.Id;
+                    wMSInstructionGRHach.OrderNumber = item.ExternOrderNumber;
+                    wMSInstructionGRHach.Creator = _userManager.Account;
+                    wMSInstructionGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionGRHach.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionGRHach.TableName = "WMS_Order";
+                    wMSInstructionGRHach.InstructionPriority = 0;
+                    wMSInstructionGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionGRHach);
+
+                    WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.CustomerId = item.CustomerId;
+                    wMSInstructionAFCGRHach.CustomerName = item.CustomerName;
+                    wMSInstructionAFCGRHach.WarehouseId = item.WarehouseId;
+                    wMSInstructionAFCGRHach.WarehouseName = item.WarehouseName;
+                    wMSInstructionAFCGRHach.OperationId = item.Id;
+                    wMSInstructionAFCGRHach.OrderNumber = item.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
+                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionAFCGRHach.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.TableName = "WMS_Order";
+                    wMSInstructionAFCGRHach.InstructionPriority = 0;
+                    wMSInstructionAFCGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionAFCGRHach);
+                    WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+                    wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstructionSNGRHach.CustomerId = item.CustomerId;
+                    wMSInstructionSNGRHach.CustomerName = item.CustomerName;
+                    wMSInstructionSNGRHach.WarehouseId = item.WarehouseId;
+                    wMSInstructionSNGRHach.WarehouseName = item.WarehouseName;
+                    wMSInstructionSNGRHach.OperationId = item.Id;
+                    wMSInstructionSNGRHach.OrderNumber = item.ExternOrderNumber;
+                    wMSInstructionSNGRHach.Creator = _userManager.Account;
+                    wMSInstructionSNGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionSNGRHach.InstructionTaskNo = item.ExternOrderNumber;
+                    wMSInstructionSNGRHach.TableName = "WMS_Order";
+                    wMSInstructionSNGRHach.InstructionPriority = 0;
+                    wMSInstructionSNGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionSNGRHach);
                 }
             }
             if (wMSInstructions.Count > 0)

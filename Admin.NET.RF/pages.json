@@ -155,6 +155,9 @@
 			"path": "pages/wMSASNCountQuantity/component/editDialog",
 			"style": {}
 		}, {
+			"path": "pages/wMSASNCountQuantity/component/editSNDialog",
+			"style": {}
+		}, {
 			"path": "pages/wMSASNCountQuantity/index",
 			"style": {}
 		}, {

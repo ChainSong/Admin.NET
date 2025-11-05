@@ -14,9 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service;
-public enum ReceiptAcquisitionStatusEnum
+public class ScanTypeDto
 {
-    新增 = 1,
-    冻结 = 10,
-    出库 = 99,
+    public string ScanTypeData { get; set; }
+    public string ScanType { get; set; }
+    public string Data { get; set; }
 }

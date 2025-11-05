@@ -1,7 +1,7 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Application.Service.WMSRFReceiptAcquisition.Enumerate;
+using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
