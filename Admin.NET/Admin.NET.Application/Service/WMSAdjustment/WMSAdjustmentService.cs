@@ -39,9 +39,10 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
-
     //private readonly ISqlSugarClient _db;
-    public WMSAdjustmentService(SqlSugarRepository<WMSAdjustment> rep, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, ISqlSugarClient db, SqlSugarRepository<WMSAdjustmentDetail> repAdjustmentDetail, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<WMSLocation> repLocation)
+    public WMSAdjustmentService(SqlSugarRepository<WMSAdjustment> rep,
+        SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, ISqlSugarClient db, SqlSugarRepository<WMSAdjustmentDetail> repAdjustmentDetail, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, 
+        SqlSugarRepository<WMSLocation> repLocation )
     {
         _rep = rep;
         _repTableColumns = repTableColumns;
@@ -193,6 +194,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         factory._userManager = _userManager;
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
+        factory._repLocation = _repLocation;
         //factory._repTableColumns = _repTableColumns;
         //factory._repTableColumnsDetail = _repTableColumnsDetail;
         var response = await factory.AddStrategy(entityListDtos);

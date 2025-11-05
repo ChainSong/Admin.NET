@@ -41,6 +41,9 @@ public class HachWmsAuthorizationConfig : EntityTenant
     public long? WarehouseId { get; set; }
     [SugarColumn(ColumnDescription = "仓库名称", IsOnlyIgnoreUpdate = true)]
     public string WarehouseName { get; set; }
+
+    [SugarColumn(ColumnDescription = "仓库代码", IsOnlyIgnoreUpdate = true)]
+    public string WarehouseCode { get; set; }
     [SugarColumn(ColumnDescription = "状态", IsOnlyIgnoreUpdate = true)]
     public bool Status { get; set; } = true;
 }

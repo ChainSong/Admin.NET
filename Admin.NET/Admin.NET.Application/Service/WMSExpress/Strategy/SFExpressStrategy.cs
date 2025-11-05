@@ -45,7 +45,7 @@ namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 public class SFExpressStrategy : IExpressInterface
 {
 
-    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
@@ -205,7 +205,7 @@ public class SFExpressStrategy : IExpressInterface
         }
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<WMSPackage, WMSExpressDelivery>()
+            cfg.CreateMap<Admin.NET.Core.Entity.WMSPackage, WMSExpressDelivery>()
                //添加创建人为当前用户
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
@@ -263,7 +263,7 @@ public class SFExpressStrategy : IExpressInterface
         //packageData.Details = sfexpress;
         //await 【【【【【【【【【【【【【【【=】、、、【、【】‘、
         await _repExpressDelivery.InsertAsync(packageData);
-        await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
+        await _repPackage.UpdateAsync(a => new Admin.NET.Core.Entity.WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
         response.Msg = "成功";
         response.Code = StatusCode.Success;
@@ -428,7 +428,7 @@ public class SFExpressStrategy : IExpressInterface
         }
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<WMSPackage, WMSExpressDelivery>()
+            cfg.CreateMap<Admin.NET.Core.Entity.WMSPackage, WMSExpressDelivery>()
                //添加创建人为当前用户
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))

@@ -28,6 +28,8 @@ internal static class PackagePrintFactory
             //return new PackageOperationDefaultStrategy();
             //case "RFID":
             //    return new PackageOperationRFIDStrategy();
+            case "危险品仓出库打印装箱清单":
+            return new PackageDGPrintDefaultStrategy();
             default:
                 return new PackagePrintDefaultStrategy();
         }

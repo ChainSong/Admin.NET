@@ -25,33 +25,26 @@ using Admin.NET.Common;
 namespace Admin.NET.Application.Service;
 public class PrintOrderStrategy : IPrintOrderInterface
 {
-
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SysWorkFlowService _repWorkFlowService { get; set; }
     public SqlSugarRepository<WMSPreOrderDetail> _reppreOrderDetail { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public UserManager _userManager { get; set; }
-
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WMSCustomer> _repCustomer { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
-
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
-
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
-
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
-
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public PrintOrderStrategy()
     {
-
     }
     //处理打印发运单
     public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintShippingList(List<long> request)
@@ -60,7 +53,7 @@ public class PrintOrderStrategy : IPrintOrderInterface
         //List<WMSOrderPrintDto> result = new List<WMSOrderPrintDto>();
         //获取订单信息
         //List<WMSOrder> orders = await _repOrder.GetListAsync(o => request.Contains(o.Id));
-        List<WMSOrder> orders = await _repOrder.AsQueryable()
+        List<Admin.NET.Core.Entity.WMSOrder> orders = await _repOrder.AsQueryable()
                  .Includes(a => a.Details)
                  .Includes(a => a.OrderAddress)
                  .Where(u => request.Contains(u.Id)).ToListAsync();

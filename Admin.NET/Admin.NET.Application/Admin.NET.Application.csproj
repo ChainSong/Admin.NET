@@ -84,6 +84,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Service\ExternalDockingInterface\HachWms\Helper\" />
     <Folder Include="Service\MMSReceiptReceiving\Abstract\" />
     <Folder Include="Service\MMSReceiptReceiving\Exporting\" />
     <Folder Include="Service\MMSReceipt\Abstract\" />

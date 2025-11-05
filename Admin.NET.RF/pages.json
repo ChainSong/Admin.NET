@@ -127,7 +127,7 @@
 		}, {
 			"path": "pages/plugin/verticalnav",
 			"style": {}
-		},{
+		}, {
 			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "",
@@ -169,9 +169,13 @@
 		}, {
 			"path": "pages/wMsRFAdjust/move/index",
 			"style": {}
+		}, {
+			"path": "pages/wMsRFAdjust/move/component/addAdjustMove",
+			"style": {}
 		}
-		
-		
+
+
+
 	],
 	"globalStyle": {
 		"mp-alipay": {

@@ -23,6 +23,7 @@ public class OutboundWorkFlowConst
     public const string Workflow_PreOrder_Update = "修改预出库单";
     public const string Workflow_Order = "出库单"; 
     public const string Workflow_Print_Order = "打印发运单";
+    public const string Workflow_Print_Job_Order = "JOB汇总清单";
     public const string Workflow_Pick = "拣货单";
     public const string Workflow_Complete = "完成出库";
     public const string Workflow_Package = "包装单";
@@ -32,6 +33,6 @@ public class OutboundWorkFlowConst
     public const string Workflow_Automated_Outbound = "自动分配";
     public const string Workflow_Order_Return = "出库单回退";
     public const string Workflow_Print_Package_List = "出库打印装箱清单";
-    
+    public const string Workflow_Print_DG_Package_List = "危险品仓出库打印装箱清单";
     //public const string Workflow_ReceiptReceiving = "上架单";
 }

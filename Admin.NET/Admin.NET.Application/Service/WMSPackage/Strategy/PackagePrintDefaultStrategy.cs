@@ -27,15 +27,13 @@ using RulesEngine.Models;
 namespace Admin.NET.Application.Service;
 public class PackagePrintDefaultStrategy : IPackagePrintInterface
 {
-
-
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     //包装
-    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
@@ -105,7 +103,6 @@ where  WMS_Package.Id in (");
 
         return response;
     }
-
 
 }
 

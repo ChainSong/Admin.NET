@@ -33,7 +33,7 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
@@ -165,7 +165,6 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
             }
         }
     }
-
     private async Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanSKU(WMSRFPickTaskDetailInput request)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
@@ -245,9 +244,6 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
         //throw new NotImplementedException();
         return response;
     }
-
-
-
     private async Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanLocation(WMSRFPickTaskDetailInput request)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };

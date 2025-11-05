@@ -53,7 +53,7 @@ export const aProvider = function () {
 						tableFooterRepeat: 'last',
 						fields: [
 							{ text: 'SKU', field: 'sku' },
-							{ text: '名称', field: 'goodsName'},
+							{ text: '名称', field: 'goodsName' },
 							{ text: '数量', field: 'qty' },
 							{ text: '行号', field: 'lineNumber' },
 							{ text: '产品类型', field: 'goodsType' },
@@ -79,16 +79,16 @@ export const aProvider = function () {
 					isEnableMergeCell: true, //合并单元格
 					columns: [
 						[
-							{ title: 'SKU', align: 'center', field: 'sku' , width: 150 },
+							{ title: 'SKU', align: 'center', field: 'sku', width: 150 },
 							{ title: '名称', align: 'center', field: 'goodsName', width: 150 },
-							{ title: '数量', align: 'center', field: 'qty' , width: 150 },
-							{ title: '行号', align: 'center', field: 'lineNumber' , width: 150 },
-							{ title: '产品类型', align: 'center', field: 'goodsType' , width: 150 },
-							{ title: '库区', align: 'center', field: 'area', width: 150  },
-							{ title: '库位', align: 'center', field: 'location' , width: 150 },
-							{ title: '批次号', align: 'center', field: 'batchCode' , width: 150 },
-							{ title: '是否SN', align: 'center', field: 'isSN' , width: 150 },
-							{ title: 'CN805', align: 'center', field: 'cN805' , width: 150 },
+							{ title: '数量', align: 'center', field: 'qty', width: 150 },
+							{ title: '行号', align: 'center', field: 'lineNumber', width: 150 },
+							{ title: '产品类型', align: 'center', field: 'goodsType', width: 150 },
+							{ title: '库区', align: 'center', field: 'area', width: 150 },
+							{ title: '库位', align: 'center', field: 'location', width: 150 },
+							{ title: '批次号', align: 'center', field: 'batchCode', width: 150 },
+							{ title: '是否SN', align: 'center', field: 'isSN', width: 150 },
+							{ title: 'CN805', align: 'center', field: 'cN805', width: 150 },
 
 							// { title: '名称', align: 'center', field: 'NAME', width: 150 },
 							// { title: '数量', align: 'center', field: 'SL', width: 80 },
@@ -104,7 +104,7 @@ export const aProvider = function () {
 					//   }
 					//   return '<td style="padding:0 10px" colspan="100">应收金额大写: </td>'
 					// },
-				},{
+				}, {
 					tid: 'HachProviderModule.table',
 					title: 'Hach发货表格',
 					type: 'table',
@@ -114,12 +114,13 @@ export const aProvider = function () {
 						tableFooterRepeat: 'last',
 						fields: [
 							{ text: '序号', field: 'sequence' },
-							{ text: '产品名称', field: 'goodsName'},
-							{ text: '货号', field: 'sku' },
-							{ text: '数量', field: 'allocatedQty' },
-							{ text: '单位', field: 'unitCode' },
+							{ text: '产品代码', field: 'sku' },
+							{ text: '产品名称', field: 'goodsName' },
+							{ text: '装箱数量', field: 'qty' },
+							{ text: '单件箱数', field: 'singelBoxQty' },
+							{ text: '总箱数', field: 'totalQty' },
 							{ text: '父件SKU', field: 'parentSku' },
-							{ text: '备注', field: 'remark' }
+							{ text: '备注', field: 'remark' },
 						],
 					},
 					editable: true,
@@ -138,35 +139,15 @@ export const aProvider = function () {
 					columns: [
 						[
 							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
-							{ title: '合同编号', align: 'center', field: 'poCode', width: 250 },
 							{ title: '产品代码', align: 'center', field: 'sku', width: 150 },
 							{ title: '产品名称', align: 'center', field: 'goodsName', width: 150 },
-							{ title: '订货号', align: 'center', field: 'sku', width: 150 },
-							{ title: '货号', align: 'center', field: 'sku' , width: 150 },
-							{ title: '装箱数量', align: 'center', field: 'boxQty' , width: 150 },
-							{ title: '单件箱数', align: 'center', field: 'pieces' , width: 150 },
-							{ title: '总箱数', align: 'center', field: 'totalBoxQty' , width: 150 },
-							{ title: '数量', align: 'center', field: 'allocatedQty' , width: 150 },
-							{ title: '单位', align: 'center', field: 'unitCode' , width: 150 },
-							{ title: '箱号', align: 'center', field: 'boxCode' , width: 150 },
-							{ title: '批次号', align: 'center', field: 'batchCode' , width: 150 },
-							{ title: 'LOT', align: 'center', field: 'lotCode' , width: 150 },
-							{ title: '父件SKU', align: 'center', field: 'parentSku' , width: 150 },
-							{ title: '备注', align: 'center', field: 'remark' , width: 150 },
-							// { title: '名称', align: 'center', field: 'NAME', width: 150 },
-							// { title: '数量', align: 'center', field: 'SL', width: 80 },
-							// { title: '规格', align: 'center', field: 'GG', width: 80, checked: false },
-							// { title: '条码', align: 'center', field: 'TM', width: 100, checked: false },
-							// { title: '单价', align: 'center', field: 'DJ', width: 100 },
-							// { title: '金额', align: 'center', field: 'JE', width: 100, checked: false },
+							{ title: '装箱数量', align: 'center', field: 'qty', width: 150 },
+							{ title: '单件箱数', align: 'center', field: 'singelBoxQty', width: 150 },
+							{ title: '总箱数', align: 'center', field: 'totalQty', width: 150 },
+							{ title: '父件SKU', align: 'center', field: 'parentSku', width: 150 },
+							{ title: '备注', align: 'center', field: 'remark', width: 150 },
 						],
 					],
-					// footerFormatter: function (options: unknown, rows: unknown, data: any, currentPageGridRowsData: unknown) {
-					//   if (data && data['totalCap']) {
-					//     return `<td style="padding:0 10px" colspan="100">${'应收金额大写: ' + data['totalCap']}</td>`
-					//   }
-					//   return '<td style="padding:0 10px" colspan="100">应收金额大写: </td>'
-					// },
 				},
 				{
 					tid: 'aProviderModule.customText',
@@ -193,7 +174,97 @@ export const aProvider = function () {
 				{ tid: 'aProviderModule.hline', title: '横线', type: 'hline' },
 				{ tid: 'aProviderModule.vline', title: '竖线', type: 'vline' },
 				{ tid: 'aProviderModule.rect', title: '矩形', type: 'rect' },
-				{ tid: 'aProviderModule.oval', title: '椭圆', type: 'oval' },
+				{ tid: 'aProviderModule.oval', title: '椭圆', type: 'oval' }, {
+					tid: 'HachProviderDGModule.table',
+					title: 'Hach危险品仓装箱清单',
+					type: 'table',
+					options: {
+						field: 'table',
+						tableHeaderRepeat: 'first',
+						tableFooterRepeat: 'last',
+						fields: [
+							{ text: '序号', field: 'sequence' },
+							{ text: '产品代码', field: 'sku' },
+							{ text: '产品名称', field: 'goodsName' },
+							{ text: '装箱数量', field: 'qty' },
+							{ text: '单件箱数', field: 'singelBoxQty' },
+							{ text: '总箱数', field: 'totalQty' },
+							{ text: '父件SKU', field: 'parentSku' },
+							{ text: '备注', field: 'remark' },
+						],
+					},
+					editable: true,
+					columnDisplayEditable: true, //列显示是否能编辑
+					columnDisplayIndexEditable: true, //列顺序显示是否能编辑
+					columnTitleEditable: true, //列标题是否能编辑
+					columnResizable: true, //列宽是否能调整
+					columnAlignEditable: true, //列对齐是否调整
+					isEnableEditField: true, //编辑字段
+					isEnableContextMenu: true, //开启右键菜单 默认true
+					isEnableInsertRow: true, //插入行
+					isEnableDeleteRow: true, //删除行
+					isEnableInsertColumn: true, //插入列
+					isEnableDeleteColumn: true, //删除列
+					isEnableMergeCell: true, //合并单元格
+					columns: [
+						[
+							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
+							{ title: '产品代码', align: 'center', field: 'sku', width: 150 },
+							{ title: '产品名称', align: 'center', field: 'goodsName', width: 150 },
+							{ title: '装箱数量', align: 'center', field: 'qty', width: 150 },
+							{ title: '单件箱数', align: 'center', field: 'singelBoxQty', width: 150 },
+							{ title: '总箱数', align: 'center', field: 'totalQty', width: 150 },
+							{ title: '父件SKU', align: 'center', field: 'parentSku', width: 150 },
+							{ title: '备注', align: 'center', field: 'remark', width: 150 },
+						],
+					],
+				}, {
+					tid: 'HachProviderDGJOBModule.table',
+					title: 'Hach危险品仓JOB汇总清单',
+					type: 'table',
+					options: {
+						field: 'table',
+						tableHeaderRepeat: 'first',
+						tableFooterRepeat: 'last',
+						fields: [
+							{ text: '序号', field: 'sequence' },
+							{ text: '出库日期', field: 'completeTime' },
+							{ text: '合同号', field: 'poCode' },
+							{ text: '箱号', field: 'boxCode' },
+							{ text: '货号', field: 'sku' },
+							{ text: '出库数量', field: 'allocatedQty' },
+							{ text: '组合箱数', field: 'combinationQty' },
+							{ text: '类型', field: 'onwer' },
+							{ text: 'JOB总箱', field: 'jobTotalQty' },
+						],
+					},
+					editable: true,
+					columnDisplayEditable: true, //列显示是否能编辑
+					columnDisplayIndexEditable: true, //列顺序显示是否能编辑
+					columnTitleEditable: true, //列标题是否能编辑
+					columnResizable: true, //列宽是否能调整
+					columnAlignEditable: true, //列对齐是否调整
+					isEnableEditField: true, //编辑字段
+					isEnableContextMenu: true, //开启右键菜单 默认true
+					isEnableInsertRow: true, //插入行
+					isEnableDeleteRow: true, //删除行
+					isEnableInsertColumn: true, //插入列
+					isEnableDeleteColumn: true, //删除列
+					isEnableMergeCell: true, //合并单元格
+					columns: [
+						[
+							{ title: '序号', align: 'center', field: 'sequence', width: 60 },
+							{ title: '出库日期', align: 'center', field: 'completeTime', width: 200 },
+							{ title: '合同号', align: 'center', field: 'poCode', width: 200 },
+							{ title: '箱号', align: 'center', field: 'boxCode', width: 200 },
+							{ title: '货号', align: 'center', field: 'sku', width: 150 },
+							{ title: '出库数量', align: 'center', field: 'allocatedQty', width: 110 },
+							{ title: '组合箱数', align: 'center', field: 'combinationQty', width: 110 },
+							{ title: '类型', align: 'center', field: 'onwer', width: 150 },
+							{ title: 'JOB总箱', align: 'center', field: 'jobTotalQty', width: 110 }
+						],
+					],
+				}
 			]),
 			new hiprint.PrintElementTypeGroup('【视图字段】', [
 				{

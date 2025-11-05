@@ -159,11 +159,8 @@ const showDialog = (hiprintTemplate: any, printData: {}, width = 210) => {
 
 //获取订单数据
 const get = async () => {
-	console.log("result");
-	console.log("result");
 	let result = await getWMSPackage(state.value.header.id);
-	console.log("result");
-	console.log(result);
+	console.log("result",result);
 	if (result.data.result != null) {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
