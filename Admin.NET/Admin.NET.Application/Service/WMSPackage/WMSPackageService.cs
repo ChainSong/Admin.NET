@@ -1100,7 +1100,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
     /// <summary>
-    /// 打印包装清单
+    /// 打印危险品仓包装清装箱单
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
