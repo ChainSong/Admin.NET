@@ -7,6 +7,7 @@ enum Api {
   GetWMSPickTask = '/api/wMSPickTask/Query',
   AddWMSPickTaskPrintLog = '/api/wMSPickTask/AddPrintLog',
   WMSPickComplete = '/api/wMSPickTask/WMSPickComplete',
+  PrintPickTasks = '/api/wMSPickTask/PrintPickTasks',
   GetPickTasks = '/api/wMSPickTask/GetPickTasks',
   
 }
@@ -53,6 +54,14 @@ request({
 export const getPickTasks = (params?: any) => 
 request({
 	url: Api.GetPickTasks,
+	method: 'post',
+	data: params,
+});
+
+// 多条查询WMSPickTask
+export const printPickTasks = (params?: any) => 
+request({
+	url: Api.PrintPickTasks,
 	method: 'post',
 	data: params,
 });
