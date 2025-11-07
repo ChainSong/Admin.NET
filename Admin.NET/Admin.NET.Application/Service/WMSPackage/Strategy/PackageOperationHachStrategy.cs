@@ -513,7 +513,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -553,9 +553,10 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
 
 
             var mapper = new Mapper(config);
-            var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
+            var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
 
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
@@ -626,6 +627,9 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            //packageData.SerialNumber=(packagenumberData)
+            packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
+
             //try
             //{
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
