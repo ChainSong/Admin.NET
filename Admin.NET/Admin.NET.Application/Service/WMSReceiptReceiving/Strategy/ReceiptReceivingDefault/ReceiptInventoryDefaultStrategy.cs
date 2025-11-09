@@ -41,6 +41,9 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
 
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+
+        public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
+
         public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
         //public ISqlSugarClient _db { get; set; }

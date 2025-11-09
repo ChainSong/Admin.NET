@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
 
-namespace Admin.NET.Application.Service.WMSOrder.Interface;
+namespace Admin.NET.Application.Service;
 public interface IPrintJobOrderStrategy
 {
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }

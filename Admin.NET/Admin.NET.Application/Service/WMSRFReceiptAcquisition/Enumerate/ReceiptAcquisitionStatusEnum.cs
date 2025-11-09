@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSRFReceiptAcquisition.Enumerate;
+namespace Admin.NET.Application.Service;
 public enum ReceiptAcquisitionStatusEnum
 {
     新增 = 1,

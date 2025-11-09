@@ -267,6 +267,7 @@
 		width: 100%;
 		height: 100%;
 		.el-dialog {
+			padding: 0px  !important;   /*自定义修改*/
 			margin: 0 auto !important;
 			position: absolute;
 			.el-dialog__body {

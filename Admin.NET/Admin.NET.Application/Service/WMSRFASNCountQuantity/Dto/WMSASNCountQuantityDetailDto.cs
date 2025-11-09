@@ -1,4 +1,4 @@
-﻿namespace Admin.NET.Core.Entity;
+﻿namespace Admin.NET.Application.Service;
 
 /// <summary>
 /// 质检点数明细表

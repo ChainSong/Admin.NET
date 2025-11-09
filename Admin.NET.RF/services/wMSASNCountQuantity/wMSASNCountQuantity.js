@@ -3,6 +3,7 @@ import request from '@/utils/request'
 let PageWMSRFASNCountQuantity= '/api/wMSRFASNCountQuantity/page';
 let AddWMSRFASNCountQuantityDetail= '/api/wMSRFASNCountQuantity/scanAdd';
 let ClearWMSRFASNCountQuantityDetail= '/api/wMSRFASNCountQuantity/clear';
+let GetScanTypeWMSRFASNCountQuantityDetail= '/api/wMSRFASNCountQuantity/getScanType';
 
 // let ScanPick= '/api/wMSASNCountQuantity/ScanPick';
 // let ScanOrderPickTask= '/api/wMSASNCountQuantity/ScanOrderPickTask';
@@ -30,4 +31,11 @@ export const addWMSRFASNCountQuantityDetail = (params) =>
 			method: 'post',
 			data: params,
 		}); 		
-		 		 
+		 		
+ export const getScanTypeWMSRFASNCountQuantityDetail = (params) =>
+ 	request({
+ 			url: GetScanTypeWMSRFASNCountQuantityDetail,
+ 			method: 'post',
+ 			data: params,
+ 		}); 	
+				 

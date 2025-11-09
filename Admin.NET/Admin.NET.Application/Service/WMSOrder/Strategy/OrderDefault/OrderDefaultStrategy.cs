@@ -48,7 +48,7 @@ namespace Admin.NET.Application.Strategy
 
         }
 
-        //处理分配业务
+        //完成
         public async Task<Response<List<OrderStatusDto>>> CompleteOrder(List<long> request)
         {
 

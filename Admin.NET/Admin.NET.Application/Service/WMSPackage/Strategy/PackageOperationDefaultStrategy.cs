@@ -105,14 +105,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             request.SKU = request.Input;
             //response.Data.SKU = request.Input;
         }
-        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
-        {
+        //if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
+        //{
 
-        }
-        if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
-        {
+        //}
+        //if (!string.IsNullOrEmpty(request.Input) && string.IsNullOrEmpty(request.PickTaskNumber))
+        //{
 
-        }
+        //}
         response.Data.PickTaskNumber = request.PickTaskNumber;
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;

@@ -12,9 +12,9 @@ const CONFIG = {
 	},
 	// 生产环境配置
 	production: {
-		assetsPath: 'http://180.169.76.197:8024/WebStatic', // 静态资源路径
-		baseUrl: 'http://180.169.76.197:8000', // 后台接口请求地址
-		filebaseUrl: 'http://180.169.76.197:8000', // 后台文件地址 
+		assetsPath: 'http://121.4.36.74:8080/WebStatic', // 静态资源路径
+		baseUrl: 'http://121.4.36.74:8084', // 后台接口请求地址
+		filebaseUrl: 'http://121.4.36.74:8084', // 后台文件地址 
 		hostUrl: '', // H5地址(前端运行地址)
 		websocketUrl: '', // websocket服务端地址
 		weixinAppId: '', // 微信公众号appid

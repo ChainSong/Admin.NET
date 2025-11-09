@@ -51,6 +51,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
     //仓库用户关系仓储
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
 
+    public SqlSugarRepository<WMSRFReceiptAcquisition> _repRFReceiptAcquisition { get; set; }
 
 
     /// <summary>
@@ -71,7 +72,7 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
 
                 string skuRegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
                 string lotRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
-               
+
                 string expirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
                 MatchCollection matchesSKU = Regex.Matches(request.ScanInput, skuRegex);
                 request.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
@@ -98,11 +99,23 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             }
             else
             {
-                //判断是不是不需要解析，直接扫描的产品条码
-                var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.ScanInput).First();
-                if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                if (!string.IsNullOrEmpty(request.SKU))
                 {
-                    request.SKU = checkProduct.SKU;
+                    //判断是不是不需要解析，直接扫描的产品条码
+                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.SKU).First();
+                    if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                    {
+                        request.SKU = checkProduct.SKU;
+                    }
+                }
+                else
+                {
+                    //判断是不是不需要解析，直接扫描的产品条码
+                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == request.ScanInput).First();
+                    if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                    {
+                        request.SKU = checkProduct.SKU;
+                    }
                 }
             }
             //request.CustomerId = request.CustomerId;
@@ -222,6 +235,18 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
             //wMSASNCountQuantityDetail.CreationTime = request.CreationTime;
             //wMSASNCountQuantityDetail.Id = SnowFlakeHelper.GetSnowInstance().NextId();
             await _repASNCountQuantityDetail.InsertAsync(wMSASNCountQuantityDetail);
+            if (!string.IsNullOrEmpty(request.SnCode))
+            {
+                var RFReceiptAcquisition = wMSASNCountQuantityDetail.Adapt<WMSRFReceiptAcquisition>();
+                RFReceiptAcquisition.Type = "SN";
+                RFReceiptAcquisition.SN = request.SnCode;
+                RFReceiptAcquisition.ReceiptAcquisitionStatus = 1;
+                RFReceiptAcquisition.ReceiptDetailId = 0;
+                RFReceiptAcquisition.ReceiptNumber = "";
+                RFReceiptAcquisition.Lot = "";
+                await _repRFReceiptAcquisition.InsertAsync(RFReceiptAcquisition);
+            }
+
             //response.Data.Add(Mapper.Map<WMSRFPickTaskDetailOutput>(wMSASNCountQuantityDetail));
             var responseList = await _repASNCountQuantityDetail.AsQueryable()
                 .WhereIF(!string.IsNullOrEmpty(request.BatchCode), m => m.BatchCode.Contains(request.BatchCode))

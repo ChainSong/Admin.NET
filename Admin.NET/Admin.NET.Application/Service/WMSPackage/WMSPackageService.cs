@@ -526,7 +526,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _sysCacheService.Set(
         redisKey,
         "1",
-        TimeSpan.FromSeconds(3)  // 根据业务需求调整过期时间
+        TimeSpan.FromSeconds(2)  // 根据业务需求调整过期时间
     );
 
         if (isNewRequest)
@@ -1048,7 +1048,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                 request.Input = request.SKU;
             }
         }
-            ;
+        
 
         //}
         //else
@@ -1066,7 +1066,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             return new Response() { Code = StatusCode.Error, Msg = "任务号不存在" };
         }
-        var checkSKU =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SKU == request.SKU).FirstAsync();
+        var checkSKU = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SKU == request.SKU).FirstAsync();
         //if (checkSKU.Result == null || string.IsNullOrEmpty(checkSKU.Result.PickTaskNumber))
         //{
         //    return new Response() { Code = StatusCode.Error, Msg = "SKU不存在" };
@@ -1078,7 +1078,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
             return new Response() { Code = StatusCode.Error, Msg = "已扫描" };
         }
 
-        var packahe =await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
+        var packahe = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
         if (packahe == null || string.IsNullOrEmpty(packahe.PackageNumber))
         {
             return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };

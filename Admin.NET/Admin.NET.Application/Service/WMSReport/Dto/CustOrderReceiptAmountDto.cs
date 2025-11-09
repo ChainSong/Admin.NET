@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSReport.Dto;
+namespace Admin.NET.Application.Service;
 public class CustOrderReceiptAmountDto
 {
     /// <summary>

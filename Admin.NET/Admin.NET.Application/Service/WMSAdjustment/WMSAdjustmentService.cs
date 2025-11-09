@@ -292,7 +292,7 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
     }
 
     /// <summary>
-    /// 获取WMSAdjustment列表
+    /// 完成
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>

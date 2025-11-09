@@ -79,13 +79,13 @@ public class LocationAddOrUpdateStrategy : ILocationInterface
         //entity.AreaName = area.First().AreaName;
         //entity.AreaId = area.First().Id;
         //根据导入的库位信息获取库位类型信息
-        var data = _repLocation.AsQueryable().Where(a => request.Select(b => b.Location).Contains(a.Location) && a.WarehouseName == entity.First().WarehouseName);
+        var data =  _repLocation.AsQueryable().Where(a => request.Select(b => b.Location).Contains(a.Location) && a.WarehouseName == entity.First().WarehouseName);
         if (data.Count() > 0)
         {
             data.ToList().ForEach(a =>
             {
 
-                response.Data.Add(new OrderStatusDto() { SystemOrder = a.Location, StatusCode = StatusCode.Error, Msg = "库位已经存在" });
+                response.Data.Add(new OrderStatusDto() { SystemOrder = a.Location, ExternOrder= a.Location, StatusCode = StatusCode.Error, Msg = "库位已经存在" });
             });
             response.Code = StatusCode.Error;
             response.Msg = "库位已经存在";

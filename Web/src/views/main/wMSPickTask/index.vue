@@ -179,7 +179,7 @@ import editDialog from '/@/views/main/wMSPickTask/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPickTask/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPickTask/component/queryDialog.vue'
 // import printDialog from '/@/views/main/wMSPickTask/component/printDialog.vue'
-import { pageWMSPickTask, deleteWMSPickTask, wmsPickComplete, getPickTasks, addWMSPickTaskPrintLog } from '/@/api/main/wMSPickTask';
+import { pageWMSPickTask, deleteWMSPickTask, wmsPickComplete, getPickTasks, addWMSPickTaskPrintLog,printPickTasks } from '/@/api/main/wMSPickTask';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import printDialog from '/@/views/tools/printDialog.vue';
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -342,6 +342,8 @@ const openPrint = async () => {
   }
 
   let printData = new Array<Header>();
+  //这是默认拣货单打印
+  let templateName="拣货单打印模板";
   var flag = 0;
   //判断列表中有没有打印次数大于0的数据
   multipleTableRef.value.getSelectionRows().forEach(a => {
@@ -350,11 +352,17 @@ const openPrint = async () => {
     }
   })
   if (flag == 0) {
-    let result = await getPickTasks(ids.value);
+    let result = await printPickTasks(ids.value);
+    console.log("result");
+    console.log(result);
     if (result.data.result != null) {
-      printData = result.data.result;
+      printData = result.data.result.data.data;
+      templateName=result.data.result.data.printTemplate;
     }
-    printDialogRef.value.openDialog({ "printData": printData, "templateName": "拣货单打印模板" });
+    console.log(printData);
+    console.log(templateName);
+    
+    printDialogRef.value.openDialog({ "printData": printData, "templateName": templateName });
   } else {
     ElMessageBox.confirm(`存在已经打印过的拣货单，是否继续打印?`, "提示", {
       confirmButtonText: "确定",

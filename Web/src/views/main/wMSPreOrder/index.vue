@@ -148,7 +148,7 @@
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
-      <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
+      <addDialog  ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
       <editAddresDialog ref="editAddresDialogRef" :title="addresTitle" @reloadTable="handleQuery" />
     </el-card>

@@ -7,6 +7,7 @@ using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
+using AngleSharp.Io;
 using AutoMapper.Internal.Mappers;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
@@ -17,6 +18,9 @@ using NewLife.Net;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 using XAct;
 
 namespace Admin.NET.Application;
@@ -42,7 +46,8 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSReceipt> _repReceipt;
     private readonly SqlSugarRepository<WMSReceiptDetail> _repReceiptDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
-    public WMSRFASNCountQuantity(SqlSugarRepository<WMSASNCountQuantity> rep, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, UserManager userManager, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSASNCountQuantityDetail> repASNCountQuantityDetail)
+    private readonly SqlSugarRepository<WMSRFReceiptAcquisition> _repRFReceiptAcquisition;
+    public WMSRFASNCountQuantity(SqlSugarRepository<WMSASNCountQuantity> rep, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, UserManager userManager, SqlSugarRepository<SysWorkFlow> repWorkFlow, SqlSugarRepository<WMSReceipt> repReceipt, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSASNCountQuantityDetail> repASNCountQuantityDetail, SqlSugarRepository<WMSRFReceiptAcquisition> repRFReceiptAcquisition)
     {
         _rep = rep;
         _repASN = repASN;
@@ -58,6 +63,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         _repReceiptDetail = repReceiptDetail;
         _repProduct = repProduct;
         _repASNCountQuantityDetail = repASNCountQuantityDetail;
+        _repRFReceiptAcquisition = repRFReceiptAcquisition;
     }
 
     /// <summary>
@@ -239,6 +245,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repProduct = _repProduct;
+        factory._repRFReceiptAcquisition = _repRFReceiptAcquisition;
         //factory._repReceipt = _repReceipt;
         //factory._repReceiptDetail = _repReceiptDetail;
         var response = await factory.ScanAddStrategy(input);
@@ -318,6 +325,108 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<WMSASNCountQuantityOutput>().ToListAsync();
     }
 
+
+    /// <summary>
+    /// 区分扫描类型
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetScanType")]
+    public async Task<Response<ScanTypeDto>> GetScanType(WMSASNCountQuantityDetailDto input)
+    {
+        Response<ScanTypeDto> scanType = new Response<ScanTypeDto>() { Data = new ScanTypeDto() };
+        scanType.Code = StatusCode.Success;
+
+        if (!string.IsNullOrEmpty(input.ScanInput) && string.IsNullOrEmpty(input.SKU))
+        {
+            //var skuInfo = request.Input.Split('|');
+            //var skuInfo = request.Input.Split('|');
+            if (input.ScanInput.Split(' ').Length > 1 || input.ScanInput.Split('|').Length > 1)
+            {
+
+                string skuRegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
+                string lotRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
+
+                string expirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
+                MatchCollection matchesSKU = Regex.Matches(input.ScanInput, skuRegex);
+                input.SKU = matchesSKU.Count > 0 ? matchesSKU[0].Value : "";
+
+                MatchCollection matchesExpirationDateRegex = Regex.Matches(input.ScanInput, expirationDateRegex);
+                input.ExpirationDate = matchesExpirationDateRegex.Count > 0 ? matchesExpirationDateRegex[0].Value : "";
+                MatchCollection matchesLOT = Regex.Matches(input.ScanInput, lotRegex);
+                input.BatchCode = matchesLOT.Count > 0 ? matchesLOT[0].Value : "";
+                input.SKU = input.SKU;
+
+            }
+            //扫描的是HTTP 二维码，那么从中解析SKU
+            else if (input.ScanInput.Contains("http"))
+            {
+
+                Uri uri = new Uri(input.ScanInput);
+                var collection = HttpUtility.ParseQueryString(uri.Query);
+                var p = collection["p"];
+                if (p.Count() > 0)
+                {
+                    input.SKU = collection["p"].Split(':')[1];
+                    input.SnCode = collection["p"].Split(':')[0];
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(input.SKU))
+                {
+                    //判断是不是不需要解析，直接扫描的产品条码
+                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == input.SKU).First();
+                    if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                    {
+                        input.SKU = checkProduct.SKU;
+                    }
+                }
+                else
+                {
+                    //判断是不是不需要解析，直接扫描的产品条码
+                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == input.ScanInput).First();
+                    if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
+                    {
+                        input.SKU = checkProduct.SKU;
+                    }
+                }
+            }
+            //1.判断是不是SKU
+            var checkSKU = await _repProduct.AsQueryable().Where(a => a.SKU == input.SKU).FirstAsync();
+            if (checkSKU != null)
+            {
+                //可以判断是SKU
+                scanType.Data.ScanType = "SKU";
+                scanType.Data.ScanTypeData = checkSKU.SKU;
+
+                return scanType;
+            }
+            //判断不出来就是SN
+            scanType.Data.ScanType = "SN";
+            scanType.Data.ScanTypeData = input.ScanInput;
+            return scanType;
+        }
+        else {
+
+            //1.判断是不是SKU
+            var checkSKU = await _repProduct.AsQueryable().Where(a => a.SKU == input.ScanInput).FirstAsync();
+            if (checkSKU != null)
+            {
+                //可以判断是SKU
+                scanType.Data.ScanType = "SKU";
+                scanType.Data.ScanTypeData = checkSKU.SKU;
+
+                return scanType;
+            }
+            //判断不出来就是SN
+            scanType.Data.ScanType = "SN";
+            scanType.Data.ScanTypeData = input.ScanInput;
+            return scanType;
+        }
+     
+    }
 
 
 

@@ -8,8 +8,7 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Application.Service.WMSOrder.Interface;
+using Admin.NET.Application.Dtos.Enum; 
 using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -21,7 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSOrder.Strategy.OrderDefault;
+namespace Admin.NET.Application.Service;
 public class PrintJobOrderStrategy : IPrintJobOrderStrategy
 {
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
@@ -35,7 +34,7 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
     public SqlSugarRepository<WMSWarehouse> _repWarehouse { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
     public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }

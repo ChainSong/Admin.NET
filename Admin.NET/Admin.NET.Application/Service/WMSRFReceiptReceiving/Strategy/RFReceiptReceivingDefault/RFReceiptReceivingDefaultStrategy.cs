@@ -7,38 +7,39 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
-using Admin.NET.Core.Entity;
-using Admin.NET.Core;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.WMSRFReceiptReceiving.Dto;
-using System.Text.RegularExpressions;
-using Admin.NET.Core.Service;
-using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
-using AutoMapper;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Service.WMSRFReceiptReceiving.Dto;
+using Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
+using Admin.NET.Core;
+using Admin.NET.Core.Entity;
+using Admin.NET.Core.Service;
 using Aliyun.OSS;
+using AutoMapper;
+using FastExpressionCompiler;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 using Nest;
 using NPOI.SS.Formula.Functions;
 using SharpCompress.Common;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CardCreateRequest.Types.GrouponCard.Types.Base.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECMerchantAddFreightTemplateRequest.Types.FreightTemplate.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ComponentTCBCreateContainerServiceRequest.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.SemanticSemproxySearchResponse.Types;
+using static SKIT.FlurlHttpClient.Wechat.TenpayV3.Models.UploadMarketingShoppingReceiptResponse.Types;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
-using System.Reflection.Emit;
-using FastExpressionCompiler;
-using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
-using Admin.NET.Application.Service.WMSRFReceiptReceiving.Enumerate;
-using System.Web;
-using System.Globalization;
-using Microsoft.AspNetCore.Http;
 
 namespace Admin.NET.Application;
 public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
@@ -248,6 +249,11 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
 
             if (!string.IsNullOrEmpty(request.ExpirationDate))
             {
+                //CultureInfo culture = new CultureInfo("en-US");
+
+                //DateTime dateTime;
+                //DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", culture, DateTimeStyles.None, out dateTime);
+                //wMSASNCountQuantityDetail.ExpirationDate = dateTime;
                 //判断解析出来的日期的格式
                 string dataformat = "MMddyy";
                 if (!string.IsNullOrEmpty(request.ExpirationDate) && Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
@@ -274,6 +280,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                     DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
                     packageData.ExpirationDate = dateTime;
                 }
+
             }
             else
             {

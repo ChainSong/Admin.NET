@@ -197,12 +197,12 @@ const getPrintTemplate = async () => {
 
 	let printData = res.data.result ?? {};
 	// console.log("printData")
-	// console.log(printData)
+	console.log(printData)
 	staterReactive.hiprintTemplate = new hiprint.PrintTemplate({ template: JSON.parse(printData.template) });
 	// staterReactive.printData = [];
 	staterReactive.printData = state.value.printData;
-	// console.log( state.value.printData)
-	// console.log( staterReactive.printData )
+	console.log( state.value.printData)
+	console.log( staterReactive.printData )
 	showDialog(staterReactive.hiprintTemplate, JSON.stringify(state.value.printData))
 }
 
