@@ -58,7 +58,7 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         try
         {
             var list = await _repOrder.AsQueryable()
-                .Where(a => a.OrderStatus == 60 && a.OrderStatus != 99)
+                .Where(a => a.OrderStatus == 60)
                 .Where(a => SqlFunc.Subqueryable<WMSPackage>()
                 .Where(p => p.PackageStatus == 99)
                 .Where(p => p.ExternOrderNumber == a.ExternOrderNumber)
@@ -186,7 +186,13 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         }
 
         var result = await _repHandover.InsertRangeAsync(wMSHandovers);
-
+        var upOrder= await _repOrder.AsUpdateable()
+            .SetColumns(a => new WMSOrder
+            {
+                OrderStatus = 80
+            })
+            .Where(a => a.Id == input.packages.First().OrderId)
+            .ExecuteCommandAsync();
         if (result)
         {
             // 新增移库单成功之后就清除缓存
