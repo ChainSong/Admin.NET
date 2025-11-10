@@ -51,7 +51,7 @@ public class HandoverDefaultStrategy : IHandoverInterface
         {
             cfg.CreateMap<WMSPackage, WMSHandover>()
                //添加创建人为当前用户
-               .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => c.Id))
+               .ForMember(a => a.PackageId, opt => opt.MapFrom(c => c.Id))
                .ForMember(a => a.HandoverStatus, opt => opt.MapFrom(c => 1))
                .ForMember(a => a.Handoveror, opt => opt.MapFrom(c => _userManager.RealName))
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.RealName))

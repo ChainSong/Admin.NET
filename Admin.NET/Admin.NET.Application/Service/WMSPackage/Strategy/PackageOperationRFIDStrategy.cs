@@ -403,10 +403,12 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
+
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
@@ -453,7 +455,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                 item.RFIDInfoOld.AddRange(item.RFIDInfo);
             }
             var mapper = new Mapper(config);
-            var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
+            var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
 
@@ -540,7 +542,9 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 
+            
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
             await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
             //await _repPackage.InsertAsync();

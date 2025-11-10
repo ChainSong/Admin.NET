@@ -707,6 +707,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
             await _rep.DeleteAsync(packageList);
             //return new Response() { Code = StatusCode.Error, Msg = "找到多条包裹信息" };
         }
+        //删除扫描的序列号信息
+        await _repRFPackageAcquisition.DeleteAsync(a => a.PickTaskNumber == input.PickTaskNumber);
 
         //修改任务号明细信息
         //var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
@@ -1048,7 +1050,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
                 request.Input = request.SKU;
             }
         }
-        
+
 
         //}
         //else

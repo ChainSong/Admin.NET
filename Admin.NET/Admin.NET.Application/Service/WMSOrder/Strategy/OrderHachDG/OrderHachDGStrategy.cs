@@ -145,9 +145,11 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionGRHach.CreationTime = DateTime.Now;
                 wMSInstructionGRHach.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstructionGRHach.TableName = "WMS_Order";
-                wMSInstructionGRHach.InstructionPriority = 0;
+                wMSInstructionGRHach.InstructionPriority = 1;
                 wMSInstructionGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionGRHach);
+
+
 
                 WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
@@ -164,7 +166,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
                 wMSInstructionAFCGRHach.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstructionAFCGRHach.TableName = "WMS_Order";
-                wMSInstructionAFCGRHach.InstructionPriority = 0;
+                wMSInstructionAFCGRHach.InstructionPriority = 1;
                 wMSInstructionAFCGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionAFCGRHach);
                 WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
@@ -183,7 +185,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionSNGRHach.CreationTime = DateTime.Now;
                 wMSInstructionSNGRHach.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstructionSNGRHach.TableName = "WMS_Order";
-                wMSInstructionSNGRHach.InstructionPriority = 0;
+                wMSInstructionSNGRHach.InstructionPriority = 99;
                 wMSInstructionSNGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionSNGRHach);
 
