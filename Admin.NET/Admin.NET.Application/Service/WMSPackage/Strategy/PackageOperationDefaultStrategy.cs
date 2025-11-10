@@ -81,8 +81,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 request.Input = request.SKU;
 
             }
-            ;
-
             //扫描的是HTTP 二维码，那么从中解析SKU
             if (request.Input.Contains("http"))
             {
@@ -97,8 +95,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     request.Input = request.SKU;
                 }
             }
-            ;
-
         }
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
@@ -120,7 +116,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
         response.Data.AcquisitionData = request.AcquisitionData;
-
 
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
