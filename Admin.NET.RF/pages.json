@@ -172,10 +172,14 @@
 		}, {
 			"path": "pages/wMsRFAdjust/move/component/addAdjustMove",
 			"style": {}
+		},
+		{
+			"path": "pages/wMsRFAdjust/handover/index",
+			"style": {}
+		}, {
+			"path": "pages/wMsRFAdjust/handover/component/handoverEdit",
+			"style": {}
 		}
-
-
-
 	],
 	"globalStyle": {
 		"mp-alipay": {
