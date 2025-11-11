@@ -81,8 +81,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 request.Input = request.SKU;
 
             }
-            ;
-
             //扫描的是HTTP 二维码，那么从中解析SKU
             if (request.Input.Contains("http"))
             {
@@ -97,8 +95,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     request.Input = request.SKU;
                 }
             }
-            ;
-
         }
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
@@ -120,7 +116,6 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
         response.Data.AcquisitionData = request.AcquisitionData;
-
 
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
@@ -257,8 +252,24 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 {
                     if (item.ScanPackageInput != null)
                     {
-                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
-                        if (count != null && !string.IsNullOrEmpty(count.SN))
+                        if (!string.IsNullOrEmpty(request.SN))
+                        {
+                            var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                            if (count != null && !string.IsNullOrEmpty(count.SN))
+                            {
+                                response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Code = StatusCode.Error;
+                                response.Msg = "不能重复扫描同一个条码";
+                                return response;
+                            }
+                        }
+                    }
+
+                    //判断JNE 是不是可用
+                    if (!string.IsNullOrEmpty(request.SN))
+                    {
+                        var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
+                        if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                         {
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                             response.Code = StatusCode.Error;
@@ -495,7 +506,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -535,10 +546,10 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
 
             var mapper = new Mapper(config);
-            var packageData = mapper.Map<WMSPackage>(pickDataTemp.Result);
+            var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
-
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
             packageData.Details.ForEach(a =>
@@ -578,13 +589,23 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
                     }
+
                     PackageAcquisitions.AddRange(PackageAcquisition);
+
+                    if (item.ScanPackageInputOld == null)
+                    {
+                        item.ScanPackageInputOld = new List<ScanPackageInput>();
+                    }
+                    item.ScanPackageInputOld.AddRange(item.ScanPackageInput);
+                    item.ScanPackageInput = new List<ScanPackageInput>();
                 }
             }
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
+
             //try
             //{
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();

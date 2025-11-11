@@ -31,7 +31,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
         public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
-
+        public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
         public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
         public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }

@@ -211,7 +211,7 @@ namespace Admin.NET.Application.Strategy
                             Creator = _userManager.Account,
                             CreationTime = DateTime.Now,
                             TableName = "WMS_Receipt",
-                            InstructionPriority = 0,
+                            InstructionPriority = 99,
                             Remark = ""
                         });
                         wMSInstructions.Add(new WMSInstruction()
@@ -230,7 +230,7 @@ namespace Admin.NET.Application.Strategy
                             Creator = _userManager.Account,
                             CreationTime = DateTime.Now,
                             TableName = "WMS_ASN",
-                            InstructionPriority = 0,
+                            InstructionPriority = 1,
                             Remark = ""
                         });
 

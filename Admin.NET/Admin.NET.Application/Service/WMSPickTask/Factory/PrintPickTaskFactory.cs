@@ -25,8 +25,8 @@ public class PrintPickTaskFactory
         //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
         switch (workflow)
         {
-            case "HachLTP":
-                return new PickTaskPrintHachLTPStrategy();
+            case "Hach":
+                return new PickTaskPrintHachStrategy();
             case "HachDG":
                 return new PickTaskPrintHachDGStrategy();
             default:

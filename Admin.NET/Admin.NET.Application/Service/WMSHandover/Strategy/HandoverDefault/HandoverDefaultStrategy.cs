@@ -9,6 +9,7 @@
 
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -26,6 +27,7 @@ public class HandoverDefaultStrategy : IHandoverInterface
 
     public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
@@ -51,7 +53,7 @@ public class HandoverDefaultStrategy : IHandoverInterface
         {
             cfg.CreateMap<WMSPackage, WMSHandover>()
                //添加创建人为当前用户
-               .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => c.Id))
+               .ForMember(a => a.PackageId, opt => opt.MapFrom(c => c.Id))
                .ForMember(a => a.HandoverStatus, opt => opt.MapFrom(c => 1))
                .ForMember(a => a.Handoveror, opt => opt.MapFrom(c => _userManager.RealName))
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.RealName))
@@ -62,6 +64,14 @@ public class HandoverDefaultStrategy : IHandoverInterface
         });
 
         var mapper = new Mapper(config);
+        //判断箱号是不是已经绑托
+        var handoverCheck = await _repHandover.AsQueryable().Where(a => request.Select(b => b.PackageNumber).Contains(a.PackageNumber)).ToListAsync();
+        if (handoverCheck != null && handoverCheck.Count > 0)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "有箱号已经存在";
+            return response;
+        }
 
         var packageData = await _repPackage.AsQueryable().Where(a => request.Select(b => b.PackageNumber).Contains(a.PackageNumber)).ToListAsync();
         var handoverData = packageData.Adapt<List<WMSHandover>>();
@@ -73,6 +83,7 @@ public class HandoverDefaultStrategy : IHandoverInterface
                 item.Length = handover.Length;
                 item.Width = handover.Width;
                 item.Height = handover.Height;
+                item.Volume = handover.Length * handover.Width * handover.Height;
                 item.GrossWeight = handover.GrossWeight;
                 item.NetWeight = handover.NetWeight;
                 item.PalletNumber = handover.PalletNumber;
@@ -82,6 +93,10 @@ public class HandoverDefaultStrategy : IHandoverInterface
         {
             await _repHandover.InsertRangeAsync(handoverData);
         }
+
+        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.交接 }, a => packageData.Select(c => c.OrderId).Contains(a.Id));
+
+
         response.Code = StatusCode.Success;
         response.Msg = "操作成功";
         return response;

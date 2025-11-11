@@ -58,8 +58,12 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
             var order = await _repOrder.AsQueryable().Includes(a => a.Details).Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
             var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
             var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
-            item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+            //获取当前订单的SKU 的父件
+
+            item.Details = item.Details.GroupBy(a => new { a.SKU, a.Str2, a.PoCode, a.ExternOrderNumber, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
             {
+                PoCode = a.Key.PoCode,
+                ExternOrderNumber = a.Key.ExternOrderNumber,
                 SKU = a.Key.SKU,
                 GoodsName = a.Key.GoodsName,
                 GoodsType = a.Key.GoodsType,
@@ -69,10 +73,11 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
                 PickTaskNumber = a.Key.PickTaskNumber,
                 PickTaskId = a.Key.PickTaskId,
                 Qty = a.Sum(b => b.Qty),
-                IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
-                CN805 = ""
+                IsSN = a.Key.Str2,
+                //Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
+                Parents = order.Details.Where(b => b.SKU == a.Key.SKU).First().Str2
             }).OrderBy(a => a.Location).ToList();
-
+            item.PoCode = item.Details.First().PoCode;
             item.PrintTime = DateTime.Now;
             item.OrderAddress = orderadrress;
             item.Remark = order.Remark;

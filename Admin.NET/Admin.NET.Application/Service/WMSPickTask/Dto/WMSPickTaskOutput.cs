@@ -41,6 +41,7 @@ public class WMSPickTaskOutput
     /// PickTaskNumber
     /// </summary>
     public string PickTaskNumber { get; set; }
+    public string PoCode { get; set; }
 
     /// <summary>
     /// PickStatus

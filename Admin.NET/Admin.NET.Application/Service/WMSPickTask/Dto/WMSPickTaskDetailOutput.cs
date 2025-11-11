@@ -308,6 +308,7 @@ public class WMSPickTaskDetailOutput
 
     public string IsSN { get; set; }
     public string CN805 { get; set; }
+    public string Parents { get; set; }
 
 
     /// <summary>

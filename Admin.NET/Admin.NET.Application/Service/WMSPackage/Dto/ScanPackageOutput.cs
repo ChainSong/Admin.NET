@@ -55,6 +55,7 @@ public class PackageData
     public List<WMSRFIDInfo> RFIDInfoOld { get; set; }
     public List<WMSRFIDInfo> RFIDInfo { get; set; }
     public List<ScanPackageInput> ScanPackageInput { get; set; }
+    public List<ScanPackageInput> ScanPackageInputOld { get; set; }
     public List<ScanPackageRFIDInput> ScanPackageRFIDInput { get; set; }
 
     //public List<PackageData> packageDatas { get; set; }

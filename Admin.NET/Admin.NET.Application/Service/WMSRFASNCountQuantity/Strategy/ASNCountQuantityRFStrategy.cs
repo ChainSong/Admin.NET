@@ -194,7 +194,8 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
                 //wMSASNCountQuantityDetail.ExpirationDate = dateTime;
                 //判断解析出来的日期的格式
                 string dataformat = "MMddyy";
-                if (!string.IsNullOrEmpty(request.ExpirationDate) && Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+
+                if (!string.IsNullOrEmpty(request.ExpirationDate) && !Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
                 {
                     dataformat = "ddMMMyy";
                     if (request.ExpirationDate.Length == 7)
@@ -213,11 +214,43 @@ public class ASNCountQuantityRFStrategy : ASNCountQuantityRFInterface
                 }
                 else
                 {
-                    CultureInfo culture = new CultureInfo("en-US");
                     DateTime dateTime;
-                    DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
-                    wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                    if (Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+                    {
+                        DateTime.TryParseExact(request.ExpirationDate, "ddMMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                    }
+                    else
+                    {
+                        CultureInfo culture = new CultureInfo("en-US");
+                        DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                        wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                    }
                 }
+                //if (!string.IsNullOrEmpty(request.ExpirationDate) && Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+                //{
+                //    dataformat = "ddMMMyy";
+                //    if (request.ExpirationDate.Length == 7)
+                //    {
+                //        CultureInfo culture = new CultureInfo("en-US");
+                //        DateTime dateTime;
+                //        DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                //        wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                //    }
+                //    if (request.ExpirationDate.Length == 9)
+                //    {
+                //        dataformat = "ddMMyyyy";
+                //        DateTime date = DateTime.ParseExact(request.ExpirationDate, dataformat, CultureInfo.InvariantCulture);
+                //        wMSASNCountQuantityDetail.ExpirationDate = date;
+                //    }
+                //}
+                //else
+                //{
+                //    CultureInfo culture = new CultureInfo("en-US");
+                //    DateTime dateTime;
+                //    DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                //    wMSASNCountQuantityDetail.ExpirationDate = dateTime;
+                //}
 
             }
             else

@@ -14,6 +14,7 @@ using Admin.NET.Application.Service;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
+using FastExpressionCompiler;
 using Nest;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ public class PickTaskPrintDefaultStrategy : IPrintPickTaskInterface
                 PickTaskId = a.Key.PickTaskId,
                 Qty = a.Sum(b => b.Qty),
                 IsSN = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
-                CN805 = ""
+                CN805 ="" // Convert.ToBoolean(order.Details.Where(b => b.SKU == a.Key.SKU && b.PoCode == a.Key.PoCode && b.CustomerId == a.Key.CustomerId).First()?.PoCode.Contains("CN805")).ToString()
             }).OrderBy(a => a.Location).ToList();
             item.PrintTime = DateTime.Now;
             item.OrderAddress = orderadrress;

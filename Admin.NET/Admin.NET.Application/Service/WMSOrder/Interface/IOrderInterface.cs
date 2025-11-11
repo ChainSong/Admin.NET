@@ -27,6 +27,7 @@ namespace Admin.NET.Application.Interface
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
 
+        public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
 
         public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }

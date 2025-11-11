@@ -62,6 +62,8 @@ export const aProvider = function () {
 							{ text: '批次号', field: 'batchCode' },
 							{ text: '是否SN', field: 'isSN' },
 							{ text: 'CN805', field: 'cN805' },
+							{ text: '父件', field: 'parents' },
+							{ text: 'PO', field: 'poCode' },
 						],
 					},
 					editable: true,
@@ -89,6 +91,8 @@ export const aProvider = function () {
 							{ title: '批次号', align: 'center', field: 'batchCode', width: 150 },
 							{ title: '是否SN', align: 'center', field: 'isSN', width: 150 },
 							{ title: 'CN805', align: 'center', field: 'cN805', width: 150 },
+							{ title: '父件', align: 'center', field: 'parents', width: 150 },
+							{ title: 'PO', align: 'center', field: 'poCode', width: 150 },
 
 							// { title: '名称', align: 'center', field: 'NAME', width: 150 },
 							// { title: '数量', align: 'center', field: 'SL', width: 80 },

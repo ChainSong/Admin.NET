@@ -32,6 +32,7 @@ public class InboundWorkFlowConst
     /// 上架单
     /// </summary>
     public const string Workflow_ReceiptReceiving = "上架单";
+    public const string Workflow__RF_ReceiptReceiving = "上架单";
     /// <summary>
     /// 转入库单
     /// </summary>

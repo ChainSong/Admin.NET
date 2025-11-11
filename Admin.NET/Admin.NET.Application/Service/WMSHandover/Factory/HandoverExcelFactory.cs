@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Admin.NET.Application.Service;
 public static class HandoverExcelFactory
 {
-    public static IHandoverExcelInterface GetReceipt()
+    public static IHandoverExcelInterface Getfactory()
     {
         //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
 
