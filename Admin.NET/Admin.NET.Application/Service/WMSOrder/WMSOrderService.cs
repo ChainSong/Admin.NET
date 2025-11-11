@@ -58,6 +58,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SysWorkFlowService _repWorkFlowService;
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
     private readonly SqlSugarRepository<HachWmsOutBound> _repOb;
+    private readonly SqlSugarRepository<WMSHandover> _repHandover;
     public readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     public WMSOrderService(SqlSugarRepository<WMSOrder> rep, 
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
@@ -78,9 +79,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSWarehouse> repWarehouse,
         SqlSugarRepository<WMSPackage> repPackage,
         SqlSugarRepository<WMSPackageDetail> repPackageDetail,
-        SysWorkFlowService repWorkFlowService, 
-        SqlSugarRepository<HachWmsOutBound> repOb, 
-        SqlSugarRepository<WMSProductBom> repProductBom)
+        SysWorkFlowService repWorkFlowService,
+        SqlSugarRepository<HachWmsOutBound> repOb,
+        SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSHandover> repHandover)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -108,6 +109,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repWorkFlowService = repWorkFlowService;
         _repOb = repOb;
         _repProductBom = repProductBom;
+        _repHandover = repHandover;
     }
 
     /// <summary>
@@ -540,6 +542,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderAllocation = _repOrderAllocation;
         factory._repPackage = _repPackage;
         factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repHandover = _repHandover;
         //factory._reprf = _reprf;
         factory._repInventoryUsable = _repInventoryUsable;
 

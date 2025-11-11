@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 
 namespace Admin.NET.Application.Service;
-public class PickTaskPrintHachLTPStrategy : IPrintPickTaskInterface
+public class PickTaskPrintHachStrategy : IPrintPickTaskInterface
 {
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
@@ -59,7 +59,7 @@ public class PickTaskPrintHachLTPStrategy : IPrintPickTaskInterface
             var order = await _repOrder.AsQueryable().Includes(a => a.Details).Where(a => a.OrderNumber == item.OrderNumber).FirstAsync();
             var orderadrress = await _repOrderAddress.AsQueryable().Where(a => a.PreOrderNumber == item.Details.First().PreOrderNumber).FirstAsync();
             var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
-            item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.PoCode, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+            item.Details = item.Details.GroupBy(a => new { a.SKU, a.GoodsName, a.PoCode, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
             {
                 SKU = a.Key.SKU,
                 GoodsName = a.Key.GoodsName,

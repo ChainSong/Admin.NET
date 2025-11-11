@@ -18,10 +18,10 @@ namespace Admin.NET.Application;
 public class RFReceiptReceivingFactory
 {
 
-    public static IRFReceiptReceivingInterface RFReceiptReceivingSave(long CustomerId)
+    public static IRFReceiptReceivingInterface RFReceiptReceivingSave(string workflow)
     {
         //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
-        switch (CustomerId)
+        switch (workflow)
         {
             default:
                 return new RFReceiptReceivingDefaultStrategy();

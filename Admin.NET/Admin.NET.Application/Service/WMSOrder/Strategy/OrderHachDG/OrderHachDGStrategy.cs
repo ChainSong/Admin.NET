@@ -35,6 +35,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
         public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+        public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
         public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
@@ -54,7 +55,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = await _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToListAsync();
             if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>
@@ -70,7 +71,6 @@ namespace Admin.NET.Application.Strategy
                             //StatusMsg = (string)StatusCode.warning,
                             Msg = "订单状态异常"
                         });
-
                 });
                 if (response.Data.Count > 0)
                 {
@@ -96,6 +96,19 @@ namespace Admin.NET.Application.Strategy
                     return response;
                 }
             }
+
+            foreach (var item in orderData)
+            {
+                //判断是不是都已经交接
+                var handover = await _repHandover.AsQueryable().Where(a => request.Contains(item.Id)).ToListAsync();
+                if (handover == null || handover.Count == 0)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "订单异常:+" + item.ExternOrderNumber + "没有完成交接信息";
+                    return response;
+                }
+            }
+
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime = DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));
             //await _repOrderDetail.UpdateAsync(a => new WMSOrderDetail { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime=DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));

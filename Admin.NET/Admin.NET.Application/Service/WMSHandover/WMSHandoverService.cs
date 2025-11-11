@@ -25,11 +25,12 @@ public class WMSHandoverService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSHandover> _rep;
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
+    private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly UserManager _userManager;
-    public WMSHandoverService(SqlSugarRepository<WMSHandover> rep, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager)
+    public WMSHandoverService(SqlSugarRepository<WMSHandover> rep, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSOrder> repOrder)
     {
         _rep = rep;
         _repPackage = repPackage;
@@ -37,6 +38,7 @@ public class WMSHandoverService : IDynamicApiController, ITransient
         _repWarehouseUser = repWarehouseUser;
         _repTableColumns = repTableColumns;
         _userManager = userManager;
+        _repOrder = repOrder;
     }
 
     /// <summary>
@@ -276,7 +278,7 @@ public class WMSHandoverService : IDynamicApiController, ITransient
             string url = await ImprotExcel.WriteFile(file);
             var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
             //1根据用户的角色 解析出Excel
-            IHandoverExcelInterface factoryExcel = HandoverExcelFactory.GetReceipt();
+            IHandoverExcelInterface factoryExcel = HandoverExcelFactory.Getfactory();
             //factoryExcel._db = _db;
             factoryExcel._repHandover = _rep;
             factoryExcel._repPackage = _repPackage;
@@ -309,6 +311,7 @@ public class WMSHandoverService : IDynamicApiController, ITransient
             factory._repTableColumns = _repTableColumns;
             factory._repCustomerUser = _repCustomerUser;
             factory._repWarehouseUser = _repWarehouseUser;
+            factory._repOrder = _repOrder;
             factory._userManager = _userManager;
             var response = await factory.Strategy(entityListDtos);
 

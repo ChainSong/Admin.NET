@@ -278,11 +278,33 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                     DateTime dateTime;
                     if (Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
                     {
+                        DateTime.TryParseExact(request.ExpirationDate, "ddMMyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
+                    if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
+                    {
+                        DateTime.TryParseExact(request.ExpirationDate, "ddMMMyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
+                    if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
+                    {
                         DateTime.TryParseExact(request.ExpirationDate, "ddMMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
                         packageData.ExpirationDate = dateTime;
                     }
-                    else
+                    if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
                     {
+                        DateTime.TryParseExact(request.ExpirationDate, "ddMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
+                    if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
+                    {
+                        DateTime.TryParseExact(request.ExpirationDate, "MMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
+             
+                    if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
+                    {
+
                         CultureInfo culture = new CultureInfo("en-US");
                         DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
                         packageData.ExpirationDate = dateTime;

@@ -1,15 +1,19 @@
-﻿using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Common.ExcelCommon;
-using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
+using Admin.NET.Application.Interface;
 using Admin.NET.Application.ReceiptCore.Factory;
 using Admin.NET.Application.ReceiptCore.Interface;
 using Admin.NET.Application.ReceiptReceivingCore.Factory;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
+using Admin.NET.Application.Service.WMSRFReceiptReceiving.Dto;
 using Admin.NET.Applicationt.ReceiptReceivingCore.Factory;
+using Admin.NET.Common;
+using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Admin.NET.Core.Service;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
@@ -19,9 +23,6 @@ using NewLife.Net;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Admin.NET.Application.Service.WMSRFReceiptReceiving.Dto;
-using Admin.NET.Application.Interface;
-using Admin.NET.Core.Service;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -43,7 +44,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysCacheService _sysCacheService;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
-
+    private readonly SysWorkFlowService _repWorkFlowService;
 
     private readonly SqlSugarRepository<WMSASNDetail> _repASNDetail;
 
@@ -54,7 +55,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSInventoryUsable> _repTableInventoryUsable;
 
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
-    public WMSRFReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SysCacheService sysCacheService, SqlSugarRepository<WMSProduct> repProduct)
+    public WMSRFReceiptReceivingService(SqlSugarRepository<WMSReceipt> rep, SqlSugarRepository<WMSReceiptDetail> repReceiptDetail, ISqlSugarClient db, SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSReceiptReceiving> repReceiptReceiving, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSASNDetail> repASNDetail, SqlSugarRepository<WMSASN> repASN, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed, SqlSugarRepository<WMSInventoryUsable> repTableInventoryUsable, SysCacheService sysCacheService, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repReceiptDetail = repReceiptDetail;
@@ -72,6 +73,7 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
         _repTableInventoryUsable = repTableInventoryUsable;
         _sysCacheService = sysCacheService;
         _repProduct = repProduct;
+        _repWorkFlowService = repWorkFlowService;
     }
 
     /// <summary>
@@ -237,8 +239,9 @@ public class WMSRFReceiptReceivingService : IDynamicApiController, ITransient
         }
 
         customerId = receiptReceivingData.CustomerId;
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(receiptReceivingData.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow__RF_ReceiptReceiving, receiptReceivingData.ReceiptType);
 
-        IRFReceiptReceivingInterface factory = RFReceiptReceivingFactory.RFReceiptReceivingSave(customerId);
+        IRFReceiptReceivingInterface factory = RFReceiptReceivingFactory.RFReceiptReceivingSave(workflow);
 
         factory._repReceipt = _rep;
         factory._repReceiptDetail = _repReceiptDetail;

@@ -33,7 +33,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail { get; set; }
 
         public SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable { get; set; }
-
+        public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
         public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
         public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
         public SqlSugarRepository<WMSOrderAllocation> _repOrderAllocation { get; set; }
