@@ -43,6 +43,9 @@ public class HachWmsReceivingDetail : EntityTenant
     [SugarColumn(ColumnDescription = "行号", IsNullable = false, Length = 100)]
     public string LineNum { get; set; }
 
+    [SugarColumn(ColumnDescription = "组织Id", IsNullable = false, Length = 20)]
+    public long OrganizationId { get; set; }
+
     [SugarColumn(ColumnDescription = "组织编码", IsNullable = false, Length = 20)]
     public string OrganizationCode { get; set; }
 
