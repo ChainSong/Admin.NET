@@ -252,8 +252,24 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 {
                     if (item.ScanPackageInput != null)
                     {
-                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
-                        if (count != null && !string.IsNullOrEmpty(count.SN))
+                        if (!string.IsNullOrEmpty(request.SN))
+                        {
+                            var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                            if (count != null && !string.IsNullOrEmpty(count.SN))
+                            {
+                                response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Code = StatusCode.Error;
+                                response.Msg = "不能重复扫描同一个条码";
+                                return response;
+                            }
+                        }
+                    }
+
+                    //判断JNE 是不是可用
+                    if (!string.IsNullOrEmpty(request.SN))
+                    {
+                        var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
+                        if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                         {
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                             response.Code = StatusCode.Error;
@@ -573,7 +589,15 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
                     }
+
                     PackageAcquisitions.AddRange(PackageAcquisition);
+
+                    if (item.ScanPackageInputOld == null)
+                    {
+                        item.ScanPackageInputOld = new List<ScanPackageInput>();
+                    }
+                    item.ScanPackageInputOld.AddRange(item.ScanPackageInput);
+                    item.ScanPackageInput = new List<ScanPackageInput>();
                 }
             }
             packageData.ExpressCompany = request.ExpressCompany;

@@ -694,7 +694,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         var packageList = await _rep.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         //根据任务号获取包装明细信息
         var packageDetailList = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
-        if (packageDetailList.Count > 1)
+        if (packageDetailList.Count > 0)
         {
             //删除包装信息
             await _repPackageDetail.DeleteAsync(packageDetailList);

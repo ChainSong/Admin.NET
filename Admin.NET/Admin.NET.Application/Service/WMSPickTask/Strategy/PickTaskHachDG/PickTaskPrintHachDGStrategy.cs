@@ -60,8 +60,10 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
             var product = await _repProduct.AsQueryable().Where(a => item.Details.Select(b => b.SKU).Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
             //获取当前订单的SKU 的父件
 
-            item.Details = item.Details.GroupBy(a => new { a.SKU,a.Str2, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
+            item.Details = item.Details.GroupBy(a => new { a.SKU, a.Str2, a.PoCode, a.ExternOrderNumber, a.GoodsName, a.GoodsType, a.CustomerId, a.Area, a.Location, a.BatchCode, a.PickTaskNumber, a.PickTaskId }).Select(a => new WMSPickTaskDetailOutput
             {
+                PoCode = a.Key.PoCode,
+                ExternOrderNumber = a.Key.ExternOrderNumber,
                 SKU = a.Key.SKU,
                 GoodsName = a.Key.GoodsName,
                 GoodsType = a.Key.GoodsType,
@@ -73,9 +75,9 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
                 Qty = a.Sum(b => b.Qty),
                 IsSN = a.Key.Str2,
                 //Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
-                Parents = a.Key.Str2
+                Parents = order.Details.Where(b => b.SKU == a.Key.SKU).First().Str2
             }).OrderBy(a => a.Location).ToList();
-
+            item.PoCode = item.Details.First().PoCode;
             item.PrintTime = DateTime.Now;
             item.OrderAddress = orderadrress;
             item.Remark = order.Remark;

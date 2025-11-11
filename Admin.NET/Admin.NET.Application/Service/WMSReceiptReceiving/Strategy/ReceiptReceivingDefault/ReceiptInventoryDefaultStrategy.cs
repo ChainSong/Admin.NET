@@ -172,7 +172,47 @@ namespace Admin.NET.Application.Strategy
 
                         //});
                         await _repReceiptDetail.UpdateRangeAsync(receiptDetailData);
+                        List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+                        wMSInstructions.Add(new WMSInstruction()
+                        {
+                            //wMSInstruction.OrderId = orderData[0].Id;
+                            InstructionStatus = (int)InstructionStatusEnum.新增,
+                            InstructionType = "入库单回传HachDG",
+                            BusinessType = "入库单回传HachDG",
+                            OrderNumber = receipt.ExternReceiptNumber,
+                            CustomerId = receipt.CustomerId,
+                            CustomerName = receipt.CustomerName,
+                            WarehouseId = receipt.WarehouseId,
+                            WarehouseName = receipt.WarehouseName,
+                            OperationId = receipt.Id,
+                            InstructionTaskNo = receipt.ExternReceiptNumber,
+                            Creator = _userManager.Account,
+                            CreationTime = DateTime.Now,
+                            TableName = "WMS_Receipt",
+                            InstructionPriority = 99,
+                            Remark = ""
+                        });
+                        wMSInstructions.Add(new WMSInstruction()
+                        {
+                            //wMSInstruction.OrderId = orderData[0].Id;
+                            InstructionStatus = (int)InstructionStatusEnum.新增,
+                            InstructionType = "入库单序列号回传HachDG",
+                            BusinessType = "入库单序列号回传HachDG",
+                            OrderNumber = receipt.ExternReceiptNumber,
+                            CustomerId = receipt.CustomerId,
+                            CustomerName = receipt.CustomerName,
+                            WarehouseId = receipt.WarehouseId,
+                            WarehouseName = receipt.WarehouseName,
+                            OperationId = receipt.Id,
+                            InstructionTaskNo = receipt.ExternReceiptNumber,
+                            Creator = _userManager.Account,
+                            CreationTime = DateTime.Now,
+                            TableName = "WMS_ASN",
+                            InstructionPriority = 1,
+                            Remark = ""
+                        });
 
+                        await _repInstruction.InsertRangeAsync(wMSInstructions);
                         //_repReceiptDetail.AsUpdateable(receiptDetailData).ExecuteCommandAsync();
 
                         //修改上架表中的状态

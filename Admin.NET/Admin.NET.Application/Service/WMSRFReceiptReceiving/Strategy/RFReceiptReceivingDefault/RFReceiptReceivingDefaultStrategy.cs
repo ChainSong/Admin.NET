@@ -256,7 +256,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 //wMSASNCountQuantityDetail.ExpirationDate = dateTime;
                 //判断解析出来的日期的格式
                 string dataformat = "MMddyy";
-                if (!string.IsNullOrEmpty(request.ExpirationDate) && Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+                if (!string.IsNullOrEmpty(request.ExpirationDate) && !Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
                 {
                     dataformat = "ddMMMyy";
                     if (request.ExpirationDate.Length == 7)
@@ -275,10 +275,18 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                 }
                 else
                 {
-                    CultureInfo culture = new CultureInfo("en-US");
                     DateTime dateTime;
-                    DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
-                    packageData.ExpirationDate = dateTime;
+                    if (Regex.IsMatch(request.ExpirationDate, "[a-zA-Z]"))
+                    {
+                        DateTime.TryParseExact(request.ExpirationDate, "ddMMMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
+                    else
+                    {
+                        CultureInfo culture = new CultureInfo("en-US");
+                        DateTime.TryParseExact(request.ExpirationDate, dataformat, culture, DateTimeStyles.None, out dateTime);
+                        packageData.ExpirationDate = dateTime;
+                    }
                 }
 
             }

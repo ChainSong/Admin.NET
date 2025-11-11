@@ -348,7 +348,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         //根据拣货单获取订单类型
         var orderEntity = await _repOrder.AsQueryable().Where(u => u.Id == data.First().Details.First().OrderId).ToListAsync();
 
-        var workflow = await _repWorkFlowService.GetSystemWorkFlow(data.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Pick, orderEntity.First().OrderType);
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(data.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Pick, orderEntity.First().OrderType);
 
 
         IPrintPickTaskInterface factory = PrintPickTaskFactory.PickTaskPrint(workflow);

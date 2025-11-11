@@ -287,6 +287,20 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                     return response;
                 }
 
+
+                //判断JNE 是不是可用
+                if (!string.IsNullOrEmpty(request.SN))
+                {
+                    var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
+                    if (checkJNE != null && string.IsNullOrEmpty(checkJNE.PreOrderNumber))
+                    {
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Code = StatusCode.Error;
+                        response.Msg = "防伪码 不存在";
+                        return response;
+                    }
+                }
+
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.
@@ -513,7 +527,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -604,6 +618,12 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                     {
                         wMSRFIDs.Add(new WMSRFIDInfo() { RFID = r.RFID });
                     }
+                    if (item.ScanPackageInputOld == null)
+                    {
+                        item.ScanPackageInputOld = new List<ScanPackageInput>();
+                    }
+                    item.ScanPackageInputOld.AddRange(item.ScanPackageInput);
+                    item.ScanPackageInput = new List<ScanPackageInput>();
                 }
             }
 
