@@ -139,7 +139,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstruction.CreationTime = DateTime.Now;
                 wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstruction.TableName = "WMS_Order";
-                wMSInstruction.InstructionPriority = 0;
+                wMSInstruction.InstructionPriority = 99;
                 wMSInstruction.Remark = "";
                 wMSInstructions.Add(wMSInstruction);
 
@@ -198,7 +198,7 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionSNGRHach.CreationTime = DateTime.Now;
                 wMSInstructionSNGRHach.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstructionSNGRHach.TableName = "WMS_Order";
-                wMSInstructionSNGRHach.InstructionPriority = 99;
+                wMSInstructionSNGRHach.InstructionPriority = 4;
                 wMSInstructionSNGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionSNGRHach);
 
