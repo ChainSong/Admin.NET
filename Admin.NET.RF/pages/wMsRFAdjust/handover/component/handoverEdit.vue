@@ -50,15 +50,15 @@
 		</you-scroll>
 
 		<!-- 使用封装的新增弹窗组件 -->
-		<SpecificationsEdit :show.sync="showPalletModal" @success="handlePalletSuccess" 
-		 />
+		<SpecificationsEdit :show.sync="showPalletModal" @success="handlePalletSuccess" />
 	</view>
 </template>
 
 <script>
 	import SpecificationsEdit from '@/pages/wMsRFAdjust/handover/component/specificationsEdit.vue'
 	import {
-		scanPackage,completeHandover
+		scanPackage,
+		completeHandover
 	} from '@/services/wMsRFAdjust/handover/handover.js'
 	export default {
 		components: {
@@ -132,11 +132,11 @@
 				params.OrderId = this.formData.id
 				let res = await scanPackage(params)
 				let result = res.data.result
-				console.log("Res",result)
+				console.log("Res", result)
 				if (result.result) {
 					this.scanData = result.packages
-					this.formData.packageNumber=''
-					this.formData.opSerialNumber=result.serialNumber
+					this.formData.packageNumber = ''
+					this.formData.opSerialNumber = result.serialNumber
 				}
 			},
 			// 关闭弹窗
@@ -177,7 +177,6 @@
 			// 托盘信息填写成功回调
 			async handlePalletSuccess(palletData) {
 				this.palletInfo = palletData;
-console.log("palletData:",palletData)
 				try {
 					this.loading = true;
 					uni.showLoading({
@@ -195,25 +194,34 @@ console.log("palletData:",palletData)
 						palletInfo: this.palletInfo,
 						scanCount: this.scanData.length,
 						submitTime: new Date().toISOString(),
-						OpSerialNumber:this.formData.opSerialNumber,
+						OpSerialNumber: this.formData.opSerialNumber,
 						type: 'RF交接',
 					};
 
 					// 调用提交API
 					const result = await completeHandover(submitData);
+					console.log("result,", result)
 
-					uni.showToast({
-						title: '交接提交成功',
-						icon: 'success'
-					});
+					// 提交成功后清空扫描信息
+					this.scanData = []; // 清空扫描的箱号列表
+					this.formData.packageNumber = ''; // 清空输入框
+					this.formData.opSerialNumber = ''; // 清空操作序列号
+
+					if (result.data.type == 'success') {
+						uni.showToast({
+							title: result.data.result.message,
+							icon: 'none'
+						});
+					}
 
 					// 提交成功后返回上一页
-					setTimeout(() => {
-						uni.navigateBack({
-							delta: 1
-						});
-					}, 1500);
-
+					if (result.data.result.message == "交接完成") {
+						setTimeout(() => {
+							uni.navigateBack({
+								delta: 1
+							});
+						}, 1500);
+					}
 				} catch (error) {
 					console.error('提交失败:', error);
 					uni.showToast({
