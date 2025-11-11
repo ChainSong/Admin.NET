@@ -611,6 +611,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                         //p.SN = item;
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
+                        p.Type = "AFC";
 
                     }
                     PackageAcquisitions.AddRange(PackageAcquisition);
