@@ -110,10 +110,18 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         var packageList = _cacheService.Get<List<WMSPackage>>(cacheKey) ?? new List<WMSPackage>();
         // 检查是否已扫描过该箱号
         var existingPackage = packageList.FirstOrDefault(p => p.PackageNumber == input.PackageNumber);
-        if (existingPackage != null)
+        //在托里面验证看是否扫描过
+        var handovered = await _repHandover.AsQueryable()
+            .Where(h => h.PackageNumber == input.PackageNumber)
+            .Where(h => h.ExternOrderNumber == input.ExternOrderNumber)
+            .Where(h => h.OrderId == input.OrderId)
+            .Where(h => h.IsHandovered == 1)
+            .FirstAsync();
+        if (existingPackage != null || handovered!=null)
         {
             throw Oops.Oh("该箱号已扫描，请勿重复扫描");
         }
+
         #region 新扫描 - 添加到List
         // 添加到列表
         packageList.Add(package);
