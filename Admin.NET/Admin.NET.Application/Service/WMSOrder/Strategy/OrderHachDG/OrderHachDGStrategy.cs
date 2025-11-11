@@ -139,10 +139,29 @@ namespace Admin.NET.Application.Strategy
                 wMSInstruction.CreationTime = DateTime.Now;
                 wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
                 wMSInstruction.TableName = "WMS_Order";
-                wMSInstruction.InstructionPriority = 99;
+                wMSInstruction.InstructionPriority = 63;
                 wMSInstruction.Remark = "";
                 wMSInstructions.Add(wMSInstruction);
 
+
+                WMSInstruction wMSInstruction99 = new WMSInstruction();
+                //wMSInstruction.OrderId = orderData[0].Id;
+                wMSInstruction99.InstructionStatus = (int)InstructionStatusEnum.新增;
+                wMSInstruction99.InstructionType = "出库单回传HachDG";
+                wMSInstruction99.BusinessType = "出库单回传HachDG";
+                wMSInstruction99.CustomerId = item.CustomerId;
+                wMSInstruction99.CustomerName = item.CustomerName;
+                wMSInstruction99.WarehouseId = item.WarehouseId;
+                wMSInstruction99.WarehouseName = item.WarehouseName;
+                wMSInstruction99.OperationId = item.Id;
+                wMSInstruction99.OrderNumber = item.ExternOrderNumber;
+                wMSInstruction99.Creator = _userManager.Account;
+                wMSInstruction99.CreationTime = DateTime.Now;
+                wMSInstruction99.InstructionTaskNo = item.ExternOrderNumber;
+                wMSInstruction99.TableName = "WMS_Order";
+                wMSInstruction99.InstructionPriority = 99;
+                wMSInstruction99.Remark = "";
+                wMSInstructions.Add(wMSInstruction99);
                 WMSInstruction wMSInstructionGRHach = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
