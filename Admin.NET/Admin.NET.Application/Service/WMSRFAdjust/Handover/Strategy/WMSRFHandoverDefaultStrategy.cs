@@ -117,9 +117,13 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
             .Where(h => h.OrderId == input.OrderId)
             .Where(h => h.IsHandovered == 1)
             .FirstAsync();
-        if (existingPackage != null || handovered!=null)
+        if (existingPackage != null)
         {
             throw Oops.Oh("该箱号已扫描，请勿重复扫描");
+        }
+        if (handovered != null)
+        {
+            throw Oops.Oh("该箱号已交接，请勿重复交接");
         }
 
         #region 新扫描 - 添加到List
@@ -143,7 +147,7 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
     {
         wMsRFPendingHandoverResponse response = new wMsRFPendingHandoverResponse();
         if (!input.palletInfo.Width.HasValue||!input.palletInfo.Length.HasValue||!input.palletInfo.height.HasValue 
-            || !input.palletInfo.Volume.HasValue || !input.palletInfo.Weight.HasValue)
+          || !input.palletInfo.Weight.HasValue)
         {
             throw Oops.Oh("请填写完整的箱子尺寸和重量信息");
         }
@@ -153,6 +157,28 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         List<WMSHandover> wMSHandovers = new List<WMSHandover>();
 
         string PalletNumber = GeneratePalletNumber();
+
+        // 检查箱号是否已存在
+        var existingHandovers = await _repHandover.AsQueryable()
+            .Where(h => input.packages.Select(p => p.Id).Contains(h.PackageId))
+            .ToListAsync();
+
+        if (existingHandovers.Any())
+        {
+            var existingPackageNumbers = existingHandovers.Select(h => h.PackageNumber).Distinct();
+            throw Oops.Oh($"以下箱号已存在，不允许重复提交: {string.Join(", ", existingPackageNumbers)}");
+        }
+
+        // 检查箱号是否已存在
+        var orderStatus = await _repOrder.AsQueryable()
+            .Where(h => h.ExternOrderNumber==input.ExternOrderNumber)
+            .Where(h=>h.OrderStatus==60)
+            .FirstAsync();
+
+        if (orderStatus==null)
+        {
+            throw Oops.Oh($"该订单状态不允许交接");
+        }
 
         foreach (var item in input.packages)
         {
@@ -194,28 +220,49 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         }
 
         var result = await _repHandover.InsertRangeAsync(wMSHandovers);
-        var upOrder= await _repOrder.AsUpdateable()
-            .SetColumns(a => new WMSOrder
-            {
-                OrderStatus = 80
-            })
-            .Where(a => a.Id == input.packages.First().OrderId)
-            .ExecuteCommandAsync();
         if (result)
         {
-            // 新增移库单成功之后就清除缓存
-            _cacheService.Remove(cacheKey);
-            response.Result = "Success";
-            response.Message = "绑托完成";
-            response.SerialNumber = input.OpSerialNumber;
+            // 检查该订单下所有包裹的交接状态
+            // 检查该订单下所有包裹的交接记录是否都存在
+            var incompletePackages = await _repPackage.AsQueryable()
+                                     .Where(p => input.packages.Select(pkg => pkg.OrderId).Contains(p.OrderId)
+                                     && !SqlFunc.Subqueryable<WMSHandover>()
+                                     .Where(h => h.PackageId == p.Id)
+                                     .Any())
+                                     .ToListAsync();
+
+            if (!incompletePackages.Any())
+            {
+                // 如果所有包裹都已交接，更新订单状态为“已交接”
+                var upOrder = await _repOrder.AsUpdateable().SetColumns(a => new WMSOrder
+                    {
+                        OrderStatus = 80 // 更新状态为交接完成
+                    })
+                              .Where(a => a.Id == input.packages.First().OrderId)
+                              .ExecuteCommandAsync();
+
+                if (upOrder > 0)
+                {
+                    // 清除缓存
+                    _cacheService.Remove(cacheKey);
+                    response.Result = "Success";
+                    response.Message = "交接完成";
+                    response.SerialNumber = input.OpSerialNumber;
+                }
+                else
+                {
+                    response.Result = "Failed";
+                    response.Message = "更新订单状态失败";
+                    response.SerialNumber = input.OpSerialNumber;
+                }
+            }
+            else
+            {
+                response.Result = "Success";
+                response.Message = "绑托完成，等待其他箱号交接";
+                response.SerialNumber = input.OpSerialNumber;
+            }
         }
-        else
-        {
-            response.Result = "Faild";
-            response.Message = "绑托失败";
-            response.SerialNumber = input.OpSerialNumber;
-        }
-       
         return response;
     }
     #endregion

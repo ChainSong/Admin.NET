@@ -30,13 +30,6 @@
 					<view class="unit">cm</view>
 				</view>
 
-				<!-- 体积（用户填写） -->
-				<view class="cu-form-group">
-					<view class="title">体&nbsp;&nbsp;积</view>
-					<input v-model="formData.volume" placeholder="请输入体积" type="number" />
-					<view class="unit">cm³</view>
-				</view>
-
 				<!-- 重量 -->
 				<view class="cu-form-group">
 					<view class="title">重&nbsp;&nbsp;量</view>
@@ -73,7 +66,6 @@
 					length: '',
 					width: '',
 					height: '',
-					volume: '',
 					weight: ''
 				}
 			};
@@ -84,7 +76,6 @@
 				return this.formData.length &&
 					this.formData.width &&
 					this.formData.height &&
-					this.formData.volume &&
 					this.formData.weight;
 			}
 		},
@@ -130,12 +121,6 @@
 					errors.push('高度必须大于0');
 				}
 
-				if (!this.formData.volume) {
-					errors.push('体积');
-				} else if (parseFloat(this.formData.volume) <= 0) {
-					errors.push('体积必须大于0');
-				}
-
 				if (!this.formData.weight) {
 					errors.push('重量');
 				} else if (parseFloat(this.formData.weight) <= 0) {
@@ -166,7 +151,6 @@
 					length: parseFloat(this.formData.length),
 					width: parseFloat(this.formData.width),
 					height: parseFloat(this.formData.height),
-					volume: parseFloat(this.formData.volume),
 					weight: parseFloat(this.formData.weight)
 				});
 
@@ -188,7 +172,6 @@
 					length: '',
 					width: '',
 					height: '',
-					volume: '',
 					weight: ''
 				};
 				this.loading = false;
