@@ -14,6 +14,24 @@ using Microsoft.IdentityModel.Tokens;
 using Minio;
 using System.Text;
 
+// =================== ① 在这里设置自己的临时目录 ===================
+
+// 放在当前程序目录下的 temp 文件夹
+var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+var tempRoot = Path.Combine(baseDir, "temp");
+
+// 如果目录不存在就创建
+if (!Directory.Exists(tempRoot))
+{
+    Directory.CreateDirectory(tempRoot);
+}
+
+// 把 .NET 运行时的临时目录都改到这里
+Environment.SetEnvironmentVariable("TEMP", tempRoot, EnvironmentVariableTarget.Process);
+Environment.SetEnvironmentVariable("TMP", tempRoot, EnvironmentVariableTarget.Process);
+Environment.SetEnvironmentVariable("ASPNETCORE_TEMP", tempRoot, EnvironmentVariableTarget.Process);
+
+// =================== ② 正常启动 Admin.NET 应用 ===================
 Serve.Run(RunOptions.Default.AddWebComponent<WebComponent>());
 
 public class WebComponent : IWebComponent

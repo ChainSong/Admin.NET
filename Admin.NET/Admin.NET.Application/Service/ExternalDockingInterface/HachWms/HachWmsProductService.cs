@@ -95,15 +95,15 @@ public class HachWmsProductService : IDynamicApiController, ITransient
             Items = new List<HachWMSDetailResponse>()
         };
         // 0) 基础校验
-        const int MaxBatch = 20;
+        //const int MaxBatch = 20;
 
         //入参不能为空
         if (input == null || input.Count == 0)
             return new HachWMSResponse { Success = false, Result = ErrorCode.BadRequest.GetDescription() };
 
         //单次请求最多允许20条，当前21条
-        if (input.Count > MaxBatch)
-            return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
+        //if (input.Count > MaxBatch)
+        //    return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
      
         List<HachWmsAuthorizationConfig> hachCustomerList = new List<HachWmsAuthorizationConfig>();
         hachCustomerList = await GetCustomerInfo("putSKUData");

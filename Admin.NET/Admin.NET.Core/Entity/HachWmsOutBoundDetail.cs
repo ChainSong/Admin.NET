@@ -62,4 +62,7 @@ public class HachWmsOutBoundDetail : EntityTenant
     public string? Attribute4 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 240)]
     public string? Attribute5 { get; set; }
+
+    [SugarColumn(ColumnDescription = "", Length = 240)]
+    public string? Subinventory { get; set; }
 }
