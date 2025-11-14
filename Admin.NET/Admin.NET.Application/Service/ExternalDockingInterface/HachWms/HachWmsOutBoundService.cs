@@ -364,7 +364,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 Creator = _userManager.UserId.ToString(),
                 Str2 = item.ParentItemNumber ?? "",
                 Int2 = item.ParentItemId ?? 0,
-                Onwer = item.Subinventory ?? "",
+                Onwer = outBound.Subinventory ?? "",
             });
         }
         // 导航写入主从表
