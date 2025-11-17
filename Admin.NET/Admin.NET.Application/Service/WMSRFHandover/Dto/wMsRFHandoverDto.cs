@@ -8,7 +8,7 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
+using Admin.NET.Application.Service.WMSRFAdjust.Dto;
 using Admin.NET.Core.Entity;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSRFHandover.Handover.Dto;
+namespace Admin.NET.Application.Service.WMSRFHandover.Dto;
 public class wMsRFPendingHandoverResponse
 {
     public string Result { get; set; }

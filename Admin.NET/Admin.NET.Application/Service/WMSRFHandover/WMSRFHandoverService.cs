@@ -17,15 +17,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Const;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Factory;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
+using Admin.NET.Application.Service.WMSRFAdjust.Factory;   
+using Admin.NET.Application.Service.WMSRFAdjust.Interface;
 using Admin.NET.Core.Service;
 using Microsoft.AspNetCore.Identity;
-using Admin.NET.Application.Service.WMSRFHandover.Handover.Dto;
-using Admin.NET.Application.Service.WMSRFHandover.Handover.Factory;
-using Admin.NET.Application.Service.WMSRFHandover.Handover.Interface;
+using Admin.NET.Application.Service.WMSRFHandover.Interface;
+using Admin.NET.Application.Service.WMSRFHandover.Factory;
+using Admin.NET.Application.Service.WMSRFHandover.Dto;
+using Admin.NET.Application.Service.WMSRFHandover.Enumerate;
 
-namespace Admin.NET.Application.Service.WMSRFHandover.Handover;
+namespace Admin.NET.Application.Service.WMSRFHandover;
 /// <summary>
 /// RFHandover服务
 /// </summary>

@@ -8,8 +8,8 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
+using Admin.NET.Application.Service.WMSRFAdjust.Dto;
+using Admin.NET.Application.Service.WMSRFAdjust.Interface;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -17,7 +17,7 @@ using Admin.NET.Core.Service;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Admin.NET.Application.Service.WMSRFAdjust.Move.Strategy;
+namespace Admin.NET.Application.Service.WMSRFAdjust.Strategy;
 public class WMSRFAdjustMoveDefaultStrategy : IWMSRFAdjustMoveInterface
 {
     private SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;

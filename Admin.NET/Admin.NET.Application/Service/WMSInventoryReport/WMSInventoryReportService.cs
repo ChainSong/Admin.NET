@@ -224,7 +224,6 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "AvailableInventorySummaryReportExport")]
     public async Task<ActionResult> AvailableInventorySummaryReportExport(WMSInventoryUsableInput input)
     {
-
         try
         {
             var query = await _repInventoryUsable.AsQueryable()

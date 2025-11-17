@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service.WMSRFHandover.Enumerate;
 public enum HandoverEnum
 {
     RF交接
