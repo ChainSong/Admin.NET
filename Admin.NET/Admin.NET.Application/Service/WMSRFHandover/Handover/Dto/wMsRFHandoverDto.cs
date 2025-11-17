@@ -16,26 +16,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service.WMSRFHandover.Handover.Dto;
 public class wMsRFPendingHandoverResponse
 {
     public string Result { get; set; }
-    public string? Message { get; set; }
-    public string? SerialNumber { get; set; }
+    public string Message { get; set; }
+    public string SerialNumber { get; set; }
     public long AdjustmentId { get; set; }
     public List<WMSPackage> packages { get; set; } = new List<WMSPackage>();
     public List<wMsRFPendingHandoverOrder> orders { get; set; } = new List<wMsRFPendingHandoverOrder>();
     public Response<List<OrderStatusDto>> response { get; set; } = new Response<List<OrderStatusDto>>();
 }
 
-public class wMsRFPendingHandoverOrder:WMSOrder
+public class wMsRFPendingHandoverOrder : WMSOrder
 {
 
 }
 
 public class wMsRFPendingHandoverOrderInput
 {
-    public string? OrderNumber { get; set; }
+    public string OrderNumber { get; set; }
     public string ExternOrderNumber { get; set; }
 }
 
@@ -45,7 +45,7 @@ public class wMsRFScanPackageInput
     public long OrderId { get; set; }
     public string ExternOrderNumber { get; set; }
     public string Type { get; set; }
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
 
 }
 
@@ -55,7 +55,7 @@ public class wMsRFSubmitHandoverInput
     public long OrderId { get; set; }
     public string ExternOrderNumber { get; set; }
     public string Type { get; set; }
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
     public PalletInfo palletInfo { get; set; }
     public List<WMSPackage> packages { get; set; } = new List<WMSPackage>();
 }

@@ -1,9 +1,11 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Application.Service.WMSInventoryReport.Dto;
 using Admin.NET.Application.Service.WMSInventoryReport.Factory;
 using Admin.NET.Application.Service.WMSInventoryReport.Interface;
+using Admin.NET.Common.枚举值帮助类;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
@@ -213,5 +215,89 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
 
+    /// <summary>
+    /// AvailableInventorySummaryReportExport
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "AvailableInventorySummaryReportExport")]
+    public async Task<ActionResult> AvailableInventorySummaryReportExport(WMSInventoryUsableInput input)
+    {
+
+        try
+        {
+            var query = await _repInventoryUsable.AsQueryable()
+                     .WhereIF(input.CustomerId > 0, u => u.CustomerId == input.CustomerId)
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.CustomerName), u => u.CustomerName.Contains(input.CustomerName.Trim()))
+                     .WhereIF(input.WarehouseId > 0, u => u.WarehouseId == input.WarehouseId)
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.WarehouseName), u => u.WarehouseName.Contains(input.WarehouseName.Trim()))
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.Area), u => u.Area.Contains(input.Area.Trim()))
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.Location), u => u.Location.Contains(input.Location.Trim()))
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.SKU), u => u.SKU.Contains(input.SKU.Trim()))
+                     .WhereIF(!string.IsNullOrWhiteSpace(input.GoodsType), u => u.GoodsType.Contains(input.GoodsType.Trim()))
+                     .WhereIF(input.InventoryStatus != 0, u => u.InventoryStatus == input.InventoryStatus)
+                     .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                     .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                     .GroupBy(a => new
+                     {
+                         a.CustomerId,
+                         a.CustomerName,
+                         a.WarehouseId,
+                         a.WarehouseName,
+                         a.SKU,
+                         a.GoodsName,
+                         a.Area,
+                         a.Location,
+                         a.PoCode,
+                         a.Onwer,
+                         a.CreationTime,
+                         a.BatchCode,
+                         a.GoodsType,
+                         a.InventoryStatus
+                     })
+                     .Select(a => new WMSInventoryUsableExport
+                     {
+                         CustomerName = a.CustomerName,
+                         WarehouseName = a.WarehouseName,
+                         AreaName = a.Area,
+                         LocationName = a.Location,
+                         PoCode = a.PoCode,
+                         SKU = a.SKU,
+                         Qty = SqlFunc.AggregateSum(a.Qty),
+                         Onwer = a.Onwer,
+                         CreateTime = a.CreationTime.ToString(),
+                         BatchNumber = a.BatchCode,
+                         GoodsType = a.GoodsType,
+                         InventoryStatus = a.InventoryStatus.ToString(),
+                     })
+                     .OrderBuilder(input, "", "SKU")
+                     .ToListAsync();
+
+            if (query == null || query.Count == 0)
+            {
+                throw Oops.Oh("未查询到可用库存");
+            }
+
+            query.ForEach(x =>
+            {
+                if (int.TryParse(x.InventoryStatus, out var status))
+                {
+                    x.InventoryStatus = EnumHelper.GetEnumName<InventoryStatusEnum>(status);
+                }
+            });
+            IExporter exporter = new ExcelExporter();
+            var result = exporter.ExportAsByteArray<WMSInventoryUsableExport>(query);
+            var fs = new MemoryStream(result.Result);
+            return new FileStreamResult(fs, "application/octet-stream")
+            {
+                FileDownloadName = "库存报表.xlsx" // 配置文件下载显示名
+            };
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
 }
 
