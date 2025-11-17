@@ -166,6 +166,7 @@ public class HachWmsProductService : IDynamicApiController, ITransient
                                     SKUClassification = item.MakeOrBuy,
                                     Creator = _userManager.UserId.ToString(),
                                     CreationTime = DateTime.Now,
+                                    Str3=item.TssCode,
                                     TenantId = customer.TenantId ?? 1300000000001 // 默认 TenantId
                                 };
 
