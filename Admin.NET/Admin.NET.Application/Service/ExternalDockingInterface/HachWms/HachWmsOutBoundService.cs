@@ -314,7 +314,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             DetailCount = outBound.items.Count,
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = DateTime.Now,
-            TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
+            TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001,
+            Dn= outBound.DeliveryNumber
         };
         // 构造明细表
         var prodMap = productLight.ToDictionary(p => p.SKU.ToUpper(), p => p);
