@@ -118,7 +118,17 @@ public class WMSPreOrder : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? So { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? Dn { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? PL { get; set; }
 
     /// <summary>
     /// 

@@ -78,6 +78,17 @@ public class WMSPreOrderBaseInput
     public string? So { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Dn { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? PL { get; set; }
+
+    /// <summary>
     /// Creator
     /// </summary>
     public virtual string? Creator { get; set; }

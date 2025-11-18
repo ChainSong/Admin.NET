@@ -72,6 +72,10 @@
           <el-button type="primary" icon="ele-Upload" @click="exportReceipts" v-auth="'wMSReceipt:receipt'"> 导出入库信息
           </el-button>
         </el-form-item>
+         <el-form-item>
+          <el-button type="primary" icon="ele-Upload" @click="exportReceiptsFeedback" v-auth="'wMSReceipt:receipt'"> 导出入库反馈
+          </el-button>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Upload" @click="exportReceiptReceivingfun"
             v-auth="'wMSReceipt:receiptReceiving'">
@@ -149,7 +153,7 @@
       </el-table>
 
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100,500,1000]" small="" background=""
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
@@ -171,6 +175,7 @@ import addDialog from '/@/views/main/wMSReceipt/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSReceipt/component/queryDialog.vue'
 import { pageWMSReceipt, deleteWMSReceipt, exportReceipt, exportReceiptReceiving, getReceipts, saveRFID, quickInventory } from '/@/api/main/wMSReceipt';
 import { getPrinrRFIDInfoByReceiptId } from '/@/api/main/wMSRFIDInfo';
+import { getReceiptReport } from '/@/api/main/wMSReceiptReport';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import printDialog from '/@/views/tools/printDialog.vue';
 import selectRemote from '/@/views/tools/select-remote.vue'
@@ -360,6 +365,32 @@ const quickInventoryFun = async () => {
     })
     .catch(() => { });
 }
+
+
+
+const exportReceiptsFeedback = async () => {
+
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if (ids.length > 0) {
+    let res = await getReceiptReport(ids);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } else {
+    let res = await getReceiptReport(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  }
+};
+
 const exportReceipts = async () => {
 
   //1 获取选中的订单ID

@@ -43,6 +43,8 @@ public class PrintOrderStrategy : IPrintOrderInterface
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+    public SqlSugarRepository<FGFHOrder> _repFGFHOrder { get; set; }
+
     public PrintOrderStrategy()
     {
     }
@@ -53,7 +55,7 @@ public class PrintOrderStrategy : IPrintOrderInterface
         //List<WMSOrderPrintDto> result = new List<WMSOrderPrintDto>();
         //获取订单信息
         //List<WMSOrder> orders = await _repOrder.GetListAsync(o => request.Contains(o.Id));
-        List<Admin.NET.Core.Entity.WMSOrder> orders = await _repOrder.AsQueryable()
+        List<WMSOrder> orders = await _repOrder.AsQueryable()
                  .Includes(a => a.Details)
                  .Includes(a => a.OrderAddress)
                  .Where(u => request.Contains(u.Id)).ToListAsync();
@@ -67,6 +69,7 @@ public class PrintOrderStrategy : IPrintOrderInterface
         //   .Includes(a => a.SysWorkFlowSteps)
         //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
         var workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Order, orders.First().OrderType);
+
 
 
         //获取仓库信息
@@ -84,11 +87,16 @@ public class PrintOrderStrategy : IPrintOrderInterface
             orderPrintDtos = orders.Adapt<List<WMSOrderPrintDto>>();
             orderPrintDtos.ForEach(order =>
             {
+                var fgfhorder = _repFGFHOrder.AsQueryable().Where(a => a.OutStockNumber == order.ExternOrderNumber).First();
+                if (fgfhorder != null)
+                {
+                    order.Str3 = fgfhorder.ContractNo;
+                }
                 order.Customer = customer;
                 order.Warehouse = warehouse;
                 order.CustomerConfig = customer.CustomerConfig;
                 order.CustomerDetail = customer.Details.FirstOrDefault();
-                order.OrderAddress.Address=order.OrderAddress.Province+order.OrderAddress.City+order.OrderAddress.County+order.OrderAddress.Address;
+                order.OrderAddress.Address = order.OrderAddress.Province + order.OrderAddress.City + order.OrderAddress.County + order.OrderAddress.Address;
                 int sequence = 0;
                 order.Details.ForEach(detail =>
                 {

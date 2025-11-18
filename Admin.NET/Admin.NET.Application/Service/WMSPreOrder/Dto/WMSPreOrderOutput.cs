@@ -78,6 +78,17 @@
     public string? So { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+
+    public string? Dn { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? PL { get; set; }
+
+    /// <summary>
     /// Creator
     /// </summary>
     public string? Creator { get; set; }

@@ -174,6 +174,12 @@ public class WMSProductBaseInput
     /// </summary>
     public virtual int IsQC { get; set; }
 
+    public virtual int IsSN { get; set; }
+
+    public virtual int IsUID { get; set; }
+
+    public virtual int IsAssembly { get; set; }
+
     /// <summary>
     /// Remark
     /// </summary>

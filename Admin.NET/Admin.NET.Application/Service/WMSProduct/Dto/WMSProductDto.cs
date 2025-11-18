@@ -175,6 +175,12 @@ public class WMSProductDto
     /// </summary>
     public int IsQC { get; set; }
 
+    public int IsUID { get; set; }
+    public int IsSN { get; set; }
+
+    public int IsAssembly { get; set; }
+
+
     /// <summary>
     /// Remark
     /// </summary>

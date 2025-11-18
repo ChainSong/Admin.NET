@@ -3,7 +3,7 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
-using Admin.NET.Application.Service; 
+using Admin.NET.Application.Service;
 using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -59,8 +59,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
     //private readonly SqlSugarRepository<WMSInventoryUsable> _repInventoryUsable;
     private readonly SqlSugarRepository<HachWmsOutBound> _repOb;
     private readonly SqlSugarRepository<WMSHandover> _repHandover;
-    public readonly SqlSugarRepository<WMSProductBom> _repProductBom;
-    public WMSOrderService(SqlSugarRepository<WMSOrder> rep, 
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
+    private readonly SqlSugarRepository<FGFHOrder> _repFGFHOrder;
+    public WMSOrderService(SqlSugarRepository<WMSOrder> rep,
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
         SqlSugarRepository<WMSCustomer> repCustomer,
         SqlSugarRepository<CustomerUserMapping> repCustomerUser,
@@ -81,7 +82,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSPackageDetail> repPackageDetail,
         SysWorkFlowService repWorkFlowService,
         SqlSugarRepository<HachWmsOutBound> repOb,
-        SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSHandover> repHandover)
+        SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSHandover> repHandover,
+        SqlSugarRepository<FGFHOrder> repFGFHOrder)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -110,6 +112,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repOb = repOb;
         _repProductBom = repProductBom;
         _repHandover = repHandover;
+        _repFGFHOrder = repFGFHOrder;
     }
 
     /// <summary>
@@ -749,6 +752,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repOrderAllocation = _repOrderAllocation;
         factory._repWarehouse = _repWarehouse;
         factory._repCustomer = _repCustomer;
+        factory._repFGFHOrder = _repFGFHOrder;
         factory._repWorkFlowService = _repWorkFlowService;
         var response = await factory.PrintShippingList(input);
 
@@ -803,7 +807,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         Response<PrintBase<List<WMSOrderJobPrintDto>>> data = new Response<PrintBase<List<WMSOrderJobPrintDto>>>();
 
         var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).FirstAsync();
-         var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, order.OrderType);
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, order.OrderType);
         IPrintJobOrderStrategy factory = PrintJobOrderFactory.PrintJobList(workflow);
         factory._userManager = _userManager;
         factory._repTableColumns = _repTableColumns;
@@ -819,9 +823,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
         factory._repWarehouse = _repWarehouse;
         factory._repCustomer = _repCustomer;
         factory._repWorkFlowService = _repWorkFlowService;
-        factory._repOb=_repOb;
-        factory._repPackage=_repPackage;
-        factory._repProductBom=_repProductBom;
+        factory._repOb = _repOb;
+        factory._repPackage = _repPackage;
+        factory._repProductBom = _repProductBom;
         var response = await factory.PrintJobList(input);
         if (response.Code == StatusCode.Success)
         {

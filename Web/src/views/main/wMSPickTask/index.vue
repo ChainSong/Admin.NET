@@ -357,8 +357,12 @@ const openPrint = async () => {
     console.log(result);
     if (result.data.result != null) {
       printData = result.data.result.data.data;
-      templateName = result.data.result.data.printTemplate;
+      if (result.data.result.data.printTemplate != "") {
+        templateName = result.data.result.data.printTemplate;
+      }
+
     }
+    console.log("printData");
     console.log(printData);
     console.log(templateName);
 
@@ -370,13 +374,16 @@ const openPrint = async () => {
       type: "warning",
     })
       .then(async () => {
-        let result = await getPickTasks(ids.value);
+        let result = await printPickTasks(ids.value);
         console.log("result");
         console.log(result);
         if (result.data.result != null) {
           printData = result.data.result.data.data;
-          templateName = result.data.result.data.printTemplate;
+          if (result.data.result.data.printTemplate != "") {
+            templateName = result.data.result.data.printTemplate;
+          }
         }
+        console.log("printData");
         console.log(printData);
         console.log(templateName);
 

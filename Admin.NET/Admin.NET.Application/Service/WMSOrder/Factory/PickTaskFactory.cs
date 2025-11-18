@@ -44,6 +44,8 @@ namespace Admin.NET.Application.Factory
 
             switch (workFlow)
             {
+                case "HachDG":
+                    return new PickTaskHachStrategy();
                 case "Hach":
                     return new PickTaskHachStrategy();
                 default:

@@ -67,10 +67,17 @@
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSCustomer:add'">导入
           </el-button>
         </el-form-item>
+          <el-form-item>
+          <el-button type="primary" icon="ele-Delete" @click="del" v-auth="'wMSCustomer:add'">批量删除
+          </el-button>
+        </el-form-item>
+        
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
-      <el-table :data="state.headers" show-overflow-tooltip tooltip-effect="light" row-key="id" style="width: 100%">
+      <el-table :data="state.headers"  ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id" style="width: 100%">
+          <el-table-column type="selection" width="55">
+        </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
           <template v-if="v.isShowInList">
             <el-table-column v-if="v.type == 'DropDownListInt'" v-bind:key="v.columnName" :fixed="false"
@@ -167,6 +174,7 @@ const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
+const multipleTableRef = ref();
 // const tableData = ref<any>
 // ([]);
 const queryParams = ref<any>
@@ -233,7 +241,18 @@ const del = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      await deleteWMSHandover(row);
+
+      //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  if (ids.length < 1) {
+    ElMessage.error("请勾选订单");
+    return;
+  }
+      await deleteWMSHandover(ids);
       handleQuery();
       ElMessage.success("删除成功");
     })

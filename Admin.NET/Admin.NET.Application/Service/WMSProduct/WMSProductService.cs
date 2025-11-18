@@ -36,8 +36,6 @@ public class WMSProductService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSCustomer> _repCustomer;
 
 
-
-
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;

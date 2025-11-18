@@ -105,6 +105,7 @@
     <Folder Include="Service\WMSOrderReport\Strategy\OrderDefault\" />
     <Folder Include="Service\WMSOrder\Abstract\" />
     <Folder Include="Service\WMSReceiptReceiving\Dto\" />
+    <Folder Include="Service\WMSReceiptReport\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Enumerate\" />
     <Folder Include="Service\WMSRFOrderPick\Enumerate\" />

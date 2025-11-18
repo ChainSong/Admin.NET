@@ -43,6 +43,8 @@ public interface IPrintOrderInterface
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
 
+    public SqlSugarRepository<FGFHOrder> _repFGFHOrder { get; set; }
+
     /// <summary>
     /// 打印发货单
     /// </summary>
