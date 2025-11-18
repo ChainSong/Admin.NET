@@ -94,7 +94,7 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
             Items = new List<HachWMSDetailResponse>()
         };
         //基础校验
-        const int MaxBatch = 20;
+        //const int MaxBatch = 20;
         //入参不能为空
         if (input == null || input.Count == 0)
         {
@@ -104,14 +104,14 @@ public class HachWmsProductBomService : IDynamicApiController, ITransient
             return new HachWMSResponse { Success = false, Result = ErrorCode.BadRequest.GetDescription() };
         }
         //单次请求最多允许20条，当前21条
-        if (input.Count > MaxBatch)
-        {
-            await _logHelper.LogAsync(
-             LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
-             LogHelper.LogLevel.Info, $"单次请求最多允许 {MaxBatch}条，当前{input.Count}条", true);
-            return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
+        //if (input.Count > MaxBatch)
+        //{
+        //    await _logHelper.LogAsync(
+        //     LogHelper.LogMainType.主档BOM数据下发, batchId, "BATCH",
+        //     LogHelper.LogLevel.Info, $"单次请求最多允许 {MaxBatch}条，当前{input.Count}条", true);
+        //    return new HachWMSResponse { Success = false, Result = $"a maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
 
-        }
+        //}
 
         HachWmsProductBom hachWmsProductBom = new HachWmsProductBom();
         List<HachWmsAuthorizationConfig> wmsAuthorizationConfigList = new List<HachWmsAuthorizationConfig>();

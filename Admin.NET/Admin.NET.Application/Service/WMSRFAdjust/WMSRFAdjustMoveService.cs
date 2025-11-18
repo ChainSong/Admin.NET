@@ -16,14 +16,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Factory;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Core.Service;
 using Microsoft.AspNetCore.Identity;
+using Admin.NET.Application.Service.WMSRFAdjust.Dto;
+using Admin.NET.Application.Service.WMSRFAdjust.Interface;
+using Admin.NET.Application.Service.WMSRFAdjust.Factory;
 
-namespace Admin.NET.Application.Service.wMsRFAdjust;
+namespace Admin.NET.Application.Service.WMSRFAdjust;
 /// <summary>
 /// RFAdjustmentMove服务
 /// </summary>
@@ -111,7 +111,7 @@ public class WMSRFAdjustMoveService : IDynamicApiController, ITransient
             );
 
         List<long> Ids = new List<long>() { input.Id };
-        
+
         response.response = await factory.CompleteAddjustmentMove(Ids);
 
         return response;

@@ -13,6 +13,9 @@
                         <el-button type="primary" icon="ele-Search" @click="handleQuery"
                             v-auth="'wMSInventoryReport:page'"> 查询 </el-button>
                         <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button>
+
+                          <el-button type="primary" icon="ele-Search" @click="handleExportData"
+                           > 导出 </el-button>
                     </el-button-group>
                 </el-form-item>
 
@@ -43,8 +46,9 @@ import { ref } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 //import { formatDate } from '/@/utils/formatTime';
+import { downloadByData, getFileName } from '/@/utils/download';
 
-import { pageWMSInventoryReport, availableInventorySummaryReport } from '/@/api/main/wMSInventoryReport';
+import { pageWMSInventoryReport, availableInventorySummaryReportExport,availableInventorySummaryReport } from '/@/api/main/wMSInventoryReport';
 
 
 const editDialogRef = ref();
@@ -85,7 +89,13 @@ const handleCurrentChange = (val: number) => {
     tableParams.value.page = val;
     handleQuery();
 };
-
+//导出
+const handleExportData=async()=>{
+   queryParams.value.inventoryStatus="1";
+    var res = await availableInventorySummaryReportExport(Object.assign(queryParams.value, tableParams.value));
+  var fileName = getFileName(res.headers);
+  downloadByData(res.data as any, fileName);
+}
 
 handleQuery();
 </script>

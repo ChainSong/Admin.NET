@@ -79,7 +79,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             "BATCH",
             LogHelper.LogLevel.Info,
             "收到上游请求报文",
-            true,jsonPayload);
+            true, jsonPayload);
 
         #region 基础验证
         if (_userManager.UserId == null)
@@ -95,7 +95,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             Items = new List<HachWMSDetailResponse>()
         };
         // 0) 基础校验
-        const int MaxBatch = 20;
+        //const int MaxBatch = 20;
 
         //入参不能为空
         if (input == null || input.Count == 0)
@@ -107,12 +107,12 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         }
 
         //单次请求最多允许20条，当前21条
-        if (input.Count > MaxBatch)
-        {
-            await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH",
-            LogHelper.LogLevel.Info, $"单次最多允许 {MaxBatch}条请求，当前 {input.Count}条", true);
-            return new HachWMSResponse { Success = false, Result = $"A maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
-        }
+        //if (input.Count > MaxBatch)
+        //{
+        //    await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH",
+        //    LogHelper.LogLevel.Info, $"单次最多允许 {MaxBatch}条请求，当前 {input.Count}条", true);
+        //    return new HachWMSResponse { Success = false, Result = $"A maximum of  {MaxBatch} equests are allowed per request，currently {input.Count} items" };
+        //}
 
         //HachWmsReceiving receiving = new HachWmsReceiving();
         // 获取客户授权配置
@@ -144,7 +144,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 #endregion
 
                 #region 订单校验
-              
+
                 // 2.2) 输入校验
                 #region 输入校验
                 if (asn.items == null || asn.items.Count == 0)
@@ -183,7 +183,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 }
 
                 wmsAuthorizationConfig = await GetCustomerInfo("putASNData", asn.LocationCode);
-                if (wmsAuthorizationConfig==null)
+                if (wmsAuthorizationConfig == null)
                 {
                     await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,
                     $"订单:{syncOrderNo} 获取仓库LocationCode信息失败", true);
@@ -220,14 +220,25 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 #endregion
                 // LineNum 去重检查
                 #region LineNum 去重检查
-                var dupLines = asn.items.GroupBy(i => i.LineNum).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-                if (dupLines.Count > 0)
+                //var dupLines = asn.items.GroupBy(i => i.LineNum).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+                //if (dupLines.Count > 0)
+                //{
+                //    await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,
+                //$"订单:{syncOrderNo} 明细行号重复", true);
+                //    //订单明细行号重复
+                //    orderResult.Success = false;
+                //    orderResult.Message = $"orderNo：{syncOrderNo} duplicate detailed line numbers：{string.Join(",", dupLines)}";
+                //    response.Items.Add(orderResult);
+                //    continue;
+                //}
+                var TransactionIds = asn.items.GroupBy(i => i.TransactionId).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+                if (TransactionIds.Count > 0)
                 {
                     await _logHelper.LogAsync(LogHelper.LogMainType.入库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,
-                $"订单:{syncOrderNo} 明细行号重复", true);
+                $"订单:{syncOrderNo} 明细TransactionId重复", true);
                     //订单明细行号重复
                     orderResult.Success = false;
-                    orderResult.Message = $"orderNo：{syncOrderNo} duplicate detailed line numbers：{string.Join(",", dupLines)}";
+                    orderResult.Message = $"orderNo：{syncOrderNo} duplicate detailed line numbers：{string.Join(",", TransactionIds)}";
                     response.Items.Add(orderResult);
                     continue;
                 }
@@ -237,7 +248,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 var existing = await _wMSASNRep.AsQueryable()
                     .Where(x => x.ASNStatus != -1)
                     .Where(x => x.ExternReceiptNumber == syncOrderNo)
-                    .Where(a=>a.WarehouseId==wmsAuthorizationConfig.WarehouseId)
+                    .Where(a => a.WarehouseId == wmsAuthorizationConfig.WarehouseId)
                     .Where(a => a.CustomerId == wmsAuthorizationConfig.CustomerId)
                     .AnyAsync();
                 if (existing)
@@ -322,7 +333,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                     orderResult.Success = true;
                     orderResult.Message = $"orderNo：{syncOrderNo} processed successfully";//处理成功
                 }
-                
+
                 response.Items.Add(orderResult);
             }
             catch (Exception ex)
@@ -372,11 +383,11 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             WarehouseId = cfg.WarehouseId!.Value,
             WarehouseName = cfg.WarehouseName,
             ASNStatus = 1, // TODO: 常量化/枚举化
-            ReceiptType = _enumRep.GetEnumDescriptionOrDefault<IbOrderStatusEnum>(receiving.DocType,"收货入库"),
+            ReceiptType = _enumRep.GetEnumDescriptionOrDefault<IbOrderStatusEnum>(receiving.DocType, "收货入库"),
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = now,
             TenantId = cfg.TenantId ?? 1300000000001, // 尽量从配置/上下文取
-            ExpectDate=DateTime.Now
+            ExpectDate = DateTime.Now
         };
 
         var prodMap = productLight.ToDictionary(p => ((string)p.SKU).ToUpper(), p => p);
@@ -397,7 +408,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 CustomerName = wmsAsn.CustomerName,
                 WarehouseId = wmsAsn.WarehouseId,
                 WarehouseName = wmsAsn.WarehouseName,
-                LineNumber = item.LineNum,
+                LineNumber = item.TransactionId.ToString(),
                 SKU = item.ItemNum,
                 UPC = "",
                 GoodsName = "", // TODO: 需要则从产品取
@@ -410,7 +421,8 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 ReceiptQty = 0,
                 CreationTime = now,
                 Creator = wmsAsn.Creator,
-                TenantId = wmsAsn.TenantId
+                TenantId = wmsAsn.TenantId,
+                Onwer = item.subinventory ?? ""
             });
         }
 
@@ -425,7 +437,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
     }
 
     //获取客户信息
-    private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type,string? WarehouseCode=null)
+    private async Task<HachWmsAuthorizationConfig> GetCustomerInfo(string Type, string? WarehouseCode = null)
     {
         HachWmsAuthorizationConfig hachCustomerMappings = new HachWmsAuthorizationConfig();
 
@@ -440,7 +452,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
             .Where(a => a.IsDelete == false)
             .Where(a => a.Type == "HachWMSApi")
             .Where(a => a.InterFaceName == Type)
-            .WhereIF(!string.IsNullOrEmpty(WarehouseCode),a=>a.WarehouseCode==WarehouseCode)
+            .WhereIF(!string.IsNullOrEmpty(WarehouseCode), a => a.WarehouseCode == WarehouseCode)
             .OrderByDescending(a => a.Id)
             .FirstAsync();
 

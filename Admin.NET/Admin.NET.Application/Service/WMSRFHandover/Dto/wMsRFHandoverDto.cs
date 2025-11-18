@@ -8,7 +8,7 @@
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
+using Admin.NET.Application.Service.WMSRFAdjust.Dto;
 using Admin.NET.Core.Entity;
 using System;
 using System.Collections.Generic;
@@ -16,26 +16,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service.WMSRFHandover.Dto;
 public class wMsRFPendingHandoverResponse
 {
     public string Result { get; set; }
-    public string? Message { get; set; }
-    public string? SerialNumber { get; set; }
+    public string Message { get; set; }
+    public string SerialNumber { get; set; }
     public long AdjustmentId { get; set; }
     public List<WMSPackage> packages { get; set; } = new List<WMSPackage>();
     public List<wMsRFPendingHandoverOrder> orders { get; set; } = new List<wMsRFPendingHandoverOrder>();
     public Response<List<OrderStatusDto>> response { get; set; } = new Response<List<OrderStatusDto>>();
 }
 
-public class wMsRFPendingHandoverOrder:WMSOrder
+public class wMsRFPendingHandoverOrder : WMSOrder
 {
 
 }
 
 public class wMsRFPendingHandoverOrderInput
 {
-    public string? OrderNumber { get; set; }
+    public string OrderNumber { get; set; }
     public string ExternOrderNumber { get; set; }
 }
 
@@ -45,7 +45,7 @@ public class wMsRFScanPackageInput
     public long OrderId { get; set; }
     public string ExternOrderNumber { get; set; }
     public string Type { get; set; }
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
 
 }
 
@@ -55,7 +55,7 @@ public class wMsRFSubmitHandoverInput
     public long OrderId { get; set; }
     public string ExternOrderNumber { get; set; }
     public string Type { get; set; }
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
     public PalletInfo palletInfo { get; set; }
     public List<WMSPackage> packages { get; set; } = new List<WMSPackage>();
 }

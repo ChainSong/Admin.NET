@@ -100,17 +100,18 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             throw Oops.Oh(ErrorCode.Unauthorized);
         }
 
-        const int MaxBatch = 20;
+        //const int MaxBatch = 20;
         var response = new HachWMSResponse { Success = true, Result = "success", Items = new List<HachWMSDetailResponse>() };
 
         if (input == null || input.Count == 0)
-            return new HachWMSResponse { Success = false, Result = OrderRespStatusEnum.RequestDataEmpty.GetDescription() };
-        if (input.Count > MaxBatch)
         {
-            //单次最多允许 { MaxBatch}条请求，当前 { input.Count}条
-            return new HachWMSResponse { Success = false, Result = $"A maximum of  {MaxBatch}requests are allowed at a time, currently there are{input.Count}requests" };
+            return new HachWMSResponse { Success = false, Result = OrderRespStatusEnum.RequestDataEmpty.GetDescription() };
         }
-
+        //if (input.Count > MaxBatch)
+        //{
+        //    //单次最多允许 { MaxBatch}条请求，当前 { input.Count}条
+        //    return new HachWMSResponse { Success = false, Result = $"A maximum of  {MaxBatch}requests are allowed at a time, currently there are{input.Count}requests" };
+        //}
         // 获取客户授权配置
         HachWmsAuthorizationConfig wmsAuthorizationConfig = new HachWmsAuthorizationConfig();
 
@@ -134,7 +135,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                         throw new Exception($"orderNo：{syncOrderNo} “LocationCode” cannot be empty");
                     }
                     //根据仓库获取客户授权配置
-                    wmsAuthorizationConfig =await _getConfigRep.GetCustomerInfo("putSOData", order.LocationCode);
+                    wmsAuthorizationConfig = await _getConfigRep.GetCustomerInfo("putSOData", order.LocationCode);
                     if (wmsAuthorizationConfig == null)
                     {
                         throw new Exception($"orderNo：{syncOrderNo} Failed to obtain warehouse Location Code information");
@@ -151,10 +152,17 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                     //订单：{ syncOrderNo}有数量 <= 0的详细行
                     if (order.items.Any(i => Convert.ToDouble(i.Quantity) <= 0))
                         throw new Exception($"Order:  {syncOrderNo} has detailed lines with quantity<=0");
-                    var dupLines = order.items.GroupBy(i => i.LineNumber).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-                    //订单：｛syncOrderNo｝有重复的行号
-                    if (dupLines.Count > 0)
-                        throw new Exception($"Order: {syncOrderNo} has duplicate line numbers: {string.Join(",", dupLines)}");
+
+                    //var dupLines = order.items.GroupBy(i => i.LineNumber).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+                    ////订单：｛syncOrderNo｝有重复的行号
+                    //if (dupLines.Count > 0)
+                    //    throw new Exception($"Order: {syncOrderNo} has duplicate line numbers: {string.Join(",", dupLines)}");
+
+
+                    var DeliveryDetailIds = order.items.GroupBy(i => i.DeliveryDetailId).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+                    //订单：｛syncOrderNo｝有重复的deliveryDetailId
+                    if (DeliveryDetailIds.Count > 0)
+                        throw new Exception($"Order: {syncOrderNo} has duplicate DeliveryDetailId: {string.Join(",", DeliveryDetailIds)}");
                     #endregion
 
                     #region 幂等检查：是否已存在
@@ -355,7 +363,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 CreationTime = DateTime.Now,
                 Creator = _userManager.UserId.ToString(),
                 Str2 = item.ParentItemNumber ?? "",
-                Int2 = item.ParentItemId ?? 0
+                Int2 = item.ParentItemId ?? 0,
+                Onwer = outBound.Subinventory ?? "",
             });
         }
         // 导航写入主从表

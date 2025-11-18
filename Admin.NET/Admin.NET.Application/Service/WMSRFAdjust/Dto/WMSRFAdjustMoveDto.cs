@@ -14,13 +14,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
+namespace Admin.NET.Application.Service.WMSRFAdjust.Dto;
 public class WMSRFAdjustMoveInput
 {
     /// <summary>
     /// 客户Id
     /// </summary>
-    public long? CustomerId { get; set; }    
+    public long? CustomerId { get; set; }
     /// <summary>
     /// 仓库Id
     /// </summary>
@@ -28,17 +28,17 @@ public class WMSRFAdjustMoveInput
     /// <summary>
     /// 扫描的数据
     /// </summary>
-    public string? ScanValue { get; set; }
+    public string ScanValue { get; set; }
     /// <summary>
     /// 操作序列号
     /// </summary>
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
     /// <summary>
     /// 操作类型
     /// </summary>
     public string Type { get; set; }
 }
-public class WMSAddAdjustRFMoveInput: WMSRFAdjustMoveInput
+public class WMSAddAdjustRFMoveInput : WMSRFAdjustMoveInput
 {
     public WMSRFAdjustMove detail { get; set; }
 }
@@ -57,14 +57,14 @@ public class WMSRFAdjustMove
 public class WMSRFAdjustMoveResponse
 {
     public string Result { get; set; }
-    public string? Message { get; set; }
-    public string? SerialNumber { get; set; }
+    public string Message { get; set; }
+    public string SerialNumber { get; set; }
     public long AdjustmentId { get; set; }
     public List<WMSRFAdjustMove> outputs { get; set; } = new List<WMSRFAdjustMove>();
     public Response<List<OrderStatusDto>> response { get; set; } = new Response<List<OrderStatusDto>>();
 }
 
-public class WMSRFAdjustAddResponse: OrderStatusDto
+public class WMSRFAdjustAddResponse : OrderStatusDto
 {
     public long AdjustmentId { get; set; }
 }
@@ -83,11 +83,11 @@ public class WMSRFAdjustMoveCompleteInput
     /// <summary>
     /// 扫描的数据
     /// </summary>
-    public string? ScanValue { get; set; }
+    public string ScanValue { get; set; }
     /// <summary>
     /// 操作序列号
     /// </summary>
-    public string? OpSerialNumber { get; set; }
+    public string OpSerialNumber { get; set; }
     /// <summary>
     /// 操作类型
     /// </summary>

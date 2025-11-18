@@ -14,17 +14,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Admin.NET.Application.Service.WMSRFAdjust.Handover.Enumerate;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Factory;
+using Admin.NET.Application.Service.WMSRFAdjust.Factory;
 using Furion.FriendlyException;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Dto;
+using Admin.NET.Application.Service.WMSRFAdjust.Dto;   
 using Admin.NET.Core.Service;
 using Microsoft.AspNetCore.Identity;
 using SqlSugar;
+using Admin.NET.Application.Service.WMSRFHandover.Interface;
+using Admin.NET.Application.Service.WMSRFHandover.Dto;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service.WMSRFHandover.Strategy;
 public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
 {
+    #region 依赖注入
     private SqlSugarRepository<WMSOrder> _repOrder;
     private SqlSugarRepository<WMSPackage> _repPackage;
     private SqlSugarRepository<WMSHandover> _repHandover;
@@ -45,6 +47,7 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         _cacheService = cacheService;
         _userManager = userManager;
     }
+    #endregion
     public WMSRFHandoverDefaultStrategy()
     {
     }
@@ -143,10 +146,15 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
     #endregion
 
     #region 提交箱号
+    /// <summary>
+    /// 提交箱号
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     public async Task<wMsRFPendingHandoverResponse> SubmitHandover(wMsRFSubmitHandoverInput input)
     {
         wMsRFPendingHandoverResponse response = new wMsRFPendingHandoverResponse();
-        if (!input.palletInfo.Width.HasValue||!input.palletInfo.Length.HasValue||!input.palletInfo.height.HasValue 
+        if (!input.palletInfo.Width.HasValue || !input.palletInfo.Length.HasValue || !input.palletInfo.height.HasValue
           || !input.palletInfo.Weight.HasValue)
         {
             throw Oops.Oh("请填写完整的箱子尺寸和重量信息");
@@ -171,11 +179,11 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
 
         // 检查箱号是否已存在
         var orderStatus = await _repOrder.AsQueryable()
-            .Where(h => h.ExternOrderNumber==input.ExternOrderNumber)
-            .Where(h=>h.OrderStatus==60)
+            .Where(h => h.ExternOrderNumber == input.ExternOrderNumber)
+            .Where(h => h.OrderStatus == 60)
             .FirstAsync();
 
-        if (orderStatus==null)
+        if (orderStatus == null)
         {
             throw Oops.Oh($"该订单状态不允许交接");
         }
@@ -184,22 +192,22 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
         {
             wMSHandovers.Add(new WMSHandover
             {
-                OrderId= item.OrderId,
+                OrderId = item.OrderId,
                 PackageId = item.Id,
                 PalletNumber = PalletNumber,
                 HandoverNumber = $"HO{DateTime.Now:yyyyMMddHHmmssfff}",
                 PickTaskId = item.PickTaskId,
                 PickTaskNumber = item.PickTaskNumber,
-                PackageNumber=item.PackageNumber,
-                PreOrderNumber=item.PreOrderNumber,
+                PackageNumber = item.PackageNumber,
+                PreOrderNumber = item.PreOrderNumber,
                 OrderNumber = item.OrderNumber,
                 ExternOrderNumber = item.ExternOrderNumber,
                 CustomerId = item.CustomerId,
                 CustomerName = item.CustomerName,
                 WarehouseId = item.WarehouseId,
                 WarehouseName = item.WarehouseName,
-                HandoverType= "RF交接",
-                Length=input.palletInfo.Length,
+                HandoverType = "RF交接",
+                Length = input.palletInfo.Length,
                 Width = input.palletInfo.Width,
                 Volume = input.palletInfo.Volume,
                 Height = input.palletInfo.height,
@@ -208,18 +216,19 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
                 ExpressNumber = item.ExpressNumber,
                 ExpressCompany = item.ExpressCompany,
                 SerialNumber = item.SerialNumber,
-                IsHandovered=1,
-                Handoveror=_userManager.RealName,
-                HandoverTime= DateTime.Now,
-                HandoverStatus=1,
-                DetailCount=item.DetailCount,
-                Creator=_userManager.RealName,
-                CreationTime=DateTime.Now,
-                TenantId= 1300000000001
+                IsHandovered = 1,
+                Handoveror = _userManager.RealName,
+                HandoverTime = DateTime.Now,
+                HandoverStatus = 1,
+                DetailCount = item.DetailCount,
+                Creator = _userManager.RealName,
+                CreationTime = DateTime.Now,
+                TenantId = 1300000000001
             });
         }
 
         var result = await _repHandover.InsertRangeAsync(wMSHandovers);
+
         if (result)
         {
             // 检查该订单下所有包裹的交接状态
@@ -235,9 +244,9 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
             {
                 // 如果所有包裹都已交接，更新订单状态为“已交接”
                 var upOrder = await _repOrder.AsUpdateable().SetColumns(a => new WMSOrder
-                    {
-                        OrderStatus = 80 // 更新状态为交接完成
-                    })
+                {
+                    OrderStatus = 80 // 更新状态为交接完成
+                })
                               .Where(a => a.Id == input.packages.First().OrderId)
                               .ExecuteCommandAsync();
 
@@ -263,34 +272,49 @@ public class WMSRFHandoverDefaultStrategy : IWMSRFHandoverInterface
                 response.SerialNumber = input.OpSerialNumber;
             }
         }
+        
         return response;
     }
     #endregion
-    #region
+
+    /// <summary>
+    /// 生成托号
+    /// </summary>
+    /// <returns></returns>
     public string GeneratePalletNumber()
     {
-        var GUId = $"{Guid.NewGuid():N}".Substring(0, 8);
-        return $"PL{DateTime.Now:yyyyMMddHHmmssfff_}_{GUId}";
+        var GUId = $"{Guid.NewGuid():N}".Substring(0, 13);
+        return $"PL{GUId}";
     }
-    #region 获取已扫描箱号列表
+
+    /// <summary>
+    /// 获取已扫描箱号列表
+    /// </summary>
+    /// <param name="opSerialNumber"></param>
+    /// <returns></returns>
     public List<WMSPackage> GetScannedPackages(string opSerialNumber)
     {
         var cacheKey = $"{_userManager.Account}_WMSRFHandover_{opSerialNumber}";
         return _cacheService.Get<List<WMSPackage>>(cacheKey) ?? new List<WMSPackage>();
     }
-    #endregion
+
+    /// <summary>
+    /// 更新缓存
+    /// </summary>
+    /// <param name="cacheKey"></param>
+    /// <param name="output"></param>
     private void UpdateCache(string cacheKey, List<WMSPackage> output)
     {
         _cacheService.Set(cacheKey, output, timeSpan);
     }
- 
 
-    #region 清空扫描缓存
+    /// <summary>
+    /// 清空扫描缓存
+    /// </summary>
+    /// <param name="opSerialNumber"></param>
     public void ClearScanCache(string opSerialNumber)
     {
         var cacheKey = $"{_userManager.Account}_WMSRFHandover_{opSerialNumber}";
         _cacheService.Remove(cacheKey);
     }
-    #endregion
-    #endregion
 }

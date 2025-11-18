@@ -17,14 +17,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Const;
-using Admin.NET.Application.Service.WMSRFAdjust.Handover.Enumerate;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Factory;
-using Admin.NET.Application.Service.WMSRFAdjust.Move.Interface;
+using Admin.NET.Application.Service.WMSRFAdjust.Factory;   
+using Admin.NET.Application.Service.WMSRFAdjust.Interface;
 using Admin.NET.Core.Service;
 using Microsoft.AspNetCore.Identity;
-using Admin.NET.Application.Service.WMSRFAdjust.Handover.Factory;
+using Admin.NET.Application.Service.WMSRFHandover.Interface;
+using Admin.NET.Application.Service.WMSRFHandover.Factory;
+using Admin.NET.Application.Service.WMSRFHandover.Dto;
+using Admin.NET.Application.Service.WMSRFHandover.Enumerate;
 
-namespace Admin.NET.Application;
+namespace Admin.NET.Application.Service.WMSRFHandover;
 /// <summary>
 /// RFHandover服务
 /// </summary>
@@ -40,8 +42,8 @@ public class WMSRFHandoverService : IDynamicApiController, ITransient
 
     public WMSRFHandoverService(SqlSugarRepository<WMSOrder> repOrder,
         SqlSugarRepository<WMSPackage> repPackage,
-        SqlSugarRepository<WMSHandover> repHandover, 
-        SysCacheService cacheService, 
+        SqlSugarRepository<WMSHandover> repHandover,
+        SysCacheService cacheService,
         UserManager userManager)
     {
         _repOrder = repOrder;

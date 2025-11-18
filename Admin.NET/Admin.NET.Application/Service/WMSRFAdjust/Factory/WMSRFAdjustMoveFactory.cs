@@ -7,14 +7,24 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Admin.NET.Application.Enumerate;
+using Admin.NET.Application.Service.WMSRFAdjust.Interface;
+using Admin.NET.Application.Service.WMSRFAdjust.Strategy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Admin.NET.Application.Service.WMSRFAdjust.Handover.Enumerate;
-public enum HandoverEnum
+namespace Admin.NET.Application.Service.WMSRFAdjust.Factory;
+public class WMSRFAdjustMoveFactory
 {
-    RF交接
+    public static IWMSRFAdjustMoveInterface AddMove(AdjustmentTypeEnum type)
+    {
+        return type switch
+        {
+            AdjustmentTypeEnum.RF库存移动 => new WMSRFAdjustMoveDefaultStrategy(),
+            _ => throw new NotSupportedException($"不支持的操作类型：{type}")
+        };
+    }
 }
