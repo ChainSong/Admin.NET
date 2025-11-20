@@ -41,7 +41,6 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     private readonly LogHelper _logHelper;
     private readonly GetEnum _enumRep;
     private readonly GetConfig _getConfigRep;
-
     public HachWmsOutBoundService(
         SqlSugarRepository<HachWmsOutBound> hachWmsOutBoundRep,
         SqlSugarRepository<WMSPreOrder> wMSPreorderRep,
@@ -366,6 +365,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 Str2 = item.ParentItemNumber ?? "",
                 Int2 = item.ParentItemId ?? 0,
                 Onwer = outBound.Subinventory ?? "",
+                Str1 = item.DeliveryDetailId.ToString()
             });
         }
         // 导航写入主从表
