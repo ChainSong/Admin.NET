@@ -82,4 +82,5 @@ export const availableInventorySummaryReportExport = (params?: any) =>
 		url: Api.AvailableInventorySummaryReportExport,
 		method: 'post',
 		data: params,
+		responseType: 'blob',
 	});

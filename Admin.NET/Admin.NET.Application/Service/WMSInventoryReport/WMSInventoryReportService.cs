@@ -154,29 +154,29 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
     //public async Task<List<WMSInventoryUsable>> InvrntoryDataReport(WMSInventoryUsableInput input)
     //{
 
-        //return null;
-        //return Json(new { Code = "" });
-        //使用简单工厂定制化  / 
-        //IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
-        ////factory._db = _db;
-        //factory._userManager = _userManager;
-        //factory._repCustomerUser = _repCustomerUser;
-        //factory._repInventoryUsable = _repInventoryUsable;
-        //factory._repWarehouseUser = _repWarehouseUser;
-        //factory._repTableColumns = _repTableColumns;
-        //factory._repTableColumnsDetail = _repTableColumnsDetail;
-        //var response = factory.InvrntoryDataExport(input);
-        ////var response = factory.Strategy(input);
-        //IExporter exporter = new ExcelExporter();
-        //var result = exporter.ExportAsByteArray<DataTable>(response.Data);
-        //var fs = new MemoryStream(result.Result);
-        ////return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
-        //return new FileStreamResult(fs, "application/octet-stream")
-        //{
-        //    FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
-        //};
+    //return null;
+    //return Json(new { Code = "" });
+    //使用简单工厂定制化  / 
+    //IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
+    ////factory._db = _db;
+    //factory._userManager = _userManager;
+    //factory._repCustomerUser = _repCustomerUser;
+    //factory._repInventoryUsable = _repInventoryUsable;
+    //factory._repWarehouseUser = _repWarehouseUser;
+    //factory._repTableColumns = _repTableColumns;
+    //factory._repTableColumnsDetail = _repTableColumnsDetail;
+    //var response = factory.InvrntoryDataExport(input);
+    ////var response = factory.Strategy(input);
+    //IExporter exporter = new ExcelExporter();
+    //var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+    //var fs = new MemoryStream(result.Result);
+    ////return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+    //return new FileStreamResult(fs, "application/octet-stream")
+    //{
+    //    FileDownloadName = "库存报表" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" // 配置文件下载显示名
+    //};
 
-        //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
+    //return await _repInventoryUsable.AsQueryable().Select<WMSInstructionOutput>().ToListAsync();
     //}
 
 
@@ -202,16 +202,16 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
                    .WhereIF(input.InventoryStatus != 0, u => u.InventoryStatus == input.InventoryStatus)
                    .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                    .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-                   .GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.SKU,a.GoodsName })
+                   .GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.SKU, a.GoodsName })
                    .Select(a => new WMSInventoryUsable
                    {
                        CustomerName = a.CustomerName,
                        WarehouseName = a.WarehouseName,
                        GoodsName = a.GoodsName,
-                       SKU = a.SKU, 
-                       Qty = SqlFunc.AggregateSum(a.Qty) 
+                       SKU = a.SKU,
+                       Qty = SqlFunc.AggregateSum(a.Qty)
                    });
-        query = query.OrderBuilder(input,"", "SKU");
+        query = query.OrderBuilder(input, "", "SKU");
         return await query.ToPagedListAsync(input.Page, input.PageSize);
     }
 
@@ -285,12 +285,15 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
                     x.InventoryStatus = EnumHelper.GetEnumName<InventoryStatusEnum>(status);
                 }
             });
-            IExporter exporter = new ExcelExporter();
-            var result = exporter.ExportAsByteArray<WMSInventoryUsableExport>(query);
-            var fs = new MemoryStream(result.Result);
-            return new FileStreamResult(fs, "application/octet-stream")
+
+
+            // 使用 IExcelExporter 导出 DataTable 数据
+            IExcelExporter excelExporter = new ExcelExporter();
+            var res = await excelExporter.ExportAsByteArray(query);
+
+            return new FileStreamResult(new MemoryStream(res), "application/octet-stream")
             {
-                FileDownloadName = "库存报表.xlsx" // 配置文件下载显示名
+                FileDownloadName = DateTime.Now.ToString("yyyyMMddHHmm") + "库存报表.xlsx"
             };
         }
         catch (Exception ex)
