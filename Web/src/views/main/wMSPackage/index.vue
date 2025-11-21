@@ -66,7 +66,7 @@
         </el-form-item>
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Printer" @click="printPackageNumber('')"
+            <el-button type="primary" icon="ele-Printer" @click="printPackageNumberFun('')"
               v-auth="'wMSPackage:printPackage'">
               打印箱号
             </el-button>
@@ -78,7 +78,7 @@
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
-              <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
+            <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
               v-auth="'wMSPackage:printPackage'">
               危险仓打印箱清单
             </el-button>
@@ -182,9 +182,10 @@ import queryDialog from '/@/views/main/wMSPackage/component/queryDialog.vue'
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
-import { pageWMSPackage, deleteWMSPackage, printExpressData, exportPackage, printPackageList
-  ,printDGPackageList
- } from '/@/api/main/wMSPackage';
+import {
+  pageWMSPackage, deleteWMSPackage, printExpressData, exportPackage, printPackageList
+  , printDGPackageList, printPackageNumber
+} from '/@/api/main/wMSPackage';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
 import Header from "/@/entities/packageMain";
@@ -358,8 +359,8 @@ const printPackageListFun = async (row: any) => {
       let result = await printPackageList(ids);
       if (result.data.result != null) {
         printData = result.data.result.data;
-        console.log("printData",printData);
-        printData.data.forEach((a:any) => {
+        console.log("printData", printData);
+        printData.data.forEach((a: any) => {
           if (a.customerConfig != null) {
             a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
           }
@@ -379,7 +380,7 @@ const printPackageListFun = async (row: any) => {
 };
 
 //打印箱唛
-const printPackageNumber = async (row: any) => {
+const printPackageNumberFun = async (row: any) => {
   console.log("row");
   console.log(row);
   ptintTitle.value = '打印';
@@ -388,10 +389,10 @@ const printPackageNumber = async (row: any) => {
     multipleTableRef.value.getSelectionRows().forEach(a => {
       // console.log("a");
       // console.log(a);
-      packageNumbers.push(a);
+      packageNumbers.push(a.id);
     });
   } else {
-    packageNumbers.push(row);
+    packageNumbers.push(row.id);
   }
   if (packageNumbers.length == 0) {
     ElMessage.error("请勾选需要打印的订单");
@@ -404,8 +405,19 @@ const printPackageNumber = async (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      console.log("packageNumbers",packageNumbers);
-      printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+    console.log("idsasas");
+      let printData = new Array<Header>();
+        console.log("printData");
+      printData.printTemplate = "";
+         console.log("ids", packageNumbers);
+      let result = await printPackageNumber(packageNumbers);
+      console.log("result", result);
+      if (result.data.result != null) {
+        printData = result.data.result.data;
+      }
+      printData.printTemplate = "打印出库箱号";
+      // console.log("packageNumbers", packageNumbers);
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
     })
     .catch(() => { });
 };
@@ -446,7 +458,7 @@ const printPackageDGListFun = async (row: any) => {
   ptintTitle.value = '打印';
   var ids = new Array<any>();
   if (row == null || row == undefined || row == "") {
-    multipleTableRef.value.getSelectionRows().forEach((a:any) => {
+    multipleTableRef.value.getSelectionRows().forEach((a: any) => {
       ids.push(a.id);
     });
   } else {
@@ -476,11 +488,11 @@ const printPackageDGListFun = async (row: any) => {
       let printData = new Array<any>();
       printData.printTemplate = "";
       let result = await printDGPackageList(ids);
-      console.log("result",result)
+      console.log("result", result)
       if (result.data.result != null) {
         printData = result.data.result.data;
-        console.log("printData",printData);
-        printData.data.forEach((a:any) => {
+        console.log("printData", printData);
+        printData.data.forEach((a: any) => {
           if (a.customerConfig != null) {
             a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
           }

@@ -37,4 +37,23 @@ internal static class PackagePrintFactory
         //return new PackageOperationDefaultStrategy();
         //return new PackageOperationDefaultStrategy();
     }
+
+
+    public static IPackagePrintInterface PackageNumberPrint(string FactoryName)
+    {
+        switch (FactoryName)
+        {
+            //case "Default":
+            //return new PackageOperationDefaultStrategy();
+            //case "RFID":
+            //    return new PackageOperationRFIDStrategy();
+            case "Hach危险品仓打印箱号":
+                return new PackageNumberDGPrintStrategy();
+            default:
+                return new PackageNumberDGPrintStrategy();
+        }
+        //PackageOperationDefaultStrategy
+        //return new PackageOperationDefaultStrategy();
+        //return new PackageOperationDefaultStrategy();
+    }
 }

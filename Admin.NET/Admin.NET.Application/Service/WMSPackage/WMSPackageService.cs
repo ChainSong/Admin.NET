@@ -946,6 +946,70 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
     /// <summary>
+    /// 打印包装箱号
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "PrintPackageNumber")]
+    public async Task<Response<PrintBase<dynamic>>> PrintPackageNumber(List<long> input)
+    {
+        Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
+
+        var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+        //获取订单状态
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
+
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
+
+
+        //使用简单工厂定制化修改和新增的方法
+        IPackagePrintInterface factory = PackagePrintFactory.PackageNumberPrint(workflow);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repOrder = _repOrder;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repCustomerConfig = _repCustomerConfig;
+        factory._repPackage = _rep;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repProduct = _repProduct;
+        //factory._userManager = _userManager;
+        //return await factory.AddStrategy(entityListDtos);
+        //string asdasd = response.Result.Msg;
+        //response.Data.PrintTemplate = workflow;
+        var response = await factory.Strategy(input);
+        //response.Data.PrintTemplate = workflow;
+        if (response.Code == StatusCode.Success)
+        {
+            response.Data.PrintTemplate = workflow;
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
+        }
+        return data;
+        //response.Data = new List<PackageData>();
+        //response.Data.aaa= "aaa";
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
+
+
+
+        //return response;
+
+    }
+
+
+
+    /// <summary>
     /// 导出
     /// </summary>
     /// <param name="input"></param>
