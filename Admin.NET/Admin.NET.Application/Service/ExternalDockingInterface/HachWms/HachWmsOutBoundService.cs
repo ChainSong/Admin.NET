@@ -41,7 +41,6 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     private readonly LogHelper _logHelper;
     private readonly GetEnum _enumRep;
     private readonly GetConfig _getConfigRep;
-
     public HachWmsOutBoundService(
         SqlSugarRepository<HachWmsOutBound> hachWmsOutBoundRep,
         SqlSugarRepository<WMSPreOrder> wMSPreorderRep,
@@ -314,7 +313,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             DetailCount = outBound.items.Count,
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = DateTime.Now,
-            TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
+            TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001,
+            Dn= outBound.DeliveryNumber
         };
         // 构造明细表
         var prodMap = productLight.ToDictionary(p => p.SKU.ToUpper(), p => p);
@@ -365,6 +365,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 Str2 = item.ParentItemNumber ?? "",
                 Int2 = item.ParentItemId ?? 0,
                 Onwer = outBound.Subinventory ?? "",
+                Str1 = item.DeliveryDetailId.ToString()
             });
         }
         // 导航写入主从表

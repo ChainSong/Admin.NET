@@ -7,7 +7,6 @@
                     <el-input v-model="queryParams.sKU" clearable="" placeholder="请输入SKU" />
                 </el-form-item>
 
-
                 <el-form-item>
                     <el-button-group>
                         <el-button type="primary" icon="ele-Search" @click="handleQuery"
@@ -18,7 +17,6 @@
                            > 导出 </el-button>
                     </el-button-group>
                 </el-form-item>
-
 
             </el-form>
         </el-card>
