@@ -3,7 +3,7 @@
     <el-card shadow="hover" :body-style="{ paddingBottom: '0' }">
       <el-form :model="queryParams" ref="queryForm" :inline="true">
         <el-row :gutter="[16, 15]">
-          <template v-for="i in  state.tableColumnHeaders">
+          <template v-for="i in state.tableColumnHeaders">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-if="i.isSearchCondition" :key="i">
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
@@ -11,11 +11,11 @@
                 </el-form-item>
               </template>
               <template v-if="i.type == 'DropDownListInt'">
-                <el-form-item style="width: 80%"  :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]"   v-if="i.isSearchCondition" size="small"
+                <el-form-item style="width: 80%" :label="i.displayName">
+                  <el-select v-model="state.header[i.columnName]" v-if="i.isSearchCondition" size="small"
                     placeholder="请选择">
-                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
-                      :label="item.name" :value="item.codeInt">
+                    <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" :label="item.name"
+                      :value="item.codeInt">
                     </el-option>
                   </el-select>
                 </el-form-item>
@@ -29,8 +29,8 @@
               </template>
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item style="width: 80%" :label="i.displayName">
-                  <el-select v-model="state.header[i.columnName]"  style="width: 100%" v-if="i.isSearchCondition" size="small"
-                    placeholder="请选择">
+                  <el-select v-model="state.header[i.columnName]" style="width: 100%" v-if="i.isSearchCondition"
+                    size="small" placeholder="请选择">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -67,11 +67,18 @@
           <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSAdjustment:add'"> 新增
           </el-button>
         </el-form-item>
+
+        <el-form-item>
+          <!--  <el-button type="primary" icon="ele-Plus" @click="handleExport" v-auth="'wMSAdjustment:export'"> 导出
+          </el-button>-->
+          <el-button type="primary" icon="ele-Plus" @click="handleExport"> 导出
+          </el-button>
+        </el-form-item>
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
       <el-table :data="state.headers" ref="multipleTableRef" show-overflow-tooltip tooltip-effect="light" row-key="id"
-        style="width: 100%">
+        style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55">
         </el-table-column>
         <template v-for="v in state.tableColumnHeaders">
@@ -109,8 +116,10 @@
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
-            <el-button @click="cxecute(scope.row)" v-show="scope.row.adjustmentStatus==1"  class="el-icon-edit" type="text" v-auth="'wMSAdjustment:complete'" size="small">完成</el-button>
-            <el-button @click="cancel(scope.row)" v-show="scope.row.adjustmentStatus==1" class="el-icon-edit" type="text" v-auth="'wMSAdjustment:cancel'" size="small">取消</el-button>
+            <el-button @click="cxecute(scope.row)" v-show="scope.row.adjustmentStatus == 1" class="el-icon-edit"
+              type="text" v-auth="'wMSAdjustment:complete'" size="small">完成</el-button>
+            <el-button @click="cancel(scope.row)" v-show="scope.row.adjustmentStatus == 1" class="el-icon-edit"
+              type="text" v-auth="'wMSAdjustment:cancel'" size="small">取消</el-button>
             <!-- <el-popconfirm confirm-button-text="确定"  cancel-button-text="取消"
                 icon="el-icon-info" icon-color="red" @confirm="cxecute(scope.row)" title="确定完成吗？">
                 <el-button   type="text" class="el-icon-delete" style="color:#F56C6C;margin-left: 10px;"
@@ -120,15 +129,17 @@
         </el-table-column>
       </el-table>
       <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
-        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background="" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" layout="total, sizes, prev, pager, next, jumper" />
+        :total="tableParams.total" :page-sizes="[10, 20, 50, 100]" small="" background=""
+        @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        layout="total, sizes, prev, pager, next, jumper" />
       <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
       <el-dialog v-model="resultPopupShow" title="调整结果" :append-to-body="true">
-			<el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder+':'+ i.msg" :type="i.statusMsg">
-			</el-alert>
-		</el-dialog>
+        <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + ':' + i.msg"
+          :type="i.statusMsg">
+        </el-alert>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -142,7 +153,7 @@ import { auth } from '/@/utils/authFunction';
 import editDialog from '/@/views/main/wMSAdjustment/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSAdjustment/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSAdjustment/component/queryDialog.vue'
-import { pageWMSAdjustment, deleteWMSAdjustment, confirmWMSAdjustment,cancelWMSAdjustment } from '/@/api/main/wMSAdjustment';
+import { pageWMSAdjustment, deleteWMSAdjustment, confirmWMSAdjustment, cancelWMSAdjustment, exportWMSAdjustment } from '/@/api/main/wMSAdjustment';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue'
 import Header from "/@/entities/adjustment";
@@ -174,6 +185,7 @@ const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
 const multipleTableRef = ref();
+const multipleSelection = ref<Array<Header>>([]); // 选中的行
 // const select_order_number = ref('') //表格select选中的条数
 // const multipleSelection = ref([])
 //自定义提示
@@ -222,7 +234,7 @@ const openAdd = () => {
 // 打开编辑页面
 const openEdit = (row: any) => {
 
-  if(row.adjustmentStatus!=1){
+  if (row.adjustmentStatus != 1) {
     ElMessage.warning("订单状态不允许编辑");
     return;
   }
@@ -244,7 +256,7 @@ const cxecute = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-     var result= await confirmWMSAdjustment([row.id]);
+      var result = await confirmWMSAdjustment([row.id]);
       if (result.data.result.data.length > 0) {
         state.value.orderStatus = result.data.result.data;
         // console.log(state.value.orderStatus);
@@ -269,8 +281,8 @@ const cancel = (row: any) => {
     type: "warning",
   })
     .then(async () => {
-     var result= await cancelWMSAdjustment([row.id]);
-      if (result.data.result.code ==1) {
+      var result = await cancelWMSAdjustment([row.id]);
+      if (result.data.result.code == 1) {
         // state.value.orderStatus = result.data.result.data;
         // console.log(state.value.orderStatus);
         //导入弹框提醒
@@ -300,7 +312,39 @@ const del = (row: any) => {
     })
     .catch(() => { });
 };
-
+// 选中行变化事件
+const handleSelectionChange = (val: Array<Header>) => {
+  multipleSelection.value = val;
+};
+import { downloadByData, getFileName } from '/@/utils/download';
+//导出
+const handleExport = async () => {
+  try {
+    loading.value = true;
+    let params: any = {};
+    if (multipleSelection.value.length > 0) {
+      // ✅ 有勾选：只导出勾选行
+      params = {
+        ids: multipleSelection.value.map(x => x.id),
+      };
+    } else {
+      params = Object.assign(state.value.header, tableParams.value);
+    }
+    const res = await exportWMSAdjustment(params);
+    console.log("res", res)
+    // 查不到数据：204
+    if (res.status === 204) {
+      ElMessage.warning('未查询到数据');
+      return;
+    }
+    const fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } catch (error) {
+    console.log("error", error)
+  } finally {
+    loading.value = false;
+  }
+}
 
 // 改变页面容量
 const handleSizeChange = (val: number) => {
@@ -314,8 +358,5 @@ const handleCurrentChange = (val: number) => {
   handleQuery();
 };
 
-
 handleQuery();
 </script>
-
-
