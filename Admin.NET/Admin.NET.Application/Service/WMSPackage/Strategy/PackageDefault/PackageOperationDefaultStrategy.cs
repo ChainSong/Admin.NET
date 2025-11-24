@@ -29,7 +29,7 @@ using SqlSugar;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Admin.NET.Application.Strategy;
+namespace Admin.NET.Application.Service;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 {
 
@@ -122,7 +122,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         {
             pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             //判断是不是包装完成，补充了重量  缓存有数据， 取缓存返回
-            if (pickData != null && pickData.Count > 0 && pickData.Where(a => (a.PackageQty + a.ScanQty) != a.PickQty).Count() == 0)
+            if (pickData != null && pickData.Count > 0 && pickData.Where(a => a.PackageQty + a.ScanQty != a.PickQty).Count() == 0)
             {
                 //判断有没有扫描数据
                 if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
@@ -296,9 +296,9 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             item.Order = 1;
                         }
                     }
-                    if (PickSKUData.Sum(a => (a.ScanQty + a.PackageQty)) + 1 <= PickSKUData.First().PickQty)
+                    if (PickSKUData.Sum(a => a.ScanQty + a.PackageQty) + 1 <= PickSKUData.First().PickQty)
                     {
-                        var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
+                        var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > a.ScanQty + a.PackageQty).First();
                         pick.ScanQty += 1;
                         pick.RemainingQty -= 1;
                         if (pick.ScanPackageInput == null)
@@ -310,7 +310,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
                         //判断是不是包装完成
-                        if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
+                        if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
                         {
                             var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -360,9 +360,9 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             item.Order = 1;
                         }
                     }
-                    if (PickSKUData.Sum(a => (a.ScanQty + a.PackageQty)) + Qty <= PickSKUData.First().PickQty)
+                    if (PickSKUData.Sum(a => a.ScanQty + a.PackageQty) + Qty <= PickSKUData.First().PickQty)
                     {
-                        var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > (a.ScanQty + a.PackageQty)).First();
+                        var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > a.ScanQty + a.PackageQty).First();
                         pick.ScanQty += Qty;
                         pick.RemainingQty -= Qty;
                         if (pick.ScanPackageInput == null)
@@ -374,7 +374,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
                         //判断是不是包装完成
-                        if (pickData.Where(a => (a.ScanQty + a.PackageQty) != a.PickQty).Count() == 0)
+                        if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
                         {
                             var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -634,9 +634,9 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
-                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
-                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
-                await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, (a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)));
+                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));
                 //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
                 //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
                 _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);

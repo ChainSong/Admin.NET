@@ -202,10 +202,28 @@ namespace Admin.NET.Application.Strategy
                 wMSInstructionAFCGRHach.Remark = "";
                 wMSInstructions.Add(wMSInstructionAFCGRHach);
 
-                //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
-                //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
-                var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Str1 == item.Str1 && a.OrderStatus != (int)OrderStatusEnum.完成).ToListAsync();
-                if (checkOrderDN != null || checkOrderDN.Count > 0)
+
+
+            }
+
+
+            //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
+            //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
+            //判断里面有哪些DN 
+            var checkDn = orderData.Where(a=>!string.IsNullOrEmpty(a.Dn)).GroupBy(a => new { a.Dn, a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName })
+                .Select(a => new
+                {
+                    a.Key.Dn,
+                    a.Key.CustomerId,
+                    a.Key.CustomerName,
+                    a.Key.WarehouseId,
+                    a.Key.WarehouseName,
+                    Id = a.Min(b => b.Id)
+                });
+            foreach (var item in checkDn)
+            {
+                var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.OrderStatus != (int)OrderStatusEnum.完成).ToListAsync();
+                if (checkOrderDN == null || checkOrderDN.Count == 0)
                 {
                     WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
                     //wMSInstruction.OrderId = orderData[0].Id;
@@ -218,17 +236,17 @@ namespace Admin.NET.Application.Strategy
                     wMSInstructionSNGRHach.WarehouseId = item.WarehouseId;
                     wMSInstructionSNGRHach.WarehouseName = item.WarehouseName;
                     wMSInstructionSNGRHach.OperationId = item.Id;
-                    wMSInstructionSNGRHach.OrderNumber = item.Str1;
+                    wMSInstructionSNGRHach.OrderNumber = item.Dn ?? "";
                     wMSInstructionSNGRHach.Creator = _userManager.Account;
                     wMSInstructionSNGRHach.CreationTime = DateTime.Now;
-                    wMSInstructionSNGRHach.InstructionTaskNo = item.Str1;
+                    wMSInstructionSNGRHach.InstructionTaskNo = item.Dn ?? "";
                     wMSInstructionSNGRHach.TableName = "WMS_Order";
                     wMSInstructionSNGRHach.InstructionPriority = 4;
                     wMSInstructionSNGRHach.Remark = "";
                     wMSInstructions.Add(wMSInstructionSNGRHach);
                 }
-
             }
+
             if (wMSInstructions.Count > 0)
             {
                 await _repInstruction.InsertRangeAsync(wMSInstructions);

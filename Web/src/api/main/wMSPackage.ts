@@ -20,6 +20,7 @@ enum Api {
 	ScanSNPackage = '/api/wMSPackage/ScanSNPackage',
 	ScanHachPackageData = '/api/wMSPackage/ScanHachPackageData',
 	PrintDGPackageList = '/api/wMSPackage/PrintDGPackageList',
+	PrintPackageNumber = '/api/wMSPackage/PrintPackageNumber',
 }
 
 // 增加WMSPackage
@@ -125,6 +126,15 @@ export const printExpressData = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+export const printPackageNumber = (params?: any) =>
+	request({
+		url: Api.PrintPackageNumber,
+		method: 'post',
+		data: params,
+	});
+
+
+	
 // 导出一个名为 printBaatchExpress 的常量，它是一个函数
 export const printBatchExpress = (params?: any) =>
 	// 调用 request 函数，发送一个 HTTP 请求

@@ -316,7 +316,7 @@ public class WMSOrderPrintDto
     public string? ImgLogoUrl { get; set; }
 
 }
-public class WMSOrderJobPrintDto: Admin.NET.Core.Entity.WMSOrder
+public class WMSOrderJobPrintDto: WMSOrder
 {
     public WMSCustomer Customer { get; set; }
     public WMSWarehouse Warehouse { get; set; }
