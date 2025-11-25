@@ -51,6 +51,18 @@ public class PackageNumberDGPrintStrategy : IPackagePrintInterface
         WMSPackageDto packageDto = new WMSPackageDto();
 
         var hachPrintPackageData = await _repPackage.AsQueryable().Where(a => request.Contains(a.Id)).ToListAsync();
+        //根据订单获取订单的DN
+        //然后复制给外部单号 DN+序列号
+        foreach (var item in hachPrintPackageData)
+        {
+            var orderData = await _repOrder.AsQueryable().Where(a => a.Id == item.OrderId).FirstAsync();
+            if (orderData != null)
+            {
+                item.ExternOrderNumber = orderData.Dn + "_" + item.SerialNumber;
+            }
+        }
+
+
         //var hachPrintPackageDataDetail = _repOrder.Context.Ado.SqlQuery<HachDGPrintPackageDataDetail>(sqlDetail.ToString());
 
         //foreach (var item in hachPrintPackageData)

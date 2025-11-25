@@ -905,7 +905,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //    }
         //}
 
-        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List, getOrder.First().OrderType);
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List_Data, getOrder.First().OrderType);
 
 
         //使用简单工厂定制化修改和新增的方法
@@ -927,7 +927,15 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //response.Data.PrintTemplate = workflow;
         if (response.Code == StatusCode.Success)
         {
-            response.Data.PrintTemplate = workflow;
+            var printTemplate = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List, getOrder.First().OrderType);
+            if (!string.IsNullOrEmpty(printTemplate))
+            {
+                response.Data.PrintTemplate = printTemplate;
+            }
+            else
+            {
+                response.Data.PrintTemplate = "装箱清单模板";
+            }
             //data.Data = response.Data.Data;
             //data.Code = StatusCode.Success;
             //data.Msg = "打印成功";
@@ -969,9 +977,12 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //获取订单状态
         var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
 
+        string workflow = "";
+        if (getOrder != null && getOrder.Count > 0)
+        {
 
-        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
-
+            workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
+        }
 
         //使用简单工厂定制化修改和新增的方法
         IPackagePrintInterface factory = PackagePrintFactory.PackageNumberPrint(workflow);
@@ -1179,29 +1190,29 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
 
-    [HttpPost]
-    [ApiDescriptionSettings(Name = "PrintDGPackageList")]
-    public async Task<Response<PrintBase<dynamic>>> PrintDGPackageList(List<long> input)
-    {
-        Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
-        var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
-        //获取订单状态
-        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
-        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_DG_Package_List, getOrder.First().OrderType);
+    //[HttpPost]
+    //[ApiDescriptionSettings(Name = "PrintDGPackageList")]
+    //public async Task<Response<PrintBase<dynamic>>> PrintDGPackageList(List<long> input)
+    //{
+    //    Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
+    //    var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+    //    //获取订单状态
+    //    var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
+    //    var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_DG_Package_List, getOrder.First().OrderType);
 
-        //使用简单工厂定制化修改和新增的方法
-        IPackagePrintInterface factory = PackagePrintFactory.PackagePrint(workflow);
-        factory._userManager = _userManager;
-        factory._repOrder = _repOrder;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._repCustomerConfig = _repCustomerConfig;
-        var response = await factory.Strategy(input);
-        if (response.Code == StatusCode.Success)
-        {
-            response.Data.PrintTemplate = workflow;
-            return response;
-        }
-        return data;
-    }
+    //    //使用简单工厂定制化修改和新增的方法
+    //    IPackagePrintInterface factory = PackagePrintFactory.PackagePrint(workflow);
+    //    factory._userManager = _userManager;
+    //    factory._repOrder = _repOrder;
+    //    factory._repCustomerUser = _repCustomerUser;
+    //    factory._repCustomerConfig = _repCustomerConfig;
+    //    var response = await factory.Strategy(input);
+    //    if (response.Code == StatusCode.Success)
+    //    {
+    //        response.Data.PrintTemplate = workflow;
+    //        return response;
+    //    }
+    //    return data;
+    //}
 }
 

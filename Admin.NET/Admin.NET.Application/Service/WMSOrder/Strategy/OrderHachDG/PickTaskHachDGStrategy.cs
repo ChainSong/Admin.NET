@@ -93,7 +93,7 @@ namespace Admin.NET.Application.Strategy
                 //得到出库单，开始根据明细拆单子
                 //1，根据是否RFID拆单
                 //2，根据POCode拆单
-                foreach (var allocation in data.Allocation.GroupBy(a => new { a.PoCode, a.OrderId, a.Str1 }))
+                foreach (var allocation in data.Allocation.GroupBy(a => new { a.OrderId }))
                 {
                     pickTaskSerialNumber++;
                     var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -114,7 +114,7 @@ namespace Admin.NET.Application.Strategy
                     });
 
                     var mapper = new Mapper(config);
-                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation.Where(a => a.PoCode == allocation.Key.PoCode && a.OrderId == allocation.Key.OrderId && a.Str1 == allocation.Key.Str1));
+                    var detaildata = mapper.Map<List<WMSPickTaskDetail>>(data.Allocation.Where(a => a.OrderId == allocation.Key.OrderId));
 
                     pickTasks.Add(new WMSPickTask
                     {

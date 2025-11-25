@@ -78,10 +78,10 @@
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
-            <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
+           <!--   <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
               v-auth="'wMSPackage:printPackage'">
               危险仓打印箱清单
-            </el-button>
+            </el-button> !-->
           </el-button-group>
         </el-form-item>
         <el-form-item>
@@ -454,61 +454,61 @@ const printExpress = async (row: any) => {
 };
 
 //打印箱唛
-const printPackageDGListFun = async (row: any) => {
-  ptintTitle.value = '打印';
-  var ids = new Array<any>();
-  if (row == null || row == undefined || row == "") {
-    multipleTableRef.value.getSelectionRows().forEach((a: any) => {
-      ids.push(a.id);
-    });
-  } else {
-    ids.push(row.id);
-  }
-  if (ids.length == 0) {
-    ElMessage.error("请勾选需要打印的订单");
-    return;
-  }
-  var flag = 0;
-  var printMessage = "是否要打印？";
-  //判断列表中有没有打印次数大于0的数据
-  multipleTableRef.value.getSelectionRows().forEach(a => {
-    if (a.printNum > 0) {
-      flag = 1;
-    }
-  })
-  if (flag == 1) {
-    printMessage = "勾选的订单存在已经打印过的数据，是否继续打印?";
-  }
-  ElMessageBox.confirm(printMessage, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  })
-    .then(async () => {
-      let printData = new Array<any>();
-      printData.printTemplate = "";
-      let result = await printDGPackageList(ids);
-      console.log("result", result)
-      if (result.data.result != null) {
-        printData = result.data.result.data;
-        console.log("printData", printData);
-        printData.data.forEach((a: any) => {
-          if (a.customerConfig != null) {
-            a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
-          }
-        });
-      }
-      // 判断有没有配置客户自定义打印模板
-      if (printData.printTemplate != "") {
-        printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
-      } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
-        printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
-      } else {
-        printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
-      }
-    })
-    .catch(() => { });
-};
+// const printPackageDGListFun = async (row: any) => {
+//   ptintTitle.value = '打印';
+//   var ids = new Array<any>();
+//   if (row == null || row == undefined || row == "") {
+//     multipleTableRef.value.getSelectionRows().forEach((a: any) => {
+//       ids.push(a.id);
+//     });
+//   } else {
+//     ids.push(row.id);
+//   }
+//   if (ids.length == 0) {
+//     ElMessage.error("请勾选需要打印的订单");
+//     return;
+//   }
+//   var flag = 0;
+//   var printMessage = "是否要打印？";
+//   //判断列表中有没有打印次数大于0的数据
+//   multipleTableRef.value.getSelectionRows().forEach(a => {
+//     if (a.printNum > 0) {
+//       flag = 1;
+//     }
+//   })
+//   if (flag == 1) {
+//     printMessage = "勾选的订单存在已经打印过的数据，是否继续打印?";
+//   }
+//   ElMessageBox.confirm(printMessage, "提示", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//   })
+//     .then(async () => {
+//       let printData = new Array<any>();
+//       printData.printTemplate = "";
+//       let result = await printDGPackageList(ids);
+//       console.log("result", result)
+//       if (result.data.result != null) {
+//         printData = result.data.result.data;
+//         console.log("printData", printData);
+//         printData.data.forEach((a: any) => {
+//           if (a.customerConfig != null) {
+//             a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+//           }
+//         });
+//       }
+//       // 判断有没有配置客户自定义打印模板
+//       if (printData.printTemplate != "") {
+//         printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+//       } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+//         printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+//       } else {
+//         printDialogRef.value.openDialog({ "printData": ids, "templateName": "装箱清单" });
+//       }
+//     })
+//     .catch(() => { });
+// };
 
 
 // 改变页面容量
