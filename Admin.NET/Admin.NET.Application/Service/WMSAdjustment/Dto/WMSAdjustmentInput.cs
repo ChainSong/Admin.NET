@@ -518,3 +518,11 @@ public class QueryByIdWMSAdjustmentInput : DeleteWMSAdjustmentInput
 {
 
 }
+
+public class WMSAdjustmentExportInput: WMSAdjustmentInput
+{
+    /// <summary>
+    /// 调整单号
+    /// </summary>
+    public List<long> Ids { get; set; }
+}

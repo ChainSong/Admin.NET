@@ -15,6 +15,8 @@ using System.Data;
 using System.Linq;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Dtos.Enum;
+using Magicodes.ExporterAndImporter.Excel;
+using System.IO;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -413,7 +415,87 @@ public class WMSAdjustmentService : IDynamicApiController, ITransient
         }
     }
 
+    ///// <summary>
+    ///// 导出WMSAdjustment
+    ///// </summary>
+    ///// <param name="input"></param>
+    ///// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "Export")]
+    [NonUnify]
+    public async Task<ActionResult> Export(WMSAdjustmentExportInput input)
+    {
+            var query = await _rep.AsQueryable()
+                .LeftJoin<WMSAdjustmentDetail>((a, ad) => a.Id == ad.AdjustmentId && a.AdjustmentNumber == ad.AdjustmentNumber)
+                .WhereIF(!string.IsNullOrEmpty(input.ExternNumber), (a, ad) => a.ExternNumber.Contains(input.ExternNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.ExternNumber), (a, ad) => ad.ExternNumber.Contains(input.ExternNumber))
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, (a, ad) => a.CustomerId == input.CustomerId)
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, (a, ad) => ad.CustomerId == input.CustomerId)
+                .WhereIF(!string.IsNullOrEmpty(input.CustomerName), (a, ad) => a.CustomerName.Contains(input.CustomerName))
+                .WhereIF(!string.IsNullOrEmpty(input.CustomerName), (a, ad) => ad.CustomerName.Contains(input.CustomerName))
+                .WhereIF(!string.IsNullOrWhiteSpace(input.AdjustmentType), (a, ad) => a.AdjustmentType.Contains(input.AdjustmentType.Trim()))
+                .WhereIF(!string.IsNullOrWhiteSpace(input.AdjustmentReason), (a, ad) => a.AdjustmentReason.Contains(input.AdjustmentReason.Trim()))
+                .WhereIF(input.Ids!=null&& input.Ids.Any() && input.Ids.Count > 0, (a, ad) => input.Ids.Contains(a.Id))
+                .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+                .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
+                .Select((a, ad) => new WMSAdjustmentExportOutput
+                {
+                    AdjustmentNumber = a.AdjustmentNumber,
+                    AdjustmentStatus = a.AdjustmentStatus == 1 ? "新建" : a.AdjustmentStatus == 99 ? "完成" : "取消",
+                    AdjustmentType = a.AdjustmentType,
+                    AdjustmentTime = a.AdjustmentTime,
+                    ExternNumber = a.ExternNumber,
+                    CustomerName = a.CustomerName,
+                    WarehouseName = a.WarehouseName,
+                    SKU = ad.SKU,
+                    UPC = ad.UPC,
+                    TrayCode = ad.TrayCode,
+                    BtachCode = ad.BatchCode,
+                    BoxCode = ad.BoxCode,
+                    GoodsName = ad.GoodsName,
+                    LotCode = ad.LotCode,
+                    PoCode = ad.PoCode,
+                    SoCode = ad.SoCode,
+                    Weight = ad.Weight,
+                    Volume = ad.Volume,
+                    ProductionDate = ad.ProductionDate,
+                    ExpirationDate = ad.ExpirationDate,
+                    FromWarehouseName = ad.FromWarehouseName,
+                    ToWarehouseName = ad.ToWarehouseName,
+                    FromArea = ad.FromArea,
+                    ToArea = ad.ToArea,
+                    FromLocation = ad.FromLocation,
+                    ToLocation = ad.ToLocation,
+                    FromQty = ad.FromQty,
+                    ToQty = ad.ToQty,
+                    Qty = ad.Qty,
+                    FromOnwer = ad.FromOnwer,
+                    ToOnwer = ad.ToOnwer,
+                    FromGoodsType = ad.FromGoodsType,
+                    ToGoodsType = ad.ToGoodsType,
+                    FromUnitCode = ad.FromUnitCode,
+                    ToUnitCode = ad.ToUnitCode,
+                    AdjustmentReason = ad.AdjustmentReason,
+                    CreationTime = a.CreationTime,
+                    Creator = a.Creator,
+                    UpdateTime = a.UpdateTime,
+                    Updator = a.Updator
+                })
+                .OrderByDescending(a => a.CreationTime)
+                .ToListAsync();
+            if (query == null || query.Count == 0)
+            {
+              return new NoContentResult();
+            //throw Oops.Oh("未查询到数据");
+            }
+            // 使用 IExcelExporter 导出 DataTable 数据
+            IExcelExporter excelExporter = new ExcelExporter();
+            var res = await excelExporter.ExportAsByteArray(query);
 
-
+            return new FileStreamResult(new MemoryStream(res), "application/octet-stream")
+            {
+                FileDownloadName = DateTime.Now.ToString("yyyyMMddHHmm") + "库存调整单信息.xlsx"
+            };
+    }
 }
 

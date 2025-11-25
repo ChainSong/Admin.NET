@@ -7,6 +7,7 @@ enum Api {
 	GetWMSAdjustment = '/api/wMSAdjustment/Query',
 	ConfirmWMSAdjustment = '/api/wMSAdjustment/Confirm',
 	CancelWMSAdjustment = '/api/wMSAdjustment/Cancel',
+	ExportWMSAdjustment= '/api/wMSAdjustment/Export',
 }
 
 // 增加WMSAdjustment
@@ -65,5 +66,13 @@ export const cancelWMSAdjustment = (params?: any) =>
 
 	
 
+// 导出库存调整单
+export const exportWMSAdjustment = (params?: any) =>
+	request({
+		url: Api.ExportWMSAdjustment,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});
 
 

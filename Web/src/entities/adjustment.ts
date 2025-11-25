@@ -48,3 +48,4 @@ export default class adjustment extends Entity<number>{
     int5   : number;
     
 }
+ 

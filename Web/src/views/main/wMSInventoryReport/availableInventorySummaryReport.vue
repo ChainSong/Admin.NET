@@ -6,6 +6,24 @@
                 <el-form-item label="SKU">
                     <el-input v-model="queryParams.sKU" clearable="" placeholder="请输入SKU" />
                 </el-form-item>
+                  <!-- 客户名称：改成下拉框 -->
+                <el-form-item label="客户名称">
+                    <el-select
+                        v-model="queryParams.customerId"
+                        placeholder="请选择客户名称"
+                        clearable
+                        filterable
+                        style="width: 200px"
+                        @visible-change="onCustomerSelectVisibleChange"
+                    >
+                        <el-option
+                            v-for="item in customerSelectList"
+                            :key="item.id"
+                            :label="item.text"
+                            :value="item.value"
+                        />
+                    </el-select>
+                </el-form-item>
 
                 <el-form-item>
                     <el-button-group>
@@ -45,9 +63,8 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 //import { formatDate } from '/@/utils/formatTime';
 import { downloadByData, getFileName } from '/@/utils/download';
-
+import { selectCustomer } from '/@/api/main/wMSCustomer';
 import { pageWMSInventoryReport, availableInventorySummaryReportExport,availableInventorySummaryReport } from '/@/api/main/wMSInventoryReport';
-
 
 const editDialogRef = ref();
 const loading = ref(false);
@@ -94,6 +111,24 @@ const handleExportData=async()=>{
   var fileName = getFileName(res.headers);
   downloadByData(res.data as any, fileName);
 }
+
+// ================== 客户下拉数据 ==================
+const customerSelectList = ref<any[]>([]);
+
+// 加载客户名称（数据源）
+const getCustomerSelectList = async () => {
+    const res = await selectCustomer({ "inputData": "" });
+    console.log(res);
+    customerSelectList.value = res.data.result ?? [];
+};
+
+// 下拉框展开/收起时触发，visible 为 true 表示展开
+const onCustomerSelectVisibleChange = (visible: boolean) => {
+    if (visible && customerSelectList.value.length === 0) {
+        // 只在第一次展开时去后台加载，避免每次点都请求
+        getCustomerSelectList();
+    }
+};
 
 handleQuery();
 </script>
