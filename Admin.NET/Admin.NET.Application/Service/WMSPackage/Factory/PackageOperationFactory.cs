@@ -20,10 +20,12 @@ namespace Admin.NET.Application.Service.Factory;
 internal static class PackageOperationFactory
 {
 
-    public static IPackageOperationInterface PackageOperation(string FactoryName)
+    public static IPackageOperationInterface PackageOperation(string workflow)
     {
-        switch (FactoryName)
+        switch (workflow)
         {
+            case "HachDG":
+                return new PackageOperationHachDGStrategy();
             case "Hach":
                 return new PackageOperationDefaultStrategy();
             case "RFID":

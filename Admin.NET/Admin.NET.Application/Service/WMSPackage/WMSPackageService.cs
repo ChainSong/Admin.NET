@@ -348,7 +348,15 @@ public class WMSPackageService : IDynamicApiController, ITransient
     public async Task<Response<ScanPackageOutput>> ScanPackageData(ScanPackageInput input)
     {
 
-        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("");
+        string workflow = "";
+        if (string.IsNullOrEmpty(input.PickTaskNumber))
+        {
+            var pickTask = await _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).FirstAsync();
+            var order = await _repOrder.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber).FirstAsync();
+            workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Operation, order.OrderType);
+        }
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation(workflow);
         factory._repPackage = _rep;
         factory._repPreOrder = _repPreOrder;
         factory._repPickTask = _repPickTask;
