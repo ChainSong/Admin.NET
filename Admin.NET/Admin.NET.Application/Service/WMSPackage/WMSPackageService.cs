@@ -493,7 +493,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
-        factory._repPickTaskDetail = _repPickTaskDetail;
+        //factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repRFPackageAcquisition = _repRFPackageAcquisition;
         factory._repCustomerUser = _repCustomerUser;
