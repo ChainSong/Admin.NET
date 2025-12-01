@@ -50,7 +50,7 @@ internal static class PackagePrintFactory
             case "Hach危险品仓打印箱号":
                 return new PackageNumberDGPrintStrategy();
             default:
-                return new PackageNumberDGPrintStrategy();
+                return new PackageNumberPrintStrategy();
         }
         //PackageOperationDefaultStrategy
         //return new PackageOperationDefaultStrategy();

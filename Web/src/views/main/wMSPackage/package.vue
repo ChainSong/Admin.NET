@@ -23,14 +23,12 @@
               <tr>
                 <th style="padding-left:5px;font-size:20px" rowspan="1">快递公司:</th>
                 <td>
-
                   <el-select v-model="expressValue" filterable style="width: 100%;font-size:20px">
                     <el-option v-for="item in expressOptions" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
                   </el-select>
-                  <!-- <el-input v-model="state.vm.form.input" v-focus="input" v-select="input" ref="input"
-                    v-on:keyup.enter="scanPackage" style="font-size:20px" placeholder="请输入内容"></el-input>  -->
                 </td>
+
               </tr>
               <tr>
                 <th style="padding-left:5px;font-size:20px" rowspan="1">扫描框:</th>
@@ -109,30 +107,30 @@
           </el-button>
         </el-button-group>
       </div>
-      
-        <el-table :data="state.vm.packageData" ref="multipleTableRef"
-          style="width: 100%;height: 300px;top: 30px;;font-size:20px;">
-          <el-table-column type="selection" width="55">
-          </el-table-column>
-          <el-table-column prop="orderNumber" label="出库单号">
-          </el-table-column>
-          <el-table-column prop="pickTaskNumber" label="拣货任务号">
-          </el-table-column>
-          <el-table-column prop="packageNumber" label="箱号">
-          </el-table-column>
-          <el-table-column prop="detailCount" label="包装数量">
-          </el-table-column>
-          <el-table-column prop="expressCompany" label="快递公司">
-          </el-table-column>
-          <el-table-column prop="expressNumber" label="快递单号">
-          </el-table-column>
-          <el-table-column prop="printNum" label="打印次数">
-          </el-table-column>
-          <el-table-column fixed="right" label="操作">
-            <template #default="scope">
-              <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)"  >打印快递单
-              </el-button>
-              <!-- <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
+
+      <el-table :data="state.vm.packageData" ref="multipleTableRef"
+        style="width: 100%;height: 300px;top: 30px;;font-size:20px;">
+        <el-table-column type="selection" width="55">
+        </el-table-column>
+        <el-table-column prop="orderNumber" label="出库单号">
+        </el-table-column>
+        <el-table-column prop="pickTaskNumber" label="拣货任务号">
+        </el-table-column>
+        <el-table-column prop="packageNumber" label="箱号">
+        </el-table-column>
+        <el-table-column prop="detailCount" label="包装数量">
+        </el-table-column>
+        <el-table-column prop="expressCompany" label="快递公司">
+        </el-table-column>
+        <el-table-column prop="expressNumber" label="快递单号">
+        </el-table-column>
+        <el-table-column prop="printNum" label="打印次数">
+        </el-table-column>
+        <el-table-column fixed="right" label="操作">
+          <template #default="scope">
+            <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)">打印快递单
+            </el-button>
+            <!-- <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
@@ -140,10 +138,10 @@
               v-auth="'wMSPackage:printPackage'">
               打印箱号
             </el-button> -->
-            </template>
-          </el-table-column>
-        </el-table>
-    
+          </template>
+        </el-table-column>
+      </el-table>
+
 
       <printDialog ref="printDialogRef" :title="ptintTitle" />
       <el-dialog title="扫描SN" v-model="state.dialogVisible" width="50%">
@@ -185,7 +183,7 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage ,printPackageList} from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage, printPackageList ,printPackageNumber} from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -522,8 +520,44 @@ const printPackageListFun = async (row: any) => {
     .catch(() => { });
 };
 
+// //打印箱唛
+// const printPackageNumber = async (row: any) => {
+//   console.log("row");
+//   console.log(row);
+//   ptintTitle.value = '打印';
+//   var packageNumbers = new Array<any>();
+//   if (row == null || row == undefined || row == "") {
+//     multipleTableRef.value.getSelectionRows().forEach(a => {
+//       // console.log("a");
+//       // console.log(a);
+//       packageNumbers.push(a);
+//     });
+//   } else {
+//     packageNumbers.push(row);
+//   }
+//   if (packageNumbers.length == 0) {
+//     ElMessage.error("请勾选需要打印的订单");
+//     return;
+//   }
+
+//   ElMessageBox.confirm("是否要打印？", "提示", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//   })
+//     .then(async () => {
+//       console.log("row");
+//       console.log(row);
+//       console.log(packageNumbers);
+//       printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+//     })
+//     .catch(() => { });
+// };
+
+
+
 //打印箱唛
-const printPackageNumber = async (row: any) => {
+const printPackageNumberFun = async (row: any) => {
   console.log("row");
   console.log(row);
   ptintTitle.value = '打印';
@@ -532,10 +566,10 @@ const printPackageNumber = async (row: any) => {
     multipleTableRef.value.getSelectionRows().forEach(a => {
       // console.log("a");
       // console.log(a);
-      packageNumbers.push(a);
+      packageNumbers.push(a.id);
     });
   } else {
-    packageNumbers.push(row);
+    packageNumbers.push(row.id);
   }
   if (packageNumbers.length == 0) {
     ElMessage.error("请勾选需要打印的订单");
@@ -548,10 +582,19 @@ const printPackageNumber = async (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      console.log("row");
-      console.log(row);
-      console.log(packageNumbers);
-      printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+      console.log("idsasas");
+      let printData = new Array<Header>();
+      console.log("printData");
+      printData.printTemplate = "";
+      console.log("ids", packageNumbers);
+      let result = await printPackageNumber(packageNumbers);
+      console.log("result", result);
+      if (result.data.result != null) {
+        printData = result.data.result.data;
+      }
+      printData.printTemplate = "打印出库箱号";
+      // console.log("packageNumbers", packageNumbers);
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
     })
     .catch(() => { });
 };

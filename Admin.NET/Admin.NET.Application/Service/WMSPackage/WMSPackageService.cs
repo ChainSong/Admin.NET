@@ -349,7 +349,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     {
 
         string workflow = "";
-        if (string.IsNullOrEmpty(input.PickTaskNumber))
+        if (!string.IsNullOrEmpty(input.PickTaskNumber))
         {
             var pickTask = await _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).FirstAsync();
             var order = await _repOrder.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber).FirstAsync();
@@ -934,7 +934,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
             }
             else
             {
-                response.Data.PrintTemplate = "装箱清单模板";
+                response.Data.PrintTemplate = "装箱清单";
             }
             //data.Data = response.Data.Data;
             //data.Code = StatusCode.Success;
@@ -981,7 +981,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         if (getOrder != null && getOrder.Count > 0)
         {
 
-            workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
+            workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number_Data, getOrder.First().OrderType);
         }
 
         //使用简单工厂定制化修改和新增的方法
@@ -1003,7 +1003,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //response.Data.PrintTemplate = workflow;
         if (response.Code == StatusCode.Success)
         {
-            response.Data.PrintTemplate = workflow;
+            var PrintTemplate = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
+            response.Data.PrintTemplate = PrintTemplate;
             //data.Data = response.Data.Data;
             //data.Code = StatusCode.Success;
             //data.Msg = "打印成功";

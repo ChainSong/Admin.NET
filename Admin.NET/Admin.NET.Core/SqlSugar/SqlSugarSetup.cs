@@ -411,7 +411,10 @@ public static class SqlSugarSetup
         {
             try
             {
-
+                if (entityType.Name.Contains("Hach"))
+                {
+                    continue;
+                }
 
                 var splitTable = entityType.GetCustomAttribute<SplitTableAttribute>();
                 Console.WriteLine(entityType.Name);

@@ -136,7 +136,7 @@
               @click="printExpress(scope.row)" size="small">打印
             </el-button>
             <el-button class="el-icon-printer" v-auth="'wMSPackage:printPackage'" type="text"
-              @click="printPackageNumber(scope.row)" size="small">打印箱号
+              @click="printPackageNumberFun(scope.row)" size="small">打印箱号
             </el-button>
             <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
             <!-- <el-button @click="openPrint(scope.row)" class="el-icon-s-comment" type="text" size="small">打印
@@ -357,6 +357,7 @@ const printPackageListFun = async (row: any) => {
       let printData = new Array<any>();
       printData.printTemplate = "";
       let result = await printPackageList(ids);
+         console.log("result", result);
       if (result.data.result != null) {
         printData = result.data.result.data;
         console.log("printData", printData);

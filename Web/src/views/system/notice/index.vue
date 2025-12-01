@@ -5,7 +5,12 @@
 				<el-form-item label="标题">
 					<el-input v-model="state.queryParams.title" placeholder="标题" clearable />
 				</el-form-item>
-				
+				<el-form-item label="类型"   >
+					<el-select v-model="state.queryParams.type"   placeholder="类型" clearable>
+						<el-option label="通知" :value="1" />
+						<el-option label="公告" :value="2" />
+					</el-select>
+				</el-form-item>
 				<el-form-item>
 					<el-button-group>
 						<el-button type="primary" icon="ele-Search" @click="handleQuery" v-auth="'sysNotice:page'"> 查询 </el-button>

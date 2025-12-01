@@ -103,16 +103,16 @@
             <template #default="scope">
               <!-- <el-button class="el-icon-s-comment" type="text" @click="printExpress(scope.row)" size="small">打印
               </el-button> -->
-               <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)"  >打印快递单
+              <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)">打印快递单
               </el-button>
               <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
-              v-auth="'wMSPackage:printPackage'">
-              打印箱清单
-            </el-button>
-             <el-button type="primary" icon="ele-Printer" @click="printPackageNumber(scope.row)"
-              v-auth="'wMSPackage:printPackage'">
-              打印箱号
-            </el-button>
+                v-auth="'wMSPackage:printPackage'">
+                打印箱清单
+              </el-button>
+              <el-button type="primary" icon="ele-Printer" @click="printPackageNumberFun(scope.row)"
+                v-auth="'wMSPackage:printPackage'">
+                打印箱号
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -153,12 +153,12 @@
 </template>
 
 <script lang="ts" setup="" name="wMSPackagerfid">
-import { ref, onMounted,onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
-import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, addRFIDPackageData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID, scanSNPackage,printPackageList } from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, printExpressData, addRFIDPackageData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, getRFIDInfo, scanPackageData_RFID, scanSNPackage, printPackageList,printPackageNumber } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -571,7 +571,7 @@ const scanPackage = async () => {
     // state.value.vm.tableData = res.data.result.data.packageDatas;
     ElMessage.error(res.data.result.msg);
   }
-   
+
   input.value = true;
   input.value = false;
   allPackage(state.value.vm.form);
@@ -597,7 +597,7 @@ const printPackageListFun = async (row: any) => {
       ids.push(a.id);
     });
   } else {
-    
+
     ids.push(row.id);
   }
   if (ids.length == 0) {
@@ -647,8 +647,42 @@ const printPackageListFun = async (row: any) => {
     .catch(() => { });
 };
 
+// //打印箱唛
+// const printPackageNumber = async (row: any) => {
+//   console.log("row");
+//   console.log(row);
+//   ptintTitle.value = '打印';
+//   var packageNumbers = new Array<any>();
+//   if (row == null || row == undefined || row == "") {
+//     multipleTableRef.value.getSelectionRows().forEach(a => {
+//       // console.log("a");
+//       // console.log(a);
+//       packageNumbers.push(a);
+//     });
+//   } else {
+//     packageNumbers.push(row);
+//   }
+//   if (packageNumbers.length == 0) {
+//     ElMessage.error("请勾选需要打印的订单");
+//     return;
+//   }
+
+//   ElMessageBox.confirm("是否要打印？", "提示", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//   })
+//     .then(async () => {
+//       console.log("row");
+//       console.log(row);
+//       console.log(packageNumbers);
+//       printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+//     })
+//     .catch(() => { });
+// };
+
 //打印箱唛
-const printPackageNumber = async (row: any) => {
+const printPackageNumberFun = async (row: any) => {
   console.log("row");
   console.log(row);
   ptintTitle.value = '打印';
@@ -657,10 +691,10 @@ const printPackageNumber = async (row: any) => {
     multipleTableRef.value.getSelectionRows().forEach(a => {
       // console.log("a");
       // console.log(a);
-      packageNumbers.push(a);
+      packageNumbers.push(a.id);
     });
   } else {
-    packageNumbers.push(row);
+    packageNumbers.push(row.id);
   }
   if (packageNumbers.length == 0) {
     ElMessage.error("请勾选需要打印的订单");
@@ -673,10 +707,19 @@ const printPackageNumber = async (row: any) => {
     type: "warning",
   })
     .then(async () => {
-      console.log("row");
-      console.log(row);
-      console.log(packageNumbers);
-      printDialogRef.value.openDialog({ "printData": packageNumbers, "templateName": "打印出库箱号" });
+      console.log("idsasas");
+      let printData = new Array<Header>();
+      console.log("printData");
+      printData.printTemplate = "";
+      console.log("ids", packageNumbers);
+      let result = await printPackageNumber(packageNumbers);
+      console.log("result", result);
+      if (result.data.result != null) {
+        printData = result.data.result.data;
+      }
+      printData.printTemplate = "打印出库箱号";
+      // console.log("packageNumbers", packageNumbers);
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
     })
     .catch(() => { });
 };
