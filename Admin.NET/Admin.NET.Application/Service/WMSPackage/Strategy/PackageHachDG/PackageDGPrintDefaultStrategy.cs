@@ -75,29 +75,17 @@ public class PackageDGPrintDefaultStrategy : IPackagePrintInterface
                         outer apply (select top 1 *  from WMS_Package wp where WMS_Order.Id=wp.OrderId order by createtime desc) wmsPackageTime
                         where WMS_Package.Id in ({string.Join(",", request)}) ";
 
-     string sqlDetail =$@"select  
-    ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) as [sequence],
-    WMS_Package.PackageNumber, 
-    SKU,
-    GoodsName,
-    SUM(Qty) Qty,
-    SerialNumber as 'SingelBoxQty',
-    (select COUNT(Id) from WMS_Package wp where wp.OrderId=(select orderid from WMS_Package where id=10425)) as TotalQty,
-    hachObInfo.ParentItemNumber as parentSku, --父件SKU
-    WMS_Package.Remark  
-    from WMS_Package 
-    left join WMS_PackageDetail on WMS_Package.PackageNumber=WMS_PackageDetail.PackageNumber
-    outer apply(
-    select 
-    hachobDetail.ItemNumber,
-    hachobDetail.ParentItemNumber 
-    from hach_wms_outBound hachob 
-    left join hach_wms_outBound_detail hachobDetail on hachob.Id=hachobDetail.OutBoundId
-    where hachob.OrderNumber = (select externordernumber from WMS_Package where id=10425)
-    and hachobDetail.ItemNumber=WMS_PackageDetail.SKU
-    ) hachObInfo
-    where WMS_Package.Id in ({string.Join(",", request)}) 
-    group by SKU,GoodsName,WMS_Package.Remark,WMS_Package.PackageNumber,hachObInfo.ParentItemNumber,WMS_Package.SerialNumber";
+         string sqlDetail =$@"
+                        select WMS_Package.PackageNumber, WMS_PackageDetail.SKU,WMS_PackageDetail.GoodsName,SUM(Qty) Qty,
+                        (select COUNT(1)    from WMS_Package wp   where wp.OrderId = WMS_Package.OrderId) as TotalQty,
+                        SerialNumber as 'SingelBoxQty',WMS_OrderDetail.Str2 as parentSku,WMS_Package.Remark  from WMS_Package 
+                        left join WMS_PackageDetail on WMS_Package.PackageNumber=WMS_PackageDetail.PackageNumber
+                        left join WMS_OrderDetail on WMS_Package.ExternOrderNumber=WMS_OrderDetail.ExternOrderNumber
+                        AND WMS_PackageDetail.ExternOrderNumber =WMS_OrderDetail.ExternOrderNumber
+                        AND WMS_PackageDetail.SKU =WMS_OrderDetail.SKU
+                        where WMS_Package.Id in ({string.Join(",", request)})
+                        group by WMS_PackageDetail.SKU,WMS_PackageDetail.GoodsName,WMS_Package.Remark,WMS_Package.PackageNumber,
+                        WMS_OrderDetail.Str2 ,WMS_Package.SerialNumber,WMS_Package.id,WMS_Package.OrderId ";
         
         var hachPrintPackageData = _repOrder.Context.Ado.SqlQuery<HachDGPrintPackageData>(sql.ToString());
         var hachPrintPackageDataDetail = _repOrder.Context.Ado.SqlQuery<HachDGPrintPackageDataDetail>(sqlDetail.ToString());
