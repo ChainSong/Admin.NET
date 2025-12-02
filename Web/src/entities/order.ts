@@ -2,7 +2,6 @@ import Entity from './entity'
 import orderDetail from './orderDetail'
 
 export default class order extends Entity<number>{
-
     preOrderNumber:string;
     orderNumber:string;
     externOrderNumber:string;
@@ -50,4 +49,5 @@ export default class order extends Entity<number>{
     int4:number;
     int5:number;
     orderDetails: Array<orderDetail>;
+    wMSOrderHachDGPrintDto:any;
 }

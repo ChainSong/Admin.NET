@@ -234,12 +234,12 @@ export const aProvider = function () {
 							{ text: '序号', field: 'sequence' },
 							{ text: '出库日期', field: 'completeTime' },
 							{ text: '合同号', field: 'poCode' },
-							{ text: '箱号', field: 'boxCode' },
+							{ text: '箱号', field: 'packageNumber' },
 							{ text: '货号', field: 'sku' },
-							{ text: '出库数量', field: 'allocatedQty' },
-							{ text: '组合箱数', field: 'combinationQty' },
-							{ text: '类型', field: 'onwer' },
-							{ text: 'JOB总箱', field: 'jobTotalQty' },
+							{ text: '出库数量', field: 'qty' },
+							{ text: '组合箱数', field: 'combinedBoxesNumber' },
+							{ text: '类型', field: 'type' },
+							{ text: 'JOB总箱', field: 'jobTotalBox' },
 						],
 					},
 					editable: true,
@@ -257,15 +257,15 @@ export const aProvider = function () {
 					isEnableMergeCell: true, //合并单元格
 					columns: [
 						[
-							{ title: '序号', align: 'center', field: 'sequence', width: 60 },
+							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
 							{ title: '出库日期', align: 'center', field: 'completeTime', width: 200 },
 							{ title: '合同号', align: 'center', field: 'poCode', width: 200 },
-							{ title: '箱号', align: 'center', field: 'boxCode', width: 200 },
+							{ title: '箱号', align: 'center', field: 'packageNumber', width: 200 },
 							{ title: '货号', align: 'center', field: 'sku', width: 150 },
-							{ title: '出库数量', align: 'center', field: 'allocatedQty', width: 110 },
-							{ title: '组合箱数', align: 'center', field: 'combinationQty', width: 110 },
-							{ title: '类型', align: 'center', field: 'onwer', width: 150 },
-							{ title: 'JOB总箱', align: 'center', field: 'jobTotalQty', width: 110 }
+							{ title: '出库数量', align: 'center', field: 'qty', width: 110 },
+							{ title: '组合箱数', align: 'center', field: 'combinedBoxesNumber', width: 110 },
+							{ title: '类型', align: 'center', field: 'type', width: 150 },
+							{ title: 'JOB总箱', align: 'center', field: 'jobTotalBox', width: 110 }
 						],
 					],
 				}
