@@ -388,7 +388,7 @@ const cancel = () => {
 const submit = async () => {
 	state.value.header.details = state.value.details;
 	state.value.header.orderAddress = state.value.orderAddress;
-	state.value.header.extend = state.value.extend;
+	state.value.header.extends = state.value.extends;
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
