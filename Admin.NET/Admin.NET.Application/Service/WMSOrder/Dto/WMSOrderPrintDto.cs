@@ -325,6 +325,9 @@ public class WMSOrderJobPrintDto: WMSOrder
     public WMSOrderAddress OrderAddress { get; set; }
     public WMSOrderPrintJobPackageDto PackageInfo { get; set; }
     public HachWmsOutBound outBound { get; set; }
+    public WMSOrderPrintCustomerInfo wMSOrderPrintCustomerInfo { get; set; }
+    public List<WMSOrderPrintDetail> JobDetails { get; set; }
+
 }
 public class WMSOrderPrintJobPackageDto
 {

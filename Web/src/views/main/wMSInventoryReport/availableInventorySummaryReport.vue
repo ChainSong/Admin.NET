@@ -14,8 +14,7 @@
                         clearable
                         filterable
                         style="width: 200px"
-                        @visible-change="onCustomerSelectVisibleChange"
-                    >
+                        @visible-change="onCustomerSelectVisibleChange">
                         <el-option
                             v-for="item in customerSelectList"
                             :key="item.id"

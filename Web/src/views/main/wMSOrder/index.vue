@@ -572,6 +572,7 @@ const openPrintJob = async () => {
   let printData = new Array<Header>();
   printData.printTemplate = "";
   let result = await printJobList(ids);
+  console.log("JOB",result)
   if (result.data.result != null) {
     printData = result.data.result.data;
     printData.data.forEach((a: any) => {

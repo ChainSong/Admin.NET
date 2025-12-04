@@ -7,7 +7,7 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
-using Admin.NET.Application.Service;
+using Admin.NET.Core.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,25 +15,29 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service;
-
-public class PrintJobOrderFactory
+public class WMSOrderHachDGPrintDto : WMSOrderPrintCustomerInfo
 {
-    public static IPrintJobOrderStrategy PrintJobList(string workflow)
-    {
-        //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
-        //switch (workflow)
-        //{
-        //    //case (long)OutboundEnum.OutboundDefault:
-        //    //    return new PrintOrderStrategy();
-        //    default:
-        //        return new PrintJobOrderStrategy();
-        //}
-        switch (workflow)
-        {
-            case "JOB汇总清单":
-                return new PrintJobOrderHachDGStrategy();
-            default:
-                return new PrintJobOrderStrategy();
-        }
-    }
+    public List<WMSOrderPrintDetail> Details { get; set; }
 }
+
+public class WMSOrderPrintCustomerInfo
+{
+    public string? DeliveryNumber { get; set; }
+    public string? CustomerName { get; set; }
+    public string? CustomerCode { get; set; }
+    public string? Address { get; set; }
+    public string? ContactPhone { get; set; }
+}
+
+public class WMSOrderPrintDetail
+{
+    public DateTime? CompleteTime { get; set; }
+    public string? PoCode { get; set; }
+    public string? PackageNumber { get; set; }
+    public string? SKU { get; set; }
+    public decimal? Qty { get; set; }
+    public decimal? CombinedBoxesNumber { get; set; }
+    public string? Type { get; set; }
+    public decimal? JOBTotalBox { get; set; }
+}
+

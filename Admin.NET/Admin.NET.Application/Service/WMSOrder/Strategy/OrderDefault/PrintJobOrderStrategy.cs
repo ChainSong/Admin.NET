@@ -194,7 +194,6 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
 
         var totalCount = package.Details.Count;
         var details = new List<WMSOrderPrintJobPackageDetailDto>();
-        var sequenceIndex = 0;
 
         foreach (var item in package.Details)
         {
@@ -202,7 +201,6 @@ public class PrintJobOrderStrategy : IPrintJobOrderStrategy
 
             details.Add(new WMSOrderPrintJobPackageDetailDto
             {
-                Sequence = sequenceIndex++,
                 PackageId = item.PackageId,
                 PackageNumber = item.PackageNumber,
                 CompleteTime = order.CompleteTime,
