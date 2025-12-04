@@ -218,9 +218,13 @@
 										<el-upload class="upload-demo" :action="uploadFileURL" :headers="httpheaders"
 											:on-success="uploadFile">
 											<el-button type="primary">点击上传</el-button>
-											<div class="el-upload__tip">只能上传文件，且不超过500kb</div>
-											<div class="el-upload__tip">由于Excel版本格式冗杂，请统一将Excel单元格设置成为文本格式</div>
-											<div class="el-upload__tip">请保存的时候删除一下空白行</div>
+											<div class="el-upload__tip">
+												只能上传文件，且不超过500kb<br>
+												由于Excel版本格式冗杂，请统一将Excel单元格设置成为文本格式<br>
+												请保存的时候删除一下空白行<br>
+											</div>
+											<!-- <div class="el-upload__tip"></div>
+											<div class="el-upload__tip"></div> -->
 										</el-upload>
 									</template>
 									<template v-if="q.type == 'TextBox'">
@@ -303,7 +307,7 @@ const state = ref({
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
 	orderAddress: new OrderAddress(),
-	extend: new Extend(),
+	extends: new Array<Extend>(),
 
 	//通用的表字段
 	tableColumnHeader: new TableColumns(),
@@ -517,7 +521,12 @@ const ImportExcel = (response, file, fileList) => {
 // 上传结果uploadImg
 const uploadFile = (response, file, fileList) => {
 	// closeDialog();
-	state.value.extend.shippingAttachmentsUrl = response.result;
+	console.log(response);
+	console.log(state.value.extends[0]);
+	state.value.extends[0]= new Extend();
+	state.value.extends[0].shippingAttachmentsUrl = response.result;
+	ElMessage.success("上传成功");
+	console.log(state.value);
 }
 //获取导入的模板
 // 导出日志

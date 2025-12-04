@@ -550,7 +550,7 @@ public class AddOrUpdateWMSPreOrderInput : WMSPreOrderBaseInput
     public long Id { get; set; }
     public List<WMSPreOrderDetail> Details { get; set; }
     public WMSOrderAddress OrderAddress { get; set; }
-    public WMSPreOrderExtend Extend { get; set; }
+    public List<WMSPreOrderExtend> Extends { get; set; }
 }
 
 /// <summary>

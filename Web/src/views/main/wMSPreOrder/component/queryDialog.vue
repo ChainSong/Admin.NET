@@ -93,21 +93,24 @@
 							</el-descriptions>
 						</el-tab-pane>
 						<el-tab-pane label="扩展配置" name="extends">
-							<el-descriptions class="margin-top" :column="2" size="small" border>
-								<template
-									v-for="q in state.tableColumnExtends.filter(q => q.isCreate == 1 || q.isKey == 1)">
-									<el-descriptions-item   :prop="q.displayName" :label="q.displayName">
-										<template v-if="q.type == 'UploadFile'">
-											<!-- <a  :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a> -->
-											<a  :href="isBaseURL(state.extend[q.columnName])" target="_blank">{{ state.extend[q.columnName] }}</a>
-										</template>
-										<template v-else-if="q.type == 'TextBox'">
-											<label font-family="Helvetica Neue"
-												v-text="state.extend[q.columnName]"></label>
-										</template>
-									</el-descriptions-item>
-								</template>
-							</el-descriptions> 
+							<el-descriptions  v-for="extend in state.extends" class="margin-top" :column="2" size="small" border>
+							 
+									<template
+										v-for="q in state.tableColumnExtends.filter(q => q.isCreate == 1 || q.isKey == 1)">
+										<el-descriptions-item :prop="q.displayName" :label="q.displayName">
+											<template v-if="q.type == 'UploadFile'">
+												<!-- <a  :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a> -->
+												<a :href="isBaseURL(extend[q.columnName])" target="_blank">{{
+													extend[q.columnName] }}</a>
+											</template>
+											<template v-else-if="q.type == 'TextBox'">
+												<label font-family="Helvetica Neue"
+													v-text="extend[q.columnName]"></label>
+											</template>
+										</el-descriptions-item>
+									</template>
+							 
+							</el-descriptions>
 						</el-tab-pane>
 					</el-tabs>
 				</el-main>
@@ -147,7 +150,7 @@ const state = ref({
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
 	orderAddress: new OrderAddress(),
-	extend: new Extend(),
+	extends: new Array<Extend>(),
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
@@ -180,12 +183,12 @@ let activeMainName: string = 'OrderInfo';
 //自行添加其他规则
 // const rules = ref<FormRules>({
 // });
-const isBaseURL= (row: string) =>  {
-    if (row!="" && row!=undefined && row.includes("http")){
-        return row;
-    }else{
-        return baseURL+row;
-    }
+const isBaseURL = (row: string) => {
+	if (row != "" && row != undefined && row.includes("http")) {
+		return row;
+	} else {
+		return baseURL + row;
+	}
 };
 
 // 打开弹窗
@@ -233,9 +236,9 @@ const get = async () => {
 		state.value.header = result.data.result;
 		state.value.details = result.data.result.details;
 		state.value.orderAddress = result.data.result.orderAddress;
-		state.value.extend = result.data.result.extend;
+		state.value.extends = result.data.result.extends;
 	}
-	console.log(state.value );
+	console.log(state.value);
 }
 
 
@@ -247,8 +250,3 @@ onMounted(async () => {
 //将属性或者函数暴露给父组件
 defineExpose({ openDialog });
 </script>
-
-
-
-
- 

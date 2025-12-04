@@ -306,13 +306,13 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         }
         List<WMSOrderAddress> orderAddresses = new List<WMSOrderAddress>();
         orderAddresses.Add(input.OrderAddress);
-        var resultorderAddresses = await checkColumnsDefault.CheckColumns<WMSOrderAddress> (orderAddresses, "WMS_OrderAddress");
+        var resultorderAddresses = await checkColumnsDefault.CheckColumns<WMSOrderAddress>(orderAddresses, "WMS_OrderAddress");
         if (resultorderAddresses.Code == StatusCode.Error)
         {
             return resultorderAddresses;
         }
 
-        List<WMSPreOrderDetail>  preOrderDetails = new List<WMSPreOrderDetail>();
+        List<WMSPreOrderDetail> preOrderDetails = new List<WMSPreOrderDetail>();
         preOrderDetails.AddRange(input.Details);
         var resultpreOrderDetails = await checkColumnsDefault.CheckColumns<WMSPreOrderDetail>(preOrderDetails, "WMS_PreOrderDetail");
         if (resultpreOrderDetails.Code == StatusCode.Error)
@@ -370,7 +370,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
-    [DisplayName("删除WMS_PreOrder")]
+    [DisplayName("取消WMS_PreOrder")]
     [ApiDescriptionSettings(Name = "Cancel")]
     public async Task Cancel(DeleteWMSPreOrderInput input)
     {
@@ -466,7 +466,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
         var entity = await _rep.AsQueryable()
             .Includes(a => a.Details)
             .Includes(a => a.OrderAddress)
-            .Includes(a => a.Extend)
+            .Includes(a => a.Extends)
             .Where(u => u.Id == id).FirstAsync();
         //var entity = await _rep.AsQueryable().Includes(a => a.Details).Where(u => u.Id == id).FirstAsync();
         return entity;
