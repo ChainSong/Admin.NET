@@ -391,11 +391,8 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSPreOrderInput input)
     {
-
-
         List<AddOrUpdateWMSPreOrderInput> entityListDtos = new List<AddOrUpdateWMSPreOrderInput>();
         entityListDtos.Add(input);
-
         ICheckColumnsDefaultInterface checkColumnsDefault = new CheckColumnDefaultStrategy();
         checkColumnsDefault._repTableColumns = _repTableColumns;
         checkColumnsDefault._userManager = _userManager;
