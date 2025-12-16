@@ -338,14 +338,23 @@ public static class SqlSugarSetup
             {
                 foreach (var entityType in entityTypes)
                 {
-                    var tAtt = entityType.GetCustomAttribute<TenantAttribute>();
-                    if (tAtt != null && tAtt.configId.ToString() != config.ConfigId) continue;
-                    if (tAtt == null && config.ConfigId != SqlSugarConst.ConfigId) continue;
+                    try
+                    {
+                        var tAtt = entityType.GetCustomAttribute<TenantAttribute>();
+                        if (tAtt != null && tAtt.configId.ToString() != config.ConfigId) continue;
+                        if (tAtt == null && config.ConfigId != SqlSugarConst.ConfigId) continue;
 
-                    if (entityType.GetCustomAttribute<SplitTableAttribute>() == null)
-                        dbProvider.CodeFirst.InitTables(entityType);
-                    else
-                        dbProvider.CodeFirst.SplitTables().InitTables(entityType);
+                        if (entityType.GetCustomAttribute<SplitTableAttribute>() == null)
+                            dbProvider.CodeFirst.InitTables(entityType);
+                        else
+                            dbProvider.CodeFirst.SplitTables().InitTables(entityType);
+                    }
+                    catch (Exception ex)
+                    {
+
+                        //throw;
+                    }
+                  
                 }
             }
         }

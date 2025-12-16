@@ -281,12 +281,19 @@ namespace Admin.NET.Application.Strategy
                     item.OrderAddress.Creator = _userManager.Account;
                     item.OrderAddress.CreationTime = DateTime.Now;
                 }
-                if (item.Extends != null && item.Extends.Count>0)
+                if (item.Extends != null && item.Extends.Count > 0)
                 {
-                    item.Extends[0].PreOrderNumber = item.PreOrderNumber;
-                    item.Extends[0].ExternOrderNumber = item.ExternOrderNumber;
-                    item.Extends[0].Creator = _userManager.Account;
-                    item.Extends[0].CreationTime = DateTime.Now;
+                    foreach (var extend in item.Extends)
+                    {
+                        extend.PreOrderNumber = item.PreOrderNumber;
+                        extend.ExternOrderNumber = item.ExternOrderNumber;
+                        extend.Updator = _userManager.Account;
+                        extend.UpdateTime = DateTime.Now;
+                    }
+                    //item.Extends[0].PreOrderNumber = item.PreOrderNumber;
+                    //item.Extends[0].ExternOrderNumber = item.ExternOrderNumber;
+                    //item.Extends[0].Creator = _userManager.Account;
+                    //item.Extends[0].CreationTime = DateTime.Now;
                 }
                 //item.OrderAddress.UpdateTime = DateTime.Now;
             });
@@ -494,12 +501,16 @@ namespace Admin.NET.Application.Strategy
                     item.OrderAddress.Updator = _userManager.Account;
                     item.OrderAddress.UpdateTime = DateTime.Now;
                 }
-                if (item.Extends != null)
+                if (item.Extends != null && item.Extends.Count > 0)
                 {
-                    item.Extends[0].PreOrderNumber = item.PreOrderNumber;
-                    item.Extends[0].ExternOrderNumber = item.ExternOrderNumber;
-                    item.Extends[0].Updator = _userManager.Account;
-                    item.Extends[0].UpdateTime = DateTime.Now;
+                    foreach (var extend in item.Extends)
+                    {
+                        extend.PreOrderNumber = item.PreOrderNumber;
+                        extend.ExternOrderNumber = item.ExternOrderNumber;
+                        extend.Updator = _userManager.Account;
+                        extend.UpdateTime = DateTime.Now;
+                    }
+
                 }
 
             });
