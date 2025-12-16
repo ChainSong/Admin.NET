@@ -151,7 +151,12 @@ public class HachWmsProduct : EntityBase
     public string? Attribute9 { get; set; }
     [SugarColumn(ColumnDescription = "", Length = 255)]
     public string? Attribute10 { get; set; }
+
+
+ 
+
     [SugarColumn(ColumnDescription = "状态")]
+
     public bool Status { get; set; } = true;
     [SugarColumn(ColumnDescription = "接收时间", IsOnlyIgnoreUpdate = true)]
     public DateTime? ReceivingTime { get; set; } = DateTime.Now;

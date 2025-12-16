@@ -46,4 +46,7 @@ public class HachWmsAuthorizationConfig : EntityTenant
     public string WarehouseCode { get; set; }
     [SugarColumn(ColumnDescription = "状态", IsOnlyIgnoreUpdate = true)]
     public bool Status { get; set; } = true;
+
+    [SugarColumn(ColumnDescription = "")]
+    public int? int1 { get; set; }
 }

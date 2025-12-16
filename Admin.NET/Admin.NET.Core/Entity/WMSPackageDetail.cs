@@ -116,7 +116,7 @@ public class WMSPackageDetail : ITenantIdFilter
     /// 货品名称
     /// </summary>
     [Required]
-    [SugarColumn(ColumnDescription = "货品名称", Length = 50)]
+    [SugarColumn(ColumnDescription = "货品名称", Length = 150)]
     public string GoodsName { get; set; } 
 
     /// <summary>

@@ -56,12 +56,14 @@ namespace Admin.NET.Common.ExcelCommon
             return result.Data;
         }
 
+
+
         /// <summary>
         /// 获取文件全路径
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        private static string GetFullPath(string fileName)
+        public static string GetFullPath(string fileName)
         {
             fileName = Path.GetFileName(fileName);
             var fullpath = Path.GetFullPath(Environment.CurrentDirectory + FileDir + "/" + fileName);
