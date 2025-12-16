@@ -52,7 +52,7 @@ public class WMSProduct : ITenantIdFilter
     /// 
     /// </summary>
     [Required]
-    [SugarColumn(ColumnDescription = "", Length = 200)]
+    [SugarColumn(ColumnDescription = "", Length = 400)]
     public string GoodsName { get; set; }
     
     /// <summary>

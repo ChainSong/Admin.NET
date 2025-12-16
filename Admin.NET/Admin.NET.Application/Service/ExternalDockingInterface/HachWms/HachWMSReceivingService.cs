@@ -411,8 +411,8 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 LineNumber = item.TransactionId.ToString(),
                 SKU = item.ItemNum,
                 UPC = "",
-                GoodsName = "", // TODO: 需要则从产品取
-                GoodsType = prod.GoodsType,
+                GoodsName = prod.GoodsName, 
+                GoodsType = "A品",
                 PoCode = "",
                 Weight = 0,
                 Volume = 0,
