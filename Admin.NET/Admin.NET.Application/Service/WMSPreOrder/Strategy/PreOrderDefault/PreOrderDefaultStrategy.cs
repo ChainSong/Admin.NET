@@ -196,7 +196,7 @@ namespace Admin.NET.Application.Strategy
                    .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                    .ForMember(a => a.Details, opt => opt.MapFrom(c => c.Details))
                    .ForMember(a => a.OrderAddress, opt => opt.MapFrom(c => c.OrderAddress))
-                   .ForMember(a => a.Extend, opt => opt.MapFrom(c => c.Extend))
+                   .ForMember(a => a.Extends, opt => opt.MapFrom(c => c.Extends))
                    //添加库存状态为可用
                    .ForMember(a => a.PreOrderStatus, opt => opt.MapFrom(c => PreOrderStatusEnum.新增))
 
@@ -281,12 +281,12 @@ namespace Admin.NET.Application.Strategy
                     item.OrderAddress.Creator = _userManager.Account;
                     item.OrderAddress.CreationTime = DateTime.Now;
                 }
-                if (item.Extend != null)
+                if (item.Extends != null && item.Extends.Count>0)
                 {
-                    item.Extend.PreOrderNumber = item.PreOrderNumber;
-                    item.Extend.ExternOrderNumber = item.ExternOrderNumber;
-                    item.Extend.Creator = _userManager.Account;
-                    item.Extend.CreationTime = DateTime.Now;
+                    item.Extends[0].PreOrderNumber = item.PreOrderNumber;
+                    item.Extends[0].ExternOrderNumber = item.ExternOrderNumber;
+                    item.Extends[0].Creator = _userManager.Account;
+                    item.Extends[0].CreationTime = DateTime.Now;
                 }
                 //item.OrderAddress.UpdateTime = DateTime.Now;
             });
@@ -303,7 +303,7 @@ namespace Admin.NET.Application.Strategy
             _repPreOrder.Context.InsertNav(orderData)
               .Include(a => a.Details)
               .Include(b => b.OrderAddress)
-              .Include(b => b.Extend).ExecuteCommand();
+              .Include(b => b.Extends).ExecuteCommand();
 
             //    await _repPreOrder.InsertRangeAsync().
             //.Include(a => a.Details)
@@ -494,12 +494,12 @@ namespace Admin.NET.Application.Strategy
                     item.OrderAddress.Updator = _userManager.Account;
                     item.OrderAddress.UpdateTime = DateTime.Now;
                 }
-                if (item.Extend != null)
+                if (item.Extends != null)
                 {
-                    item.Extend.PreOrderNumber = item.PreOrderNumber;
-                    item.Extend.ExternOrderNumber = item.ExternOrderNumber;
-                    item.Extend.Updator = _userManager.Account;
-                    item.Extend.UpdateTime = DateTime.Now;
+                    item.Extends[0].PreOrderNumber = item.PreOrderNumber;
+                    item.Extends[0].ExternOrderNumber = item.ExternOrderNumber;
+                    item.Extends[0].Updator = _userManager.Account;
+                    item.Extends[0].UpdateTime = DateTime.Now;
                 }
 
             });
@@ -509,7 +509,7 @@ namespace Admin.NET.Application.Strategy
             await _repPreOrder.Context.UpdateNav(orderData)
               .Include(a => a.Details)
               .Include(b => b.OrderAddress)
-              .Include(b => b.Extend)
+              .Include(b => b.Extends)
               .ExecuteCommandAsync();
 
             orderData.ToList().ForEach(b =>

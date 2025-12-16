@@ -67,7 +67,7 @@
 						<el-form label-position="top" :model="state" ref="detailRuleRef" :rules="detailRule">
 							<el-table :data="state.details" height="250">
 								<template v-for="(v, index) in state.tableColumnDetails">
-									<el-table-column v-if="v.isCreate" :key="index" style="margin:0;padding:0;"
+									<el-table-column  v-if="v.isCreate" :key="index" style="margin:0;padding:0;"
 										:fixed="false" :prop="v.columnName" :label="v.displayName" width="150">
 										<template #default="scope">
 											<el-form-item :key="scope.row.key" style="margin:0;padding:0;"
@@ -142,11 +142,11 @@
 					<el-card>
 						<el-form ref="headerRuleRef" label-position="top" :model="state.orderAddress">
 							<el-row :gutter="35">
-								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
+								<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" 	style="height: 55px;"
 									v-for="i in state.tableColumnOrderAddresss.filter(a => a.isCreate == 1)"
 									v-bind:key="i.id">
 									<el-form-item :label="i.displayName" v-if="i.isCreate"
-										style="width: 90%;height: 45px;" :prop="i.columnName">
+										style="width: 90%;height: 55px;" :prop="i.columnName">
 										<template v-if="i.type == 'TextBox'">
 											<el-input :placeholder=i.displayName size="small" style="width:90%"
 												v-model="state.orderAddress[i.columnName]" v-if="i.isCreate">
@@ -192,14 +192,14 @@
 					</el-card>
 				</el-tab-pane>
 				<el-tab-pane label="扩展配置" name="extends">
-					<el-form ref="extendRuleRef" label-position="top" :rules="extendRule" :model="state.extend">
-						<el-row :gutter="35">
+					<el-form ref="extendRuleRef" label-position="top" :rules="extendRule" :model="state.extends">
+						<el-row  v-for="extend in state.extends"  v-bind:key="extend" :gutter="35">
 							<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" v-for="q in state.tableColumnExtends"
 								v-bind:key="q.id">
 								<el-form-item :label="q.displayName" v-if="q.isCreate" style="width: 90%;height: 100px;"
 									:prop="q.columnName">
 									<template v-if="q.type == 'UploadFile'">
-										<a :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a>
+										<a :href="baseURL + extend[q.columnName]" target="_blank">{{extend[q.columnName] }}</a>
 										<el-upload class="upload-demo" :action="uploadFileURL" :headers="httpheaders"
 											:on-success="uploadFile">
 											<el-button type="primary">点击上传</el-button>
@@ -208,7 +208,7 @@
 									</template>
 									<template v-if="q.type == 'TextBox'">
 										<el-input placeholder="请输入内容" size="small" style="width:90%"
-											v-model="state.extend[q.columnName]" v-if="q.isCreate">
+											v-model="extend[q.columnName]" v-if="q.isCreate">
 										</el-input>
 									</template>
 								</el-form-item>
@@ -286,7 +286,7 @@ const state = ref({
 	header: new Header(),
 	headers: new Array<Header>(),
 	details: new Array<Detail>(),
-	extend: new Extend(),
+	extends: new Array<Extend>(),
 
 	tableColumnHeader: new TableColumns(),
 	tableColumnHeaders: new Array<TableColumns>(),
@@ -361,7 +361,7 @@ const cancel = () => {
 const submit = async () => {
 	state.value.header.details = state.value.details;
 	state.value.header.orderAddress = state.value.orderAddress;
-	state.value.header.extend = state.value.extend;
+	state.value.header.extends = state.value.extends;
 	headerRuleRef.value.validate(async (isValid: boolean, fields?: any) => {
 		if (isValid) {
 			detailRuleRef.value.validate(async (isValidDetail: boolean, fieldsDetail?: any) => {
@@ -411,7 +411,7 @@ const get = async () => {
 	state.value.header = result.data.result;
 	state.value.details = result.data.result.details;
 	state.value.orderAddress = result.data.result.orderAddress;
-	state.value.extend = result.data.result.extend;
+	state.value.extends = result.data.result.extends;
 }
 
 const gettableColumn = async () => {
@@ -476,7 +476,7 @@ const gettableColumn = async () => {
 // 上传结果uploadImg
 const uploadFile = (response, file, fileList) => {
 	// closeDialog();
-	state.value.extend.shippingAttachmentsUrl = response.result;
+	state.value.extends[0].shippingAttachmentsUrl = response.result;
 }
 
 // 页面加载时

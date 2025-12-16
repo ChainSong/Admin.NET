@@ -3,7 +3,7 @@
 /// <summary>
 /// 福光出库对接表
 /// </summary>
-[SugarTable("FGFH_Order", "福光出库对接表")]
+[SugarTable("FGFH_Order", "FGFH_Order")]
 public class FGFHOrder
 {
 
