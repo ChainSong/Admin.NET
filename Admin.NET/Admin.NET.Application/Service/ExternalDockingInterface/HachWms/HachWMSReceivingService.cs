@@ -74,7 +74,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
         });
 
         await _logHelper.LogAsync(
-            LogHelper.LogMainType.出库订单下发,
+            LogHelper.LogMainType.入库订单下发,
             batchId,
             "BATCH",
             LogHelper.LogLevel.Info,
