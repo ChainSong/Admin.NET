@@ -139,6 +139,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                     {
                         throw new Exception($"orderNo：{syncOrderNo} Failed to obtain warehouse Location Code information");
                     }
+
                     #region Step 1：参数与数据校验 
                     if (string.IsNullOrWhiteSpace(syncOrderNo))
                         throw new Exception(OrderRespStatusEnum.OBMissingOrder.GetDescription());
