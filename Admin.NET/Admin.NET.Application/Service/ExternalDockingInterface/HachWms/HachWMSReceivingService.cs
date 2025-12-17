@@ -246,7 +246,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 // 2.3) 幂等：先查已存在（DB 有唯一约束时也要提前查）
                 #region 幂等：先查已存在（DB 有唯一约束时也要提前查）
                 var existing = await _wMSASNRep.AsQueryable()
-                    .Where(x => x.ASNStatus != -1)
+                    //.Where(x => x.ASNStatus != -1)
                     .Where(x => x.ExternReceiptNumber == syncOrderNo)
                     .Where(a => a.WarehouseId == wmsAuthorizationConfig.WarehouseId)
                     .Where(a => a.CustomerId == wmsAuthorizationConfig.CustomerId)

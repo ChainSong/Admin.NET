@@ -166,11 +166,16 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
 
                     #region 幂等检查：是否已存在
                     bool exists = await _wMSPreorderRep.AsQueryable()
-                        .Where(x => x.PreOrderStatus != -1 && x.ExternOrderNumber == syncOrderNo)
+                        .Where(x => x.ExternOrderNumber == syncOrderNo)
+                        .Where(a => a.WarehouseId == wmsAuthorizationConfig.WarehouseId)
+                        .Where(a => a.CustomerId == wmsAuthorizationConfig.CustomerId)
                         .AnyAsync();
                     //订单  {syncOrderNo}已存在(幂等校验)
                     if (exists)
+                    {
+                        await _logHelper.LogAsync(LogHelper.LogMainType.出库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,$"订单:{syncOrderNo} 已存在", true);
                         throw new Exception($"Order:  {syncOrderNo} already exists (idempotent parity check)");
+                    }
                     #endregion
 
                     #region Step 2：SKU合法性校验
@@ -314,7 +319,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = DateTime.Now,
             TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001,
-            Dn= outBound.DeliveryNumber
+            Dn = outBound.DeliveryNumber
         };
         // 构造明细表
         var prodMap = productLight.ToDictionary(p => p.SKU.ToUpper(), p => p);
