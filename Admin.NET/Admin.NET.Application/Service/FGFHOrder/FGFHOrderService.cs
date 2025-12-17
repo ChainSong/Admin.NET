@@ -37,7 +37,7 @@ public class FGFHOrderService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Addressee), u => u.Addressee.Contains(input.Addressee.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Phone), u => u.Phone.Contains(input.Phone.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Address), u => u.Address.Contains(input.Address.Trim()))
-                    .WhereIF(input.IsReturn > 0, u => u.IsReturn == input.IsReturn)
+                    .WhereIF(input.IsReturn != null, u => u.IsReturn == input.IsReturn)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Reason), u => u.Reason.Contains(input.Reason.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Str1), u => u.Str1.Contains(input.Str1.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Str2), u => u.Str2.Contains(input.Str2.Trim()))

@@ -5,23 +5,26 @@
                 <el-row :gutter="[16, 15]">
                     <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
                         <el-form-item class="mb-0" label="SKU">
-                            <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
+                            <el-input v-model="state.header.sku" />
                         </el-form-item>
                     </el-col>
                     <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
                         <el-form-item class="mb-0" label="数量">
-                            <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
+                            <el-input v-model="state.header.qty" />
                         </el-form-item>
+                    </el-col>
+                      <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6">
+                           <el-form-item>
+                    <el-button type="primary" icon="ele-Help" @click="openPrintJob" v-auth="'wMSProduct:add'"> 打印
+                    </el-button>
+                </el-form-item>
                     </el-col>
                 </el-row>
 
-                <el-form-item>
-                    <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSProduct:add'"> 打印
-                    </el-button>
-                </el-form-item>
+              
             </el-form>
         </el-card>
-
+<printDialog ref="printDialogRef" :title="ptintTitle" />
     </div>
 </template>
 
@@ -33,7 +36,7 @@ import editDialog from '/@/views/main/wMSProduct/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSProduct/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSProduct/component/queryDialog.vue'
 import selectRemote from '/@/views/tools/select-remote.vue'
-
+import printDialog from '/@/views/tools/printDialog.vue';
 // import { pageWMSProduct, deleteWMSProduct } from '/@/api/main/wMSProduct';
 import { pageWMSProduct, deleteWMSProduct } from '/@/api/main/wMSProduct';
 import { getByTableNameList } from "/@/api/main/tableColumns";
@@ -69,11 +72,12 @@ const state = ref({
     // tableColumnsDetails: new Array<TableColumnsDetails>(),
     //   tableColumnsDetail = ref();
 });
-
+const printDialogRef = ref();
 const editDialogRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
 const loading = ref(false);
+const ptintTitle = ref("");
 // const tableData = ref<any>
 // ([]);
 const queryParams = ref<any>
@@ -89,69 +93,45 @@ const queryTitle = ref("");
 
 // 页面加载时
 onMounted(async () => {
-    gettableColumn();
+
 });
 
-const gettableColumn = async () => {
-    let res = await getByTableNameList("WMS_Product");
-    state.value.tableColumnHeaders = res.data.result;
-};
+
 
 // 查询操作
-const handleQuery = async () => {
-    loading.value = true;
-    var res = await pageWMSProduct(Object.assign(state.value.header, tableParams.value));
-    state.value.headers = res.data.result?.items ?? [];
-    tableParams.value.total = res.data.result?.total;
-    loading.value = false;
-};
+// const handleQuery = async () => {
+//     var res = await pageWMSProduct(Object.assign(state.value.header, tableParams.value));
+// };
 
-// 打开新增页面
-const openAdd = () => {
-    addTitle.value = '添加';
-    addDialogRef.value.openDialog({});
-};
-
-// 打开编辑页面
-const openEdit = (row: any) => {
-    editTitle.value = '编辑';
-    editDialogRef.value.openDialog(row);
-};
-// 打开查询页面
-const openQuery = (row: any) => {
-    queryTitle.value = '查看';
-    queryDialogRef.value.openDialog(row);
-};
-
-// 删除
-const del = (row: any) => {
-    ElMessageBox.confirm(`确定要删除吗?`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-    })
-        .then(async () => {
-            await deleteWMSProduct(row);
-            handleQuery();
-            ElMessage.success("删除成功");
-        })
-        .catch(() => { });
-};
-
-// 改变页面容量
-const handleSizeChange = (val: number) => {
-    tableParams.value.pageSize = val;
-    handleQuery();
-};
-
-// 改变页码序号
-const handleCurrentChange = (val: number) => {
-    tableParams.value.page = val;
-    handleQuery();
-};
 
 // =============================自定义功能============================================
 
+// 打开打印询页面
+const openPrintJob = async () => {
+    ptintTitle.value = '打印SKU';
+    // let ids = ref(Array<Number>);
+    // let ids = new Array<Number>();
+    let printData = {};
+    printData.printTemplate = "打印SKU模板";
+    if(state.value.header.sku=="" || state.value.header.sku==undefined){
+        ElMessage.warning("请输入SKU");
+        return;
+    }
+    console.log("打印SKU");
+    console.log(state.value.header);
+    var res = await pageWMSProduct(Object.assign(state.value.header, tableParams.value));
+    if (res.data.result != null) {
+        printData.data = [];
+        for (let i = 0; i < state.value.header.qty; i++) {
+            printData.data.push( res.data.result?.items[0]);
+        }
+    }
+    // 判断有没有配置客户自定义打印模板
+    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
 
-handleQuery();
+};
+
+
+
+
 </script>
