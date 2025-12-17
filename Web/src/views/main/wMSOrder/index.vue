@@ -179,7 +179,7 @@
       <!-- <editDialog ref="editDialogRef" :title="editTitle" @reloadTable="handleQuery" />
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" /> -->
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
-      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="printOrder" />
+      <printDialog ref="printDialogRef" :title="ptintTitle" @reloadTable="handleQuery" />
     </el-card>
 
 
