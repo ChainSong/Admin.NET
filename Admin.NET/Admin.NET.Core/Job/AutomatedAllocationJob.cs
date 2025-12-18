@@ -39,7 +39,7 @@ public class AutomatedAllocationJob : IJob
 
     public async Task ExecuteAsync(JobExecutingContext context, CancellationToken stoppingToken)
     {
-        return;
+        //return;
         using var serviceScope = _serviceProvider.CreateScope();
         // 获取指令仓储 
         var repWarehouse = serviceScope.ServiceProvider.GetService<SqlSugarRepository<WMSWarehouse>>();
@@ -65,113 +65,120 @@ public class AutomatedAllocationJob : IJob
             }
             foreach (var tenant in tenantdata)
             {
-                var defautConfig = App.GetOptions<DbConnectionOptions>().ConnectionConfigs.FirstOrDefault();
-
-                var config = new DbConnectionConfig
+                try
                 {
-                    ConfigId = tenant.Id.ToString(),
-                    DbType = tenant.DbType,
-                    ConnectionString = tenant.Connection,
-                    DbSettings = new DbSettings()
+                    var defautConfig = App.GetOptions<DbConnectionOptions>().ConnectionConfigs.FirstOrDefault();
+
+                    var config = new DbConnectionConfig
                     {
-                        EnableInitDb = true,
-                        EnableDiffLog = false,
-                        EnableUnderLine = defautConfig.DbSettings.EnableUnderLine,
-                    }
-                };
-
-
-                ITenant iTenant = App.GetRequiredService<ISqlSugarClient>().AsTenant();
-                SqlSugarSetup.SetDbConfig(config);
-                iTenant.AddConnection(config);
-                using SqlSugarScopeProvider db = iTenant.GetConnectionScope(config.ConfigId);
-                db.DbMaintenance.CreateDatabase();
-                //db.DbMaintenance.c
-                //var dasd = db.Queryable<WMSInstruction>();
-                var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo,CustomerName,MAX(OperationId) OperationId, Creator from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1  group by InstructionTaskNo,CustomerName,Creator  order by InstructionTaskNo");
-                if (data != null && data.Count > 0)
-                {
-                    List<WMSAdjustmentInformationDo> AdjustmentInfo = new List<WMSAdjustmentInformationDo>();
-
-                    foreach (var instruction in data)
-                    {
-                        //默认分配规则
-                        string procedureName = "Proc_WMS_AutomatedOutbound";
-                        //获取订单，判断订单类型
-                        var repOrderData = repOrder.AsQueryable().Where(a => a.Id == instruction.OperationId).First();
-                        //根据订单类型判断是否存在该流程
-                        var workflow = await repWorkFlow.AsQueryable()
-                           .Includes(a => a.SysWorkFlowSteps)
-                           .Where(a => a.WorkName == instruction.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
-
-                        if (workflow != null && !string.IsNullOrEmpty(workflow.WorkName))
+                        ConfigId = tenant.Id.ToString(),
+                        DbType = tenant.DbType,
+                        ConnectionString = tenant.Connection,
+                        DbSettings = new DbSettings()
                         {
-                            //判断有没有子流程
-                            if (workflow.SysWorkFlowSteps.Count > 0)
-                            {
-                                //从子流程中获取分配规则
-                                var customWorkFlow = workflow.SysWorkFlowSteps.Where(a => a.StepName == OutboundWorkFlowConst.Workflow_Automated_Outbound).FirstOrDefault();
-                                if (customWorkFlow != null && !string.IsNullOrEmpty(customWorkFlow.Filters))
-                                {
-                                    List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow.Filters);
+                            EnableInitDb = true,
+                            EnableDiffLog = false,
+                            EnableUnderLine = defautConfig.DbSettings.EnableUnderLine,
+                        }
+                    };
 
-                                }
-                                else
+
+                    ITenant iTenant = App.GetRequiredService<ISqlSugarClient>().AsTenant();
+                    SqlSugarSetup.SetDbConfig(config);
+                    iTenant.AddConnection(config);
+                    using SqlSugarScopeProvider db = iTenant.GetConnectionScope(config.ConfigId);
+                    db.DbMaintenance.CreateDatabase();
+                    //db.DbMaintenance.c
+                    //var dasd = db.Queryable<WMSInstruction>();
+                    var data = db.Ado.SqlQuery<WMSInstruction>("  select distinct InstructionTaskNo,CustomerName,MAX(OperationId) OperationId, Creator from WMS_Instruction where BusinessType ='自动分配'  and InstructionStatus = 1  group by InstructionTaskNo,CustomerName,Creator  order by InstructionTaskNo");
+                    if (data != null && data.Count > 0)
+                    {
+                        List<WMSAdjustmentInformationDo> AdjustmentInfo = new List<WMSAdjustmentInformationDo>();
+
+                        foreach (var instruction in data)
+                        {
+                            //默认分配规则
+                            string procedureName = "Proc_WMS_AutomatedOutbound";
+                            //获取订单，判断订单类型
+                            var repOrderData = repOrder.AsQueryable().Where(a => a.Id == instruction.OperationId).First();
+                            //根据订单类型判断是否存在该流程
+                            var workflow = await repWorkFlow.AsQueryable()
+                               .Includes(a => a.SysWorkFlowSteps)
+                               .Where(a => a.WorkName == instruction.CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+                            if (workflow != null && !string.IsNullOrEmpty(workflow.WorkName))
+                            {
+                                //判断有没有子流程
+                                if (workflow.SysWorkFlowSteps.Count > 0)
                                 {
-                                    if (customWorkFlow != null)
+                                    //从子流程中获取分配规则
+                                    var customWorkFlow = workflow.SysWorkFlowSteps.Where(a => a.StepName == OutboundWorkFlowConst.Workflow_Automated_Outbound).FirstOrDefault();
+                                    if (customWorkFlow != null && !string.IsNullOrEmpty(customWorkFlow.Filters))
                                     {
-                                        procedureName = customWorkFlow.Remark;
+                                        List<SysWorkFlowFieldDto> sysWorkFlowFieldDtos = JsonConvert.DeserializeObject<List<SysWorkFlowFieldDto>>(customWorkFlow.Filters);
+
+                                    }
+                                    else
+                                    {
+                                        if (customWorkFlow != null)
+                                        {
+                                            procedureName = customWorkFlow.Remark;
+                                        }
                                     }
                                 }
                             }
-                        }
-                        var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
-                        db.Ado.CommandTimeOut = 1800;
-                        DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync(procedureName, sugarParameter);
-                        if (infoData != null && infoData.Rows.Count > 0)
-                        {
-                            AdjustmentInfo.AddRange(infoData.TableToList<WMSAdjustmentInformationDo>());
-                        }
-                        SysNotice notice = new SysNotice();
-                        notice.Title = "自动分配";
-                        notice.PublicTime = DateTime.Now;
-                        notice.Type = NoticeTypeEnum.NOTICE;
-                        if (AdjustmentInfo.Where(a => a.Qty != a.InventoryQty).Count() > 0)
-                        {
-                            notice.Title = "库存不足";
-                            //构建一个html的table
-                            notice.Content = "<table border='1'><tr><th>订单号</th><th>SKU</th><th>订单数量</th><th>库存数量</th><th>备注</th></tr>";
-
-                            foreach (var item in AdjustmentInfo)
+                            var sugarParameter = new SugarParameter("@InstructionTaskNo", instruction.InstructionTaskNo, typeof(string), ParameterDirection.Input);
+                            db.Ado.CommandTimeOut = 1800;
+                            DataTable infoData = await db.Ado.UseStoredProcedure().GetDataTableAsync(procedureName, sugarParameter);
+                            if (infoData != null && infoData.Rows.Count > 0)
                             {
-                                if (item.Qty != item.InventoryQty)
-                                {
-                                    notice.Content += "<tr><td>" + item.OrderNumber + "</td><td>" + item.SKU + "</td><td>" + item.Qty + "</td><td>" + item.InventoryQty + "</td><td>请核对其他订单要求：如品级，批次，单位</td></tr>";
-                                    //notice.Content += "订单号:"+item.OrderNumber + ":SKU:" + item.SKU + "订单数量" + item.Qty + "，库存数量" + item.InventoryQty  + ";数量不足，请及时补货！\n";
-                                }
+                                AdjustmentInfo.AddRange(infoData.TableToList<WMSAdjustmentInformationDo>());
                             }
-                            notice.Content += "</table>";
-                            //notice.Content+= "";
+                            SysNotice notice = new SysNotice();
+                            notice.Title = "自动分配";
+                            notice.PublicTime = DateTime.Now;
+                            notice.Type = NoticeTypeEnum.NOTICE;
+                            if (AdjustmentInfo.Where(a => a.Qty != a.InventoryQty).Count() > 0)
+                            {
+                                notice.Title = "库存不足";
+                                //构建一个html的table
+                                notice.Content = "<table border='1'><tr><th>订单号</th><th>SKU</th><th>订单数量</th><th>库存数量</th><th>备注</th></tr>";
+
+                                foreach (var item in AdjustmentInfo)
+                                {
+                                    if (item.Qty != item.InventoryQty)
+                                    {
+                                        notice.Content += "<tr><td>" + item.OrderNumber + "</td><td>" + item.SKU + "</td><td>" + item.Qty + "</td><td>" + item.InventoryQty + "</td><td>请核对其他订单要求：如品级，批次，单位</td></tr>";
+                                        //notice.Content += "订单号:"+item.OrderNumber + ":SKU:" + item.SKU + "订单数量" + item.Qty + "，库存数量" + item.InventoryQty  + ";数量不足，请及时补货！\n";
+                                    }
+                                }
+                                notice.Content += "</table>";
+                                //notice.Content+= "";
+                            }
+                            else
+                            {
+                                notice.Title = "分配完成";
+                                notice.Content = "分配完成";
+                            }
+                            notice.Status = NoticeStatusEnum.PUBLIC;
+                            notice.PublicOrgId = 0;
+                            notice.PublicUserId = 0;
+                            notice.PublicOrgName = "";
+                            await repSysNotice.InsertAsync(notice);
+                            instruction.InstructionStatus = 99;
+                            //修改任务状态
+                            //await repInstruction.UpdateAsync(data.Result);
+                            db.Ado.SqlQuery<WMSInstruction>("  update WMS_Instruction set  InstructionStatus=99 where InstructionTaskNo='" + instruction.InstructionTaskNo + "' ");
+                            NoticeInput noticeInput = new NoticeInput();
+                            noticeInput.Id = notice.Id;
+                            var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == instruction.Creator).Select(u => u.Id).ToListAsync();
+                            await noticeServic.PublicByUser(noticeInput, userIdList.First());
                         }
-                        else
-                        {
-                            notice.Title = "分配完成";
-                            notice.Content = "分配完成";
-                        }
-                        notice.Status = NoticeStatusEnum.PUBLIC;
-                        notice.PublicOrgId = 0;
-                        notice.PublicUserId = 0;
-                        notice.PublicOrgName = "";
-                        await repSysNotice.InsertAsync(notice);
-                        instruction.InstructionStatus = 99;
-                        //修改任务状态
-                        //await repInstruction.UpdateAsync(data.Result);
-                        db.Ado.SqlQuery<WMSInstruction>("  update WMS_Instruction set  InstructionStatus=99 where InstructionTaskNo='" + instruction.InstructionTaskNo + "' ");
-                        NoticeInput noticeInput = new NoticeInput();
-                        noticeInput.Id = notice.Id;
-                        var userIdList = await repSysUser.AsQueryable().Where(a => a.Account == instruction.Creator).Select(u => u.Id).ToListAsync();
-                        await noticeServic.PublicByUser(noticeInput, userIdList.First());
                     }
+                }
+                catch (Exception)
+                {
+                     
                 }
             }
         }

@@ -61,7 +61,7 @@ public class WMSOrderAllocation : ITenantIdFilter
     /// </summary>
     [Required]
     [SugarColumn(ColumnDescription = "")]
-    public long OrderDetailBomId { get; set; }
+    public long? OrderDetailBomId { get; set; }
 
     /// <summary>
     /// 
