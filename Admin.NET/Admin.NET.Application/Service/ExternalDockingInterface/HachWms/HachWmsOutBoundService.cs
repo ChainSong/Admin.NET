@@ -174,7 +174,7 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                     //订单  {syncOrderNo}已存在(幂等校验)
                     if (exists)
                     {
-                        await _logHelper.LogAsync(LogHelper.LogMainType.出库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info,$"订单:{syncOrderNo} 已存在", true);
+                        await _logHelper.LogAsync(LogHelper.LogMainType.出库订单下发, batchId, "BATCH", LogHelper.LogLevel.Info, $"订单:{syncOrderNo} 已存在", true);
                         throw new Exception($"Order:  {syncOrderNo} already exists (idempotent parity check)");
                     }
                     #endregion
@@ -316,7 +316,10 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             OrderType = _enumRep.GetEnumDescriptionOrDefault<ObOrderStatusEnum>(outBound.DocType, "大仓出库"),
             PreOrderStatus = 1,
             OrderTime = Convert.ToDateTime(outBound.ScheduleShippingDate),
-            DetailCount = outBound.items.Count,
+            DetailCount = outBound.items.Sum(a =>
+            {
+                return long.TryParse(a.Quantity, out var qty) ? qty : 0;
+            }),
             Creator = (_userManager?.UserId ?? 0).ToString(),
             CreationTime = DateTime.Now,
             TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001,
