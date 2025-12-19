@@ -503,7 +503,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             var result = await _repRFIDInfo.AsQueryable().Where(p => pickData.First().RFIDInfo.Select(q => q.RFID).Contains(p.RFID) && p.Status == (int)RFIDStatusEnum.新增
             && packageData.CustomerId == packageData.CustomerId
             ).ToListAsync();
-            if (result.Count > packageData.Details.Sum(a=>a.Qty))
+            if (result.Count > packageData.Details.Sum(a => a.Qty))
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "RFID 读取错误";
@@ -544,7 +544,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             packageData.Id = 0;
             packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 
-            
+
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
             await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
             //await _repPackage.InsertAsync();
@@ -757,7 +757,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
@@ -952,7 +952,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();

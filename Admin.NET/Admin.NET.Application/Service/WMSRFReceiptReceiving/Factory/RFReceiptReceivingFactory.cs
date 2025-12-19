@@ -23,6 +23,8 @@ public class RFReceiptReceivingFactory
         //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
         switch (workflow)
         {
+            case "沂庆RF上架":
+                return new RFReceiptReceivingYQStrategy();
             default:
                 return new RFReceiptReceivingDefaultStrategy();
         }
