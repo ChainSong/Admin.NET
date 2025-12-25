@@ -43,6 +43,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SysCacheService _sysCacheService { get; set; }
 
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
@@ -247,34 +248,37 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             response.Data.SKU = request.Input;
             if (request.ScanQty <= 1)
             {
-                //判断唯一码是不是重复扫描
-                foreach (var item in pickData)
+                if (!string.IsNullOrEmpty(request.SN))
                 {
-                    if (item.ScanPackageInput != null)
+                    //判断唯一码是不是重复扫描
+                    foreach (var item in pickData.Where(a=>a.SKU== request.SKU))
                     {
+                        if (item.ScanPackageInput != null)
+                        {
+                            if (!string.IsNullOrEmpty(request.SN))
+                            {
+                                var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                                if (count != null && !string.IsNullOrEmpty(count.SN))
+                                {
+                                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                    response.Code = StatusCode.Error;
+                                    response.Msg = "不能重复扫描同一个条码";
+                                    return response;
+                                }
+                            }
+                        }
+
+                        //判断JNE 是不是可用
                         if (!string.IsNullOrEmpty(request.SN))
                         {
-                            var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
-                            if (count != null && !string.IsNullOrEmpty(count.SN))
+                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
+                            if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                                 response.Code = StatusCode.Error;
                                 response.Msg = "不能重复扫描同一个条码";
                                 return response;
                             }
-                        }
-                    }
-
-                    //判断JNE 是不是可用
-                    if (!string.IsNullOrEmpty(request.SN))
-                    {
-                        var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
-                        if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
-                        {
-                            response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                            response.Code = StatusCode.Error;
-                            response.Msg = "不能重复扫描同一个条码";
-                            return response;
                         }
                     }
                 }

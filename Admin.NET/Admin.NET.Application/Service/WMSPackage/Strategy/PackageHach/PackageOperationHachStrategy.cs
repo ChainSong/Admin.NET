@@ -11,23 +11,24 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using AutoMapper;
+using FluentEmail.Core;
+using Furion.FriendlyException;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FluentEmail.Core;
-using Admin.NET.Application.Service;
-using XAct;
-using Furion.FriendlyException;
-using SqlSugar;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
+using XAct;
 
 namespace Admin.NET.Application.Strategy;
 internal class PackageOperationHachStrategy : IPackageOperationInterface
@@ -47,6 +48,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
@@ -253,38 +255,45 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             if (request.ScanQty <= 1)
             {
                 //判断唯一码是不是重复扫描
-                foreach (var item in pickData)
+                if (!string.IsNullOrEmpty(request.SN))
                 {
-                    if (item.ScanPackageInput != null)
+                    //判断唯一码是不是重复扫描
+                    foreach (var item in pickData.Where(a => a.SKU == request.SKU))
                     {
-                        var count = item.ScanPackageInput.Where(a => a.SN == request.SN || a.RFID == request.RFID).FirstOrDefault();
-                        if (count != null && !string.IsNullOrEmpty(count.SN))
+                        if (item.ScanPackageInput != null)
                         {
-                            response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                            response.Code = StatusCode.Error;
-                            response.Msg = "不能重复扫描同一个条码";
-                            return response;
+                            var count = item.ScanPackageInput.Where(a => a.SN == request.SN || a.RFID == request.RFID).FirstOrDefault();
+                            if (count != null && !string.IsNullOrEmpty(count.SN))
+                            {
+                                response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Code = StatusCode.Error;
+                                response.Msg = "不能重复扫描同一个条码";
+                                return response;
+                            }
+
+
                         }
-
-
                     }
                 }
-                //判断RFID 是不是可用
-                var checkRFID = await _repRFIDInfo.AsQueryable().Where(a => a.RFID == request.RFID).FirstAsync();
-                if (checkRFID == null)
+                if (!string.IsNullOrEmpty(request.RFID))
                 {
-                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                    response.Code = StatusCode.Error;
-                    response.Msg = "RFID 不存在";
-                    return response;
-                }
+                    //判断RFID 是不是可用
+                    var checkRFID = await _repRFIDInfo.AsQueryable().Where(a => a.RFID == request.RFID).FirstAsync();
+                    if (checkRFID == null)
+                    {
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Code = StatusCode.Error;
+                        response.Msg = "RFID 不存在";
+                        return response;
+                    }
 
-                if (checkRFID.Status != 1)
-                {
-                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                    response.Code = StatusCode.Error;
-                    response.Msg = "RFID 不可用";
-                    return response;
+                    if (checkRFID.Status != 1)
+                    {
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Code = StatusCode.Error;
+                        response.Msg = "RFID 不可用";
+                        return response;
+                    }
                 }
 
 
@@ -570,7 +579,20 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
-            var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
+            //var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
+
+            //var packageDetailDetail = .WMSRFPackageAcquisition
+            //通过order id  查找 dn
+            //再根据dn 查找所有的 so 信息， 再来计算箱号序列
+            var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId).FirstAsync();
+            List<WMSOrder> orderSo = new List<WMSOrder>();
+            if (orderDn != null)
+            {
+                orderSo = await _repOrder.AsQueryable().Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId).ToListAsync();
+
+            }
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
+
 
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
@@ -627,23 +649,26 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                     item.ScanPackageInput = new List<ScanPackageInput>();
                 }
             }
-
-            //获取RFID
-            var rfiddata = await _repRFIDInfo.AsQueryable().Where(a => wMSRFIDs.Select(b => b.RFID).Contains(a.RFID)).ToListAsync();
-            foreach (var item in rfiddata)
+            //判断有没有RFID
+            var checkRFID = wMSRFIDs.Where(b => !string.IsNullOrEmpty(b.RFID)).ToList();
+            if (checkRFID != null && checkRFID.Count > 0)
             {
-                item.Status = (int)RFIDStatusEnum.出库;
-                item.PackageNumber = packageNumber;
-                //item.Sequence = pickData.First().RFIDInfo.Where(a => a.RFID.Contains(item.RFID)).FirstOrDefault().Sequence;
-                item.ExternOrderNumber = packageData.ExternOrderNumber;
-                item.PickTaskNumber = packageData.PickTaskNumber;
-                item.OrderTime = DateTime.Now;
-                item.OrderPerson = _userManager.Account;
-                //item.PickTaskNumber = pickData.FirstOrDefault().PickTaskNumber;
-                item.OrderNumber = packageData.OrderNumber;
+                //获取RFID
+                var rfiddata = await _repRFIDInfo.AsQueryable().Where(a => wMSRFIDs.Select(b => b.RFID).Contains(a.RFID)).ToListAsync();
+                foreach (var item in rfiddata)
+                {
+                    item.Status = (int)RFIDStatusEnum.出库;
+                    item.PackageNumber = packageNumber;
+                    //item.Sequence = pickData.First().RFIDInfo.Where(a => a.RFID.Contains(item.RFID)).FirstOrDefault().Sequence;
+                    item.ExternOrderNumber = packageData.ExternOrderNumber;
+                    item.PickTaskNumber = packageData.PickTaskNumber;
+                    item.OrderTime = DateTime.Now;
+                    item.OrderPerson = _userManager.Account;
+                    //item.PickTaskNumber = pickData.FirstOrDefault().PickTaskNumber;
+                    item.OrderNumber = packageData.OrderNumber;
+                }
+                await _repRFIDInfo.UpdateRangeAsync(rfiddata);
             }
-            await _repRFIDInfo.UpdateRangeAsync(rfiddata);
-
             packageData.ExpressCompany = request.ExpressCompany;
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
@@ -678,6 +703,33 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
+                //包装完成，插入
+                List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).ToList())
+                {
+                    //插入反馈指令
+                    WMSInstruction wMSInstruction = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstruction.InstructionType = "出库单回传HachDG";
+                    wMSInstruction.BusinessType = "出库单回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstruction.CustomerId = item.Key.CustomerId;
+                    wMSInstruction.CustomerName = item.Key.CustomerName;
+                    wMSInstruction.WarehouseId = item.Key.WarehouseId;
+                    wMSInstruction.WarehouseName = item.Key.WarehouseName;
+                    wMSInstruction.OperationId = item.Key.OrderId;
+                    wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstruction.TableName = "WMS_Order";
+                    wMSInstruction.InstructionPriority = 63;
+                    wMSInstruction.Remark = "";
+                    wMSInstructions.Add(wMSInstruction);
+                }
+                await _repInstruction.InsertRangeAsync(wMSInstructions);
+                //wMSInstructions.Add(wMSInstruction);
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
                 await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, (a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)));

@@ -42,7 +42,7 @@ namespace Admin.NET.Application.Service.WMSExpress.Strategy;
 /// <summary>
 /// 顺丰快递
 /// </summary>
-public class SFExpressStrategy : IExpressInterface
+public class SFExpressHachDNStrategy : IExpressInterface
 {
 
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
@@ -264,7 +264,7 @@ public class SFExpressStrategy : IExpressInterface
         //packageData.Details = sfexpress;
         //await 【【【【【【【【【【【【【【【=】、、、【、【】‘、
         await _repExpressDelivery.InsertAsync(packageData);
-        await _repPackage.UpdateAsync(a => new Admin.NET.Core.Entity.WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
+        await _repPackage.UpdateAsync(a => new WMSPackage { ExpressNumber = sfexpress.WaybillNo }, a => a.PackageNumber == package.PackageNumber);
         //await _db.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
         response.Msg = "成功";
         response.Code = StatusCode.Success;
@@ -279,7 +279,7 @@ public class SFExpressStrategy : IExpressInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-   
+
     public async Task<Response> GetExpressDataList(ScanPackageInput request)
     {
         Response response = new Response();
@@ -291,6 +291,8 @@ public class SFExpressStrategy : IExpressInterface
         //根据订单号获取所有未获取快递单的包裹
         var package = _repPackage.AsQueryable().Where(a => a.OrderNumber == packageOrder.OrderNumber && string.IsNullOrEmpty(a.ExpressNumber)).ToList();
 
+        //获取订单信息（原来不需要，后面逻辑变了）
+        var getOrderData = await _repOrder.AsQueryable().Where(a => a.OrderNumber == packageOrder.OrderNumber).FirstAsync();
         //如果已经有了快递单号直接打印
         if (package != null && !string.IsNullOrEmpty(packageOrder.ExpressNumber))
         {
@@ -380,7 +382,7 @@ public class SFExpressStrategy : IExpressInterface
         {
             IsSignBack = receiver.IsSignBack == 1 ? 1 : 0;
         }
-
+        //string ExpressDeliveryOrderId=
         input.Data = new SFRootobject()
         {
             orderId = packageOrder.OrderId.ToString(),
@@ -396,19 +398,40 @@ public class SFExpressStrategy : IExpressInterface
             //extraInfoList = ,
             cargoDetails = sFCargodetails,
             contactInfoList = sFContactinfolists,
-            remark = packageOrder.ExternOrderNumber?.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ')
+            remark = !string.IsNullOrEmpty(getOrderData.Dn) ? getOrderData.Dn : packageOrder.ExternOrderNumber?.Replace('(', ' ').Replace(')', ' ').Replace('/', ' ') //新逻辑 需要显示DN
         };
 
         input.Checkword = getExpressConfig.Checkword;
         input.Url = getExpressConfig.Url;
         input.PartnerId = getExpressConfig.PartnerId;
-        input.ServiceCode = "EXP_RECE_CREATE_ORDER"; //下单方法
-                                                     //判断已经申请过母单号，使用申请子单号的方法
-        var packageParent = _repPackage.AsQueryable().Where(a => a.OrderNumber == packageOrder.OrderNumber && !string.IsNullOrEmpty(a.ExpressNumber)).ToList();
-        if (packageParent.Count > 0)
+        input.ServiceCode = "EXP_RECE_CREATE_ORDER";
+        //下单方法
+        //判断已经申请过母单号，使用申请子单号的方法
+        //Hach 因为接口是会拆单下发，所以判断的时候要根据dn 找到所有的订单来判断是不是需要申请子单号
+
+        //根据单号查询到所有的订单
+        var getOrderByDNData = await _repOrder.AsQueryable().Where(a => a.Dn == getOrderData.Dn && !string.IsNullOrEmpty(a.Dn)).ToListAsync();
+
+        if (getOrderByDNData != null && getOrderByDNData.Count > 0)
         {
-            input.ServiceCode = "EXP_RECE_GET_SUB_MAILNO"; //下单方法（获取子单号）
+            var getExpressDeliveryData = await _repExpressDelivery.AsQueryable().Where(a => getOrderByDNData.Select(b => b.OrderNumber).Contains(a.OrderNumber)).FirstAsync();
+            if (getExpressDeliveryData != null && !string.IsNullOrEmpty(getExpressDeliveryData.ExpressDeliveryOrderId))
+            {
+                input.Data.orderId = getExpressDeliveryData.ExpressDeliveryOrderId.ToString();
+                input.ServiceCode = "EXP_RECE_GET_SUB_MAILNO"; //下单方法（获取子单号）
+            }
+
         }
+        else
+        {
+            var packageParent = _repPackage.AsQueryable().Where(a => a.OrderNumber == packageOrder.OrderNumber && !string.IsNullOrEmpty(a.ExpressNumber)).ToList();
+            if (packageParent.Count > 0)
+            {
+                input.ServiceCode = "EXP_RECE_GET_SUB_MAILNO"; //下单方法（获取子单号）
+            }
+        }
+
+
         //input.Data.contactInfoList[1].company = "_";
         string Express = ExpressApplication.GetExpress(input);
 
@@ -429,11 +452,12 @@ public class SFExpressStrategy : IExpressInterface
         }
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<Admin.NET.Core.Entity.WMSPackage, WMSExpressDelivery>()
+            cfg.CreateMap<WMSPackage, WMSExpressDelivery>()
                //添加创建人为当前用户
                .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
                .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                .ForMember(a => a.PackageId, opt => opt.MapFrom(c => c.Id))
+               .ForMember(a => a.WaybillOrder, opt => opt.MapFrom(c => c.SerialNumber))
                .ForMember(a => a.Weight, opt => opt.MapFrom(c => c.GrossWeight))
                // 
                //.ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
@@ -478,7 +502,7 @@ public class SFExpressStrategy : IExpressInterface
             item.RecipientsCounty = receiver.County;
             item.RecipientsCompany = receiver.ExpressCompany;
             item.ExpressNumber = Waybillnoinfolist[sfexpressflag].waybillNo; //sfexpress.WaybillNo;
-            item.WaybillOrder = sfexpressflag;
+            //item.WaybillOrder = sfexpressflag;//箱序号
             item.WaybillType = Waybillnoinfolist[sfexpressflag].waybillType.ToString(); //sfexpress.waybillType;
             item.SumOrder = Waybillnoinfolist.Length; //sfexpress.waybillType;
             item.RecipientsContact = receiver.Name;
@@ -488,6 +512,7 @@ public class SFExpressStrategy : IExpressInterface
             item.PrintTime = DateTime.Now;
             item.PrintPersonnel = _userManager.Account;
             item.EstimatedPrice = GetExpressFee(item);
+            item.ExpressDeliveryOrderId = input.Data.orderId;
             sfexpressflag++;
         }
 
@@ -502,6 +527,14 @@ public class SFExpressStrategy : IExpressInterface
 
         //packageData.Details = sfexpress;
         await _repExpressDelivery.InsertRangeAsync(packageData);
+
+        //修改箱总数信息
+        var packageNum = await _repPackage.AsQueryable().Where(a => getOrderByDNData.Select(b => b.OrderNumber).Contains(a.OrderNumber)).CountAsync();
+        await _repExpressDelivery.AsUpdateable()
+                .SetColumns(a => a.SumOrder == packageNum)
+                .Where(a => getOrderByDNData.Select(b => b.OrderNumber).Contains(a.OrderNumber))
+                .ExecuteCommandAsync();
+
         foreach (var c in packageData)
         {
             await _repPackage.AsUpdateable()
@@ -982,7 +1015,7 @@ public class SFExpressStrategy : IExpressInterface
                 await _repPackage.UpdateAsync(item);
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillType = getExpressDelivery.WaybillType;
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().SumOrder = getExpressDelivery.SumOrder ?? 1;
-                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
+                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0) + 1;
             }
             else
             {
@@ -992,7 +1025,7 @@ public class SFExpressStrategy : IExpressInterface
                 return response;
             }
         }
-        response.Data = result.OrderBy(a=>a.SumOrder).ToList();
+        response.Data = result.OrderBy(a => a.SumOrder).ToList();
         response.Msg = "成功";
         response.Code = StatusCode.Success;
         return response;
@@ -1060,7 +1093,7 @@ public class SFExpressStrategy : IExpressInterface
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
             result.WaybillType = getExpressDelivery.WaybillType;
-            result.WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
+            result.WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0) + 1;
             result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
             response.Data = result;

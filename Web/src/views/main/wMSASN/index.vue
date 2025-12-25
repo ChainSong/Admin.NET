@@ -132,9 +132,9 @@
           <template #default="scope">
             <el-button @click="openQuery(scope.row)" class="el-icon-s-comment" type="text" size="small">查看
             </el-button>
-            <el-button @click="openCancel(scope.row)" class="el-icon-s-comment" type="text" size="small">取消
+            <el-button @click="openCancel(scope.row)" class="el-icon-s-comment" v-auth="'wMSASN:cancel'" type="text" size="small">取消
             </el-button>
-            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text" size="small">编辑</el-button>
+            <el-button @click="openEdit(scope.row)" class="el-icon-edit" type="text"  v-auth="'wMSASN:edit'"  size="small">编辑</el-button>
             <el-button @click="openAsnforReceipt(scope.row)" class="el-icon-edit" type="text"
               size="small">转入库单(部分)</el-button>
           </template>

@@ -311,7 +311,13 @@ public class WMSExpressDelivery : ITenantIdFilter
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Updator { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public string? ExpressDeliveryOrderId { get; set; }
 
+    
     //[Navigate(NavigateType.OneToMany, nameof(WMSPackageDetail.PackageId))]
     //public T Details { get; set; }
 

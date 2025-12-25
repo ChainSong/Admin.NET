@@ -21,4 +21,5 @@ public enum ExpressEnum
     顺丰快递 = 3,
     韵达快递 = 4,
     中通快递 = 5,
+    顺丰快递HachDN维度 = 6,
 }

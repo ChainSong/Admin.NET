@@ -11,6 +11,7 @@ using Admin.NET.Application.Service.WMSExpress.Interface;
 using Admin.NET.Application.Service.WMSExpress.Strategy;
 using Admin.NET.Application.Strategy;
 using Admin.NET.Express.Enumerate;
+using RulesEngine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,24 @@ public class ExpressFactory
             case ExpressEnum.中通快递:
                 break;
             case ExpressEnum.顺丰快递:
+                return new SFExpressStrategy();
+                break;
+            case ExpressEnum.顺丰快递HachDN维度:
+                //判断子流程
+                return new SFExpressHachDNStrategy();
+                break;
+        }
+        return null;
+    }
+
+    public static IExpressInterface GetExpress_Customize(string workflow)
+    {
+        //string aaa = Enum.GetName(typeof(ASNEnum), ASNEnum.ASNExportDefault);
+        switch (workflow)
+        {
+
+            case "哈希DN申请":
+                //判断子流程
                 return new SFExpressStrategy();
                 break;
         }

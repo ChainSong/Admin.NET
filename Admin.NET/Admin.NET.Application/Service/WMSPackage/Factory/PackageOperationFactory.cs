@@ -27,7 +27,7 @@ internal static class PackageOperationFactory
             case "HachDG":
                 return new PackageOperationHachDGStrategy();
             case "Hach":
-                return new PackageOperationDefaultStrategy();
+                return new PackageOperationHachStrategy();
             case "RFID":
                 return new PackageOperationRFIDStrategy();
             default:

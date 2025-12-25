@@ -28,6 +28,7 @@ using Furion.FriendlyException;
 using SqlSugar;
 using System.Text.RegularExpressions;
 using System.Web;
+using Admin.NET.Application.Service.Enumerate;
 
 namespace Admin.NET.Application.Service;
 internal class PackageOperationHachDGStrategy : IPackageOperationInterface
@@ -46,6 +47,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
 
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
@@ -226,14 +228,14 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
 
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
         //1，先获取拣货任务号，判断是一个还是多个
-        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => a.PreOrderNumber).Distinct();
+        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).Distinct();
         if (preOrderNumbers.Count() > 1)
         {
             response.Data.Remark = "该拣货任务为合并订单，请前往查看";
         }
         else
         {
-            var preOrderNumber = preOrderNumbers.First();
+            var preOrderNumber = preOrderNumbers.First().PreOrderNumber;
             //2,根据获取，获取订单号，获取订单备注
             response.Data.Remark = await _repPreOrder.AsQueryable().Where(a => a.PreOrderNumber == preOrderNumber).Select(a => a.Remark).FirstAsync();
 
@@ -248,14 +250,31 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             if (request.ScanQty <= 1)
             {
                 //判断唯一码是不是重复扫描
-                foreach (var item in pickData)
+                if (!string.IsNullOrEmpty(request.SN))
                 {
-                    if (item.ScanPackageInput != null)
+                    //判断唯一码是不是重复扫描
+                    foreach (var item in pickData.Where(a => a.SKU == request.SKU))
                     {
+                        if (item.ScanPackageInput != null)
+                        {
+                            if (!string.IsNullOrEmpty(request.SN))
+                            {
+                                var count = item.ScanPackageInput.Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstOrDefault();
+                                if (count != null && !string.IsNullOrEmpty(count.SN))
+                                {
+                                    response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                    response.Code = StatusCode.Error;
+                                    response.Msg = "不能重复扫描同一个条码";
+                                    return response;
+                                }
+                            }
+                        }
+
+                        //判断JNE 是不是可用
                         if (!string.IsNullOrEmpty(request.SN))
                         {
-                            var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
-                            if (count != null && !string.IsNullOrEmpty(count.SN))
+                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                            if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                                 response.Code = StatusCode.Error;
@@ -264,21 +283,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                             }
                         }
                     }
-
-                    //判断JNE 是不是可用
-                    if (!string.IsNullOrEmpty(request.SN))
-                    {
-                        var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
-                        if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
-                        {
-                            response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                            response.Code = StatusCode.Error;
-                            response.Msg = "不能重复扫描同一个条码";
-                            return response;
-                        }
-                    }
                 }
-
 
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
@@ -645,6 +650,35 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
+                //包装完成，插入
+                List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).ToList())
+                {
+                    //插入反馈指令
+                    WMSInstruction wMSInstruction = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstruction.InstructionType = "出库单回传HachDG";
+                    wMSInstruction.BusinessType = "出库单回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstruction.CustomerId = item.Key.CustomerId;
+                    wMSInstruction.CustomerName = item.Key.CustomerName;
+                    wMSInstruction.WarehouseId = item.Key.WarehouseId;
+                    wMSInstruction.WarehouseName = item.Key.WarehouseName;
+                    wMSInstruction.OperationId = item.Key.OrderId;
+                    wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstruction.TableName = "WMS_Order";
+                    wMSInstruction.InstructionPriority = 63;
+                    wMSInstruction.Remark = "";
+                    wMSInstructions.Add(wMSInstruction);
+                }
+                await _repInstruction.InsertRangeAsync(wMSInstructions);
+                //wMSInstructions.Add(wMSInstruction);
+
+
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));

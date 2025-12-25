@@ -581,6 +581,8 @@ const openPrintJob = async () => {
       }
     });
   }
+  console.log("printData",printData)
+  console.log("result");
   // 判断有没有配置客户自定义打印模板
   if (printData.printTemplate != "") {
     printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });

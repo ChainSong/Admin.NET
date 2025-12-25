@@ -82,8 +82,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
     private readonly SqlSugarRepository<WMSCustomerConfig> _repCustomerConfig;
 
+    private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig, SqlSugarRepository<WMSPreOrder> repPreOrder)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSInstruction> repInstruction)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -109,6 +110,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repWorkFlow = repWorkFlow;
         _repWorkFlowService = repWorkFlowService;
         _repCustomerConfig = repCustomerConfig;
+        _repInstruction = repInstruction;
     }
 
     /// <summary>
@@ -359,6 +361,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation(workflow);
         factory._repPackage = _rep;
         factory._repPreOrder = _repPreOrder;
+        factory._repInstruction = _repInstruction;
         factory._repPickTask = _repPickTask;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
@@ -393,6 +396,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repPackage = _rep;
         factory._repPreOrder = _repPreOrder;
         factory._repPickTask = _repPickTask;
+        factory._repInstruction = _repInstruction;
+
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -426,7 +431,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
-        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repInstruction = _repInstruction;
+
+        //factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repCustomerUser = _repCustomerUser;
@@ -459,7 +466,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
-        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repInstruction = _repInstruction;
+
+        //factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repRFPackageAcquisition = _repRFPackageAcquisition;
@@ -492,6 +501,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
+        factory._repInstruction = _repInstruction;
+
         factory._repPickTaskDetail = _repPickTaskDetail;
         //factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
@@ -544,23 +555,6 @@ public class WMSPackageService : IDynamicApiController, ITransient
             //return new Response<ScanPackageOutput>() { Code = StatusCode.Error, Msg = "你操作频率过快，请稍后重试！" };
         }
         Response<dynamic> response = new Response<dynamic>();
-        IExpressInterface factory = ExpressFactory.GetExpress((ExpressEnum)Enum.Parse(typeof(ExpressEnum), input.ExpressCompany));
-        factory._repPackage = _rep;
-        factory._repPickTask = _repPickTask;
-        factory._repPickTaskDetail = _repPickTaskDetail;
-        factory._repOrderAddress = _repOrderAddress;
-        factory._repWarehouseUser = _repWarehouseUser;
-        factory._repCustomerUser = _repCustomerUser;
-        factory._userManager = _userManager;
-
-        //factory._db = _db;
-
-        factory._repPackageDetail = _repPackageDetail;
-        factory._sysCacheService = _sysCacheService;
-        factory._repWarehouse = _repWarehouse;
-        factory._repExpressDelivery = _repExpressDelivery;
-        factory._repExpressConfig = _repExpressConfig;
-        factory._repWMSExpressFee = _repWMSExpressFee;
         //先校验包装的信息是不是和拣货的信息一致
         var packageCheck = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         var pickCheck = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
@@ -571,6 +565,31 @@ public class WMSPackageService : IDynamicApiController, ITransient
             response.Msg = "包装数量大于拣货数量请核对";
             return response;
         }
+
+        string workflow = "";
+
+        workflow = await _repWorkFlowService.GetSystemWorkFlow(packageCheck.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Print_Express_Data, "");
+
+        IExpressInterface factory = ExpressFactory.GetExpress((ExpressEnum)Enum.Parse(typeof(ExpressEnum), input.ExpressCompany + workflow));
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repOrderAddress = _repOrderAddress;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        factory._repOrder = _repOrder;
+
+        //factory._db = _db;
+
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repWarehouse = _repWarehouse;
+        factory._repExpressDelivery = _repExpressDelivery;
+        factory._repExpressConfig = _repExpressConfig;
+        factory._repWMSExpressFee = _repWMSExpressFee;
+
+
         //获取快递信息（包含快递单号）
         var data = await factory.GetExpressDataList(input);
         if (data.Code == StatusCode.Error)
@@ -859,7 +878,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("RFID");
         factory._repPackage = _rep;
         factory._repPickTask = _repPickTask;
-        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repInstruction = _repInstruction;
+
+        //factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repRFPackageAcquisition = _repRFPackageAcquisition;

@@ -30,7 +30,8 @@ public class OutboundWorkFlowConst
     public const string Workflow_Complete = "完成出库";
     public const string Workflow_Package_Operation = "包装";
     public const string Workflow_Package = "包装单";
-    public const string Workflow_Package_Number_Data = "打印箱号";
+    public const string Workflow_Package_Number_Data = "打印出库箱号";
+    public const string Workflow_Package_Print_Express_Data = "申请快递单号";
     public const string Workflow_Package_Number = "打印箱号";
     public const string Workflow_PreOrder_ForOrder = "转出库单";
     public const string Workflow_PreOrder_ForOrder_ALL = "全部转出库单";

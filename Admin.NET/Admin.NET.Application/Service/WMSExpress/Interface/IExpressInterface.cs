@@ -20,7 +20,8 @@ using Admin.NET.Application.Dtos;
 namespace Admin.NET.Application.Service.WMSExpress.Interface;
 public interface IExpressInterface
 {
-    public SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> _repPackage { get; set; }
+    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }

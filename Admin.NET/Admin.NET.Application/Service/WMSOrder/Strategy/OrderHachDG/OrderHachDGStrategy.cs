@@ -120,29 +120,7 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in orderData)
             {
 
-                //if (item.CustomerName != "哈希")
-                //{
-                //插入反馈指令
-                WMSInstruction wMSInstruction = new WMSInstruction();
-                //wMSInstruction.OrderId = orderData[0].Id;
-                wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
-                wMSInstruction.InstructionType = "出库单回传HachDG";
-                wMSInstruction.BusinessType = "出库单回传HachDG";
-                //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                wMSInstruction.CustomerId = item.CustomerId;
-                wMSInstruction.CustomerName = item.CustomerName;
-                wMSInstruction.WarehouseId = item.WarehouseId;
-                wMSInstruction.WarehouseName = item.WarehouseName;
-                wMSInstruction.OperationId = item.Id;
-                wMSInstruction.OrderNumber = item.ExternOrderNumber;
-                wMSInstruction.Creator = _userManager.Account;
-                wMSInstruction.CreationTime = DateTime.Now;
-                wMSInstruction.InstructionTaskNo = item.ExternOrderNumber;
-                wMSInstruction.TableName = "WMS_Order";
-                wMSInstruction.InstructionPriority = 63;
-                wMSInstruction.Remark = "";
-                wMSInstructions.Add(wMSInstruction);
-
+                
 
                 WMSInstruction wMSInstruction99 = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;

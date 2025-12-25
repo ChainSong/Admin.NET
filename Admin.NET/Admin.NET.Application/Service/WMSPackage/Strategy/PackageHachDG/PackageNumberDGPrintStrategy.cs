@@ -58,7 +58,14 @@ public class PackageNumberDGPrintStrategy : IPackagePrintInterface
             var orderData = await _repOrder.AsQueryable().Where(a => a.Id == item.OrderId).FirstAsync();
             if (orderData != null)
             {
-                item.ExternOrderNumber = orderData.Dn + "_" + item.SerialNumber;
+                if (!string.IsNullOrEmpty(orderData.Dn))
+                {
+                    item.ExternOrderNumber = orderData.Dn + "_" + item.SerialNumber;
+                }
+                else
+                {
+                    item.ExternOrderNumber = orderData.ExternOrderNumber + "_" + item.SerialNumber;
+                }
             }
         }
 
