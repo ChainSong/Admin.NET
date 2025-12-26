@@ -164,11 +164,14 @@ public class WMSRFPackageAcquisition : ITenantIdFilter
     /// </summary>
     [SugarColumn(ColumnDescription = "", Length = 50)]
     public string? Updator { get; set; }
-    
+
+    [SugarColumn(ColumnDescription = "", Length = 50)]
+    public DateTime? UpdateTime { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
     //[SugarColumn(ColumnDescription = "")]
     //public long? TenantId { get; set; }
-    
+
 }

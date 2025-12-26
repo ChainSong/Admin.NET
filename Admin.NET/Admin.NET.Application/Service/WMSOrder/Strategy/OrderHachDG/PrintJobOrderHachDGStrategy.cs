@@ -109,7 +109,9 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                                   PD_SUM AS (SELECT PackageId,SKU,SUM(Qty) AS Qty FROM WMS_PackageDetail GROUP BY PackageId, SKU)
                                   SELECT p.ExternOrderNumber,o.CompleteTime,od.PoCode,p.PackageNumber,
                                   CASE WHEN ISNULL(od.Str2,'')='' THEN od.SKU ELSE od.Str2 END AS SKU,
-                                  CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(ps.Qty,0) ELSE 1 END AS Qty,
+                                  --CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(ps.Qty,0) ELSE 1 END AS Qty,
+                                  --CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(ps.Qty,0) ELSE ps.qty END AS Qty,
+                                  ps.qty  AS Qty,
                                   (CASE WHEN ISNULL(od.Str2,'')='' THEN 0 ELSE 1 END) AS CombinedBoxesNumber,
                                   od.Onwer AS Type,(SELECT COUNT(Id) FROM WMS_Package WHERE OrderId in(
                                   select Id from WMS_Order where dn in(select dn from wms_order where id in ({string.Join(",", request)})))) AS JOBTotalBox

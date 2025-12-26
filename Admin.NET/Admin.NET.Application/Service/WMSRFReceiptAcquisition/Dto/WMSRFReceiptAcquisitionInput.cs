@@ -190,6 +190,10 @@ public class WMSRFReceiptAcquisitionInput : BasePageInput
     /// Updator
     /// </summary>
     public string? Updator { get; set; }
+    /// <summary>
+    /// type:SN/AFC
+    /// </summary>
+    public string? Type {  get; set; }
 
 }
 
