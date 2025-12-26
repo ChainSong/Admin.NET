@@ -89,7 +89,7 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                                    isnull((select sum(qty) from wms_productBom b where sku=a.sku and b.CustomerId = a.CustomerId),1) as SkuQty,CombinedBoxesNumber,OrderType
                                    from (select p.PackageNumber, p.packageTime, od.pocode,
                                    CASE WHEN ISNULL(od.Str2,'')='' THEN od.SKU ELSE od.Str2 END AS SKU,
-                                   CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(pd.Qty,0) ELSE pd.qty END AS Qty,
+                                   CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(od.AllocatedQty,0) ELSE od.AllocatedQty END AS Qty,
                                    CASE WHEN ISNULL(od.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,
                                    p.customerId,od.Onwer AS OrderType from wms_package p 
                                    left join wms_order o on p.orderid=o.id
