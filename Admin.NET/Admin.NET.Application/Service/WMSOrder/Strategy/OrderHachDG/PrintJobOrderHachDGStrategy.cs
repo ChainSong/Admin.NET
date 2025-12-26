@@ -53,11 +53,13 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
 
         WMSOrderPrintCustomerInfo PrintData = new WMSOrderPrintCustomerInfo();
         //查对接表数据
-        var Sql = $@"SELECT distinct DeliveryNumber,ContactName as CustomerName,ContactName as CustomerCode,Address,Telephone as ContactPhone FROM hach_wms_outBound 
-                            where DeliveryNumber IN (SELECT DeliveryNumber FROM hach_wms_outBound 
-                            WHERE ordernumber in( SELECT ExternOrderNumber FROM WMS_Order 
-                            WHERE ID={string.Join(",", request)}))";
-
+        
+        var Sql = $@"SELECT distinct dn,od.Name as CustomerName,od.Name as CustomerCode,Address,od.Phone as ContactPhone FROM WMS_Order o
+                      left join WMS_OrderAddress od on o.ExternOrderNumber = od.ExternOrderNumber
+                      WHERE o.Dn in (
+                      select dn from wms_order where id in ({string.Join(",", request)})
+                      )";
+                      
         PrintData = await _repOb.Context.Ado.SqlQuerySingleAsync<WMSOrderPrintCustomerInfo>(Sql.ToString());
 
         //查出库信息
@@ -85,44 +87,24 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                  .Where(o => o.Id == orders.First().CustomerId).FirstAsync();
         try
         {
-            //string SqlDetail = $@"SELECT  distinct p.ExternOrderNumber, o.CompleteTime, od.PoCode, p.PackageNumber,
-            //                      CASE  WHEN ISNULL(od.Str2, '') = '' THEN od.SKU ELSE od.Str2 END AS 'SKU',
-            //                      -- 母件=1套，普通物料=该箱里该SKU的数量汇总
-            //                      CASE WHEN ISNULL(od.Str2, '') = ''  THEN SUM(ISNULL(pd.Qty, 0))    -- 普通物料：按明细数量
-            //                      -- 母件：每箱一套
-            //                      ELSE 1  END AS Qty,1 AS CombinedBoxesNumber,
-            //                      'DGGC' AS Type,
-            //                      (SELECT COUNT(Id) FROM WMS_Package WHERE OrderId = o.Id) AS JOBTotalBox FROM WMS_Package p
-            //                      LEFT JOIN WMS_PackageDetail pd ON p.Id = pd.PackageId LEFT JOIN WMS_Order o 
-            //                      ON p.OrderId = o.Id LEFT JOIN WMS_OrderDetail od 
-            //                      ON o.Id = od.OrderId AND od.SKU = pd.SKU
-            //                      WHERE p.ExternOrderNumber in
-            //                      (SELECT OrderNumber FROM hach_wms_outBound WHERE DeliveryNumber IN (
-            //                      SELECT DeliveryNumber FROM hach_wms_outBound WHERE ordernumber in(
-            //                      SELECT ExternOrderNumber FROM WMS_Order WHERE ID in ({string.Join(",", request)})))
-            //                      )GROUP BY p.ExternOrderNumber,o.CompleteTime,od.PoCode,p.PackageNumber,od.Str2, 
-            //                      CASE WHEN ISNULL(od.Str2, '') = '' THEN od.SKU
-            //                      ELSE od.Str2 END,o.Id,
-            //                      CASE  WHEN ISNULL(od.Str2, '') = '' THEN 0 ELSE 1 END;";
-
-            string SqlDetail = $@"WITH OD AS (SELECT OrderId,SKU,MAX(PoCode) AS PoCode,MAX(Str2) AS Str2,Onwer FROM WMS_OrderDetail GROUP BY OrderId, SKU,Onwer),
-                                  PD_SUM AS (SELECT PackageId,SKU,SUM(Qty) AS Qty FROM WMS_PackageDetail GROUP BY PackageId, SKU)
-                                  SELECT p.ExternOrderNumber,o.CompleteTime,od.PoCode,p.PackageNumber,
-                                  CASE WHEN ISNULL(od.Str2,'')='' THEN od.SKU ELSE od.Str2 END AS SKU,
-                                  --CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(ps.Qty,0) ELSE 1 END AS Qty,
-                                  --CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(ps.Qty,0) ELSE ps.qty END AS Qty,
-                                  ps.qty  AS Qty,
-                                  (CASE WHEN ISNULL(od.Str2,'')='' THEN 0 ELSE 1 END) AS CombinedBoxesNumber,
-                                  od.Onwer AS Type,(SELECT COUNT(Id) FROM WMS_Package WHERE OrderId in(
-                                  select Id from WMS_Order where dn in(select dn from wms_order where id in ({string.Join(",", request)})))) AS JOBTotalBox
-                                  FROM WMS_Order o
-                                  LEFT JOIN WMS_Package p ON o.Id = p.OrderId
-                                  LEFT JOIN OD od ON o.Id = od.OrderId
-                                  LEFT JOIN PD_SUM ps ON ps.PackageId = p.Id AND ps.SKU = od.SKU
-                                  WHERE o.Dn in (select dn from wms_order where id in ({string.Join(",", request)}))";
+            string SqlDetail = $@";WITH T AS (Select a.PackageNumber, Max(a.packageTime) as CompleteTime,Max(a.pocode) as PoCode,sku,sum(qty) as OrderQty,
+                                   isnull((select sum(qty) from wms_productBom b where sku=a.sku and b.CustomerId = a.CustomerId),1) as SkuQty,CombinedBoxesNumber,OrderType
+                                   from (select p.PackageNumber, p.packageTime, od.pocode,
+                                   CASE WHEN ISNULL(od.Str2,'')='' THEN od.SKU ELSE od.Str2 END AS SKU,
+                                   CASE WHEN ISNULL(od.Str2,'')='' THEN ISNULL(pd.Qty,0) ELSE pd.qty END AS Qty,
+                                   CASE WHEN ISNULL(od.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,
+                                   p.customerId,od.Onwer AS OrderType from wms_package p 
+                                   left join wms_order o on p.orderid=o.id
+                                   left join wms_packagedetail pd on p.id = pd.packageid
+                                   left join wms_orderdetail od  on p.orderid=od.orderid and od.orderid = pd.orderid   and pd.sku = od.sku
+                                   where o.dn in (select dn from wms_order where id in ({string.Join(",", request)}))) a
+                                   group by PackageNumber, a.pocode,sku, CombinedBoxesNumber,OrderType,CustomerId),
+                                   BOX AS (SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T )
+                                   SELECT t.PackageNumber,t.CompleteTime,t.PoCode,t.SKU,FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty,
+                                   t.OrderType AS Type,t.CombinedBoxesNumber,b.JOBTotalBox FROM T t CROSS JOIN BOX b;
+                                   ";
 
             var details = await _repOb.Context.Ado.SqlQueryAsync<WMSOrderPrintDetail>(SqlDetail.ToString());
-
             List<WMSOrderJobPrintDto> orderPrintDtos = new List<WMSOrderJobPrintDto>();
             orderPrintDtos = orders.Adapt<List<WMSOrderJobPrintDto>>();
             foreach (var order in orderPrintDtos)

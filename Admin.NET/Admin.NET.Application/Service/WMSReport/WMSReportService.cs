@@ -470,7 +470,6 @@ public class WMSReportService : IDynamicApiController, ITransient
     {
         List<WMSRFPackageAcquisitionExport> wMSRFPackageAcquisitions = new List<WMSRFPackageAcquisitionExport>();
         IExcelExporter excelExporter = new ExcelExporter();
-
         try
         {
             wMSRFPackageAcquisitions = await _repRFPackageAcquisition.AsQueryable()
