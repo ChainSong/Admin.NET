@@ -942,8 +942,14 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     wMSInstruction.TableName = "WMS_Order";
                     wMSInstruction.InstructionPriority = 63;
                     wMSInstruction.Remark = "";
+                    //var getInstruction63 = await _repInstruction.AsQueryable().Where(a => a.OperationId == item.Key.OrderId && a.BusinessType == "出库单回传HachDG").ToListAsync();
+                    //if (getInstruction63 == null && getInstruction63.Count == 0)
+                    //{
                     wMSInstructions.Add(wMSInstruction);
+                    //}
                 }
+                //判断是不是回传过
+
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
