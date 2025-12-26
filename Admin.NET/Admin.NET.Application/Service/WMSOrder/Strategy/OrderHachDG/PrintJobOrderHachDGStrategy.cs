@@ -54,11 +54,9 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
         WMSOrderPrintCustomerInfo PrintData = new WMSOrderPrintCustomerInfo();
         //查对接表数据
         
-        var Sql = $@"SELECT distinct dn,od.Name as CustomerName,od.Name as CustomerCode,Address,od.Phone as ContactPhone FROM WMS_Order o
+        var Sql = $@"SELECT distinct dn as DeliveryNumber,od.Name as CustomerName,od.Name as CustomerCode,Address,od.Phone as ContactPhone FROM WMS_Order o
                       left join WMS_OrderAddress od on o.ExternOrderNumber = od.ExternOrderNumber
-                      WHERE o.Dn in (
-                      select dn from wms_order where id in ({string.Join(",", request)})
-                      )";
+                      WHERE o.Dn in (select dn from wms_order where id in ({string.Join(",", request)}))";
                       
         PrintData = await _repOb.Context.Ado.SqlQuerySingleAsync<WMSOrderPrintCustomerInfo>(Sql.ToString());
 
