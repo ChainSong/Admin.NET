@@ -153,25 +153,25 @@ namespace Admin.NET.Application.Strategy
                     //if (item.CustomerName != "哈希")
                     //{
                     //插入反馈指令
-                    WMSInstruction wMSInstructionGI = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstructionGI.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstructionGI.InstructionType = "出库单回传HachDG";
-                    wMSInstructionGI.BusinessType = "出库单回传HachDG";
-                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstructionGI.CustomerId = item.CustomerId;
-                    wMSInstructionGI.CustomerName = item.CustomerName;
-                    wMSInstructionGI.WarehouseId = item.WarehouseId;
-                    wMSInstructionGI.WarehouseName = item.WarehouseName;
-                    wMSInstructionGI.OperationId = item.Id;
-                    wMSInstructionGI.OrderNumber = item.ExternOrderNumber;
-                    wMSInstructionGI.Creator = _userManager.Account;
-                    wMSInstructionGI.CreationTime = DateTime.Now;
-                    wMSInstructionGI.InstructionTaskNo = item.ExternOrderNumber;
-                    wMSInstructionGI.TableName = "WMS_Order";
-                    wMSInstructionGI.InstructionPriority = 63;
-                    wMSInstructionGI.Remark = "";
-                    wMSInstructions.Add(wMSInstructionGI);
+                    //WMSInstruction wMSInstructionGI = new WMSInstruction();
+                    ////wMSInstruction.OrderId = orderData[0].Id;
+                    //wMSInstructionGI.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    //wMSInstructionGI.InstructionType = "出库单回传HachDG";
+                    //wMSInstructionGI.BusinessType = "出库单回传HachDG";
+                    ////wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    //wMSInstructionGI.CustomerId = item.CustomerId;
+                    //wMSInstructionGI.CustomerName = item.CustomerName;
+                    //wMSInstructionGI.WarehouseId = item.WarehouseId;
+                    //wMSInstructionGI.WarehouseName = item.WarehouseName;
+                    //wMSInstructionGI.OperationId = item.Id;
+                    //wMSInstructionGI.OrderNumber = item.ExternOrderNumber;
+                    //wMSInstructionGI.Creator = _userManager.Account;
+                    //wMSInstructionGI.CreationTime = DateTime.Now;
+                    //wMSInstructionGI.InstructionTaskNo = item.ExternOrderNumber;
+                    //wMSInstructionGI.TableName = "WMS_Order";
+                    //wMSInstructionGI.InstructionPriority = 63;
+                    //wMSInstructionGI.Remark = "";
+                    //wMSInstructions.Add(wMSInstructionGI);
 
 
 
