@@ -131,8 +131,6 @@ public class WMSReportService : IDynamicApiController, ITransient
 
     #endregion
 
-
-
     #region 第二版大屏数据展示
     /// <summary>
     /// 增加WMSProduct
