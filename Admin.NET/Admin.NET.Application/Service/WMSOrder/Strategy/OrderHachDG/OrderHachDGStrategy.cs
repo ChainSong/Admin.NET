@@ -120,7 +120,7 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in orderData)
             {
 
-                
+
 
                 WMSInstruction wMSInstruction99 = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
@@ -188,7 +188,7 @@ namespace Admin.NET.Application.Strategy
             //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
             //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
             //判断里面有哪些DN 
-            var checkDn = orderData.Where(a=>!string.IsNullOrEmpty(a.Dn)).GroupBy(a => new { a.Dn, a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName })
+            var checkDn = orderData.Where(a => !string.IsNullOrEmpty(a.Dn)).GroupBy(a => new { a.Dn, a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName })
                 .Select(a => new
                 {
                     a.Key.Dn,
@@ -221,7 +221,15 @@ namespace Admin.NET.Application.Strategy
                     wMSInstructionSNGRHach.TableName = "WMS_Order";
                     wMSInstructionSNGRHach.InstructionPriority = 4;
                     wMSInstructionSNGRHach.Remark = "";
-                    wMSInstructions.Add(wMSInstructionSNGRHach);
+                    //判断是否插入过一次
+                    var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == item.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
+                    if (getInstruction == null || getInstruction.Count == 0)
+                    {
+                        if (!string.IsNullOrEmpty(item.Dn))
+                        {
+                            wMSInstructions.Add(wMSInstructionSNGRHach);
+                        }
+                    }
                 }
             }
 

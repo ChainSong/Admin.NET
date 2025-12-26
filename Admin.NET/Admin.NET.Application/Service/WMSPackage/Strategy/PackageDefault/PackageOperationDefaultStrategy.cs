@@ -11,23 +11,24 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using AutoMapper;
+using FluentEmail.Core;
+using Furion.FriendlyException;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FluentEmail.Core;
-using Admin.NET.Application.Service;
-using XAct;
-using Furion.FriendlyException;
-using SqlSugar;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
+using XAct;
 
 namespace Admin.NET.Application.Service;
 internal class PackageOperationDefaultStrategy : IPackageOperationInterface
@@ -251,7 +252,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 if (!string.IsNullOrEmpty(request.SN))
                 {
                     //判断唯一码是不是重复扫描
-                    foreach (var item in pickData.Where(a=>a.SKU== request.SKU))
+                    foreach (var item in pickData.Where(a => a.SKU == request.SKU))
                     {
                         if (item.ScanPackageInput != null)
                         {
@@ -638,6 +639,35 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
+
+                //包装完成，插入
+                List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).ToList())
+                {
+                    //插入反馈指令
+                    WMSInstruction wMSInstruction = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstruction.InstructionType = "出库单回传HachDG";
+                    wMSInstruction.BusinessType = "出库单回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstruction.CustomerId = item.Key.CustomerId;
+                    wMSInstruction.CustomerName = item.Key.CustomerName;
+                    wMSInstruction.WarehouseId = item.Key.WarehouseId;
+                    wMSInstruction.WarehouseName = item.Key.WarehouseName;
+                    wMSInstruction.OperationId = item.Key.OrderId;
+                    wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstruction.TableName = "WMS_Order";
+                    wMSInstruction.InstructionPriority = 63;
+                    wMSInstruction.Remark = "";
+                    wMSInstructions.Add(wMSInstruction);
+                }
+                await _repInstruction.InsertRangeAsync(wMSInstructions);
+                //wMSInstructions.Add(wMSInstruction);
+
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));
