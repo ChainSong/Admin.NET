@@ -24,6 +24,10 @@ using Admin.NET.Application.Service.WMSReport.Dto;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinAccountGetAccountBasicInfoResponse.Types;
 using MathNet.Numerics.OdeSolvers;
 using Admin.NET.Application.Service;
+using System.IO;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using Nest;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -39,9 +43,17 @@ public class WMSReportService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly UserManager _userManager;
-
+    private readonly SqlSugarRepository<WMSRFReceiptAcquisition> _repRFReceiptAcquisition;
+    private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
     private readonly SqlSugarRepository<WMSInventoryUsed> _repTableInventoryUsed;
-    public WMSReportService(SqlSugarRepository<WMSCustomer> repCustomer, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed)
+    public WMSReportService(SqlSugarRepository<WMSCustomer> repCustomer,
+        SqlSugarRepository<CustomerUserMapping> repCustomerUser,
+        SqlSugarRepository<WarehouseUserMapping> repWarehouseUser,
+        UserManager userManager,
+        SqlSugarRepository<TableColumns> repTableColumns,
+        SqlSugarRepository<WMSInventoryUsed> repTableInventoryUsed,
+        SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition,
+        SqlSugarRepository<WMSRFReceiptAcquisition> repRFReceiptAcquisition)
     {
 
         //_db = db;
@@ -51,6 +63,8 @@ public class WMSReportService : IDynamicApiController, ITransient
         _userManager = userManager;
         _repTableColumns = repTableColumns;
         _repTableInventoryUsed = repTableInventoryUsed;
+        _repRFPackageAcquisition = repRFPackageAcquisition;
+        _repRFReceiptAcquisition = repRFReceiptAcquisition;
     }
 
     #region 第一版大屏数据展示
@@ -145,7 +159,7 @@ public class WMSReportService : IDynamicApiController, ITransient
         try
         {
             //1.客户：出入库，出入库金额数据
-            var list1= LeftTable1();
+            var list1 = LeftTable1();
             var list2 = LeftTable2();
             var list3 = LeftTable3();
             var list4 = GetTopPercentage();
@@ -223,7 +237,7 @@ public class WMSReportService : IDynamicApiController, ITransient
             result.pic1Out = list1Qty2;
             result.pic1In = list1Qty3;
             result.pic1All = list1Qty4;
-                
+
             result.pic2Name = list1Price1;
             result.pic2Out = list1Price2;
             result.pic2In = list1Price3;
@@ -323,6 +337,185 @@ public class WMSReportService : IDynamicApiController, ITransient
     #endregion
 
 
+    #region 出入库序列号查询
+
+    /// <summary>
+    /// 入库序列号查询
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetWMSRFReceiptAcquisitionPageList")]
+    public async Task<SqlSugarPagedList<WMSRFReceiptAcquisition>> GetWMSRFReceiptAcquisition(WMSRFReceiptAcquisitionInput input)
+    {
+        SqlSugarPagedList<WMSRFReceiptAcquisition> wMSRFReceiptAcquisitions = new SqlSugarPagedList<WMSRFReceiptAcquisition>();
+        try
+        {
+            wMSRFReceiptAcquisitions = await _repRFReceiptAcquisition.AsQueryable()
+                .WhereIF(!string.IsNullOrEmpty(input.ExternReceiptNumber), a => a.ExternReceiptNumber.Contains(input.ExternReceiptNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.ASNNumber), a => a.ASNNumber.Contains(input.ASNNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.ReceiptNumber), a => a.ReceiptNumber.Contains(input.ReceiptNumber))
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+                .WhereIF(input.WarehouseId != null && input.WarehouseId > 0, a => a.WarehouseId == input.WarehouseId)
+                .WhereIF(!string.IsNullOrEmpty(input.Type), a => a.Type.Contains(input.Type))
+                .WhereIF(!string.IsNullOrEmpty(input.SKU), a => a.SKU.Contains(input.SKU))
+                .WhereIF(!string.IsNullOrEmpty(input.Lot), a => a.Lot.Contains(input.Lot))
+                .WhereIF(!string.IsNullOrEmpty(input.SN), a => a.SN.Contains(input.SN))
+                .OrderByDescending(a => a.CreationTime)
+                .ToPagedListAsync(input.Page, input.PageSize);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+        return wMSRFReceiptAcquisitions;
+    }
+
+    /// <summary>
+    /// 入库序列号导出
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "ExportWMSRFReceiptAcquisition")]
+    public async Task<ActionResult> ExportWMSRFReceiptAcquisition(WMSRFReceiptAcquisitionInput input)
+    {
+        List<WMSRFReceiptAcquisitionExport> wMSRFReceiptAcquisitions = new List<WMSRFReceiptAcquisitionExport>();
+        IExcelExporter excelExporter = new ExcelExporter();
+        try
+        {
+            wMSRFReceiptAcquisitions = await _repRFReceiptAcquisition.AsQueryable()
+                .WhereIF(!string.IsNullOrEmpty(input.ExternReceiptNumber), a => a.ExternReceiptNumber.Contains(input.ExternReceiptNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.ASNNumber), a => a.ASNNumber.Contains(input.ASNNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.ReceiptNumber), a => a.ReceiptNumber.Contains(input.ReceiptNumber))
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+                .WhereIF(input.WarehouseId != null && input.WarehouseId > 0, a => a.WarehouseId == input.WarehouseId)
+                .WhereIF(!string.IsNullOrEmpty(input.Type), a => a.Type.Contains(input.Type))
+                .WhereIF(!string.IsNullOrEmpty(input.SKU), a => a.SKU.Contains(input.SKU))
+                .WhereIF(!string.IsNullOrEmpty(input.Lot), a => a.Lot.Contains(input.Lot))
+                .WhereIF(!string.IsNullOrEmpty(input.SN), a => a.SN.Contains(input.SN))
+                .Select(a => new WMSRFReceiptAcquisitionExport
+                {
+                    ExternReceiptNumber = a.ExternReceiptNumber,
+                    ASNNumber = a.ASNNumber,
+                    ReceiptNumber = a.ReceiptNumber,
+                    CustomerName = a.CustomerName,
+                    WarehouseName = a.WarehouseName,
+                    Type = a.Type,
+                    SKU = a.SKU,
+                    Lot = a.Lot,
+                    SN = a.SN,
+                    ProductionDate = a.ProductionDate,
+                    ExpirationDate = a.ExpirationDate,
+                    CreationTime = a.CreationTime,
+                    Creator = a.Creator,
+                    UpdateTime = a.UpdateTime,
+                    Updator = a.Updator,
+                })
+                .OrderByDescending(a => a.CreationTime)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+        // 使用 IExcelExporter 导出 DataTable 数据
+        var res = await excelExporter.ExportAsByteArray(wMSRFReceiptAcquisitions);
+
+        return new FileStreamResult(new MemoryStream(res), "application/octet-stream")
+        {
+            FileDownloadName = DateTime.Now.ToString("yyyyMMddHHmm") + "入库SN报表.xlsx"
+        };
+    }
+
+    /// <summary>
+    /// 出库序列号查询
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "GetWMSRFPackageAcquisitionPageList")]
+    public async Task<SqlSugarPagedList<WMSRFPackageAcquisition>> GetWMSRFPackageAcquisition(WMSRFPackageAcquisitionInput input)
+    {
+        SqlSugarPagedList<WMSRFPackageAcquisition> wMSRFPackageAcquisitions = new SqlSugarPagedList<WMSRFPackageAcquisition>();
+        try
+        {
+            wMSRFPackageAcquisitions = await _repRFPackageAcquisition.AsQueryable()
+                .WhereIF(!string.IsNullOrEmpty(input.ExternOrderNumber), a => a.ExternOrderNumber.Contains(input.ExternOrderNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.PreOrderNumber), a => a.PreOrderNumber.Contains(input.PreOrderNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.OrderNumber), a => a.OrderNumber.Contains(input.OrderNumber))
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+                .WhereIF(input.WarehouseId != null && input.WarehouseId > 0, a => a.WarehouseId == input.WarehouseId)
+                .WhereIF(!string.IsNullOrEmpty(input.Type), a => a.Type.Contains(input.Type))
+                .WhereIF(!string.IsNullOrEmpty(input.SKU), a => a.SKU.Contains(input.SKU))
+                .WhereIF(!string.IsNullOrEmpty(input.Lot), a => a.Lot.Contains(input.Lot))
+                .WhereIF(!string.IsNullOrEmpty(input.SN), a => a.SN.Contains(input.SN))
+                .OrderByDescending(a => a.CreationTime)
+                .ToPagedListAsync(input.Page, input.PageSize);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+        return wMSRFPackageAcquisitions;
+    }
+    /// <summary>
+    /// 出库序列号导出
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "ExportWMSRFPackageAcquisition")]
+    public async Task<ActionResult> ExportWMSRFPackageAcquisition(WMSRFPackageAcquisitionInput input)
+    {
+        List<WMSRFPackageAcquisitionExport> wMSRFPackageAcquisitions = new List<WMSRFPackageAcquisitionExport>();
+        IExcelExporter excelExporter = new ExcelExporter();
+        try
+        {
+            wMSRFPackageAcquisitions = await _repRFPackageAcquisition.AsQueryable()
+                .WhereIF(!string.IsNullOrEmpty(input.ExternOrderNumber), a => a.ExternOrderNumber.Contains(input.ExternOrderNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.PreOrderNumber), a => a.PreOrderNumber.Contains(input.PreOrderNumber))
+                .WhereIF(!string.IsNullOrEmpty(input.OrderNumber), a => a.OrderNumber.Contains(input.OrderNumber))
+                .WhereIF(input.CustomerId != null && input.CustomerId > 0, a => a.CustomerId == input.CustomerId)
+                .WhereIF(input.WarehouseId != null && input.WarehouseId > 0, a => a.WarehouseId == input.WarehouseId)
+                .WhereIF(!string.IsNullOrEmpty(input.Type), a => a.Type.Contains(input.Type))
+                .WhereIF(!string.IsNullOrEmpty(input.SKU), a => a.SKU.Contains(input.SKU))
+                .WhereIF(!string.IsNullOrEmpty(input.Lot), a => a.Lot.Contains(input.Lot))
+                .WhereIF(!string.IsNullOrEmpty(input.SN), a => a.SN.Contains(input.SN))
+                .Select(a => new  WMSRFPackageAcquisitionExport
+                {
+                    ExternOrderNumber = a.ExternOrderNumber,
+                    PreOrderNumber = a.PreOrderNumber,
+                    OrderNumber = a.OrderNumber,
+                    CustomerName = a.CustomerName,
+                    WarehouseName = a.WarehouseName,
+                    Type = a.Type,
+                    SKU = a.SKU,
+                    Lot = a.Lot,
+                    SN = a.SN,
+                    ProductionDate = a.ProductionDate,
+                    ExpirationDate = a.ExpirationDate,
+                    CreationTime = a.CreationTime,
+                    Creator = a.Creator,
+                    Updator = a.Updator,
+                    UpdateTime=a.UpdateTime
+                })
+                .OrderByDescending(a => a.CreationTime)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+        // 使用 IExcelExporter 导出 DataTable 数据
+        var res = await excelExporter.ExportAsByteArray(wMSRFPackageAcquisitions);
+
+        return new FileStreamResult(new MemoryStream(res), "application/octet-stream")
+        {
+            FileDownloadName = DateTime.Now.ToString("yyyyMMddHHmm") + "出库(包装)SN报表.xlsx"
+        };
+    }
+    #endregion
 
 }
 
