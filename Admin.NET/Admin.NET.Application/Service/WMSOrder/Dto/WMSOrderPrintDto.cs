@@ -318,15 +318,15 @@ public class WMSOrderPrintDto
 }
 public class WMSOrderJobPrintDto: WMSOrder
 {
-    public WMSCustomer Customer { get; set; }
-    public WMSWarehouse Warehouse { get; set; }
-    public WMSCustomerConfig CustomerConfig { get; set; }
-    public WMSCustomerDetail CustomerDetail { get; set; }
-    public WMSOrderAddress OrderAddress { get; set; }
-    public WMSOrderPrintJobPackageDto PackageInfo { get; set; }
-    public HachWmsOutBound outBound { get; set; }
-    public WMSOrderPrintCustomerInfo wMSOrderPrintCustomerInfo { get; set; }
-    public List<WMSOrderPrintDetail> JobDetails { get; set; }
+    public WMSCustomer Customer { get; set; } = new WMSCustomer();
+    public WMSWarehouse Warehouse { get; set; } = new WMSWarehouse();
+    public WMSCustomerConfig CustomerConfig { get; set; } = new WMSCustomerConfig();
+    public WMSCustomerDetail CustomerDetail { get; set; } = new WMSCustomerDetail();
+    public WMSOrderAddress OrderAddress { get; set; } = new WMSOrderAddress();
+    public WMSOrderPrintJobPackageDto PackageInfo { get; set; } = new WMSOrderPrintJobPackageDto();
+    public HachWmsOutBound outBound { get; set; }= new HachWmsOutBound();
+    public WMSOrderPrintCustomerInfo wMSOrderPrintCustomerInfo { get; set; } = new WMSOrderPrintCustomerInfo();
+    public List<WMSOrderPrintDetail> JobDetails { get; set; } = new List<WMSOrderPrintDetail>();
 
 }
 public class WMSOrderPrintJobPackageDto
