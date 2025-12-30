@@ -119,9 +119,6 @@ namespace Admin.NET.Application.Strategy
             List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
             foreach (var item in orderData)
             {
-
-
-
                 WMSInstruction wMSInstruction99 = new WMSInstruction();
                 //wMSInstruction.OrderId = orderData[0].Id;
                 wMSInstruction99.InstructionStatus = (int)InstructionStatusEnum.新增;
@@ -201,7 +198,10 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in checkDn)
             {
                 var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.OrderStatus != (int)OrderStatusEnum.完成).ToListAsync();
-                if (checkOrderDN == null || checkOrderDN.Count == 0)
+                //已经转出库单的都已经完成， 且预出库单没有新增
+                var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
+
+                if ((checkOrderDN != null || checkOrderDN.Count > 0) && checkPreOrderDN.Count == 0)
                 {
                     WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
                     //wMSInstruction.OrderId = orderData[0].Id;
