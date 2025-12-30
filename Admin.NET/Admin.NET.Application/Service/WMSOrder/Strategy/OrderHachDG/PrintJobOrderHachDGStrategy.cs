@@ -153,6 +153,7 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                 result.Warehouse = warehouse;
                 result.CustomerConfig=customer.CustomerConfig;
                 result.CustomerDetail=customer.Details.FirstOrDefault();
+                result.OrderAddress=oa;
                 result.OrderAddress.Address =  $"{oa?.Province ?? ""}{oa?.City ?? ""}{oa?.County ?? ""}{oa?.Address ?? ""}";
                 result.wMSOrderPrintCustomerInfo = item;
                 result.JobDetails = details;
