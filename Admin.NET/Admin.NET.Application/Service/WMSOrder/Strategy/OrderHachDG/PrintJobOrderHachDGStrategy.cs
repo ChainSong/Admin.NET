@@ -140,13 +140,13 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                                CROSS APPLY ( SELECT TOP 1 od.Str2 FROM wms_orderdetail od INNER JOIN wms_order o ON od.OrderId = o.Id WHERE o.DN in ({item.DeliveryNumber}) 
                                AND od.SKU = pd.SKU) od2
                                CROSS APPLY (
-                               SELECT TOP 1 o.Id AS OrderId FROM wms_order o WHERE o.DN in (49552590))  o1 LEFT JOIN OD od ON od.OrderId = o1.OrderId),
+                               SELECT TOP 1 o.Id AS OrderId FROM wms_order o WHERE o.DN in ({item.DeliveryNumber}))   o1 LEFT JOIN OD od ON od.OrderId = o1.OrderId),
                                BOX AS (SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T)
                                SELECT t.PackageNumber,t.CompleteTime,t.PoCode,
                                t.SKU,FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty,t.OrderType AS Type,t.CombinedBoxesNumber, b.JOBTotalBox FROM T t CROSS JOIN BOX b
                                ORDER BY t.PackageNumber, t.SKU; ";
 
-                var details = await _repOb.Context.Ado.SqlQueryAsync<WMSOrderPrintDetail>(SqlDetail.ToString());
+                 var details = await _repOb.Context.Ado.SqlQueryAsync<WMSOrderPrintDetail>(SqlDetail.ToString());
 
                 result= item.Adapt<WMSOrderJobPrintDto>();
                 result.Customer = customer;
