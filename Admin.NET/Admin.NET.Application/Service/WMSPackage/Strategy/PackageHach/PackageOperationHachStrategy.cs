@@ -705,7 +705,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             {
                 //包装完成，插入
                 List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
-                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).ToList())
+                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).Distinct().ToList())
                 {
                     //插入反馈指令
                     WMSInstruction wMSInstruction = new WMSInstruction();
