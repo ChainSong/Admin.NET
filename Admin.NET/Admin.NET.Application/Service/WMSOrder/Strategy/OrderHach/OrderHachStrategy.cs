@@ -251,7 +251,7 @@ namespace Admin.NET.Application.Strategy
                     //已经转出库单的都已经完成， 且预出库单没有新增
                     var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
 
-                    if ((checkOrderDN != null && checkOrderDN.Count > 0) && checkPreOrderDN.Count == 0)
+                    if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
                     {
                         WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
                         //wMSInstruction.OrderId = orderData[0].Id;

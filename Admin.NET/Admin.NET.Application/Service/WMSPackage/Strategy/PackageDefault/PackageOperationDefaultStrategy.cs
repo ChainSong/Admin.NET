@@ -212,8 +212,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             pickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                   .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                   .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-              .GroupBy(a => new { a.SKU, a.PickTaskNumber })
-              .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
+              .GroupBy(a => new { a.SKU, a.PickTaskNumber,a.CustomerId })
+              .Select(a => new PackageData { SKU = a.SKU, CustomerId=a.CustomerId, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
               .ToList();
 
             if (pickData.Count > 0)
@@ -258,7 +258,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         {
                             if (!string.IsNullOrEmpty(request.SN))
                             {
-                                var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
+                                var count = item.ScanPackageInput.Where(a => a.SN == request.SN && pickData.First().CustomerId==a.CustomerId).FirstOrDefault();
                                 if (count != null && !string.IsNullOrEmpty(count.SN))
                                 {
                                     response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -272,7 +272,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         //判断JNE 是不是可用
                         if (!string.IsNullOrEmpty(request.SN))
                         {
-                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN).FirstAsync();
+                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && pickData.First().CustomerId == a.CustomerId).FirstAsync();
                             if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
