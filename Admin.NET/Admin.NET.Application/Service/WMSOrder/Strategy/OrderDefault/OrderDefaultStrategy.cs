@@ -89,6 +89,15 @@ namespace Admin.NET.Application.Strategy
             }
             foreach (var item in request)
             {
+                //判断拣货任务数量是不是小于订单信息的（不能多发货）
+                var AllocationQty = orderData.Where(a => a.Id == item).First().Allocation.Sum(a => a.Qty);
+                var PickQty = package.Where(a => a.OrderId == item).Sum(a => a.PickQty);
+                if (AllocationQty < PickQty)
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "订单异常:请检查是因为拣货任务导致多发货";
+                    return response;
+                }
                 if (package.Where(a => a.PickStatus != (int)PickTaskStatusEnum.包装完成).Count() > 0)
                 {
                     response.Code = StatusCode.Error;

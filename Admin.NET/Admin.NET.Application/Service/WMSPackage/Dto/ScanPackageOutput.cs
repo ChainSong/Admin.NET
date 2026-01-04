@@ -38,6 +38,7 @@ public class ScanPackageOutput
 public class PackageData
 {
 
+    public long CustomerId { get; set; }
     public string OrderNumber { get; set; }
     public string SKU { get; set; }
     public string PickTaskNumber { get; set; }

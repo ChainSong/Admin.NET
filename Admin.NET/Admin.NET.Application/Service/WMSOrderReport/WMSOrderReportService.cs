@@ -250,7 +250,9 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber
                 ) Package
                 outer apply(
-                select SN from WMS_RFPackageAcquisition where WMS_RFPackageAcquisition.PackageNumber = Package.PackageNumber and type = 'AFC'
+               select SN from WMS_RFPackageAcquisition where WMS_RFPackageAcquisition.PackageNumber = Package.PackageNumber and type = 'AFC'
+				and WMS_RFPackageAcquisition.CustomerId=WMS_Order.CustomerId and WMS_RFPackageAcquisition.ExternOrderNumber=WMS_Order.ExternOrderNumber
+				and     WMS_RFPackageAcquisition.SKU= WMS_OrderDetail.SKU 
                 ) RFPackageAcquisition
                 outer apply(
                 select * from WMS_Handover where WMS_Handover.PackageNumber = Package.PackageNumber and WMS_Handover.ExternOrderNumber = WMS_Order.ExternOrderNumber

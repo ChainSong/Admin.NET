@@ -100,7 +100,7 @@ namespace Admin.NET.Application.Strategy
             foreach (var item in orderData)
             {
                 //判断是不是都已经交接
-                var handover = await _repHandover.AsQueryable().Where(a => request.Contains(item.Id)).ToListAsync();
+                var handover = await _repHandover.AsQueryable().Where(a => a.OrderId == (item.Id)).ToListAsync();
                 if (handover == null || handover.Count == 0)
                 {
                     response.Code = StatusCode.Error;
@@ -201,7 +201,7 @@ namespace Admin.NET.Application.Strategy
                 //已经转出库单的都已经完成， 且预出库单没有新增
                 var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
 
-                if ((checkOrderDN != null || checkOrderDN.Count > 0) && checkPreOrderDN.Count == 0)
+                if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
                 {
                     WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
                     //wMSInstruction.OrderId = orderData[0].Id;
@@ -227,7 +227,10 @@ namespace Admin.NET.Application.Strategy
                     {
                         if (!string.IsNullOrEmpty(item.Dn))
                         {
-                            wMSInstructions.Add(wMSInstructionSNGRHach);
+                            if (wMSInstructions.Where(a => a.OperationId == item.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+                            {
+                                wMSInstructions.Add(wMSInstructionSNGRHach);
+                            }
                         }
                     }
                 }
