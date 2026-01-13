@@ -64,12 +64,12 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                       WHERE o.Dn in (select dn from wms_order where id in ({string.Join(",", request)}))";
         PrintList = await _repOb.Context.Ado.SqlQueryAsync<WMSOrderPrintCustomerInfo>(Sql.ToString());
 
-        if (PrintList==null || PrintList.Count==0)
+        if (PrintList == null || PrintList.Count == 0)
         {
             throw Oops.Oh("获取dn数据繁忙！");
         }
 
-       
+
         foreach (var item in PrintList)
         {
             WMSOrderJobPrintDto result = new WMSOrderJobPrintDto();
@@ -78,7 +78,7 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
             List<WMSOrder> orders = await _repOrder.AsQueryable()
                      .Includes(a => a.Details)
                      .Includes(a => a.OrderAddress)
-                     .Where(a=>a.Dn == item.DeliveryNumber)
+                     .Where(a => a.Dn == item.DeliveryNumber)
                      .ToListAsync();
 
             var firstOrder = orders.FirstOrDefault();
@@ -119,64 +119,63 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
                      .Includes(a => a.CustomerConfig)
                      .Where(o => o.Id == orders.First().CustomerId).FirstAsync();
 
-             workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, orders.First().OrderType);
+            workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Job_Order, orders.First().OrderType);
             try
             {
-                //string SqlDetail = $@"WITH PD AS (
-                //               SELECT p.PackageNumber,MAX(p.PackageTime) AS CompleteTime,p.CustomerId, pd.SKU, SUM(pd.Qty) AS PackQty
-                //               FROM wms_package p
-                //               INNER JOIN wms_packagedetail pd ON p.Id = pd.PackageId INNER JOIN wms_order o ON p.OrderId = o.Id WHERE o.DN in ({item.DeliveryNumber})
-                //               GROUP BY p.PackageNumber, p.CustomerId, pd.SKU),
-                //               OD AS (SELECT o.Id AS OrderId,MAX(od.PoCode) AS PoCode,
-                //               MAX(od.Onwer) AS OrderType FROM wms_order o
-                //               LEFT JOIN wms_orderdetail od ON o.Id = od.OrderId WHERE o.DN in ({item.DeliveryNumber}) GROUP BY o.Id),
-                //               T AS (
-                //               SELECT pd.PackageNumber,pd.CompleteTime,od.PoCode,CASE WHEN ISNULL(od2.Str2,'')='' THEN pd.SKU ELSE od2.Str2 END AS SKU,
-                //               pd.PackQty AS OrderQty,ISNULL((SELECT SUM(qty) FROM wms_productBom b 
-                //               WHERE b.sku = pd.SKU AND b.CustomerId = pd.CustomerId ),1) AS SkuQty,
-                //               CASE WHEN ISNULL(od2.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,
-                //               od.OrderType
-                //               FROM PD pd
-                //               CROSS APPLY ( SELECT TOP 1 od.Str2 FROM wms_orderdetail od INNER JOIN wms_order o ON od.OrderId = o.Id WHERE o.DN in ({item.DeliveryNumber}) 
-                //               AND od.SKU = pd.SKU) od2
-                //               CROSS APPLY (
-                //               SELECT TOP 1 o.Id AS OrderId FROM wms_order o WHERE o.DN in ({item.DeliveryNumber}))   o1 LEFT JOIN OD od ON od.OrderId = o1.OrderId),
-                //               BOX AS (SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T)
-                //               SELECT t.PackageNumber,t.CompleteTime,t.PoCode,
-                //               t.SKU,FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty,t.OrderType AS Type,t.CombinedBoxesNumber, b.JOBTotalBox FROM T t CROSS JOIN BOX b
-                //               ORDER BY t.PackageNumber, t.SKU; ";
+                #region 
+                //没有汇总的版本
+                //string SqlDetail = $@"WITH PD AS (SELECT p.PackageNumber,MAX(p.PackageTime) AS CompleteTime,
+                //                      p.CustomerId,pd.SKU,SUM(pd.Qty) AS PackQty FROM wms_package p 
+                //                      INNER JOIN wms_packagedetail pd ON p.Id = pd.PackageId 
+                //                      INNER JOIN wms_order o ON p.OrderId = o.Id 
+                //                      WHERE o.DN in ({item.DeliveryNumber})GROUP BY p.PackageNumber, p.CustomerId, pd.SKU),
+                //                      T AS (SELECT pd.PackageNumber,pd.CompleteTime,od_info.PoCode,
+                //                      CASE WHEN ISNULL(od2.Str2,'')='' THEN pd.SKU ELSE od2.Str2 END AS SKU,
+                //                      pd.PackQty AS OrderQty,ISNULL((SELECT SUM(qty) FROM wms_productBom b 
+                //                      WHERE b.sku = pd.SKU AND b.CustomerId = pd.CustomerId ),1) AS SkuQty,CASE WHEN ISNULL(od2.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,
+                //                      od_info.OrderType FROM PD pd
+                //                      CROSS APPLY (SELECT TOP 1 od.Str2 FROM wms_orderdetail od 
+                //                      INNER JOIN wms_order o ON od.OrderId = o.Id 
+                //                      WHERE o.DN in ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC ) od2
+                //                      CROSS APPLY (
+                //                      SELECT TOP 1 od.PoCode, od.Onwer AS OrderType FROM wms_orderdetail od
+                //                      INNER JOIN wms_order o ON od.OrderId = o.Id
+                //                      WHERE o.DN in ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC ) od_info),
+                //                      BOX AS (SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T)
+                //                      SELECT t.PackageNumber,t.CompleteTime,t.PoCode,t.SKU,FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty,
+                //                      t.OrderType AS Type,t.CombinedBoxesNumber,b.JOBTotalBox FROM T t  CROSS JOIN BOX b
+                //                      ORDER BY t.PackageNumber, t.SKU; ";
+                #endregion
 
-                string SqlDetail = $@"WITH PD AS (SELECT p.PackageNumber,MAX(p.PackageTime) AS CompleteTime,
-                                      p.CustomerId,pd.SKU,SUM(pd.Qty) AS PackQty FROM wms_package p 
-                                      INNER JOIN wms_packagedetail pd ON p.Id = pd.PackageId 
-                                      INNER JOIN wms_order o ON p.OrderId = o.Id 
-                                      WHERE o.DN in ({item.DeliveryNumber})GROUP BY p.PackageNumber, p.CustomerId, pd.SKU),
-                                      T AS (SELECT pd.PackageNumber,pd.CompleteTime,od_info.PoCode,
-                                      CASE WHEN ISNULL(od2.Str2,'')='' THEN pd.SKU ELSE od2.Str2 END AS SKU,
-                                      pd.PackQty AS OrderQty,ISNULL((SELECT SUM(qty) FROM wms_productBom b 
-                                      WHERE b.sku = pd.SKU AND b.CustomerId = pd.CustomerId ),1) AS SkuQty,CASE WHEN ISNULL(od2.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,
-                                      od_info.OrderType FROM PD pd
-                                      CROSS APPLY (SELECT TOP 1 od.Str2 FROM wms_orderdetail od 
-                                      INNER JOIN wms_order o ON od.OrderId = o.Id 
-                                      WHERE o.DN in ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC ) od2
-                                      CROSS APPLY (
-                                      SELECT TOP 1 od.PoCode, od.Onwer AS OrderType FROM wms_orderdetail od
-                                      INNER JOIN wms_order o ON od.OrderId = o.Id
-                                      WHERE o.DN in ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC ) od_info),
-                                      BOX AS (SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T)
-                                      SELECT t.PackageNumber,t.CompleteTime,t.PoCode,t.SKU,FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty,
-                                      t.OrderType AS Type,t.CombinedBoxesNumber,b.JOBTotalBox FROM T t  CROSS JOIN BOX b
-                                      ORDER BY t.PackageNumber, t.SKU; ";
-                
+                //--外层汇总：按 SKU 分组 SUM(qty)
+                string SqlDetail = $@" WITH PD AS (SELECT p.PackageNumber,MAX(p.PackageTime) AS CompleteTime,p.CustomerId,pd.SKU,SUM(pd.Qty) AS PackQty
+                                       FROM wms_package p
+                                       INNER JOIN wms_packagedetail pd ON p.Id = pd.PackageId
+                                       INNER JOIN wms_order o ON p.OrderId = o.Id
+                                       WHERE o.DN IN ({item.DeliveryNumber}) GROUP BY p.PackageNumber, p.CustomerId, pd.SKU),
+                                       T AS (SELECT pd.PackageNumber,pd.CompleteTime,od_info.PoCode,CASE WHEN ISNULL(od2.Str2,'')='' THEN pd.SKU ELSE od2.Str2 END AS SKU,
+                                       pd.PackQty AS OrderQty,ISNULL((SELECT SUM(qty)FROM wms_productBom b WHERE b.sku = pd.SKU AND b.CustomerId = pd.CustomerId),1) AS SkuQty,
+                                       CASE WHEN ISNULL(od2.Str2,'')='' THEN 0 ELSE 1 END AS CombinedBoxesNumber,od_info.OrderType
+                                       FROM PD pd CROSS APPLY ( SELECT TOP 1 od.Str2 FROM wms_orderdetail od
+                                       INNER JOIN wms_order o ON od.OrderId = o.Id WHERE o.DN IN ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC) od2
+                                       CROSS APPLY ( SELECT TOP 1 od.PoCode, od.Onwer AS OrderType FROM wms_orderdetail od INNER JOIN wms_order o ON od.OrderId = o.Id
+                                       WHERE o.DN IN ({item.DeliveryNumber}) AND od.SKU = pd.SKU ORDER BY od.Id DESC) od_info),
+                                       BOX AS ( SELECT COUNT(DISTINCT PackageNumber) AS JOBTotalBox FROM T ),
+                                       R AS ( SELECT t.PackageNumber, t.CompleteTime, t.PoCode, t.SKU, FLOOR(t.OrderQty / NULLIF(t.SkuQty,0)) AS qty, t.OrderType AS Type,
+                                       t.CombinedBoxesNumber, b.JOBTotalBox FROM T t CROSS JOIN BOX b)
+                                       SELECT r.PackageNumber,MAX(r.CompleteTime) AS CompleteTime,MAX(r.PoCode) AS PoCode,r.SKU,SUM(r.qty) AS qty,MAX(r.Type) AS Type,
+                                       MAX(r.CombinedBoxesNumber) AS CombinedBoxesNumber, MAX(r.JOBTotalBox) AS JOBTotalBox FROM R r GROUP BY r.PackageNumber, r.SKU 
+                                       ORDER BY r.PackageNumber, r.SKU; ";
+
                 var details = await _repOb.Context.Ado.SqlQueryAsync<WMSOrderPrintDetail>(SqlDetail.ToString());
 
-                result= item.Adapt<WMSOrderJobPrintDto>();
+                result = item.Adapt<WMSOrderJobPrintDto>();
                 result.Customer = customer;
                 result.Warehouse = warehouse;
-                result.CustomerConfig=customer.CustomerConfig;
-                result.CustomerDetail=customer.Details.FirstOrDefault();
+                result.CustomerConfig = customer.CustomerConfig;
+                result.CustomerDetail = customer.Details.FirstOrDefault();
                 result.OrderAddress = oa;
-                result.OrderAddress.Address =  $"{oa?.Province ?? ""}{oa?.City ?? ""}{oa?.County ?? ""}{oa?.Address ?? ""}";
+                result.OrderAddress.Address = $"{oa?.Province ?? ""}{oa?.City ?? ""}{oa?.County ?? ""}{oa?.Address ?? ""}";
                 result.wMSOrderPrintCustomerInfo = item;
                 result.JobDetails = details;
             }

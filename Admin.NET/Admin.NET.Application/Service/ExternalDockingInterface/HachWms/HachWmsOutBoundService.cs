@@ -341,8 +341,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
             Phone = outBound.Telephone,
             Address = outBound.Address,
             CreationTime = DateTime.Now,
-            Creator = _userManager.UserId.ToString()
-            ,
+            Creator = _userManager.UserId.ToString(),
+            AddressTag=outBound.EndUserName,
             TenantId = wmsAuthorizationConfig.TenantId ?? 1300000000001
         };
 
