@@ -279,7 +279,7 @@ public class SFExpressStrategy : IExpressInterface
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-   
+
     public async Task<Response> GetExpressDataList(ScanPackageInput request)
     {
         Response response = new Response();
@@ -405,10 +405,20 @@ public class SFExpressStrategy : IExpressInterface
         input.ServiceCode = "EXP_RECE_CREATE_ORDER"; //下单方法
                                                      //判断已经申请过母单号，使用申请子单号的方法
         var packageParent = _repPackage.AsQueryable().Where(a => a.OrderNumber == packageOrder.OrderNumber && !string.IsNullOrEmpty(a.ExpressNumber)).ToList();
+        //
+        //判断是不是存在回退过，去历史数据里面抽取牡丹号信息
+        var deliveryCount = await _repExpressDelivery.AsQueryable().Where(a => packageOrder.OrderId == a.OrderId).ToListAsync();
         if (packageParent.Count > 0)
         {
             input.ServiceCode = "EXP_RECE_GET_SUB_MAILNO"; //下单方法（获取子单号）
         }
+        //if (deliveryCount != null && deliveryCount.Count > 0)
+        //{
+        //    input.ServiceCode = "EXP_RECE_GET_SUB_MAILNO"; //下单方法（获取子单号）
+
+        //    input.Data.orderId = deliveryCount.First().ExpressDeliveryOrderId;
+
+        //}
         //input.Data.contactInfoList[1].company = "_";
         string Express = ExpressApplication.GetExpress(input);
 
@@ -487,6 +497,7 @@ public class SFExpressStrategy : IExpressInterface
             item.RecipientsPostCode = "";
             item.PrintTime = DateTime.Now;
             item.PrintPersonnel = _userManager.Account;
+            item.ExpressDeliveryOrderId = input.Data.orderId;
             item.EstimatedPrice = GetExpressFee(item);
             sfexpressflag++;
         }
@@ -982,7 +993,7 @@ public class SFExpressStrategy : IExpressInterface
                 await _repPackage.UpdateAsync(item);
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillType = getExpressDelivery.WaybillType;
                 result.Where(a => a.PackageNumber == item.PackageNumber).First().SumOrder = getExpressDelivery.SumOrder ?? 1;
-                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
+                result.Where(a => a.PackageNumber == item.PackageNumber).First().WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0) + 1;
             }
             else
             {
@@ -992,7 +1003,7 @@ public class SFExpressStrategy : IExpressInterface
                 return response;
             }
         }
-        response.Data = result.OrderBy(a=>a.SumOrder).ToList();
+        response.Data = result.OrderBy(a => a.SumOrder).ToList();
         response.Msg = "成功";
         response.Code = StatusCode.Success;
         return response;
@@ -1060,7 +1071,7 @@ public class SFExpressStrategy : IExpressInterface
             package.PrintTime = DateTime.Now;
             await _repPackage.UpdateAsync(package);
             result.WaybillType = getExpressDelivery.WaybillType;
-            result.WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0)+1;
+            result.WaybillOrder = (getExpressDelivery.WaybillOrder ?? 0) + 1;
             result.SumOrder = getExpressDelivery.SumOrder ?? 1;
 
             response.Data = result;

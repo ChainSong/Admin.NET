@@ -1,87 +1,188 @@
 ﻿<template>
 	<div class="wMSPreOrder-container">
-		<el-dialog v-model="isShowDialog" :title="props.title" :width="1000" draggable="">
-			<el-container>
-				<el-main>
-					<el-tabs v-model="activeMainName">
-						<el-tab-pane label="盘点信息" name="OrderInfo">
-							<el-descriptions class="margin-top" :column="2" size="small" border>
-							</el-descriptions>
-							<el-container title="明细信息">
-								<el-main>
-									<el-form>
-										<el-table :data="state.details" style="width: 100%" height="250">
-											<template v-for="(v, index) in state.tableColumnDetails">
-												<el-table-column v-if="v.isCreate" :key="index" :fixed="false"
-													:label="v.displayName" width="150">
-
-													<template #default="scope">
-														<label v-text="scope.row[v.columnName]"></label>
-													</template>
-												</el-table-column>
-											</template>
-										</el-table>
-									</el-form>
-								</el-main>
-							</el-container>
-						</el-tab-pane>
-						<el-tab-pane label="地址信息" name="AddressInfo">
-							<el-descriptions class="margin-top" :column="2" size="small" border>
-								<template v-for="i in state.tableColumnOrderAddresss">
-									<el-descriptions-item v-bind:key="i.id" :prop="i.displayName" :label="i.displayName"
-										v-if="i.isCreate || i.isKey">
-										<template>
-											<!-- <i></i>
-									{{ i.displayName }} -->
-										</template>
-										<template v-if="i.type == 'DropDownListStr'">
-											<template v-for="item in i.tableColumnsDetails">
-												<label v-if="item.codeStr == state.orderAddress[i.columnName]"
-													v-text="item.name" show-icon :type="item.color"
-													:key="item.codeStr"></label>
-											</template>
-										</template>
-										<template v-else-if="i.type == 'DropDownListInt'">
-											<template v-for="item in i.tableColumnsDetails">
-												<template v-if="item.codeStr == state.orderAddress[i.columnName]">
+		 <el-dialog v-model="isShowDialog" :title="props.title" :width="1200" draggable="">
+			<el-card>
+				<el-form  label-position="top"  :model="state.header">
+					<el-row :gutter="35">
+						<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"
+							v-for="i in state.tableColumnHeaders.filter(a => a.isCreate == 1)" v-bind:key="i.id">
+							<el-form-item :label="i.displayName" v-if="i.isCreate" style="width: 90%;height: 95px;"
+								:prop="i.columnName">
+								<template v-if="i.type == 'TextBox'">
+									{{state.header[i.columnName]}}
+									<!-- <el-input placeholder="请输入内容" size="small" style="width:90%"
+										v-model="state.header[i.columnName]" v-if="i.isCreate">
+									</el-input> -->
+								</template>
+								<template v-if="i.type == 'DropDownListInt'">
+									<template v-for="item in i.tableColumnsDetails">
+												<el-tag v-if="item.codeInt == state.header[i.columnName]"
+													v-bind:key="item.color" show-icon :type="item.color">
+													{{ item.name }}
+												</el-tag>
+												<!-- <template v-if="item.codeStr == state.header[i.columnName]">
 													<label show-icon :type="item.color" v-text="item.name"
 														:key="item.codeInt"></label>
-												</template>
+												</template> -->
 											</template>
-										</template>
-										<template v-else>
-											<label font-family="Helvetica Neue"
-												v-text="state.orderAddress[i.columnName]"></label>
-										</template>
-									</el-descriptions-item>
+									<!-- <el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+										size="small" style="width:90%" filterable>
+										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt"
+											:label="item.name" :value="item.codeInt">
+										</el-option>
+									</el-select> -->
 								</template>
-							</el-descriptions>
-						</el-tab-pane>
-						<el-tab-pane label="扩展配置" name="extends">
-							<el-descriptions class="margin-top" :column="2" size="small" border>
-								<template
-									v-for="q in state.tableColumnExtends.filter(q => q.isCreate == 1 || q.isKey == 1)">
-									<el-descriptions-item :prop="q.displayName" :label="q.displayName">
-									 
-										<template v-if="q.type == 'UploadFile'">
-											<a :href="baseURL + state.extend[q.columnName]" target="_blank">{{ state.extend[q.columnName] }}</a>
-										</template>
-										<template v-else-if="q.type == 'TextBox'">
-											<label font-family="Helvetica Neue"
-												v-text="state.extend[q.columnName]"></label>
-										</template>
-									</el-descriptions-item>
+								<template v-if="i.type == 'DropDownListStrRemote'">
+									{{ state.header[i.columnName]  }}
+									<!-- <select-Remote :whereData="state.header" :isDisabled="i.isCreate" :columnData="i"
+										:defaultvValue="state.header[i.columnName]"
+										@select:model="data => { state.header[i.columnName] = data.text; state.header[i.relationColumn] = data.value; console.log(state.header) }"></select-Remote> -->
 								</template>
-							</el-descriptions> 
-						</el-tab-pane>
-					</el-tabs>
-				</el-main>
-			</el-container>
+								<template v-if="i.type == 'DropDownListStr'">
+									{{state.header[i.columnName]}}
+									<!-- <el-select v-model="state.header[i.columnName]" v-if="i.isCreate" placeholder="请选择"
+										size="small" style="width:90%" filterable>
+										<el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr"
+											:label="item.name" :value="item.codeStr">
+										</el-option>
+									</el-select> -->
+								</template>
+								<template v-if="i.type == 'DatePicker'">
+									{{state.header[i.columnName]}}
+									<!-- <el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate" type="date"
+										placeholder="选择日期" size="small" style="width:90%">
+									</el-date-picker> -->
+								</template>
+								<template v-if="i.type == 'DateTimePicker'">
+									{{state.header[i.columnName]}}
+									<!-- <el-date-picker v-model="state.header[i.columnName]" v-if="i.isCreate"
+										type="datetime" start-placeholder="选择日期时间" size="small" style="width:90%">
+									</el-date-picker> -->
+								</template>
+							</el-form-item>
+						</el-col>
+					</el-row>
+				</el-form>
+			</el-card>
+			<el-card>
+				<!-- <template #header>
+					<div class="card-header">
+						<span>盘点条件</span>
+					</div>
+				</template> -->
+				<!-- <template v-if="state.header['stockCheckType'] == '按库区盘点'">
+					<el-row :gutter="[16, 15]">
+						<el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" class="mb20">
+							<el-form-item label="库区" prop="Area">
+								<el-input size="small" v-model="ruleForm.Area" placeholder="请输入库区" clearable />
+							</el-form-item>
+						</el-col>
+					</el-row>
+				</template> -->
+				<!-- <template v-if="state.header['stockCheckType'] == '按库位盘点'">
+					<el-row :gutter="[16, 15]">
+						<el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" class="mb20">
+							<el-form-item label="库位" prop="externNumber">
+								<el-input size="small" type="textarea" v-model="ruleForm.Location" placeholder="请输入库位"
+									clearable />
+							</el-form-item>
+						</el-col>
 
+					</el-row>
+				</template> -->
+				<!-- <template v-if="state.header['stockCheckType'] == '按SKU盘点'">
+					<el-row :gutter="[16, 15]">
+						<el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" class="mb20">
+							<el-form-item label="SKU" prop="sku">
+								<el-input size="small" type="textarea" v-model="ruleForm.sku" placeholder="请输入SKU"
+									clearable />
+							</el-form-item>
+						</el-col>
+
+					</el-row>
+				</template> -->
+				<!-- <template v-if="state.header['stockCheckType'] == '动态库位盘点'">
+					<el-row :gutter="[16, 15]">
+						<el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" class="mb20">
+							<el-form-item label="订单类型" prop="orderTypeList">
+								<el-checkbox-group v-model="ruleForm.orderTypeList">
+									<el-checkbox label="入库单" disabled></el-checkbox>
+									<el-checkbox label="出库单" disabled></el-checkbox>
+									<el-checkbox label="移库单" disabled></el-checkbox>
+									<el-checkbox label="冻结单" disabled></el-checkbox>
+									<el-checkbox label="调整单" disabled></el-checkbox>
+								</el-checkbox-group>
+							</el-form-item>
+						</el-col>
+					</el-row>
+				</template>
+				<el-button @click="handleQuery" type="primary" size="large" class="toolbar-btn">查询</el-button> -->
+			</el-card>
+
+			<el-card>
+				<el-form label-position="top" :model="state" ref="detailRuleRef"  >
+							<el-table :data="state.details" height="250">
+								<template v-for="(v, index) in state.tableColumnDetails">
+									<el-table-column v-if="v.isCreate" :key="index" style="margin:0;padding:0;"
+										:fixed="false" :prop="v.columnName" :label="v.displayName" width="150">
+										<template #default="scope">
+											<el-form-item :key="scope.row.key" style="margin:0;padding:0;"
+												>
+												<template v-if="v.type == 'TextBox'">
+												 {{scope.row[v.columnName]}}
+												</template>
+												<template v-if="v.type == 'DropDownListInt'">
+													<el-select v-model="state.details[scope.$index][v.columnName]"
+														v-if="v.isCreate" placeholder="请选择" style="width: 100%">
+														<el-option v-for="item in v.tableColumnsDetails"
+															:key="item.codeInt" :label="item.name"
+															:value="item.codeInt">
+														</el-option>
+													</el-select>
+												</template>
+												<template v-if="v.type == 'DropDownListStr'">
+													 {{scope.row[v.columnName]}}
+												</template>
+												<template v-if="v.type == 'DropDownListStrRemote'">
+													 {{scope.row[v.columnName]}}
+												</template>
+												<template v-if="v.type == 'DatePicker'">
+													 {{scope.row[v.columnName]}}
+												</template>
+												<template v-if="v.type == 'DateTimePicker'">
+													 {{scope.row[v.columnName]}}
+												</template>
+												<template v-if="v.type == 'InputNumber'">
+													 {{scope.row[v.columnName]}}
+												</template>
+											</el-form-item>
+										</template>
+									</el-table-column>
+								</template>
+								<!-- <el-table-column>
+									<template #default="scope">
+										<el-button size="mini" type="primary"
+											@click="handleDelete(scope.$index)">删除</el-button>
+									</template>
+								</el-table-column> -->
+							</el-table>
+						</el-form>
+				<!-- <el-form label-position="top" ref="detailRuleRef">
+					<el-table :data="state.headers" height="250">
+						<el-table-column prop="date" label="日期" width="180"> </el-table-column>
+						<el-table-column prop="date" label="姓名" width="180"> </el-table-column>
+						<el-table-column prop="date" label="地址" width="180"> </el-table-column>
+					</el-table>
+				</el-form> -->
+				<!-- <el-pagination v-model:currentPage="tableParams.page" v-model:page-size="tableParams.pageSize"
+					:total="tableParams.total" :page-sizes=	`"[10, 20, 50, 100]" small="" background=""
+					@size-change="handleSizeChange" @current-change="handleCurrentChange"
+					layout="total, sizes, prev, pager, next, jumper" /> -->
+			</el-card>
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="cancel" size="default">取 消</el-button>
-					<el-button type="primary" @click="cancel" size="default">确 定</el-button>
+					<el-button type="primary" @click="submit" size="default">确 定</el-button>
 				</span>
 			</template>
 		</el-dialog>
@@ -92,7 +193,7 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import type { FormRules } from "element-plus";
-import { pageWMSStockCheck, deleteWMSStockCheck } from '/@/api/main/wMSStockCheck';
+import { pageWMSStockCheck, deleteWMSStockCheck,getWMSStockCheck } from '/@/api/main/wMSStockCheck';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import Header from "/@/entities/preOrder";
 import Detail from "../../../../entities/preOrderDetail";
@@ -172,13 +273,11 @@ const gettableColumn = async () => {
 };
 
 const get = async () => {
-	// let result = await getWMSPreOrder(state.value.header.id);
-	// if (result.data.result != null) {
-	// 	state.value.header = result.data.result;
-	// 	state.value.details = result.data.result.details;
-	// 	state.value.orderAddress = result.data.result.orderAddress;
-	// 	state.value.extend = result.data.result.extend;
-	// }
+	let result = await getWMSStockCheck(state.value.header.id);
+	if (result.data.result != null) {
+		state.value.header = result.data.result;
+		state.value.details = result.data.result.details; 
+	}
 	console.log(state.value );
 }
 

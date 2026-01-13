@@ -103,9 +103,14 @@
       <div>
         <el-button-group>
           <el-button type="primary" icon="ele-Printer" @click="printExpressBatchFun('')">
-            批量打印
+            批量快递打印
           </el-button>
         </el-button-group>
+         <!-- <el-button-group>
+          <el-button type="primary" icon="ele-Printer" @click="printExpressBatchFun('')">
+            批量快递箱号
+          </el-button>
+        </el-button-group> -->
       </div>
 
       <el-table :data="state.vm.packageData" ref="multipleTableRef"
@@ -117,6 +122,8 @@
         <el-table-column prop="pickTaskNumber" label="拣货任务号">
         </el-table-column>
         <el-table-column prop="packageNumber" label="箱号">
+        </el-table-column>
+          <el-table-column prop="serialNumber" label="序号">
         </el-table-column>
         <el-table-column prop="detailCount" label="包装数量">
         </el-table-column>
@@ -130,14 +137,14 @@
           <template #default="scope">
             <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)">打印快递单
             </el-button>
-            <!-- <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
+              <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
              <el-button type="primary" icon="ele-Printer" @click="printPackageNumber(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱号
-            </el-button> -->
+            </el-button> 
           </template>
         </el-table-column>
       </el-table>

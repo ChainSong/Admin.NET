@@ -813,7 +813,20 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
-            var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
+            //var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
+            var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId).FirstAsync();
+            List<WMSOrder> orderSo = new List<WMSOrder>();
+            if (orderDn != null && !string.IsNullOrEmpty(orderDn.Dn))
+            {
+                orderSo = await _repOrder.AsQueryable().Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId).ToListAsync();
+
+            }
+            else
+            {
+                orderSo = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId && orderDn.CustomerId == a.CustomerId).ToListAsync();
+
+            }
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
 
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
@@ -920,6 +933,14 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).ToListAsync();
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
+               
+                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
+                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
+                await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, (a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)));
+                //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+                //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+                _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+
                 List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
                 foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).Distinct().ToList())
                 {
@@ -948,15 +969,66 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
                     wMSInstructions.Add(wMSInstruction);
                     //}
                 }
-                //判断是不是回传过
+                //wMSInstructions.Add(wMSInstruction);
+                //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
+                //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
+                //判断里面有哪些DN 
+                //var checkDn = await _repOrder.AsQueryable()
+                //    .Where(a => CheckPickData.Select(b => b.OrderNumber).Contains(a.OrderNumber) && !string.IsNullOrEmpty(a.Dn))
+                //    .Select(a => new
+                //    {
+                //        a.Dn,
+                //        a.CustomerId,
+                //        a.CustomerName,
+                //        a.WarehouseId,
+                //        a.WarehouseName,
+                //        a.Id
+                //    }).FirstAsync();
+                //if (checkDn != null && !string.IsNullOrEmpty(checkDn.Dn))
+                //{
+                //    //foreach (var item in checkDn)
+                //    //{
+                //    var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.OrderStatus < (int)OrderStatusEnum.已包装).ToListAsync();
+                //    //已经转出库单的都已经完成， 且预出库单没有新增
+                //    var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
 
+                //    if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
+                //    {
+                //        WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
+                //        //wMSInstruction.OrderId = orderData[0].Id;
+                //        wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                //        wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+                //        wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
+                //        //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                //        wMSInstructionSNGRHach.CustomerId = checkDn.CustomerId;
+                //        wMSInstructionSNGRHach.CustomerName = checkDn.CustomerName;
+                //        wMSInstructionSNGRHach.WarehouseId = checkDn.WarehouseId;
+                //        wMSInstructionSNGRHach.WarehouseName = checkDn.WarehouseName;
+                //        wMSInstructionSNGRHach.OperationId = checkDn.Id;
+                //        wMSInstructionSNGRHach.OrderNumber = checkDn.Dn ?? "";
+                //        wMSInstructionSNGRHach.Creator = _userManager.Account;
+                //        wMSInstructionSNGRHach.CreationTime = DateTime.Now;
+                //        wMSInstructionSNGRHach.InstructionTaskNo = checkDn.Dn ?? "";
+                //        wMSInstructionSNGRHach.TableName = "WMS_Order";
+                //        wMSInstructionSNGRHach.InstructionPriority = 4;
+                //        wMSInstructionSNGRHach.Remark = "";
+                //        //判断是否插入过一次
+                //        var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == checkDn.CustomerId && a.OrderNumber == checkDn.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
+                //        if (getInstruction == null || getInstruction.Count == 0)
+                //        {
+                //            if (!string.IsNullOrEmpty(checkDn.Dn))
+                //            {
+                //                if (wMSInstructions.Where(a => a.OperationId == checkDn.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+                //                {
+                //                    wMSInstructions.Add(wMSInstructionSNGRHach);
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+                //判断是不是回传过
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
-                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
-                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
-                await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, (a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)));
-                //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
-                //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
-                _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";
                 return response;

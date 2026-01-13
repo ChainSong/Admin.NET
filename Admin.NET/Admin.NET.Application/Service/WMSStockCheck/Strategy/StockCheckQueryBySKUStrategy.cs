@@ -26,7 +26,7 @@ public class StockCheckQueryBySKUStrategy : IStockCheckInterface
     {
 
         List<string> SKUs = new List<string>();
-        if (!string.IsNullOrEmpty(input.SKU) && input.SKU.IndexOf(",") > 0)
+        if (!string.IsNullOrEmpty(input.SKU) || input.SKU.IndexOf(",") > 0)
         {
 
             SKUs = input.SKU.Split(',').Select(a => a.Trim()).ToList();

@@ -78,7 +78,7 @@
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
-           <!--   <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
+            <!--   <el-button type="primary" icon="ele-Printer" @click="printPackageDGListFun('')"
               v-auth="'wMSPackage:printPackage'">
               危险仓打印箱清单
             </el-button> !-->
@@ -357,7 +357,7 @@ const printPackageListFun = async (row: any) => {
       let printData = new Array<any>();
       printData.printTemplate = "";
       let result = await printPackageList(ids);
-         console.log("result", result);
+      console.log("result", result);
       if (result.data.result != null) {
         printData = result.data.result.data;
         console.log("printData", printData);
@@ -406,11 +406,11 @@ const printPackageNumberFun = async (row: any) => {
     type: "warning",
   })
     .then(async () => {
-    console.log("idsasas");
+      console.log("idsasas");
       let printData = new Array<Header>();
-        console.log("printData");
+      console.log("printData");
       printData.printTemplate = "";
-         console.log("ids", packageNumbers);
+      console.log("ids", packageNumbers);
       let result = await printPackageNumber(packageNumbers);
       console.log("result", result);
       if (result.data.result != null) {
