@@ -34,7 +34,7 @@ public class WMSBoxType : ITenantIdFilter
     /// 
     /// </summary>
     [SugarColumn(ColumnDescription = "")]
-    public long? WarehouseId { get; set; }
+    public long WarehouseId { get; set; }
     
     /// <summary>
     /// 

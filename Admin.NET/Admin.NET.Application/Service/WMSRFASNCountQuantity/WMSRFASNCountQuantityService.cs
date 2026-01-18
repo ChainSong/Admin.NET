@@ -339,9 +339,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         scanType.Code = StatusCode.Success;
 
         if (!string.IsNullOrEmpty(input.ScanInput) && string.IsNullOrEmpty(input.SKU))
-        {
-            //var skuInfo = request.Input.Split('|');
-            //var skuInfo = request.Input.Split('|');
+        { 
             if (input.ScanInput.Split(' ').Length > 1 || input.ScanInput.Split('|').Length > 1)
             {
 
@@ -377,7 +375,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
                 if (!string.IsNullOrEmpty(input.SKU))
                 {
                     //判断是不是不需要解析，直接扫描的产品条码
-                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == input.SKU).First();
+                    var checkProduct = await _repProduct.AsQueryable().Where(m => m.SKU == input.SKU).FirstAsync();
                     if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
                     {
                         input.SKU = checkProduct.SKU;
@@ -386,7 +384,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
                 else
                 {
                     //判断是不是不需要解析，直接扫描的产品条码
-                    var checkProduct = _repProduct.AsQueryable().Where(m => m.SKU == input.ScanInput).First();
+                    var checkProduct = await _repProduct.AsQueryable().Where(m => m.SKU == input.ScanInput).FirstAsync();
                     if (checkProduct != null || !string.IsNullOrEmpty(checkProduct.SKU))
                     {
                         input.SKU = checkProduct.SKU;
@@ -408,7 +406,8 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
             scanType.Data.ScanTypeData = input.ScanInput;
             return scanType;
         }
-        else {
+        else
+        {
 
             //1.判断是不是SKU
             var checkSKU = await _repProduct.AsQueryable().Where(a => a.SKU == input.ScanInput).FirstAsync();
@@ -425,7 +424,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
             scanType.Data.ScanTypeData = input.ScanInput;
             return scanType;
         }
-     
+
     }
 
 

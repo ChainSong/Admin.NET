@@ -30,6 +30,13 @@
                 </td>
 
               </tr>
+               <tr>
+                <th style="padding-left:5px;font-size:20px" rowspan="1">包装箱型:</th>
+                <td>
+                    <el-input v-model="state.vm.form.boxType"   
+                   style="font-size:20px" placeholder="请输入内容"></el-input>
+                </td>
+              </tr>
               <tr>
                 <th style="padding-left:5px;font-size:20px" rowspan="1">扫描框:</th>
                 <td>
@@ -141,7 +148,7 @@
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
-             <el-button type="primary" icon="ele-Printer" @click="printPackageNumber(scope.row)"
+             <el-button type="primary" icon="ele-Printer" @click="printPackageNumberFun(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱号
             </el-button> 
@@ -201,6 +208,7 @@ import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
 import sfExpress from "/@/api/expressInterface/sfExpress";
+import { getWMSBoxType } from '/@/api/main/wMSBoxType';
 // import SCPPrint from "";
 
 import { addWMSPickTask } from "/@/api/main/wMSPickTask";

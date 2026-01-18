@@ -17,11 +17,19 @@ namespace Admin.NET.Application.Service;
 
 public static class HandoverFactory
 {
-    public static IHandoverInterface AddHandover()
+    public static IHandoverInterface AddHandover(string workflow)
     {
         //string RoleName = Enum.GetName(typeof(ReceiptEnum), ReceiptEnum.ReceiptExportDefault);
+        switch (workflow)
+        {
+            case "Hach":
+                return new HandoverHachStrategy();
+            case "HachDG":
+                return new HandoverHachDGStrategy();
+            default:
+                return new HandoverDefaultStrategy();
+        }
 
-        return new HandoverDefaultStrategy();
         //return new ASNDefaultStrategy();
     }
 }

@@ -508,7 +508,10 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
     private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
         Response response = new Response();
-
+        if (request.Weight < 0.3)
+        {
+            request.Weight = 1;
+        }
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
@@ -572,6 +575,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
 
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
+            packageData.PackageType = request.BoxType;
             packageData.Details.ForEach(a =>
             {
                 a.CustomerId = packageData.CustomerId;
