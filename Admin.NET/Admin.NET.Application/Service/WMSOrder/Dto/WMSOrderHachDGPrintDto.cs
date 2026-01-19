@@ -31,7 +31,7 @@ public class WMSOrderPrintCustomerInfo
 
 public class WMSOrderPrintDetail
 {
-    public DateTime? CompleteTime { get; set; }
+    public string? CompleteTime { get; set; }
     public string? PoCode { get; set; }
     public string? PackageNumber { get; set; }
     public string? SKU { get; set; }
