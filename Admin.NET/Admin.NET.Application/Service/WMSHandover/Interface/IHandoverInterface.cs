@@ -24,9 +24,13 @@ public interface IHandoverInterface
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
 
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
+    public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+     
+  
     public UserManager _userManager { get; set; }
     //public ISqlSugarClient _db { get; set; }
 

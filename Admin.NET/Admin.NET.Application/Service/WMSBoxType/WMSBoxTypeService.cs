@@ -1,9 +1,12 @@
 ﻿using Admin.NET.Application.Const;
+using Admin.NET.Application.Dtos;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -13,9 +16,13 @@ namespace Admin.NET.Application;
 public class WMSBoxTypeService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSBoxType> _rep;
-    public WMSBoxTypeService(SqlSugarRepository<WMSBoxType> rep)
+    private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
+    private readonly UserManager _userManager;
+    public WMSBoxTypeService(SqlSugarRepository<WMSBoxType> rep, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, UserManager userManager)
     {
         _rep = rep;
+        _repWarehouseUser = repWarehouseUser;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -128,6 +135,47 @@ public class WMSBoxTypeService : IDynamicApiController, ITransient
         return await _rep.AsQueryable().Select<WMSBoxTypeOutput>().ToListAsync();
     }
 
+
+
+    /// <summary>
+    /// 获取WMSWarehouse列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "SelectBoxType")]
+    public async Task<List<SelectListItem>> SelectBoxType(dynamic input)
+    {
+
+        try
+        {
+            string boxTypeInput = input.inputData;
+            //获取可以操作的仓库的箱类型
+            var getWarehouse = await _repWarehouseUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).ToListAsync();
+            // 获取可以使用的仓库权限
+            if (!string.IsNullOrEmpty(boxTypeInput))
+            {
+                return await _rep.AsQueryable().Where(a => getWarehouse.Select(b => b.WarehouseId).Contains(a.WarehouseId)).Select(a => new SelectListItem { Text = a.BoxType, Value = a.BoxCode.ToString() }).ToListAsync();
+
+                //return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerName) && a.CustomerName.Contains(customerInput)).Select(a => new SelectListItem { Text = a.CustomerName, Value = a.Id.ToString() }).ToListAsync();
+                //return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName) && a.WarehouseName.Contains(warehouseinput)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
+                //return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerId) && a.CustomerId == customerId && a.SKU.Contains(sku)).Select(a => new SelectListItem { Text = a.SKU, Value = a.GoodsName.ToString() }).Distinct().Take(6).ToListAsync();
+            }
+            else
+            {
+                return await _rep.AsQueryable().Select(a => new SelectListItem { Text = a.BoxType, Value = a.BoxCode.ToString() }).ToListAsync();
+                //return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerName)).Select(a => new SelectListItem { Text = a.CustomerName, Value = a.Id.ToString() }).ToListAsync();
+                //return await _rep.AsQueryable().Where(a => warehouse.Contains(a.WarehouseName)).Select(a => new SelectListItem { Text = a.WarehouseName, Value = a.Id.ToString() }).Distinct().ToListAsync();
+            }
+        }
+        catch (Exception)
+        {
+            throw Oops.Oh("请选择客户");
+        }
+        //获取可以使用的仓库权限
+        //var customer = _repCustomerUser.AsQueryable().Where(a => a.UserId == _userManager.UserId).Select(a => a.CustomerName).ToList();
+        //return await _rep.AsQueryable().Where(a => customer.Contains(a.CustomerName)).Select(a => new SelectListItem { Text = a.CustomerName, Value = a.Id.ToString() }).ToListAsync();
+    }
 
 
 

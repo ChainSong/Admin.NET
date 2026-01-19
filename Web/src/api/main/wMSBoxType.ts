@@ -5,6 +5,7 @@ enum Api {
   UpdateWMSBoxType = '/api/wMSBoxType/update',
   PageWMSBoxType = '/api/wMSBoxType/page',
   GetWMSBoxType = '/api/wMSBoxType/Query',
+  SelectBoxType = '/api/wMSBoxType/SelectBoxType',
 }
 
 // 增加WMSBoxType
@@ -45,5 +46,10 @@ request({
 	method: 'get'
 });
 
-
+export const selectBoxType = (params?: any) => 
+	request({
+			url: Api.SelectBoxType,
+			method: 'post',
+			data: params,
+		});
 

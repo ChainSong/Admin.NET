@@ -913,6 +913,7 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            packageData.PackageType = request.BoxType;
             packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 
             //packageData.SerialNumber=,

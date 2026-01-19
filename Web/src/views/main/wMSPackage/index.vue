@@ -206,6 +206,7 @@ const state = ref({
   header: new Header(),
   headers: new Array<Header>(),
   details: new Array<Details>(),
+  boxType: new Array<any>(),
 
   // header: new Array<Details>(),
 
@@ -453,7 +454,9 @@ const printExpress = async (row: any) => {
     })
     .catch(() => { });
 };
+ const getBoxType = async (row: any) => {
 
+};
 //打印箱唛
 // const printPackageDGListFun = async (row: any) => {
 //   ptintTitle.value = '打印';

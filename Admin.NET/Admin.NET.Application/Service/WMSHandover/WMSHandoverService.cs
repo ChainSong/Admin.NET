@@ -1,10 +1,13 @@
 ﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
 using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Applicationt.ReceiptReceivingCore.Factory;
+using Admin.NET.Common;
 using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
@@ -26,12 +29,25 @@ public class WMSHandoverService : IDynamicApiController, ITransient
 {
     private readonly SqlSugarRepository<WMSHandover> _rep;
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
-    private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     private readonly SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser;
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly UserManager _userManager;
-    public WMSHandoverService(SqlSugarRepository<WMSHandover> rep, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<TableColumns> repTableColumns, UserManager userManager, SqlSugarRepository<WMSOrder> repOrder)
+    private readonly SqlSugarRepository<WMSOrder> _repOrder;
+    private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
+    private readonly SqlSugarRepository<WMSPreOrder> _repPreOrder;
+    private readonly SysWorkFlowService _repWorkFlowService;
+
+    public WMSHandoverService(SqlSugarRepository<WMSHandover> rep,
+        SqlSugarRepository<WMSPackage> repPackage,
+        SqlSugarRepository<CustomerUserMapping> repCustomerUser,
+        SqlSugarRepository<WarehouseUserMapping> repWarehouseUser,
+        SqlSugarRepository<TableColumns> repTableColumns,
+        UserManager userManager,
+        SqlSugarRepository<WMSOrder> repOrder,
+        SqlSugarRepository<WMSInstruction> repInstruction,
+        SqlSugarRepository<WMSPreOrder> repPreOrder,
+        SysWorkFlowService repWorkFlowService)
     {
         _rep = rep;
         _repPackage = repPackage;
@@ -40,6 +56,9 @@ public class WMSHandoverService : IDynamicApiController, ITransient
         _repTableColumns = repTableColumns;
         _userManager = userManager;
         _repOrder = repOrder;
+        _repInstruction = repInstruction;
+        _repPreOrder = repPreOrder;
+        _repWorkFlowService = repWorkFlowService;
     }
 
     /// <summary>
@@ -214,7 +233,7 @@ public class WMSHandoverService : IDynamicApiController, ITransient
     public async Task Delete(List<long> input)
     {
         //var entity = input.Adapt<WMSHandover>();
-        await _rep.DeleteAsync(a => input.Contains(a.Id));    
+        await _rep.DeleteAsync(a => input.Contains(a.Id));
     }
 
     /// <summary>
@@ -272,8 +291,6 @@ public class WMSHandoverService : IDynamicApiController, ITransient
         try
         {
 
-
-
             //FileDir是存储临时文件的目录，相对路径
             //private const string FileDir = "/File/ExcelTemp";
             string url = await ImprotExcel.WriteFile(file);
@@ -288,9 +305,12 @@ public class WMSHandoverService : IDynamicApiController, ITransient
             factoryExcel._userManager = _userManager;
             //factoryExcel._repTableColumnsDetail = _repTableColumnsDetail;
             var data = factoryExcel.Strategy(dataExcel);
-
-
             var entityListDtos = data.Data.TableToList<WMSHandover>();
+            var getPackage = await _repPackage.AsQueryable().Where(a => a.PackageNumber == entityListDtos.First().PackageNumber).FirstAsync();
+            if (getPackage == null || string.IsNullOrEmpty(getPackage.PackageNumber))
+            {
+                return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "数据错误" };
+            }
             //var entityListDtos = ObjectMapper.Map<List<WMS_ReceiptReceivingListDto>>(data.Data);
 
             //获取需要导入的客户，根据客户调用不同的配置方法(根据系统单号获取)
@@ -304,8 +324,10 @@ public class WMSHandoverService : IDynamicApiController, ITransient
             //{
             //    return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "数据错误" };
             //}
+            var workflow = await _repWorkFlowService.GetSystemWorkFlow(getPackage.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Outbound_Handover, "");
+
             //使用简单工厂定制化修改和新增的方法
-            IHandoverInterface factory = HandoverFactory.AddHandover();
+            IHandoverInterface factory = HandoverFactory.AddHandover(workflow);
             //factory._db = _db;
             factory._repHandover = _rep;
             factory._repPackage = _repPackage;
@@ -313,9 +335,10 @@ public class WMSHandoverService : IDynamicApiController, ITransient
             factory._repCustomerUser = _repCustomerUser;
             factory._repWarehouseUser = _repWarehouseUser;
             factory._repOrder = _repOrder;
+            factory._repPreOrder = _repPreOrder;
+            factory._repInstruction = _repInstruction;
             factory._userManager = _userManager;
             var response = await factory.Strategy(entityListDtos);
-
             return response;
         }
         catch (Exception ex)
@@ -324,6 +347,85 @@ public class WMSHandoverService : IDynamicApiController, ITransient
         }
     }
 
+
+
+    /// <summary>
+    /// 获取WMSHandover 
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "HachHandover")]
+    public async Task<Response> HachHandover(List<WMSOrder> orders)
+    {
+
+        Response response = new Response();
+        //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
+        //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
+        //判断里面有哪些DN 
+        //var checkDn = await _repOrder.AsQueryable().Where(a => orders.Select(b => b.Dn).Contains(a.Dn) && a.CustomerId == orders.First().CustomerId).GroupBy(a => new { a.Dn, a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName })
+        //    .Select(a => new
+        //    {
+        //        a.Key.Dn,
+        //        a.Key.CustomerId,
+        //        a.Key.CustomerName,
+        //        a.Key.WarehouseId,
+        //        a.Key.WarehouseName,
+        //        Id = a.Min(b => b.Id)
+        //    });
+
+        List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+        foreach (var item in orders)
+        {
+
+            //当已经完成包装的订单数量== 预报订单里面的数量 就回传
+            var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == item.Dn && item.CustomerId == item.CustomerId && a.OrderStatus >= (int)OrderStatusEnum.已包装).ToListAsync();
+
+            var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && item.CustomerId == item.CustomerId && a.PreOrderStatus != (int)PreOrderStatusEnum.取消).ToListAsync();
+
+            if (checkOrderDN.Count == checkPreOrderDN.Count)
+            {
+                WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
+                //wMSInstruction.OrderId = orderData[0].Id;
+                wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+                wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
+                //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                wMSInstructionSNGRHach.CustomerId = item.CustomerId;
+                wMSInstructionSNGRHach.CustomerName = item.CustomerName;
+                wMSInstructionSNGRHach.WarehouseId = item.WarehouseId;
+                wMSInstructionSNGRHach.WarehouseName = item.WarehouseName;
+                wMSInstructionSNGRHach.OperationId = item.Id;
+                wMSInstructionSNGRHach.OrderNumber = item.Dn ?? "";
+                wMSInstructionSNGRHach.Creator = _userManager.Account;
+                wMSInstructionSNGRHach.CreationTime = DateTime.Now;
+                wMSInstructionSNGRHach.InstructionTaskNo = item.Dn ?? "";
+                wMSInstructionSNGRHach.TableName = "WMS_Order";
+                wMSInstructionSNGRHach.InstructionPriority = 4;
+                wMSInstructionSNGRHach.Remark = "";
+                //判断是否插入过一次
+                var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == item.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
+                if (getInstruction == null || getInstruction.Count == 0)
+                {
+                    if (!string.IsNullOrEmpty(item.Dn))
+                    {
+                        if (wMSInstructions.Where(a => a.OperationId == item.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+                        {
+                            wMSInstructions.Add(wMSInstructionSNGRHach);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (wMSInstructions.Count > 0)
+        {
+            await _repInstruction.InsertRangeAsync(wMSInstructions);
+        }
+        response.Code = StatusCode.Success;
+        response.Msg = "成功";
+        return response;
+    }
 
 }
 

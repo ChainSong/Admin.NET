@@ -532,7 +532,10 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
     private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
         Response response = new Response();
-
+        if (request.Weight < 0.3)
+        {
+            request.Weight = 1;
+        }
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
@@ -676,6 +679,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            packageData.PackageType = request.BoxType;
             //packageData.SerialNumber=(packagenumberData)
             packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 

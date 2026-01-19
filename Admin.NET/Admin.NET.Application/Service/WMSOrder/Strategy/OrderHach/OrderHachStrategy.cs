@@ -186,25 +186,25 @@ namespace Admin.NET.Application.Strategy
 
 
 
-                    WMSInstruction wMSInstructionGI99 = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstructionGI99.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstructionGI99.InstructionType = "出库单回传HachDG";
-                    wMSInstructionGI99.BusinessType = "出库单回传HachDG";
-                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstructionGI99.CustomerId = item.CustomerId;
-                    wMSInstructionGI99.CustomerName = item.CustomerName;
-                    wMSInstructionGI99.WarehouseId = item.WarehouseId;
-                    wMSInstructionGI99.WarehouseName = item.WarehouseName;
-                    wMSInstructionGI99.OperationId = item.Id;
-                    wMSInstructionGI99.OrderNumber = item.ExternOrderNumber;
-                    wMSInstructionGI99.Creator = _userManager.Account;
-                    wMSInstructionGI99.CreationTime = DateTime.Now;
-                    wMSInstructionGI99.InstructionTaskNo = item.ExternOrderNumber;
-                    wMSInstructionGI99.TableName = "WMS_Order";
-                    wMSInstructionGI99.InstructionPriority = 99;
-                    wMSInstructionGI99.Remark = "";
-                    wMSInstructions.Add(wMSInstructionGI99);
+                    //WMSInstruction wMSInstructionGI99 = new WMSInstruction();
+                    ////wMSInstruction.OrderId = orderData[0].Id;
+                    //wMSInstructionGI99.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    //wMSInstructionGI99.InstructionType = "出库单回传HachDG";
+                    //wMSInstructionGI99.BusinessType = "出库单回传HachDG";
+                    ////wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    //wMSInstructionGI99.CustomerId = item.CustomerId;
+                    //wMSInstructionGI99.CustomerName = item.CustomerName;
+                    //wMSInstructionGI99.WarehouseId = item.WarehouseId;
+                    //wMSInstructionGI99.WarehouseName = item.WarehouseName;
+                    //wMSInstructionGI99.OperationId = item.Id;
+                    //wMSInstructionGI99.OrderNumber = item.ExternOrderNumber;
+                    //wMSInstructionGI99.Creator = _userManager.Account;
+                    //wMSInstructionGI99.CreationTime = DateTime.Now;
+                    //wMSInstructionGI99.InstructionTaskNo = item.ExternOrderNumber;
+                    //wMSInstructionGI99.TableName = "WMS_Order";
+                    //wMSInstructionGI99.InstructionPriority = 99;
+                    //wMSInstructionGI99.Remark = "";
+                    //wMSInstructions.Add(wMSInstructionGI99);
 
                     WMSInstruction wMSInstructionGRHach = new WMSInstruction();
                     //wMSInstruction.OrderId = orderData[0].Id;
@@ -253,39 +253,99 @@ namespace Admin.NET.Application.Strategy
 
                     //if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
                     //{
-                    //    WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
-                    //    //wMSInstruction.OrderId = orderData[0].Id;
-                    //    wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    //    wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
-                    //    wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
-                    //    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    //    wMSInstructionSNGRHach.CustomerId = item.CustomerId;
-                    //    wMSInstructionSNGRHach.CustomerName = item.CustomerName;
-                    //    wMSInstructionSNGRHach.WarehouseId = item.WarehouseId;
-                    //    wMSInstructionSNGRHach.WarehouseName = item.WarehouseName;
-                    //    wMSInstructionSNGRHach.OperationId = item.Id;
-                    //    wMSInstructionSNGRHach.OrderNumber = item.Dn;
-                    //    wMSInstructionSNGRHach.Creator = _userManager.Account;
-                    //    wMSInstructionSNGRHach.CreationTime = DateTime.Now;
-                    //    wMSInstructionSNGRHach.InstructionTaskNo = item.Dn;
-                    //    wMSInstructionSNGRHach.TableName = "WMS_Order";
-                    //    wMSInstructionSNGRHach.InstructionPriority = 1;
-                    //    wMSInstructionSNGRHach.Remark = "";
-                    //    //判断是否插入过一次
-                    //    var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == item.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
-                    //    if (getInstruction == null || getInstruction.Count == 0)
+                    //    foreach (var itemDN in checkOrderDN)
                     //    {
-                    //        if (!string.IsNullOrEmpty(item.Dn))
+                    //        WMSInstruction wMSInstruction99 = new WMSInstruction();
+                    //        //wMSInstruction.OrderId = orderData[0].Id;
+                    //        wMSInstruction99.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    //        wMSInstruction99.InstructionType = "出库单回传HachDG";
+                    //        wMSInstruction99.BusinessType = "出库单回传HachDG";
+                    //        wMSInstruction99.CustomerId = itemDN.CustomerId;
+                    //        wMSInstruction99.CustomerName = itemDN.CustomerName;
+                    //        wMSInstruction99.WarehouseId = itemDN.WarehouseId;
+                    //        wMSInstruction99.WarehouseName = itemDN.WarehouseName;
+                    //        wMSInstruction99.OperationId = itemDN.Id;
+                    //        wMSInstruction99.OrderNumber = itemDN.ExternOrderNumber;
+                    //        wMSInstruction99.Creator = _userManager.Account;
+                    //        wMSInstruction99.CreationTime = DateTime.Now;
+                    //        wMSInstruction99.InstructionTaskNo = itemDN.ExternOrderNumber;
+                    //        wMSInstruction99.TableName = "WMS_Order";
+                    //        wMSInstruction99.InstructionPriority = 99;
+                    //        wMSInstruction99.Remark = "";
+                    //        //wMSInstructions.Add(wMSInstruction99);
+                    //        //判断是否插入过一次
+                    //        var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == itemDN.Dn && a.BusinessType == "出库单回传HachDG").ToListAsync();
+                    //        if (getInstruction == null || getInstruction.Count == 0)
                     //        {
-                    //            if (wMSInstructions.Where(a => a.OperationId == item.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+                    //            if (!string.IsNullOrEmpty(item.Dn))
                     //            {
-                    //                wMSInstructions.Add(wMSInstructionSNGRHach);
+                    //                if (wMSInstructions.Where(a => a.OrderNumber == item.Dn && a.InstructionType == "出库单回传HachDG").Count() == 0)
+                    //                {
+                    //                    wMSInstructions.Add(wMSInstruction99);
+                    //                }
                     //            }
-                    //            //wMSInstructions.Add(wMSInstructionSNGRHach);
                     //        }
                     //    }
 
                     //}
+                }
+            }
+
+            //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
+            //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
+            //判断里面有哪些DN 
+            var checkDn = orderData.Where(a => !string.IsNullOrEmpty(a.Dn) && a.CustomerId == orderData.First().CustomerId).GroupBy(a => new { a.Dn, a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName })
+                .Select(a => new
+                {
+                    a.Key.Dn,
+                    a.Key.CustomerId,
+                    a.Key.CustomerName,
+                    a.Key.WarehouseId,
+                    a.Key.WarehouseName,
+                    Id = a.Min(b => b.Id)
+                });
+            foreach (var item in checkDn)
+            {
+                var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.CustomerId == orderData.First().CustomerId && a.OrderStatus == (int)OrderStatusEnum.完成).ToListAsync();
+                //已经转出库单的都已经完成， 且预出库单没有新增
+                var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.CustomerId == orderData.First().CustomerId && a.PreOrderStatus > (int)PreOrderStatusEnum.新增).ToListAsync();
+
+                if (checkPreOrderDN.Count == checkPreOrderDN.Count)
+                {
+                    foreach (var itemDN in checkOrderDN)
+                    {
+                        WMSInstruction wMSInstruction99 = new WMSInstruction();
+                        //wMSInstruction.OrderId = orderData[0].Id;
+                        wMSInstruction99.InstructionStatus = (int)InstructionStatusEnum.新增;
+                        wMSInstruction99.InstructionType = "出库单回传HachDG";
+                        wMSInstruction99.BusinessType = "出库单回传HachDG";
+                        wMSInstruction99.CustomerId = itemDN.CustomerId;
+                        wMSInstruction99.CustomerName = itemDN.CustomerName;
+                        wMSInstruction99.WarehouseId = itemDN.WarehouseId;
+                        wMSInstruction99.WarehouseName = itemDN.WarehouseName;
+                        wMSInstruction99.OperationId = itemDN.Id;
+                        wMSInstruction99.OrderNumber = itemDN.ExternOrderNumber;
+                        wMSInstruction99.Creator = _userManager.Account;
+                        wMSInstruction99.CreationTime = DateTime.Now;
+                        wMSInstruction99.InstructionTaskNo = itemDN.ExternOrderNumber;
+                        wMSInstruction99.TableName = "WMS_Order";
+                        wMSInstruction99.InstructionPriority = 99;
+                        wMSInstruction99.Remark = "";
+                        //wMSInstructions.Add(wMSInstruction99);
+                        //判断是否插入过一次
+                        var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == itemDN.Dn && a.BusinessType == "出库单回传HachDG").ToListAsync();
+                        if (getInstruction == null || getInstruction.Count == 0)
+                        {
+                            if (!string.IsNullOrEmpty(item.Dn))
+                            {
+                                if (wMSInstructions.Where(a => a.OrderNumber == item.Dn && a.InstructionType == "出库单回传HachDG").Count() == 0)
+                                {
+                                    wMSInstructions.Add(wMSInstruction99);
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
             if (wMSInstructions.Count > 0)

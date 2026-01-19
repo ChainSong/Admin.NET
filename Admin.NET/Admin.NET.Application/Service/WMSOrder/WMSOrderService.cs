@@ -82,7 +82,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSPackageDetail> repPackageDetail,
         SysWorkFlowService repWorkFlowService,
         SqlSugarRepository<HachWmsOutBound> repOb,
-        SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSHandover> repHandover,
+        SqlSugarRepository<WMSProductBom> repProductBom, 
+        SqlSugarRepository<WMSHandover> repHandover,
         SqlSugarRepository<FGFHOrder> repFGFHOrder)
     {
         _rep = rep;

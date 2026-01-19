@@ -11,6 +11,7 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.ReceiptReceivingCore.Interface;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using AutoMapper;
@@ -22,7 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service;
-public class HandoverDefaultStrategy : IHandoverInterface
+public class HandoverHachStrategy : IHandoverInterface
 {
 
     public SqlSugarRepository<WMSHandover> _repHandover { get; set; }
@@ -31,12 +32,11 @@ public class HandoverDefaultStrategy : IHandoverInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
-    public UserManager _userManager { get; set; }
-
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
+    public UserManager _userManager { get; set; }
 
-    public HandoverDefaultStrategy(
+    public HandoverHachStrategy(
 
     )
     {
@@ -79,7 +79,6 @@ public class HandoverDefaultStrategy : IHandoverInterface
         var packageData = await _repPackage.AsQueryable().Where(a => request.Select(b => b.PackageNumber).Contains(a.PackageNumber)).ToListAsync();
         var handoverData = packageData.Adapt<List<WMSHandover>>();
 
-
         foreach (var item in handoverData)
         {
             var handover = request.Where(a => a.PackageNumber == item.PackageNumber).FirstOrDefault();
@@ -94,6 +93,56 @@ public class HandoverDefaultStrategy : IHandoverInterface
                 item.PalletNumber = handover.PalletNumber;
             }
         }
+        var getOredr = await _repOrder.AsQueryable().Where(a => packageData.Select(b => b.OrderId).Contains(a.Id)
+           && !string.IsNullOrEmpty(a.Dn)
+        ).ToListAsync();
+
+        List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+        foreach (var item in getOredr)
+        {
+            //当已经完成包装的订单数量== 预报订单里面的数量 就回传
+            var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == item.Dn && item.CustomerId == item.CustomerId && a.OrderStatus >= (int)OrderStatusEnum.已包装).ToListAsync();
+            var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && item.CustomerId == item.CustomerId && a.PreOrderStatus != (int)PreOrderStatusEnum.取消).ToListAsync();
+            if (checkOrderDN.Count == checkPreOrderDN.Count)
+            {
+                WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
+                //wMSInstruction.OrderId = orderData[0].Id;
+                wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+                wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
+                //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                wMSInstructionSNGRHach.CustomerId = item.CustomerId;
+                wMSInstructionSNGRHach.CustomerName = item.CustomerName;
+                wMSInstructionSNGRHach.WarehouseId = item.WarehouseId;
+                wMSInstructionSNGRHach.WarehouseName = item.WarehouseName;
+                wMSInstructionSNGRHach.OperationId = item.Id;
+                wMSInstructionSNGRHach.OrderNumber = item.Dn ?? "";
+                wMSInstructionSNGRHach.Creator = _userManager.Account;
+                wMSInstructionSNGRHach.CreationTime = DateTime.Now;
+                wMSInstructionSNGRHach.InstructionTaskNo = item.Dn ?? "";
+                wMSInstructionSNGRHach.TableName = "WMS_Order";
+                wMSInstructionSNGRHach.InstructionPriority = 4;
+                wMSInstructionSNGRHach.Remark = "";
+                //判断是否插入过一次
+                var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == item.CustomerId && a.OrderNumber == item.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
+                if (getInstruction == null || getInstruction.Count == 0)
+                {
+                    if (!string.IsNullOrEmpty(item.Dn))
+                    {
+                        if (wMSInstructions.Where(a => a.OrderNumber == item.Dn && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+                        {
+                            wMSInstructions.Add(wMSInstructionSNGRHach);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (wMSInstructions.Count > 0)
+        {
+            await _repInstruction.InsertRangeAsync(wMSInstructions);
+        }
+
         if (handoverData.Count > 0)
         {
             await _repHandover.InsertRangeAsync(handoverData);

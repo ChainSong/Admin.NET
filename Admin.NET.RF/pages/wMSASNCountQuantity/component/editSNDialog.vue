@@ -11,8 +11,8 @@
 			</view>
 			<view class="cu-form-group ">
 				<input :adjust-position="false" confirm-type="search" id="scanInput" :focus="focusflag"
-					v-model="form.scanInput" v-focus="input" v-select="input" ref="input" name="input"
-					@confirm="scanAcquisition()" clearable="" placeholder="请扫描" selection-start="0"
+					v-model="form.scanInput"   ref="input" name="input"
+					@confirm="scanAcquisition()"   placeholder="请扫描" selection-start="0"
 					:selection-end="selectendlength"></input>
 			</view>
 			<view v-if="this.list.length>0">
