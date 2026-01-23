@@ -6,6 +6,7 @@ enum Api {
 	PageWMSPackage = '/api/wMSPackage/page',
 	GetWMSPackage = '/api/wMSPackage/Query',
 	ScanPackageData = '/api/wMSPackage/ScanPackageData',
+	ScanPackagSuiteData = '/api/wMSPackage/ScanPackagSuiteData',
 	ScanPackageData_RFID = '/api/wMSPackage/ScanPackageData_RFID',
 	PrintExpress = '/api/wMSPackage/PrintExpress',
 	PrintBaatchExpress = '/api/wMSPackage/PrintBatchExpress',
@@ -61,6 +62,17 @@ export const scanPackageData = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+
+
+// 分页查询WMSPackage
+export const scanPackagSuiteData = (params?: any) =>
+	request({
+		url: Api.ScanPackagSuiteData,
+		method: 'post',
+		data: params,
+	});
+
+	
 
 export const scanHachPackageData = (params?: any) =>
 	request({

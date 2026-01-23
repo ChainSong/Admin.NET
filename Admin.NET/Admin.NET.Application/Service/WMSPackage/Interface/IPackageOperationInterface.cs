@@ -41,7 +41,9 @@ public interface IPackageOperationInterface
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
-    
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
 
     /// <summary>

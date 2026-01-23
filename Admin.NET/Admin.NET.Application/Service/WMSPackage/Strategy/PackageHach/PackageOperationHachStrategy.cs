@@ -43,9 +43,10 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
     //public ISqlSugarClient _db { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }

@@ -182,7 +182,7 @@ namespace Admin.NET.Application.Strategy
                 //已经转出库单的都已经完成， 且预出库单没有新增
                 var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == item.Dn && a.CustomerId == orderData.First().CustomerId && a.PreOrderStatus > (int)PreOrderStatusEnum.新增).ToListAsync();
 
-                if ( checkPreOrderDN.Count == checkPreOrderDN.Count)
+                if (checkOrderDN.Count == checkPreOrderDN.Count)
                 {
                     foreach (var itemDN in checkOrderDN)
                     {

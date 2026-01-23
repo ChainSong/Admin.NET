@@ -40,8 +40,11 @@ internal class PackageOperationRFIDStrategy : IPackageOperationInterface
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
+
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public UserManager _userManager { get; set; }
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }

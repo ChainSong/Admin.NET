@@ -36,6 +36,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
@@ -43,7 +44,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
     //public ISqlSugarClient _db { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
@@ -284,11 +285,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     }
                 }
 
+              
 
-                //判断有没有SN,有SN 就记录出库SN
-                //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
-                //wMSRF.
-                //_repRFPackageAcquisition
                 var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
                 if (PickSKUData.Count() > 0)
                 {
@@ -746,6 +744,35 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 //    }
                 //}
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
+                if (CheckPickData.First().CustomerId == 22)
+                {
+                    //获取
+                    var getSN = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == CheckPickData.First().PickTaskNumber).ToListAsync();
+                    //将福光的包装数据处理一下
+                    foreach (var item in CheckPickData)
+                    {
+                        //声明一个变量
+                        double NumberRemaining = item.PickQty;
+                        var itemdata = getSN.Where(a => a.CustomerId == item.CustomerId && a.Type == "AFC" && a.SKU == item.SKU && a.ReceiptAcquisitionStatus.Value != 1);
+                        foreach (var itemSN in itemdata)
+                        {
+                            if (NumberRemaining <= 0)
+                            {
+                                break;
+                            }
+                            itemSN.ReceiptAcquisitionStatus = 1;
+                            itemSN.OrderId = item.OrderId;
+                            itemSN.PreOrderNumber = item.PreOrderNumber;
+                            itemSN.OrderNumber = item.OrderNumber;
+                            itemSN.ExternOrderNumber = item.ExternOrderNumber;
+                            NumberRemaining--;
+                        }
+                    }
+                    await _repRFPackageAcquisition.UpdateRangeAsync(getSN);
+                }
+
+
+
                 //wMSInstructions.Add(wMSInstruction);
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";

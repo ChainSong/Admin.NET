@@ -204,7 +204,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
         if (customer.CustomerName == "哈希危险品")
         {
             strSql = @"select distinct
-                CompleteTime '出库日期',
+                WMS_Order.CompleteTime '出库日期',
                 WMS_OrderDetail.PoCode '合同号',
                 isnull(WMS_Order.Dn, right(WMS_Order.ExternOrderNumber, 8))  'JOB号', 
                 left(WMS_Order.ExternOrderNumber, 11)  '出库单号', 
@@ -226,11 +226,13 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
 				Handover.Length '长',
 				Handover.Width '宽',
 				Handover.Height '高',
-				Handover.PalletNumber '托号'
-
+				Handover.PalletNumber '托号',
+				PreOrder.CreationTime '订单接收时间',
+				WMS_Order.CompleteTime '订单完成时间'
                 from
                 WMS_Order left join WMS_OrderDetail
                 on WMS_Order.Id = WMS_OrderDetail.OrderId
+                outer apply (select * from WMS_PreOrder where Id=WMS_Order.PreOrderId) PreOrder
                 outer apply(select top 1 * from WMS_OrderAddress where ExternOrderNumber = WMS_Order.ExternOrderNumber) OrderAddress
                 left join WMS_PickTaskDetail  on WMS_OrderDetail.Id = WMS_PickTaskDetail.OrderDetailId
                   outer apply(
