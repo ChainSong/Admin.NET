@@ -413,7 +413,7 @@ public class HachWMSReceivingService : IDynamicApiController, ITransient
                 UPC = "",
                 GoodsName = prod.GoodsName, 
                 GoodsType = "A品",
-                PoCode = "",
+                PoCode =receiving.DocNumber,
                 Weight = 0,
                 Volume = 0,
                 ExpectedQty = item.Quantity,
