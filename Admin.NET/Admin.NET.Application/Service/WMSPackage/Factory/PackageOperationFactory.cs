@@ -26,6 +26,8 @@ internal static class PackageOperationFactory
         {
             case "HachDG":
                 return new PackageOperationHachDGStrategy();
+            case "HachDGSuit":
+                return new PackageOperationHachDGSuitStrategy();
             case "Hach":
                 return new PackageOperationHachStrategy();
             case "RFID":

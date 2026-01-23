@@ -32,7 +32,7 @@ using Admin.NET.Application.Service.Enumerate;
 using OfficeOpenXml.FormulaParsing.Excel.Functions;
 
 namespace Admin.NET.Application.Service;
-internal class PackageOperationHachDGStrategy : IPackageOperationInterface
+internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 {
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
@@ -152,7 +152,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             }
 
         }
-
+       
 
         //else
         //{
@@ -226,8 +226,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 response.Code = StatusCode.Success;
                 return response;
             }
-        }
-
+        } 
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
         //1，先获取拣货任务号，判断是一个还是多个
         var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).Distinct();
@@ -243,13 +242,14 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
 
         }
 
-
-
         //2，判断扫描数据是不是SKU
         if (pickData != null && pickData.Count > 0)
         {
             response.Data.SKU = request.Input;
-            if (request.ScanQty <= 1)
+            //判断是不是套装
+            var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == pickData.First().CustomerId).ToListAsync();
+
+            if (request.ScanQty <= 1 && getParent.Count <= 1)
             {
                 //判断唯一码是不是重复扫描
                 if (!string.IsNullOrEmpty(request.SN))
@@ -291,6 +291,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.
                 //_repRFPackageAcquisition
+
+
                 var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
                 if (PickSKUData.Count() > 0)
                 {
@@ -355,61 +357,70 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.
                 //_repRFPackageAcquisition
-                var PickSKUData = pickData.Where(a => a.SKU == request.Input);
-                if (PickSKUData.Count() > 0)
+                foreach (var parentitem in getParent)
                 {
+                    request.Input = parentitem.ChildSKU;
+                    Qty = parentitem.Qty;
 
-                    foreach (var item in pickData)
+                    var PickSKUData = pickData.Where(a => a.SKU == request.Input);
+                    if (PickSKUData.Count() > 0)
                     {
-                        item.Order = 99;
-                        if (item.SKU == response.Data.SKU)
-                        {
-                            item.Order = 1;
-                        }
-                    }
-                    if (PickSKUData.Sum(a => a.ScanQty + a.PackageQty) + Qty <= PickSKUData.First().PickQty)
-                    {
-                        var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > a.ScanQty + a.PackageQty).First();
-                        pick.ScanQty += Qty;
-                        pick.RemainingQty -= Qty;
-                        if (pick.ScanPackageInput == null)
-                        {
-                            pick.ScanPackageInput = new List<ScanPackageInput>();
-                        }
-                        //pick.ScanPackageInput = new List<ScanPackageInput>();
-                        pick.ScanPackageInput.Add(request);
-                        _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
 
-                        //判断是不是包装完成
-                        if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
+                        foreach (var item in pickData)
                         {
-                            var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
+                            item.Order = 99;
+                            if (item.SKU == response.Data.SKU)
+                            {
+                                item.Order = 1;
+                            }
+                        }
+                        if (PickSKUData.Sum(a => a.ScanQty + a.PackageQty) + Qty <= PickSKUData.First().PickQty)
+                        {
+                            var pick = pickData.Where(a => a.SKU == request.Input && a.PickQty > a.ScanQty + a.PackageQty).First();
+                            pick.ScanQty += Qty;
+                            pick.RemainingQty -= Qty;
+                            if (pick.ScanPackageInput == null)
+                            {
+                                pick.ScanPackageInput = new List<ScanPackageInput>();
+                            }
+                            //pick.ScanPackageInput = new List<ScanPackageInput>();
+                            pick.ScanPackageInput.Add(request);
+                            _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
+
+                            //判断是不是包装完成
+                            if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
+                            {
+                                var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
+                                response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Code = result.Code;
+                                response.Msg = result.Msg;
+                                //return response;
+                            }
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                            response.Code = result.Code;
-                            response.Msg = result.Msg;
-                            return response;
+                            response.Code = StatusCode.Success;
+                            //return response;
                         }
-                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
-                        response.Code = StatusCode.Success;
-                        return response;
+                        else
+                        {
+                            response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                            response.Code = StatusCode.Error;
+                            response.Msg = "该SKU数量已满足";
+                            return response;
+                            //return response;
+                        }
+
                     }
                     else
                     {
-                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Data.PackageDatas = pickData;
+                        response.Data.PickTaskNumber = request.PickTaskNumber;
                         response.Code = StatusCode.Error;
-                        response.Msg = "该SKU数量已满足";
+                        response.Msg = "SKU 不存在";
                         return response;
-                    }
 
+                    }
                 }
-                else
-                {
-                    response.Data.PackageDatas = pickData;
-                    response.Data.PickTaskNumber = request.PickTaskNumber;
-                    response.Code = StatusCode.Error;
-                    response.Msg = "SKU 不存在";
-                    return response;
-                }
+                return response;
             }
 
         }

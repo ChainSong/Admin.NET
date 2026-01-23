@@ -58,6 +58,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<TableColumns> _repTableColumns;
     private readonly SqlSugarRepository<TableColumnsDetail> _repTableColumnsDetail;
+    private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly UserManager _userManager;
     //private readonly ISqlSugarClient _db;
     private readonly SqlSugarRepository<SysWorkFlow> _repWorkFlow;
@@ -69,7 +70,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSExpressDelivery> _repExpressDelivery;
     private readonly SqlSugarRepository<WMSExpressConfig> _repExpressConfig;
-
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
 
     private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
 
@@ -84,7 +85,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
     private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
 
-    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSInstruction> repInstruction)
+    public WMSPackageService(SqlSugarRepository<WMSPackage> rep, SqlSugarRepository<WMSPickTask> repPickTask, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSExpressDelivery> repExpressDelivery, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSWarehouse> repWarehouse, SqlSugarRepository<WMSExpressConfig> repExpressConfig, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSExpressFee> repWMSExpressFee, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<TableColumnsDetail> repTableColumnsDetail, SqlSugarRepository<SysWorkFlow> repWorkFlow, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSCustomerConfig> repCustomerConfig, SqlSugarRepository<WMSPreOrder> repPreOrder, SqlSugarRepository<WMSInstruction> repInstruction, SqlSugarRepository<WMSProduct> repProduct, SqlSugarRepository<WMSProductBom> repProductBom)
     {
         _rep = rep;
         _repPickTask = repPickTask;
@@ -111,6 +112,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         _repWorkFlowService = repWorkFlowService;
         _repCustomerConfig = repCustomerConfig;
         _repInstruction = repInstruction;
+        _repProduct = repProduct;
+        _repProductBom = repProductBom;
     }
 
     /// <summary>
@@ -367,6 +370,57 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repPickTaskDetail = _repPickTaskDetail;
         factory._repWarehouseUser = _repWarehouseUser;
         factory._repCustomerUser = _repCustomerUser;
+        factory._repProduct = _repProduct;
+
+        factory._repProductBom = _repProductBom;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.GetPackage(input);
+        return response;
+
+        //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
+    }
+
+
+
+
+    /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "ScanPackagSuiteData")]
+    //[Idempotent("ms", 500)]
+    public async Task<Response<ScanPackageOutput>> ScanPackageSuitData(ScanPackageInput input)
+    {
+
+        //string workflow = "";
+        //if (!string.IsNullOrEmpty(input.PickTaskNumber))
+        //{
+        //    var pickTask = await _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).FirstAsync();
+        //    var order = await _repOrder.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber).FirstAsync();
+        //    workflow = await _repWorkFlowService.GetSystemWorkFlow(order.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Operation, order.OrderType);
+        //}
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("HachDGSuit");
+        factory._repPackage = _rep;
+        factory._repPreOrder = _repPreOrder;
+        factory._repInstruction = _repInstruction;
+        factory._repPickTask = _repPickTask;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repProduct = _repProduct;
+
+        factory._repProductBom = _repProductBom;
         factory._repRFPackageAcquisition = _repRFPackageAcquisition;
         factory._userManager = _userManager;
         //factory._db = _db;
@@ -404,6 +458,8 @@ public class WMSPackageService : IDynamicApiController, ITransient
         factory._repCustomerUser = _repCustomerUser;
         factory._repRFPackageAcquisition = _repRFPackageAcquisition;
         factory._userManager = _userManager;
+        factory._repProduct = _repProduct;
+        factory._repProductBom = _repProductBom;
         //factory._db = _db;
         factory._repPackageDetail = _repPackageDetail;
         factory._sysCacheService = _sysCacheService;

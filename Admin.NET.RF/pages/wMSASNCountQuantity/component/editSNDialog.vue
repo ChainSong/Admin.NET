@@ -170,7 +170,10 @@
 				this.lpnSearchSet();
 				let that = this;
 				console.log(this.form);
-				
+				// uni.showToast({
+				// 	title: "扫描"+this.form.scanInput,
+				// 		icon: 'none'
+				// });
 				let res = await getScanTypeWMSRFASNCountQuantityDetail(this.form);
 				console.log(res.data.result)
 				if (res.data.result.code == "1") {
@@ -187,7 +190,11 @@
 							playErrorSound();
 						   return;	
 						}
-						this.form.sncode=res.data.result.data.scanTypeData;
+						this.form.sncode=this.form.scanInput;
+						// uni.showToast({
+						// 	title: "提示SKU"+this.form.sku+":SN"+this.form.sncode,
+						// 		icon: 'none'
+						// });
 						let ress = await addWMSRFASNCountQuantityDetail(this.form);
 						if (ress.data.result.code == "1") {
 							this.form.scanSKU = "";
