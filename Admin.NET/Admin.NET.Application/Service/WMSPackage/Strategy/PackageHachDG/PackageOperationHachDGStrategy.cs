@@ -119,6 +119,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
         response.Data.Input = request.Input;
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
+        response.Data.BoxType = request.BoxType;
         response.Data.AcquisitionData = request.AcquisitionData;
 
         List<PackageData> pickData = new List<PackageData>();
@@ -430,6 +431,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
         response.Data.Input = request.Input;
+        response.Data.BoxType = request.BoxType;
         var pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
 
         //保存缓存中的已经包装的数据

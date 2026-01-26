@@ -438,7 +438,7 @@ const scanPackage = async () => {
     state.value.vm.form.sku = "";
     // state.value.vm.form.pickTaskNumber = "";
     state.value.vm.form.weight = 0,
-      state.value.vm.tableData = res.data.result.data.packageDatas;
+    state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
   } else {

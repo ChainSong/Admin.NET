@@ -120,6 +120,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
         response.Data.AcquisitionData = request.AcquisitionData;
+        response.Data.BoxType = request.BoxType;
 
         List<PackageData> pickData = new List<PackageData>();
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
@@ -229,7 +230,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         } 
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
         //1，先获取拣货任务号，判断是一个还是多个
-        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).Distinct();
+        var preOrderNumbers =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).ToListAsync();
         if (preOrderNumbers.Count() > 1)
         {
             response.Data.Remark = "该拣货任务为合并订单，请前往查看";
@@ -247,7 +248,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         {
             response.Data.SKU = request.Input;
             //判断是不是套装
-            var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == pickData.First().CustomerId).ToListAsync();
+            var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == preOrderNumbers.First().CustomerId).ToListAsync();
 
             if (request.ScanQty <= 1 && getParent.Count <= 1)
             {
@@ -441,6 +442,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
         response.Data.Input = request.Input;
+        response.Data.BoxType = request.BoxType;
         var pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
 
         //保存缓存中的已经包装的数据
