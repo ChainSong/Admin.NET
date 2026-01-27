@@ -204,7 +204,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
         if (customer.CustomerName == "哈希危险品")
         {
             strSql = @"select distinct
-                WMS_Order.CompleteTime '出库日期',
+                CONVERT(VARCHAR, WMS_Order.CompleteTime, 23) '出库日期',
                 WMS_OrderDetail.PoCode '合同号',
                 isnull(WMS_Order.Dn, right(WMS_Order.ExternOrderNumber, 8))  'JOB号', 
                 left(WMS_Order.ExternOrderNumber, 11)  '出库单号', 
@@ -219,7 +219,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
 				(select COUNT(1) from WMS_Package where WMS_Package.CustomerId=WMS_OrderDetail.CustomerId and  right(ExternOrderNumber,8) =right( WMS_Order.ExternOrderNumber,8) ) 'JOB号总箱数',	
 				Package.ExpressCompany '承运人',
 				WMS_OrderDetail.GoodsName '品名',
-				Package.ExpressNumber '承运公司',	
+				'' '承运公司',	--Package.ExpressNumber
 				Package.ExpressCompany '运单号',	
 				isnull(RFIDInfo.RFID, RFPackageAcquisition.SN) '防伪码',
 				OrderAddress.CompanyName '最终用户名称',
@@ -264,7 +264,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
         else
         {
             strSql = @"  select distinct
-                CompleteTime '出库日期',
+                CONVERT(VARCHAR, WMS_Order.CompleteTime, 23) '出库日期',
                 WMS_OrderDetail.PoCode '合同号',
                 isnull(WMS_Order.Dn,right(WMS_Order.ExternOrderNumber,8))  'JOB号', 
                 left(WMS_Order.ExternOrderNumber,11)  '出库单号', 

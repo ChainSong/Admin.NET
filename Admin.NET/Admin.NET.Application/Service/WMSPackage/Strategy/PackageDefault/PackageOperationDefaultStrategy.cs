@@ -134,6 +134,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     response.Data.PackageDatas = pickData;
                     response.Code = result.Code;
                     response.Msg = result.Msg;
+                    response.Data.BoxType = request.BoxType;
+
                     return response;
                 }
                 else
@@ -142,6 +144,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, null);
                     response.Code = StatusCode.Error;
                     response.Msg = "该拣货任务已经包装完成";
+                    response.Data.BoxType = request.BoxType;
+
                     return response;
                 }
             }
@@ -180,6 +184,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
 
@@ -191,6 +197,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             .ToList();
             if (CheckPickData.Where(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成).Count() > 0)
             {
+                response.Data.BoxType = request.BoxType;
+
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单已经完成包装";
                 return response;
@@ -199,6 +207,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单还未完成拣货";
+                response.Data.BoxType = request.BoxType;
+
                 return response;
 
             }
@@ -206,6 +216,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单号不存在";
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
 
@@ -223,6 +235,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
         }
@@ -265,6 +279,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                                     response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                                     response.Code = StatusCode.Error;
                                     response.Msg = "不能重复扫描同一个条码";
+                                    response.Data.BoxType = request.BoxType;
+
                                     return response;
                                 }
                             }
@@ -277,6 +293,9 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Data.BoxType = request.BoxType;
+
+
                                 response.Code = StatusCode.Error;
                                 response.Msg = "不能重复扫描同一个条码";
                                 return response;
@@ -317,10 +336,12 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                         {
                             var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                            response.Data.BoxType = request.BoxType;
                             response.Code = result.Code;
                             response.Msg = result.Msg;
                             return response;
                         }
+                        response.Data.BoxType = request.BoxType;
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                         response.Code = StatusCode.Success;
                         return response;
@@ -328,6 +349,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     else
                     {
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Data.BoxType = request.BoxType;
                         response.Code = StatusCode.Error;
                         response.Msg = "该SKU数量已满足";
                         return response;
@@ -338,6 +360,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 {
                     response.Data.PackageDatas = pickData;
                     response.Data.PickTaskNumber = request.PickTaskNumber;
+                    response.Data.BoxType = request.BoxType;
                     response.Code = StatusCode.Error;
                     response.Msg = "SKU 不存在";
                     return response;
@@ -426,6 +449,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Data.Weight = request.Weight;
         response.Data.SKU = request.SKU;
         response.Data.Input = request.Input;
+        response.Data.BoxType = request.BoxType;
         var pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
 
         //保存缓存中的已经包装的数据
@@ -439,6 +463,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+           
                 return response;
             }
             else
