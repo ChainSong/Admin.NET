@@ -778,7 +778,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     {
                         //声明一个变量
                         double NumberRemaining = item.PickQty;
-                        var itemdata = getSN.Where(a => a.CustomerId == item.CustomerId && a.Type == "AFC" && a.SKU == item.SKU && a.ReceiptAcquisitionStatus.Value != 1);
+                        var itemdata = getSN.Where(a => a.CustomerId == item.CustomerId && a.Type == "AFC" && a.SKU == item.SKU && (a.ReceiptAcquisitionStatus ?? 0) != 1);
                         foreach (var itemSN in itemdata)
                         {
                             if (NumberRemaining <= 0)

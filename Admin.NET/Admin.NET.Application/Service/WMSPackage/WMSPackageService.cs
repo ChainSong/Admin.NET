@@ -969,7 +969,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
         var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
         //获取订单状态
-        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber) && getPackageList.First().CustomerId==a.CustomerId).ToListAsync();
 
 
         //foreach (var item in getOrder)
