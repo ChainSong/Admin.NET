@@ -33,6 +33,7 @@ public class PickTaskPrintHachStrategy : IPrintPickTaskInterface
     public SysCacheService _sysCacheService { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SysWorkFlowService _repWorkFlowService { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
 
     public SqlSugarRepository<WMSOrderAddress> _repOrderAddress { get; set; }
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }

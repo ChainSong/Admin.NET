@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.WxaGetNearbyPOIListResponse.Types.Data.Types.POI.Types;
 
 namespace Admin.NET.Application.Service;
 public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
@@ -39,6 +40,7 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
 
     public async Task<Response<PrintBase<List<WMSPickTaskOutput>>>> PickTaskPtint(List<long> ids)
     {
@@ -81,6 +83,26 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
             item.PrintTime = DateTime.Now;
             item.OrderAddress = orderadrress;
             item.Remark = order.Remark;
+            var Parents = item.Details.GroupBy(b => b.Parents).Select(b => b.Key);
+            item.ProductBoms = await _repProductBom.AsQueryable().Where(a => Parents.Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+            //var checkBom = item.Details.GroupBy(a => a.Parents).ToList();
+            //if (checkBom.Count > 0)
+            //{
+            //    item.Str10="请将一下SKU:"
+            ////如果有父件，那么将父件的信息查询并且描述出来
+            //foreach (var BomItem in item.Details.GroupBy(a => a.Parents))
+            //    {
+            //        var skuInfo = await _repProductBom.AsQueryable().Where(a => a.SKU == BomItem.Key).ToListAsync();
+            //        foreach (var skuItem in skuInfo)
+            //        {
+
+            //        }
+
+            //    }
+            //}
+
+
+
         }
         response.Code = StatusCode.Success;
         response.Msg = "操作成功";

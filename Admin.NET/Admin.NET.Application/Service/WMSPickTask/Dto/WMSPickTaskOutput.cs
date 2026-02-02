@@ -212,6 +212,7 @@ public class WMSPickTaskOutput
 
     //[Navigate(NavigateType.OneToMany, nameof(WMSPickTaskDetail.PickTaskId))]
     public List<WMSPickTaskDetailOutput> Details { get; set; }
+    public List<WMSProductBom> ProductBoms { get; set; }
 
     //[Navigate(NavigateType.OneToOne, nameof(WMSOrderAddress.PreOrderId), nameof(PreOrderId))]
     //[Navigate()]

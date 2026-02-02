@@ -32,7 +32,7 @@ public interface IPrintPickTaskInterface
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     public SysWorkFlowService _repWorkFlowService { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
-
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public Task<Response<PrintBase<List<WMSPickTaskOutput>>>> PickTaskPtint(List<long> ids);

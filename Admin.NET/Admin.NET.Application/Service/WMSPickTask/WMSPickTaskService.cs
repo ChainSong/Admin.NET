@@ -61,8 +61,9 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrderDetail> _repOrderDetail;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SysWorkFlowService _repWorkFlowService;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<TableColumns> repTableColumns)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<TableColumns> repTableColumns, SqlSugarRepository<WMSProductBom> repProductBom)
     {
         _rep = rep;
         _userManager = userManager;
@@ -80,6 +81,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repProduct = repProduct;
         _repWorkFlowService = repWorkFlowService;
         _repTableColumns = repTableColumns;
+        _repProductBom = repProductBom;
     }
 
     /// <summary>
@@ -371,6 +373,8 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         factory._repOrderAddress = _repOrderAddress;
         factory._repProduct = _repProduct;
         factory._repWorkFlowService = _repWorkFlowService;
+        factory._repProductBom = _repProductBom;
+        
         var response = await factory.PickTaskPtint(ids);
 
         if (response.Code == StatusCode.Success)

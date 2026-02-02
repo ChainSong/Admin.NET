@@ -109,6 +109,44 @@ export const aProvider = function () {
 					//   return '<td style="padding:0 10px" colspan="100">应收金额大写: </td>'
 					// },
 				}, {
+					tid: 'HachPickBomProviderModule.table',
+					title: 'Hach拣货Bom表格',
+					type: 'table',
+					options: {
+						field: 'table',
+						tableHeaderRepeat: 'first',
+						tableFooterRepeat: 'last',
+						fields: [
+							{ text: '序号', field: 'sequence' },
+							{ text: '父件SKU', field: 'sku' },
+							{ text: '子件SKU', field: 'childSKU' },
+							{ text: '子件数量', field: 'qty' },
+							{ text: '备注', field: 'remark' },
+						],
+					},
+					editable: true,
+					columnDisplayEditable: true, //列显示是否能编辑
+					columnDisplayIndexEditable: true, //列顺序显示是否能编辑
+					columnTitleEditable: true, //列标题是否能编辑
+					columnResizable: true, //列宽是否能调整
+					columnAlignEditable: true, //列对齐是否调整
+					isEnableEditField: true, //编辑字段
+					isEnableContextMenu: true, //开启右键菜单 默认true
+					isEnableInsertRow: true, //插入行
+					isEnableDeleteRow: true, //删除行
+					isEnableInsertColumn: true, //插入列
+					isEnableDeleteColumn: true, //删除列
+					isEnableMergeCell: true, //合并单元格
+					columns: [
+						[
+							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
+							{ title: '父件SKU', align: 'center', field: 'sku', width: 150 },
+							{ title: '子件SKU', align: 'center', field: 'childSKU', width: 150 },
+							{ title: '子件数量', align: 'center', field: 'qty', width: 150 },
+							{ title: '备注', align: 'center', field: 'remark', width: 150 },
+						],
+					],
+				}, {
 					tid: 'HachProviderModule.table',
 					title: 'Hach发货表格',
 					type: 'table',
