@@ -71,7 +71,10 @@
           <el-button-group>
             <el-button type="primary" icon="ele-Printer" @click="openPrint" v-auth="'wMSPickTask:page'"> 打印
             </el-button>
-            <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
+          </el-button-group>
+          <el-button-group>
+            <el-button type="primary" icon="ele-Printer" @click="exportPickFun" v-auth="'wMSPickTask:page'"> 导出
+            </el-button>
           </el-button-group>
 
         </el-form-item>
@@ -179,7 +182,7 @@ import editDialog from '/@/views/main/wMSPickTask/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSPickTask/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSPickTask/component/queryDialog.vue'
 // import printDialog from '/@/views/main/wMSPickTask/component/printDialog.vue'
-import { pageWMSPickTask, deleteWMSPickTask, wmsPickComplete, getPickTasks, addWMSPickTaskPrintLog, printPickTasks } from '/@/api/main/wMSPickTask';
+import { pageWMSPickTask, deleteWMSPickTask, wmsPickComplete, getPickTasks, addWMSPickTaskPrintLog, printPickTasks,exportPick } from '/@/api/main/wMSPickTask';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import printDialog from '/@/views/tools/printDialog.vue';
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -189,7 +192,8 @@ import TableColumns from "/@/entities/tableColumns";
 import { number } from "echarts";
 import orderStatus from "/@/entities/orderStatus";
 import pickTask from "/@/entities/pickTask";
-
+import { downloadByData, getFileName } from '/@/utils/download';
+import { classNameToArray } from "element-plus/es/utils";
 
 const state = ref({
   vm: {
@@ -399,6 +403,29 @@ const openPrint = async () => {
 
 };
 
+
+//导出拣货任务
+const exportPickFun = async () => {
+  //1 获取选中的订单ID
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  // 2,验证数据有没有勾选
+  // if (ids.length < 1) {
+  //   ElMessage.error("请勾选订单");
+  //   return;
+  // }
+  if (ids.length > 0) {
+    let res = await exportPick(ids);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } else {
+    let res = await exportPick(state.value.header);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  }
+}
 
 
 //打印

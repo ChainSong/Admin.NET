@@ -209,6 +209,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 isnull(WMS_Order.Dn, right(WMS_Order.ExternOrderNumber, 8))  'JOB号', 
                 left(WMS_Order.ExternOrderNumber, 11)  '出库单号', 
                 isnull(RFIDInfo.PackageNumber, Package.PackageNumber) '箱号', 
+                isnull(WMS_Order.Dn+'_'+Package.SerialNumber,Package.PackageNumber) '箱号Hach',
                 WMS_OrderDetail.SKU '货号',
                 (case isnull(isnull(RFID, RFPackageAcquisition.SN), '') when ''  then Package.Qty  else 1 end) '出库数量',
                 0 '组合箱数',
@@ -241,7 +242,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 ) RFIDInfo
 
                  outer apply(
-                select  WMS_Package.PackageNumber, ExpressCompany, ExpressNumber, sum(Qty) Qty from WMS_Package
+                select  WMS_Package.PackageNumber, ExpressCompany, ExpressNumber, sum(Qty) Qty,SerialNumber from WMS_Package
                 left join WMS_PackageDetail  on WMS_Package.Id = WMS_PackageDetail.PackageId
 
                 where WMS_PickTaskDetail.PickTaskNumber = WMS_Package.PickTaskNumber
@@ -249,7 +250,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
 
                 and  WMS_PackageDetail.SKU = WMS_OrderDetail.SKU
 
-                group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber
+                group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber,SerialNumber
                 ) Package
                 outer apply(
                select SN from WMS_RFPackageAcquisition where WMS_RFPackageAcquisition.PackageNumber = Package.PackageNumber and type = 'AFC'
@@ -269,6 +270,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 isnull(WMS_Order.Dn,right(WMS_Order.ExternOrderNumber,8))  'JOB号', 
                 left(WMS_Order.ExternOrderNumber,11)  '出库单号', 
                 isnull(RFIDInfo.PackageNumber,Package.PackageNumber) '箱号', 
+                isnull(WMS_Order.Dn+'_'+Package.SerialNumber,Package.PackageNumber) '箱号Hach',
                 WMS_OrderDetail.SKU '货号',
                 (case isnull(RFID, '') when ''  then Package.Qty  else 1 end) '出库数量',
                 0 '组合箱数',
@@ -293,12 +295,12 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 and WMS_PickTaskDetail.SKU= WMS_RFIDInfo.SKU and Status = 99
                 ) RFIDInfo
                  outer apply(
-                select distinct top 1 WMS_Package.PackageNumber, ExpressCompany, ExpressNumber,sum(Qty) Qty from WMS_Package
+                select distinct top 1 WMS_Package.PackageNumber, ExpressCompany, ExpressNumber,sum(Qty) Qty,SerialNumber from WMS_Package
 				left join WMS_PackageDetail  on WMS_Package.Id=WMS_PackageDetail.PackageId
 				where WMS_PickTaskDetail.PickTaskNumber = WMS_Package.PickTaskNumber
                 and(isnull(RFIDInfo.PackageNumber, '') = '' or  WMS_Package.PackageNumber = RFIDInfo.PackageNumber) 
 				and  WMS_PackageDetail.SKU=WMS_OrderDetail.SKU
-				group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber
+				group by WMS_Package.PackageNumber, ExpressCompany, ExpressNumber,SerialNumber
                 ) Package
                 where  WMS_Order.Id in (" + string.Join(",", ids) + ") order by  isnull(WMS_Order.Dn,right(WMS_Order.ExternOrderNumber,8))";
         }

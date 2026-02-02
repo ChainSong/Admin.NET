@@ -9,6 +9,7 @@ enum Api {
   WMSPickComplete = '/api/wMSPickTask/WMSPickComplete',
   PrintPickTasks = '/api/wMSPickTask/PrintPickTasks',
   GetPickTasks = '/api/wMSPickTask/GetPickTasks',
+  ExportPick = '/api/wMSPickTask/ExportPick',
   
 }
 
@@ -82,3 +83,14 @@ request({
 	method: 'post',
 	data: params,
 });
+
+
+
+// 导出出库信息
+export const exportPick = (params?: any) =>
+	request({
+		url: Api.ExportPick,
+		method: 'post',
+		data: params,
+		responseType: 'blob',
+	});

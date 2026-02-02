@@ -112,7 +112,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun"
-            v-auth="'wMSOrder:exportWMSOrderByRFID'">
+            v-auth="'wMSOrder:page'">
             导出RFID
           </el-button>
         </el-form-item>

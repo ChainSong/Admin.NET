@@ -86,24 +86,24 @@ namespace Admin.NET.Application.Strategy
                     try
                     {
                         //调用高德地图api
-                        var Georesponse = await aMap.RequestGeoCode(item.OrderAddress.Province + item.OrderAddress.City + item.OrderAddress.County + item.OrderAddress.Address, item.OrderAddress.City);
-                        if (Georesponse != null && Georesponse.status == "1")
-                        {
-                            item.OrderAddress.Province = Georesponse.geocodes[0].province;
-                            item.OrderAddress.City = Georesponse.geocodes[0]?.city?.ToString() ?? item.OrderAddress.City;
-                            //item.OrderAddress.County = Georesponse.geocodes[0].district;
-                        }
-                        else
-                        {
-                            //response.Data.Add(new OrderStatusDto()
-                            //{
-                            //    ExternOrder = item.ExternOrderNumber,
-                            //    SystemOrder = item.PreOrderNumber,
-                            //    Type = item.OrderType,
-                            //    Msg = "获取省区市失败"
-                            //});
-                            //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
-                        }
+                        //var Georesponse = await aMap.RequestGeoCode(item.OrderAddress.Province + item.OrderAddress.City + item.OrderAddress.County + item.OrderAddress.Address, item.OrderAddress.City);
+                        //if (Georesponse != null && Georesponse.status == "1")
+                        //{
+                        //    item.OrderAddress.Province = Georesponse.geocodes[0].province;
+                        //    item.OrderAddress.City = Georesponse.geocodes[0]?.city?.ToString() ?? item.OrderAddress.City;
+                        //    //item.OrderAddress.County = Georesponse.geocodes[0].district;
+                        //}
+                        //else
+                        //{
+                        //    //response.Data.Add(new OrderStatusDto()
+                        //    //{
+                        //    //    ExternOrder = item.ExternOrderNumber,
+                        //    //    SystemOrder = item.PreOrderNumber,
+                        //    //    Type = item.OrderType,
+                        //    //    Msg = "获取省区市失败"
+                        //    //});
+                        //    //return new Response<List<OrderStatusDto>>() { Code = StatusCode.Error, Msg = "获取省区市失败" };
+                        //}
                     }
                     catch (Exception ex)
                     {

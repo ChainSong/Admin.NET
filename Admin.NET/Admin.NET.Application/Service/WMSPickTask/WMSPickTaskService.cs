@@ -3,6 +3,7 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Factory;
+using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
 using Admin.NET.Application.Service.Factory;
 using Admin.NET.Common;
@@ -14,10 +15,15 @@ using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
 using Furion.RemoteRequest;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
 using Nest;
 using Org.BouncyCastle.Asn1.Cmp;
 using Org.BouncyCastle.Crypto;
+using RulesEngine.Models;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using XAct;
@@ -42,6 +48,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
     private readonly SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo;
+    private readonly SqlSugarRepository<TableColumns> _repTableColumns;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -55,7 +62,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SysWorkFlowService _repWorkFlowService;
-    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail)
+    public WMSPickTaskService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<Admin.NET.Core.Entity.WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSRFIDInfo> repRFIDInfo, SqlSugarRepository<WMSOrderAddress> repOrderAddress, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSOrderDetail> repOrderDetail, SqlSugarRepository<TableColumns> repTableColumns)
     {
         _rep = rep;
         _userManager = userManager;
@@ -72,6 +79,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         _repOrderAddress = repOrderAddress;
         _repProduct = repProduct;
         _repWorkFlowService = repWorkFlowService;
+        _repTableColumns = repTableColumns;
     }
 
     /// <summary>
@@ -508,5 +516,65 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         await _rep.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
     }
 
+
+
+
+
+    /// <summary>
+    /// 导出拣货信息
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+
+    [HttpPost]
+    //[UnitOfWork]
+    [ApiDescriptionSettings(Name = "ExportPick")]
+    public async Task<Microsoft.AspNetCore.Mvc.ActionResult> ExportPick([FromBody]List<long> ids)
+    {
+        //使用简单工厂定制化  /
+        //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
+        //默认：1，按照已有库存，且库存最小推荐
+        //默认：2，没有库存，以前有库存
+        //默认：3，随便推荐
+
+        //private const string FileDir = "/File/ExcelTemp";
+        //string url = await ImprotExcel.WriteFile(file);
+        //var dataExcel = ExcelData.ExcelToDataTable(url, null, true);
+        //var aaaaa = ExcelData.GetData<DataSet>(url);
+
+        var entity = await _rep.AsQueryable().Where(u => ids.Contains(u.Id)).FirstAsync();
+
+        //var data = entity.Adapt<List<WMSPickTaskOutput>>();
+        //根据拣货单获取订单类型
+        //var orderEntity = await _repOrder.AsQueryable().Where(u => u.Id == data.First().Details.First().OrderId).ToListAsync();
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(entity.CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Pick, entity.PickType);
+
+        //1根据用户的角色 解析出Excel
+        IPickTaskExportInterface factory = PickTaskExportFactory.PickTaskExport("");
+        factory._userManager = _userManager;
+        factory._repPickTask = _rep;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repOrder = _repOrder;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repPackage = _repPackage;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._repTableColumns = _repTableColumns;
+        //factory._repOrderAddress = _repOrderAddress;
+        //factory._repProduct = _repProduct;
+        //factory._repWorkFlowService = _repWorkFlowService;
+
+        var response = await factory.PickTaskExport(ids);
+        IExporter exporter = new ExcelExporter();
+        var result = exporter.ExportAsByteArray<DataTable>(response.Data);
+        var fs = new MemoryStream(result.Result);
+        //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
+        return new FileStreamResult(fs, "application/octet-stream")
+        {
+            FileDownloadName = "包装信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+        };
+    }
 
 }
