@@ -125,6 +125,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Page")]
     public async Task<SqlSugarPagedList<WMSPackageOutput>> Page(WMSPackageInput input)
     {
+
         var query = _rep.AsQueryable()
                     .WhereIF(input.OrderId > 0, u => u.OrderId == input.OrderId)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.PackageNumber), u => u.PackageNumber.Contains(input.PackageNumber.Trim()))
@@ -513,9 +514,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
+    //[Idempotent("s", 1)]
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "AddPackage")]
+    [Idempotent("s", 1)]
     public async Task<Response<ScanPackageOutput>> AddPackageData(ScanPackageInput input)
     {
 
@@ -542,6 +545,42 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
     }
 
+
+    /// <summary>
+    /// 获取WMSPackage列表
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    //[Idempotent("s", 1)]
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "AddPackageHachDGSuit")]
+    [Idempotent("s", 1)]
+    public async Task<Response<ScanPackageOutput>> AddPackageHachDGSuitData(ScanPackageInput input)
+    {
+
+        IPackageOperationInterface factory = PackageOperationFactory.PackageOperation("HachDGSuit");
+        factory._repPackage = _rep;
+        factory._repPickTask = _repPickTask;
+        factory._repInstruction = _repInstruction;
+
+        //factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repWarehouseUser = _repWarehouseUser;
+        factory._repRFPackageAcquisition = _repRFPackageAcquisition;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._userManager = _userManager;
+        //factory._db = _db;
+        factory._repPackageDetail = _repPackageDetail;
+        factory._sysCacheService = _sysCacheService;
+        factory._repRFIDInfo = _repRFIDInfo;
+        factory._repOrder = _repOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        var response = await factory.AddPackage(input);
+        return response;
+
+        //return await _rep.AsQueryable().Select<WMSPackageOutput>().ToListAsync();
+    }
 
     /// <summary>
     /// 获取WMSPackage列表
@@ -969,7 +1008,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
         var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
         //获取订单状态
-        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber) && getPackageList.First().CustomerId==a.CustomerId).ToListAsync();
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber) && getPackageList.First().CustomerId == a.CustomerId).ToListAsync();
 
 
         //foreach (var item in getOrder)
@@ -1246,11 +1285,19 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };
         }
+        if (string.IsNullOrEmpty(request.SN))
+        {
+            if (!string.IsNullOrEmpty(request.snCode))
+            {
+                request.SN = request.snCode;
+            }
+        }
 
         WMSRFPackageAcquisition packageAcquisition = new WMSRFPackageAcquisition();
         packageAcquisition = packahe.Adapt<WMSRFPackageAcquisition>();
         packageAcquisition.SKU = request.SKU;
         packageAcquisition.SN = request.SN;
+        packageAcquisition.Type = "SN";
         packageAcquisition.Qty = 1;
         packageAcquisition.Creator = _userManager.Account;
         packageAcquisition.CreationTime = DateTime.Now;

@@ -218,7 +218,7 @@ public class WMSOrderReportService : IDynamicApiController, ITransient
                 OrderAddress.Address '地址',
                 OrderAddress.Phone '电话',
 				(select COUNT(1) from WMS_Package where WMS_Package.CustomerId=WMS_OrderDetail.CustomerId and  right(ExternOrderNumber,8) =right( WMS_Order.ExternOrderNumber,8) ) 'JOB号总箱数',	
-				Package.ExpressCompany '承运人',
+				'' '承运人',
 				WMS_OrderDetail.GoodsName '品名',
 				'' '承运公司',	--Package.ExpressNumber
 				Package.ExpressCompany '运单号',	

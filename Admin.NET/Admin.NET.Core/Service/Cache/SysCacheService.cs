@@ -57,6 +57,20 @@ public class SysCacheService : IDynamicApiController, ISingleton
         return _cache.Set(key, value, expire);
     }
 
+
+    /// <summary>
+    /// 增加缓存并设置过期时间
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <param name="expire"></param>
+    /// <returns></returns>
+    [NonAction]
+    public bool Set(string key, object value, int expire)
+    {
+        return _cache.Set(key, value, expire);
+    }
+
     /// <summary>
     /// 获取缓存
     /// </summary>

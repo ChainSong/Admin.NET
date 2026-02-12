@@ -76,15 +76,15 @@ public class PickTaskPrintHachDGStrategy : IPrintPickTaskInterface
                 PickTaskId = a.Key.PickTaskId,
                 Qty = a.Sum(b => b.Qty),
                 IsSN = a.Key.Str2,
-                //Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsSN).ToString(),
+                IsUID = Convert.ToBoolean(product.Where(b => b.SKU == a.Key.SKU && b.CustomerId == a.Key.CustomerId).First().IsUID).ToString(),
                 Parents = order.Details.Where(b => b.SKU == a.Key.SKU).First().Str2
             }).OrderBy(a => a.Location).ToList();
             item.PoCode = item.Details.First().PoCode;
             item.PrintTime = DateTime.Now;
             item.OrderAddress = orderadrress;
             item.Remark = order.Remark;
-            var Parents = item.Details.GroupBy(b => b.Parents).Select(b => b.Key);
-            item.ProductBoms = await _repProductBom.AsQueryable().Where(a => Parents.Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
+            //var Parents = item.Details.GroupBy(b => b.Parents).Select(b => b.Key);
+            //item.ProductBoms = await _repProductBom.AsQueryable().Where(a => Parents.Contains(a.SKU) && a.CustomerId == item.CustomerId).ToListAsync();
             //var checkBom = item.Details.GroupBy(a => a.Parents).ToList();
             //if (checkBom.Count > 0)
             //{

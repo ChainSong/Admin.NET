@@ -97,6 +97,12 @@ public class WMSPackageDto
     public string? ExpressNumber { get; set; }
 
     /// <summary>
+    /// 序号
+    /// </summary>
+    public string? SerialNumber { get; set; }
+
+
+    /// <summary>
     /// 是否主单
     /// </summary>
     public int? IsComposited { get; set; }

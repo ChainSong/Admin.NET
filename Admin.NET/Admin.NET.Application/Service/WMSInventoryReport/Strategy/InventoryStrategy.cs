@@ -1,4 +1,4 @@
-﻿// 麻省理工学院许可证
+// 麻省理工学院许可证
 //
 // 版权所有 (c) 2021-2023 zuohuaijun，大名科技（天津）有限公司  联系电话/微信：18020030720  QQ：515096995
 //
@@ -635,7 +635,16 @@ public class InventoryStrategy : IInvrntoryInterface
                         }
                         else
                         {
-                            row[h.DisplayName] = property.GetValue(a);
+                            var val = property.GetValue(a);
+                            // 如果是 InventoryTime 字段，格式化为年月日
+                            if (h.DbColumnName == "InventoryTime" && val is DateTime)
+                            {
+                                row[h.DisplayName] = ((DateTime)val).ToString("yyyy-MM-dd");
+                            }
+                            else
+                            {
+                                row[h.DisplayName] = val;
+                            }
                         }
 
                         //if (property != null)

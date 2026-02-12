@@ -90,6 +90,7 @@ export const aProvider = function () {
 							{ title: '库位', align: 'center', field: 'location', width: 150 },
 							{ title: '批次号', align: 'center', field: 'batchCode', width: 150 },
 							{ title: '是否SN', align: 'center', field: 'isSN', width: 150 },
+							{ title: '是否防伪码', align: 'center', field: 'isUID', width: 150 },
 							{ title: 'CN805', align: 'center', field: 'cN805', width: 150 },
 							{ title: '父件', align: 'center', field: 'parents', width: 150 },
 							{ title: 'PO', align: 'center', field: 'poCode', width: 150 },

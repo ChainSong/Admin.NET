@@ -29,6 +29,8 @@ using System;
 using System.Net;
 using System.Net.Mail;
 using Yitter.IdGenerator;
+using Microsoft.Extensions.Configuration;
+
 
 namespace Admin.NET.Web.Core;
 
@@ -36,6 +38,10 @@ public class Startup : AppStartup
 {
     public void ConfigureServices(IServiceCollection services)
     {
+        #region 读取  appsettings.json 其中的系统配置配置 Redis 等
+        IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+        #endregion
+
         // 配置选项
         services.AddProjectOptions();
 
@@ -52,9 +58,14 @@ public class Startup : AppStartup
         // 任务队列
         services.AddTaskQueue();
         // 任务调度
+        var jobOptions = configuration["JobFlag:Enabled"];
+        // 任务调度
         services.AddSchedule(options =>
         {
-            options.AddPersistence<DbJobPersistence>(); // 添加作业持久化器
+            if (jobOptions=="1")
+            {
+                options.AddPersistence<DbJobPersistence>(); // 添加作业持久化器
+            }
         });
         // 脱敏检测
         services.AddSensitiveDetection();

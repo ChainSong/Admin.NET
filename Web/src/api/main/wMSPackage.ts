@@ -22,6 +22,7 @@ enum Api {
 	ScanHachPackageData = '/api/wMSPackage/ScanHachPackageData',
 	PrintDGPackageList = '/api/wMSPackage/PrintDGPackageList',
 	PrintPackageNumber = '/api/wMSPackage/PrintPackageNumber',
+	AddPackageHachDGSuit = '/api/wMSPackage/AddPackageHachDGSuit',
 }
 
 // 增加WMSPackage
@@ -127,6 +128,15 @@ export const addRFIDPackageData = (params?: any) =>
 export const addPackageData = (params?: any) =>
 	request({
 		url: Api.AddPackageData,
+		method: 'post',
+		data: params,
+	});
+
+	
+// 新增箱
+export const addPackageHachDGSuit = (params?: any) =>
+	request({
+		url: Api.AddPackageHachDGSuit,
 		method: 'post',
 		data: params,
 	});

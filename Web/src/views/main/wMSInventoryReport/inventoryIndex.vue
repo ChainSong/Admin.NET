@@ -65,7 +65,7 @@
         </el-form-item>
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Search" @click="invrntoryExport" v-auth="'wMSInventoryUsable:page'"> 下载 </el-button>
+            <el-button type="primary" icon="ele-Download" @click="invrntoryExport" v-auth="'wMSInventoryUsable:page'"> 下载 </el-button>
           </el-button-group>
         </el-form-item>
         <!-- <el-form-item>

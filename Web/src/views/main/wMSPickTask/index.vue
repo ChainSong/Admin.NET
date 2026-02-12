@@ -73,7 +73,7 @@
             </el-button>
           </el-button-group>
           <el-button-group>
-            <el-button type="primary" icon="ele-Printer" @click="exportPickFun" v-auth="'wMSPickTask:page'"> 导出
+            <el-button type="primary"   icon="ele-Download" @click="exportPickFun" v-auth="'wMSPickTask:page'"> 导出
             </el-button>
           </el-button-group>
 

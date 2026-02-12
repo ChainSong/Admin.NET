@@ -94,6 +94,11 @@ public class WMSPackageBaseInput
     public virtual string? ExpressNumber { get; set; }
 
     /// <summary>
+    /// 序号
+    /// </summary>
+    public string? SerialNumber { get; set; }
+
+    /// <summary>
     /// 是否主单
     /// </summary>
     public virtual int? IsComposited { get; set; }
@@ -399,6 +404,10 @@ public class WMSPackageInput : BasePageInput
     /// 快递单号
     /// </summary>
     public string? ExpressNumber { get; set; }
+    /// <summary>
+    /// 序号
+    /// </summary>
+    public string? SerialNumber { get; set; }
 
     /// <summary>
     /// 是否主单

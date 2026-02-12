@@ -116,6 +116,8 @@ public class WMSInventoryReportService : IDynamicApiController, ITransient
     public ActionResult InvrntoryDataExport(WMSInventoryUsableInput input)
     {
 
+
+
         //使用简单工厂定制化  / 
         IInvrntoryInterface factory = InvrntoryFactory.InvrntoryData(input.CustomerId);
         //factory._db = _db;

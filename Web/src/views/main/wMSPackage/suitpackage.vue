@@ -197,7 +197,7 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
-import { pageWMSPackage, deleteWMSPackage, scanPackageData,scanPackagSuiteData, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage, printPackageList ,printPackageNumber} from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData,scanPackagSuiteData,addPackageHachDGSuit, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage, printPackageList ,printPackageNumber} from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -366,7 +366,7 @@ const scanSNPickNumber = async () => {
 const addPackage = async (data: any) => {
   state.value.vm.form.expressCompany = expressValue.value;
   // allPackage(state.value.vm.form);
-  let res = await addPackageData(state.value.vm.form);
+  let res = await addPackageHachDGSuit(state.value.vm.form);
   // let res = await scanPackageData(state.value.vm.form);
   if (res.data.result.code == 1) {
     state.value.vm.form = res.data.result.data;

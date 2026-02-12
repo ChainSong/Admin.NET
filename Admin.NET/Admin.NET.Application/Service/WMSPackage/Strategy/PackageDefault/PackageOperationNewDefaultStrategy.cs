@@ -11,46 +11,45 @@ using Admin.NET.Application.Dtos;
 using Admin.NET.Application.Dtos.Enum;
 using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
 using AutoMapper;
+using FluentEmail.Core;
+using Furion.FriendlyException;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FluentEmail.Core;
-using Admin.NET.Application.Service;
-using XAct;
-using Furion.FriendlyException;
-using SqlSugar;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
-using Admin.NET.Application.Service.Enumerate;
-using OfficeOpenXml.FormulaParsing.Excel.Functions;
+using XAct;
 
 namespace Admin.NET.Application.Service;
-internal class PackageOperationHachDGStrategy : IPackageOperationInterface
+internal class PackageOperationNewDefaultStrategy : IPackageOperationInterface
 {
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
-    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
     //public ISqlSugarClient _db { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-
+    public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
+    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
     public SqlSugarRepository<WMSOrderDetail> _repOrderDetail { get; set; }
     public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
-    public SqlSugarRepository<WMSInstruction> _repInstruction { get; set; }
-    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+
     public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     TimeSpan timeSpan = new TimeSpan(72, 0, 0);
@@ -119,7 +118,6 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
         response.Data.Input = request.Input;
         response.Data.SN = request.SN;
         response.Data.Lot = request.Lot;
-        response.Data.BoxType = request.BoxType;
         response.Data.AcquisitionData = request.AcquisitionData;
 
         List<PackageData> pickData = new List<PackageData>();
@@ -136,6 +134,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                     response.Data.PackageDatas = pickData;
                     response.Code = result.Code;
                     response.Msg = result.Msg;
+                    response.Data.BoxType = request.BoxType;
+
                     return response;
                 }
                 else
@@ -144,6 +144,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                     _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, null);
                     response.Code = StatusCode.Error;
                     response.Msg = "该拣货任务已经包装完成";
+                    response.Data.BoxType = request.BoxType;
+
                     return response;
                 }
             }
@@ -182,6 +184,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             {
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
 
@@ -193,6 +197,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             .ToList();
             if (CheckPickData.Where(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成).Count() > 0)
             {
+                response.Data.BoxType = request.BoxType;
+
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单已经完成包装";
                 return response;
@@ -201,6 +207,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单还未完成拣货";
+                response.Data.BoxType = request.BoxType;
+
                 return response;
 
             }
@@ -208,6 +216,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单号不存在";
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
 
@@ -215,8 +225,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             pickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                   .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                   .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-              .GroupBy(a => new { a.SKU, a.PickTaskNumber })
-              .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
+              .GroupBy(a => new { a.SKU, a.PickTaskNumber, a.CustomerId })
+              .Select(a => new PackageData { SKU = a.SKU, CustomerId = a.CustomerId, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
               .ToList();
 
             if (pickData.Count > 0)
@@ -225,20 +235,22 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
+                response.Data.BoxType = request.BoxType;
+
                 return response;
             }
         }
 
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
         //1，先获取拣货任务号，判断是一个还是多个
-        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).Distinct();
+        var preOrderNumbers = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => a.PreOrderNumber).Distinct();
         if (preOrderNumbers.Count() > 1)
         {
             response.Data.Remark = "该拣货任务为合并订单，请前往查看";
         }
         else
         {
-            var preOrderNumber = preOrderNumbers.First().PreOrderNumber;
+            var preOrderNumber = preOrderNumbers.First();
             //2,根据获取，获取订单号，获取订单备注
             response.Data.Remark = await _repPreOrder.AsQueryable().Where(a => a.PreOrderNumber == preOrderNumber).Select(a => a.Remark).FirstAsync();
 
@@ -252,7 +264,6 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             response.Data.SKU = request.Input;
             if (request.ScanQty <= 1)
             {
-                //判断唯一码是不是重复扫描
                 if (!string.IsNullOrEmpty(request.SN))
                 {
                     //判断唯一码是不是重复扫描
@@ -268,6 +279,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                                     response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                                     response.Code = StatusCode.Error;
                                     response.Msg = "不能重复扫描同一个条码";
+                                    response.Data.BoxType = request.BoxType;
+
                                     return response;
                                 }
                             }
@@ -276,10 +289,13 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                         //判断JNE 是不是可用
                         if (!string.IsNullOrEmpty(request.SN))
                         {
-                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && pickData.First().CustomerId == a.CustomerId).FirstAsync();
                             if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                                response.Data.BoxType = request.BoxType;
+
+
                                 response.Code = StatusCode.Error;
                                 response.Msg = "不能重复扫描同一个条码";
                                 return response;
@@ -288,10 +304,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                     }
                 }
 
-                //判断有没有SN,有SN 就记录出库SN
-                //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
-                //wMSRF.
-                //_repRFPackageAcquisition
+              
+
                 var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
                 if (PickSKUData.Count() > 0)
                 {
@@ -322,10 +336,12 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                         {
                             var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                            response.Data.BoxType = request.BoxType;
                             response.Code = result.Code;
                             response.Msg = result.Msg;
                             return response;
                         }
+                        response.Data.BoxType = request.BoxType;
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                         response.Code = StatusCode.Success;
                         return response;
@@ -333,6 +349,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                     else
                     {
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Data.BoxType = request.BoxType;
                         response.Code = StatusCode.Error;
                         response.Msg = "该SKU数量已满足";
                         return response;
@@ -343,6 +360,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 {
                     response.Data.PackageDatas = pickData;
                     response.Data.PickTaskNumber = request.PickTaskNumber;
+                    response.Data.BoxType = request.BoxType;
                     response.Code = StatusCode.Error;
                     response.Msg = "SKU 不存在";
                     return response;
@@ -445,6 +463,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+           
                 return response;
             }
             else
@@ -511,10 +530,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
     private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
         Response response = new Response();
-        if (request.Weight < 0.3)
-        {
-            request.Weight = 1;
-        }
+
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
@@ -561,8 +577,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
             //var packageDetailDetail = .WMSRFPackageAcquisition
-            //通过order id  查找 dn
-            //再根据dn 查找所有的 so 信息， 再来计算箱号序列
+            //var packagenumberData = await _repPackage.AsQueryable().Where(a => a.OrderId == pickDataTemp.OrderId).ToListAsync();
             var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId).FirstAsync();
             List<WMSOrder> orderSo = new List<WMSOrder>();
             if (orderDn != null && !string.IsNullOrEmpty(orderDn.Dn))
@@ -575,10 +590,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             }
             var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
 
-
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
-            packageData.PackageType = request.BoxType;
             packageData.Details.ForEach(a =>
             {
                 a.CustomerId = packageData.CustomerId;
@@ -632,13 +645,9 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             packageData.GrossWeight = request.Weight;
             packageData.NetWeight = request.Weight;
             packageData.Id = 0;
+            packageData.PackageType = request.BoxType;
             packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 
-            //判断SN是不是重复
-            //if (PackageAcquisitions.GroupBy(a => a.SN).Any(a => a.Count() > 1))
-            //{
-            //    throw Oops.Oh("SN不能重复");
-            //}
             //try
             //{
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
@@ -666,6 +675,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
+
 
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
@@ -758,8 +768,37 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 //        }
                 //    }
                 //}
-                //}
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
+                if (CheckPickData.First().CustomerId == 22)
+                {
+                    //获取
+                    var getSN = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == CheckPickData.First().PickTaskNumber).ToListAsync();
+                    //将福光的包装数据处理一下
+                    foreach (var item in CheckPickData)
+                    {
+                        //声明一个变量
+                        double NumberRemaining = item.PickQty;
+                        var itemdata = getSN.Where(a => a.CustomerId == item.CustomerId && a.Type == "AFC" && a.SKU == item.SKU && (a.ReceiptAcquisitionStatus ?? 0) != 1);
+                        foreach (var itemSN in itemdata)
+                        {
+                            if (NumberRemaining <= 0)
+                            {
+                                break;
+                            }
+                            itemSN.ReceiptAcquisitionStatus = 1;
+                            itemSN.OrderId = item.OrderId;
+                            itemSN.PreOrderNumber = item.PreOrderNumber;
+                            itemSN.OrderNumber = item.OrderNumber;
+                            itemSN.ExternOrderNumber = item.ExternOrderNumber;
+                            NumberRemaining--;
+                        }
+                    }
+                    await _repRFPackageAcquisition.UpdateRangeAsync(getSN);
+                }
+
+
+
+                //wMSInstructions.Add(wMSInstruction);
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";
                 return response;

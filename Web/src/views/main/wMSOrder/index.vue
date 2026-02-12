@@ -8,13 +8,13 @@
 
               <template v-if="i.type == 'TextBox'">
                 <el-form-item class="mb-0" :label="i.displayName">
-                  <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" />
+                  <el-input v-model="state.header[i.dbColumnName]" :placeholder="i.displayName" style="width: 100%" size="small" clearable />
                 </el-form-item>
               </template>
               <template v-if="i.type == 'DropDownListInt'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
-                    size="small" placeholder="请选择">
+                    size="small" placeholder="请选择" style="width: 100%">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeInt" style="width: 100%"
                       :label="item.name" :value="item.codeInt">
                     </el-option>
@@ -33,7 +33,7 @@
               <template v-if="i.type == 'DropDownListStr'">
                 <el-form-item class="mb-0" :label="i.displayName">
                   <el-select v-model="state.header[i.columnName]" clearable filterable v-if="i.isSearchCondition"
-                    size="small" placeholder="请选择">
+                    size="small" placeholder="请选择" style="width: 100%">
                     <el-option v-for="item in i.tableColumnsDetails" :key="item.codeStr" style="width: 100%"
                       :label="item.name" :value="item.codeStr">
                     </el-option>
@@ -70,7 +70,7 @@
 
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'"> 导出出库单
+            <el-button type="primary" icon="ele-Download" @click="exportOrderFun" v-auth="'wMSOrder:export'" :loading="opLoading.exportOrder" :disabled="opLoading.exportOrder"> 导出出库单
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
@@ -79,7 +79,7 @@
 
         <el-form-item>
           <el-button-group>
-            <el-button type="primary" icon="ele-Download" @click="exportPackageFun" v-auth="'wMSOrder:export'"> 导出包装
+            <el-button type="primary" icon="ele-Download" @click="exportPackageFun" v-auth="'wMSOrder:export'" :loading="opLoading.exportPackage" :disabled="opLoading.exportPackage"> 导出包装
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
@@ -90,29 +90,29 @@
         </el-form-item> -->
 
         <el-form-item>
-          <el-button type="primary" icon="ele-Share" @click="automatedAllocationFun" v-auth="'wMSOrder:allocation'">
+          <el-button type="primary" icon="ele-Share" @click="automatedAllocationFun" v-auth="'wMSOrder:allocation'" :loading="opLoading.automatedAllocation" :disabled="opLoading.automatedAllocation">
             分配库存
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="createPickTaskFun" v-auth="'wMSOrder:pickTask'"> 拣货任务
+          <el-button type="primary" icon="ele-Plus" @click="createPickTaskFun" v-auth="'wMSOrder:pickTask'" :loading="opLoading.createPickTask" :disabled="opLoading.createPickTask"> 拣货任务
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Help" @click="completeOrderFun" v-auth="'wMSOrder:completeOrder'"> 完成
+          <el-button type="primary" icon="ele-Help" @click="completeOrderFun" v-auth="'wMSOrder:completeOrder'" :loading="opLoading.completeOrder" :disabled="opLoading.completeOrder"> 完成
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Help" @click="openPrint" v-auth="'wMSOrder:page'"> 打印
+          <el-button type="primary" icon="ele-Help" @click="openPrint" v-auth="'wMSOrder:page'" :loading="opLoading.print" :disabled="opLoading.print"> 打印
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Help" @click="openPrintJob" v-auth="'wMSOrder:page'"> 打印JOB汇总清单
+          <el-button type="primary" icon="ele-Help" @click="openPrintJob" v-auth="'wMSOrder:page'" :loading="opLoading.printJob" :disabled="opLoading.printJob"> 打印JOB汇总清单
           </el-button>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun"
-            v-auth="'wMSOrder:page'">
+            v-auth="'wMSOrder:page'" :loading="opLoading.exportRFID" :disabled="opLoading.exportRFID">
             导出RFID
           </el-button>
         </el-form-item>
@@ -261,6 +261,16 @@ let baseURL = import.meta.env.VITE_API_URL;
 // const multipleSelection = ref([])
 //自定义提示
 const resultPopupShow = ref(false);
+const opLoading = ref({
+  exportOrder: false,
+  exportPackage: false,
+  exportRFID: false,
+  automatedAllocation: false,
+  createPickTask: false,
+  completeOrder: false,
+  print: false,
+  printJob: false
+});
 // const tableData = ref<any>
 // ([]);
 const queryParams = ref<any>
@@ -363,10 +373,17 @@ const exportWMSOrderByRFIDFun = async () => {
     ElMessage.error("请勾选订单");
     return;
   }
-  let res = await exportWMSOrderByRFID(ids);
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
-}
+  opLoading.value.exportRFID = true;
+  try {
+    let res = await exportWMSOrderByRFID(ids);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } catch (e) {
+    ElMessage.error(e?.message ?? "导出失败");
+  } finally {
+    opLoading.value.exportRFID = false;
+  }
+} 
 
 
 
@@ -387,16 +404,22 @@ const automatedAllocationFun = () => {
     type: "warning",
   })
     .then(async () => {
-
-      let result = await automatedAllocation(ids);
-      handleQuery();
-      if (result.data.result.data.length > 0) {
-        state.value.orderStatus = result.data.result.data;
-        // console.log(state.value.orderStatus);
-        //导入弹框提醒
-        resultPopupShow.value = true;
-      } else {
-        ElMessage.info(result.data.result.msg);
+      opLoading.value.automatedAllocation = true;
+      try {
+        let result = await automatedAllocation(ids);
+        handleQuery();
+        if (result.data.result.data.length > 0) {
+          state.value.orderStatus = result.data.result.data;
+          // console.log(state.value.orderStatus);
+          //导入弹框提醒
+          resultPopupShow.value = true;
+        } else {
+          ElMessage.info(result.data.result.msg);
+        }
+      } catch (e) {
+        ElMessage.error(e?.message ?? "分配失败");
+      } finally {
+        opLoading.value.automatedAllocation = false;
       }
       // console.log(data.data.result);
       // if (data.data.result[0].statusCode == 1) {
@@ -408,7 +431,7 @@ const automatedAllocationFun = () => {
       // }
     })
     .catch(() => { });
-};
+};  
 
 
 
@@ -425,10 +448,17 @@ const exportPackageFun = async () => {
     ElMessage.error("请勾选订单");
     return;
   }
-  let res = await exportPackage(ids);
-  var fileName = getFileName(res.headers);
-  downloadByData(res.data as any, fileName);
-}
+  opLoading.value.exportPackage = true;
+  try {
+    let res = await exportPackage(ids);
+    var fileName = getFileName(res.headers);
+    downloadByData(res.data as any, fileName);
+  } catch (e) {
+    ElMessage.error(e?.message ?? "导出失败");
+  } finally {
+    opLoading.value.exportPackage = false;
+  }
+} 
 
 //导出出库单
 const exportOrderFun = async () => {
@@ -437,21 +467,23 @@ const exportOrderFun = async () => {
   multipleTableRef.value.getSelectionRows().forEach(a => {
     ids.push(a.id);
   });
-  // 2,验证数据有没有勾选
-  // if (ids.length < 1) {
-  //   ElMessage.error("请勾选订单");
-  //   return;
-  // }
-  if (ids.length > 0) {
-    let res = await exportOrder({ "ids": ids });
-    var fileName = getFileName(res.headers);
-    downloadByData(res.data as any, fileName);
-  } else {
-    let res = await exportOrder(state.value.header);
-    var fileName = getFileName(res.headers);
-    downloadByData(res.data as any, fileName);
+  opLoading.value.exportOrder = true;
+  try {
+    if (ids.length > 0) {
+      let res = await exportOrder({ "ids": ids });
+      var fileName = getFileName(res.headers);
+      downloadByData(res.data as any, fileName);
+    } else {
+      let res = await exportOrder(state.value.header);
+      var fileName = getFileName(res.headers);
+      downloadByData(res.data as any, fileName);
+    }
+  } catch (e) {
+    ElMessage.error(e?.message ?? "导出失败");
+  } finally {
+    opLoading.value.exportOrder = false;
   }
-}
+} 
 
 
 //生成拣货任务
@@ -472,15 +504,22 @@ const createPickTaskFun = () => {
     type: "warning",
   })
     .then(async () => {
-      let result = await createPickTask(ids);
-      handleQuery();
-      if (result.data.result.data.length > 0) {
-        state.value.orderStatus = result.data.result.data;
-        // console.log(state.value.orderStatus);
-        //导入弹框提醒
-        resultPopupShow.value = true;
-      } else {
-        ElMessage.info(result.data.result.msg);
+      opLoading.value.createPickTask = true;
+      try {
+        let result = await createPickTask(ids);
+        handleQuery();
+        if (result.data.result.data.length > 0) {
+          state.value.orderStatus = result.data.result.data;
+          // console.log(state.value.orderStatus);
+          //导入弹框提醒
+          resultPopupShow.value = true;
+        } else {
+          ElMessage.info(result.data.result.msg);
+        }
+      } catch (e) {
+        ElMessage.error(e?.message ?? "生成拣货任务失败");
+      } finally {
+        opLoading.value.createPickTask = false;
       }
     })
     .catch(() => { });
@@ -506,14 +545,21 @@ const completeOrderFun = () => {
     type: "warning",
   })
     .then(async () => {
-      let result = await completeOrder(ids);
-      if (result.data.result.data.length > 0) {
-        state.value.orderStatus = result.data.result.data;
-        //导入弹框提醒
-        resultPopupShow.value = true;
-        handleQuery();
-      } else {
-        ElMessage.info(result.data.result.msg);
+      opLoading.value.completeOrder = true;
+      try {
+        let result = await completeOrder(ids);
+        if (result.data.result.data.length > 0) {
+          state.value.orderStatus = result.data.result.data;
+          //导入弹框提醒
+          resultPopupShow.value = true;
+          handleQuery();
+        } else {
+          ElMessage.info(result.data.result.msg);
+        }
+      } catch (e) {
+        ElMessage.error(e?.message ?? "完成订单失败");
+      } finally {
+        opLoading.value.completeOrder = false;
       }
     })
     .catch(() => { });
@@ -532,27 +578,32 @@ const openPrint = async () => {
     ElMessage.error("请勾选需要打印的订单");
     return;
   }
+  opLoading.value.print = true;
   let printData = new Array<Header>();
   printData.printTemplate = "";
-  let result = await printShippingList(ids);
-  // console.log("result");
-  // console.log(result);
-  if (result.data.result != null) {
-    printData = result.data.result.data;
-    printData.data.forEach(a => {
-      if (a.customerConfig != null) {
-        a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
-      }
-    });
-  }
+  try {
+    let result = await printShippingList(ids);
+    if (result.data.result != null) {
+      printData = result.data.result.data;
+      printData.data.forEach(a => {
+        if (a.customerConfig != null) {
+          a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+        }
+      });
+    }
 
-  // 判断有没有配置客户自定义打印模板
-  if (printData.printTemplate != "") {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
-  } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
-  } else {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
+    // 判断有没有配置客户自定义打印模板
+    if (printData.printTemplate != "") {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+    } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+    } else {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
+    }
+  } catch (e) {
+    ElMessage.error(e?.message ?? "打印失败");
+  } finally {
+    opLoading.value.print = false;
   }
 };
 
@@ -569,27 +620,34 @@ const openPrintJob = async () => {
     ElMessage.error("请勾选需要打印的订单");
     return;
   }
+  opLoading.value.printJob = true;
   let printData = new Array<Header>();
   printData.printTemplate = "";
-  let result = await printJobList(ids);
-  console.log("JOB",result)
-  if (result.data.result != null) {
-    printData = result.data.result.data;
-    printData.data.forEach((a: any) => {
-      if (a.customerConfig != null) {
-        a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
-      }
-    });
-  }
-  console.log("printData",printData)
-  console.log("result");
-  // 判断有没有配置客户自定义打印模板
-  if (printData.printTemplate != "") {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
-  } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
-  } else {
-    printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
+  try {
+    let result = await printJobList(ids);
+    console.log("JOB",result)
+    if (result.data.result != null) {
+      printData = result.data.result.data;
+      printData.data.forEach((a: any) => {
+        if (a.customerConfig != null) {
+          a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+        }
+      });
+    }
+    console.log("printData",printData)
+    console.log("result");
+    // 判断有没有配置客户自定义打印模板
+    if (printData.printTemplate != "") {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+    } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+    } else {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "发运单模板" });
+    }
+  } catch (e) {
+    ElMessage.error(e?.message ?? "打印失败");
+  } finally {
+    opLoading.value.printJob = false;
   }
 };
 
@@ -609,3 +667,12 @@ const handleCurrentChange = (val: number) => {
 
 handleQuery();
 </script>
+
+<style scoped>
+.wMSOrder-container .el-form-item .el-select,
+.wMSOrder-container .el-form-item .el-date-picker,
+.wMSOrder-container .el-form-item .el-input,
+.wMSOrder-container select-remote {
+  width: 100%;
+}
+</style> 

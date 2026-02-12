@@ -49,7 +49,7 @@ public class WMSHachJMECodeService : IDynamicApiController, ITransient
                     .WhereIF(!string.IsNullOrWhiteSpace(input.QRCode), u => u.QRCode.Contains(input.QRCode.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Url), u => u.Url.Contains(input.Url.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.JMEData), u => u.JMEData.Contains(input.JMEData.Trim()))
-                    .WhereIF(input.PrintNum > 0, u => u.PrintNum == input.PrintNum)
+                    .WhereIF(input.PrintNum >= 0, u => u.PrintNum == input.PrintNum)
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Creator), u => u.Creator.Contains(input.Creator.Trim()))
                     .WhereIF(!string.IsNullOrWhiteSpace(input.Updator), u => u.Updator.Contains(input.Updator.Trim()))
 
@@ -170,6 +170,7 @@ public class WMSHachJMECodeService : IDynamicApiController, ITransient
                 item.Url = "https://oms.hachchina.com.cn/webapp/s.html?p=" + item.QRCode + "";
                 item.CreationTime = DateTime.Now;
                 item.Creator = _userManager.RealName;
+                item.PrintNum = 0;
             }
 
             //var entity = input.Adapt<WMSHachJMECode>();

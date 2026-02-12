@@ -353,7 +353,18 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             else
             {
                 double Qty = request.ScanQty;
-
+                //判断JNE 是不是可用
+                if (!string.IsNullOrEmpty(request.SN))
+                {
+                    var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                    if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
+                    {
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Code = StatusCode.Error;
+                        response.Msg = "不能重复扫描同一个条码";
+                        return response;
+                    }
+                }
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.
@@ -369,6 +380,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 
                         foreach (var item in pickData)
                         {
+                          
                             item.Order = 99;
                             if (item.SKU == response.Data.SKU)
                             {
@@ -623,6 +635,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                         p.PreOrderNumber = packageData.PreOrderNumber;
                         p.OrderNumber = packageData.OrderNumber;
                         p.PickTaskId = packageData.PickTaskId;
+                        p.SKU = item.SKU;
                         //p.SN = item;
                         p.Creator = _userManager.Account;
                         p.CreationTime = DateTime.Now;
