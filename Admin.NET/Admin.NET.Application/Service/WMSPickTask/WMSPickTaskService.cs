@@ -577,7 +577,7 @@ public class WMSPickTaskService : IDynamicApiController, ITransient
         //return new XlsxFileResult(stream: fs, fileDownloadName: "下载文件");
         return new FileStreamResult(fs, "application/octet-stream")
         {
-            FileDownloadName = "包装信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
+            FileDownloadName = "拣货信息_" + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx" // 配置文件下载显示名
         };
     }
 

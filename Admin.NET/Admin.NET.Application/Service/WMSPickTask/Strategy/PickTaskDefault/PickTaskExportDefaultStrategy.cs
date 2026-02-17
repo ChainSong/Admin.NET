@@ -4,7 +4,7 @@
 //
 // 特此免费授予获得本软件的任何人以处理本软件的权利，但须遵守以下条件：在所有副本或重要部分的软件中必须包括上述版权声明和本许可声明。
 //
-// 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
+// 软件按"原样"提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
 using Admin.NET.Application.Dtos;
@@ -22,190 +22,186 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Admin.NET.Application.Service;
+
+/// <summary>
+/// 默认拣货任务导出策略实现类
+/// </summary>
 public class PickTaskExportDefaultStrategy : IPickTaskExportInterface
 {
+    #region 依赖注入
+
+    /// <summary>
+    /// 拣货任务仓储
+    /// </summary>
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
+
+    /// <summary>
+    /// 仓库用户映射仓储
+    /// </summary>
     public SqlSugarRepository<WarehouseUserMapping> _repWarehouseUser { get; set; }
+
+    /// <summary>
+    /// 客户用户映射仓储
+    /// </summary>
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
+
+    /// <summary>
+    /// 用户管理服务
+    /// </summary>
     public UserManager _userManager { get; set; }
+
+    /// <summary>
+    /// 系统缓存服务
+    /// </summary>
     public SysCacheService _sysCacheService { get; set; }
+
+    /// <summary>
+    /// 订单仓储
+    /// </summary>
     public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
+
+    /// <summary>
+    /// 拣货任务明细仓储
+    /// </summary>
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
+    /// <summary>
+    /// RFID信息仓储
+    /// </summary>
     public SqlSugarRepository<WMSRFIDInfo> _repRFIDInfo { get; set; }
 
+    /// <summary>
+    /// 表字段配置仓储
+    /// </summary>
     public SqlSugarRepository<TableColumns> _repTableColumns { get; set; }
+
+    /// <summary>
+    /// 包装信息仓储
+    /// </summary>
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
+
+    /// <summary>
+    /// 包装明细仓储
+    /// </summary>
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
-    //public async Task<Response<DataTable>> PickTaskExport(List<DeleteWMSPickTaskInput> request)
-    //{
+    #endregion
 
+    #region IPickTaskExportInterface 实现
 
-    //    Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
-    //    //CreateOrUpdateWMS_ReceiptInput receipts = new CreateOrUpdateWMS_ReceiptInput();
-    //    var pickTaskDetailData = await _repPickTaskDetail.AsQueryable().Where(a => request.Select(a => a.Id).Contains(a.PickTaskId)).ToListAsync();
-    //    //先判断状态是否正常 是否允许回退
-    //    var repOrder = await _repOrder.AsQueryable().Where(a => pickTaskDetailData.Select(a => a.OrderId).Contains(a.Id)).ToListAsync();
-    //    repOrder.ForEach(a =>
-    //    {
-    //        if (a.OrderStatus >= (int)OrderStatusEnum.交接)
-    //        {
-    //            response.Data.Add(new OrderStatusDto()
-    //            {
-    //                ExternOrder = a.ExternOrderNumber,
-    //                SystemOrder = a.OrderNumber,
-    //                Type = a.OrderType,
-    //                StatusCode = StatusCode.Warning,
-    //                Msg = "已交接订单不允许回退"
-    //            });
-    //        }
-
-    //    });
-    //    if (response.Data != null && response.Data.Count > 0)
-    //    {
-    //        return response;
-    //    }
-    //    //先删除包装信息，再删除拣货信息
-    //    var orderIds = pickTaskDetailData.Select(a => a.OrderId).Distinct().ToList();
-    //    await _repPackageDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
-    //    await _repPackage.DeleteAsync(a => orderIds.Contains(a.OrderId));
-    //    //删除RFID 信息
-    //    //await _repRFIDInfo;
-    //    _repRFIDInfo.Context.Updateable<WMSRFIDInfo>()
-    //               .SetColumns(p => p.Status == (int)RFIDStatusEnum.新增)
-    //               .SetColumns(p => p.PickTaskNumber == "")
-    //               .SetColumns(p => p.OrderNumber == "")
-    //               .SetColumns(p => p.ExternOrderNumber == "")
-    //               .SetColumns(p => p.PackageNumber == "")
-    //               .Where(p => repOrder.Select(e => e.OrderNumber).Contains(p.OrderNumber))
-    //               .ExecuteCommand();
-    //    await _repPickTaskDetail.DeleteAsync(a => orderIds.Contains(a.OrderId));
-    //    await _repPickTask.DeleteAsync(a => request.Select(b => b.Id).Contains(a.Id));
-
-    //    repOrder.ForEach(a =>
-    //    {
-    //        a.OrderStatus = (int)OrderStatusEnum.已分配;
-    //    });
-    //    await _repOrder.UpdateRangeAsync(repOrder);
-
-
-    //    //先删除明细表，再删除主表
-    //    //_repOrderDetail.Delete(a => request.Select(a => a.Id).Contains(a.OrderId));
-    //    //_repOrder.Delete(a => request.Select(a => a.Id).Contains(a.Id));
-    //    //var PreOrderIds = await receipt.Select(b => b.PreOrderId).ToListAsync();
-    //    ////先更新主表，在更新明细表
-    //    //await _repPreOrder.UpdateAsync(a => new WMSPreOrder { PreOrderStatus = (int)PreOrderStatusEnum.新增 }, (a => PreOrderIds.Contains(a.Id)));
-    //    //await _reppreOrderDetail.UpdateAsync(a => new WMSPreOrderDetail
-    //    //{
-    //    //    //OrderQty = 0,
-    //    //    Updator = _userManager.Account,
-    //    //    UpdateTime = DateTime.Now
-    //    //}, a => PreOrderIds.Contains(a.PreOrderId));
-
-    //    //_wms_asndetailRepository.GetAll().Where(a => receipt.Select(b => b.ASNId).Contains(a.ASNId)).ToList().ForEach(c =>
-    //    //{
-    //    //    c.ReceiptQty = 0;
-    //    //    _wms_asndetailRepository.Update(c);
-    //    //}); 
-    //    //先处理上架=>入库单
-
-    //    repOrder.ForEach(a =>
-    //   {
-    //       response.Data.Add(new OrderStatusDto()
-    //       {
-    //           ExternOrder = a.ExternOrderNumber,
-    //           SystemOrder = a.OrderNumber,
-    //           Type = a.OrderType,
-    //           StatusCode = StatusCode.Success,
-    //           Msg = "操作成功"
-    //       });
-    //   });
-    //    response.Code = StatusCode.Success;
-    //    response.Msg = "操作成功";
-    //    //throw new NotImplementedException();
-    //    return response;
-    //}
-    //默认方法不做任何处理
+    /// <summary>
+    /// 导出拣货任务数据
+    /// </summary>
+    /// <param name="request">拣货任务ID列表</param>
+    /// <returns>包含导出数据的数据表格响应</returns>
     public async Task<Response<DataTable>> PickTaskExport(List<long> request)
     {
+        // 初始化响应对象
         Response<DataTable> response = new Response<DataTable>();
+
+        // 获取WMS_PickTaskDetail表的导出列配置
         var tableColumn = GetExportColumns("WMS_PickTaskDetail");
 
+        // 构建动态SQL查询语句
         StringBuilder sql = new StringBuilder();
         sql.Append("SELECT ");
+
+        // 动态拼接SELECT字段，使用配置的显示名称作为列别名
         foreach (var item in tableColumn)
         {
             sql.Append(item.TableName + "." + item.DbColumnName + " as '" + item.DisplayName + "',");
         }
+
+        // 移除最后一个逗号
         sql.Remove(sql.Length - 1, 1);
-        sql.Append(@"from   WMS_PickTaskDetail  
-           ");
-        sql.Append("where WMS_PickTaskDetail.PickTaskId in (" + string.Join(",", request) + ")");
-        var data =await _repOrder.Context.Ado.GetDataTableAsync(sql.ToString());
+
+        // 添加FROM子句
+        sql.Append(@"from WMS_PickTaskDetail");
+
+        // 添加WHERE条件，根据拣货任务ID筛选
+        sql.Append(" where WMS_PickTaskDetail.PickTaskId in (" + string.Join(",", request) + ")");
+
+        // 执行查询获取数据
+        var data = await _repOrder.Context.Ado.GetDataTableAsync(sql.ToString());
+
+        // 设置响应数据
         response.Data = data;
         response.Code = StatusCode.Success;
-        return response;
 
+        return response;
     }
 
+    #endregion
 
+    #region 私有方法
 
-
+    /// <summary>
+    /// 获取导出列配置
+    /// </summary>
+    /// <param name="_tableNames">表名数组</param>
+    /// <returns>表列配置列表</returns>
     public virtual List<TableColumns> GetExportColumns(params string[] _tableNames)
     {
         var tenantId = _userManager.TenantId;
+
         return _repTableColumns.AsQueryable()
             .Where(a => _tableNames.Contains(a.TableName) &&
-              a.TenantId == tenantId &&
-              (a.IsCreate == 1 || a.IsKey == 1)
+                       a.TenantId == tenantId &&
+                       (a.IsCreate == 1 || a.IsKey == 1)
             )
+            // 按数据库列名、关联字段、导入列标识等字段分组
             .GroupBy(a => new { a.DbColumnName, a.Associated, a.IsImportColumn, a.DisplayName, a.IsKey, a.Type, a.IsCreate, a.Validation, a.TenantId })
-           .Select(a => new TableColumns
-           {
-               DisplayName = a.DisplayName,
-               Type = a.Type,
-               TableName = SqlFunc.AggregateMax(a.TableName),
-               //由于框架约定大于配置， 数据库的字段首字母小写
-               //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-               DbColumnName = a.DbColumnName,
-               Validation = a.Validation,
-               IsImportColumn = a.IsImportColumn,
-               IsCreate = a.IsCreate,
-               IsKey = a.IsKey,
-               tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
-               //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
-               //.Select()
-           }).Distinct().ToList();
-
-
-
+            .Select(a => new TableColumns
+            {
+                DisplayName = a.DisplayName,
+                Type = a.Type,
+                // 使用聚合函数获取表名（处理多表关联情况）
+                TableName = SqlFunc.AggregateMax(a.TableName),
+                DbColumnName = a.DbColumnName,
+                Validation = a.Validation,
+                IsImportColumn = a.IsImportColumn,
+                IsCreate = a.IsCreate,
+                IsKey = a.IsKey,
+                // 子查询获取关联的列详情信息
+                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>()
+                    .Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId)
+                    .ToList()
+            })
+            .Distinct()
+            .ToList();
     }
 
+    /// <summary>
+    /// 获取导入列配置
+    /// </summary>
+    /// <param name="_tableNames">表名数组</param>
+    /// <returns>表列配置列表</returns>
     public virtual List<TableColumns> GetImportColumns(params string[] _tableNames)
     {
-
         var tenantId = _userManager.TenantId;
+
         return _repTableColumns.AsQueryable()
             .Where(a => _tableNames.Contains(a.TableName) &&
-              a.TenantId == tenantId &&
-              (a.IsImportColumn == 1 || a.IsKey == 1)
+                       a.TenantId == tenantId &&
+                       (a.IsImportColumn == 1 || a.IsKey == 1)
             )
-           .Select(a => new TableColumns
-           {
-               DisplayName = a.DisplayName,
-               Type = a.Type,
-               IsKey = a.IsKey,
-               TableName = a.TableName,
-               //由于框架约定大于配置， 数据库的字段首字母小写
-               //DbColumnName = a.DbColumnName.Substring(0, 1).ToLower() + a.DbColumnName.Substring(1)
-               DbColumnName = a.DbColumnName,
-               Validation = a.Validation,
-               IsImportColumn = a.IsImportColumn,
-               tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>().Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId).ToList()
-               //Details = _repTableColumnsDetail.AsQueryable().Where(b => b.Associated == a.Associated)
-               //.Select()
-           }).Distinct().ToList();
-
+            .Select(a => new TableColumns
+            {
+                DisplayName = a.DisplayName,
+                Type = a.Type,
+                IsKey = a.IsKey,
+                TableName = a.TableName,
+                DbColumnName = a.DbColumnName,
+                Validation = a.Validation,
+                IsImportColumn = a.IsImportColumn,
+                // 子查询获取关联的列详情信息
+                tableColumnsDetails = SqlFunc.Subqueryable<TableColumnsDetail>()
+                    .Where(b => b.Associated == a.Associated && b.Status == 1 && b.TenantId == a.TenantId)
+                    .ToList()
+            })
+            .Distinct()
+            .ToList();
     }
+
+    #endregion
 }
