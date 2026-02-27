@@ -291,6 +291,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "Add")]
+    [Idempotent("s", 2)]
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateWMSASNInput input)
     {
@@ -337,6 +338,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "AddByRFID")]
+    [Idempotent("s", 2)]
     [UnitOfWork]
     [AllowAnonymous]
     public async Task<Response<List<OrderStatusDto>>> AddByRFID(AddOrUpdateWMSASNInput input)

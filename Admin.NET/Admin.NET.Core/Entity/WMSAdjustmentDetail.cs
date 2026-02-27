@@ -184,20 +184,20 @@ public class WMSAdjustmentDetail : ITenantIdFilter
     /// <summary>
     /// 从数量
     /// </summary>
-    [SugarColumn(ColumnDescription = "从数量", Length = 18, DecimalDigits=2 )]
-    public decimal FromQty { get; set; }
+    [SugarColumn(ColumnDescription = "从数量" )]
+    public float FromQty { get; set; }
     
     /// <summary>
     /// 至数量
     /// </summary>
-    [SugarColumn(ColumnDescription = "至数量", Length = 18, DecimalDigits=2 )]
-    public decimal ToQty { get; set; }
+    [SugarColumn(ColumnDescription = "至数量" )]
+    public float ToQty { get; set; }
     
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(ColumnDescription = "", Length = 18, DecimalDigits=2 )]
-    public decimal Qty { get; set; }
+    [SugarColumn(ColumnDescription = "" )]
+    public float Qty { get; set; }
 
     
          
