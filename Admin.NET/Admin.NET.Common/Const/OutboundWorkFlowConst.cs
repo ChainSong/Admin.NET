@@ -42,5 +42,7 @@ public class OutboundWorkFlowConst
     public const string Workflow_Print_Package_List = "出库打印装箱清单模板";
     public const string Workflow_Print_DG_Package_List = "危险品仓出库打印装箱清单";
     public const string Workflow_Outbound_Handover = "出库交接";
+    public const string Workflow_Outbound_RF_PICK = "RF拣货";
+    
     //public const string Workflow_ReceiptReceiving = "上架单";
 }

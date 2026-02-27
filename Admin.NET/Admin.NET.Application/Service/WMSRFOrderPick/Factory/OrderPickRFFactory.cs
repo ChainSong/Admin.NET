@@ -19,6 +19,13 @@ public class OrderPickRFFactory
 {
     public static IOrderPickRFInterface OrderPickTask(string FactoryName)
     {
+        switch (FactoryName)
+        {
+            case "Hach":
+                return new OrderPickWithRedisStrategy();
+            default:
+                return new OrderPickRFStrategy();
+        }
         return new OrderPickRFStrategy();
     }
 }

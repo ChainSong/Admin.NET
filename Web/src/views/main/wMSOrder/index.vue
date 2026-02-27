@@ -111,6 +111,10 @@
           </el-button>
         </el-form-item>
         <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="openPrintBoxNumber" v-auth="'wMSOrder:page'" :loading="opLoading.printBoxNumber" :disabled="opLoading.printBoxNumber"> 前置打印箱号
+          </el-button>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun"
             v-auth="'wMSOrder:page'" :loading="opLoading.exportRFID" :disabled="opLoading.exportRFID">
             导出RFID
@@ -203,7 +207,7 @@ import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
 import {
   pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList,
   createPickTask, completeOrder, exportOrder, exportPackage, exportWMSOrderByRFID
-  , printJobList
+  , printJobList, printBoxNumber
 } from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -269,7 +273,8 @@ const opLoading = ref({
   createPickTask: false,
   completeOrder: false,
   print: false,
-  printJob: false
+  printJob: false,
+  printBoxNumber: false
 });
 // const tableData = ref<any>
 // ([]);
@@ -650,6 +655,48 @@ const openPrintJob = async () => {
     opLoading.value.printJob = false;
   }
 };
+
+// 前置打印箱号
+const openPrintBoxNumber = async () => {
+  ptintTitle.value = '打印箱号';
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的订单");
+    return;
+  }
+  opLoading.value.printBoxNumber = true;
+  let printData = new Array<Header>();
+  printData.printTemplate = "";
+  try {
+    let result = await printBoxNumber(ids);
+    console.log("箱号打印", result);
+    if (result.data.result != null) {
+      printData = result.data.result.data;
+      printData.data.forEach((a: any) => {
+        if (a.customerConfig != null) {
+          a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+        }
+      });
+    }
+    // 判断有没有配置客户自定义打印模板
+    if (printData.printTemplate != "") {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+    } else if (printData.data[0].customerConfig != null && printData.data[0].customerConfig.printShippingTemplate != null) {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.data[0].customerConfig.printShippingTemplate });
+    } else {
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": "打印箱号" });
+    }
+  } catch (e) {
+    ElMessage.error(e?.message ?? "打印失败");
+  } finally {
+    opLoading.value.printBoxNumber = false;
+  }
+};
+
+
 
 
 // 改变页面容量

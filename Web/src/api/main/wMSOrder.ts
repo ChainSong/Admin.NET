@@ -13,7 +13,8 @@ enum Api {
 	ExportPackage = '/api/wMSOrder/ExportPackage',
 	GetOrderLocation = '/api/wMSOrder/GetOrderLocation',
 	ExportWMSOrderByRFID = '/api/WMSOrderReport/ExportWMSOrderByRFID',
-	PrintJobList='/api/wMSOrder/PrintJobList'
+	PrintJobList='/api/wMSOrder/PrintJobList',
+	PrintBoxNumber='/api/wMSOrder/PrintBoxNumber'
 }
 
 // 增加WMSOrder
@@ -129,3 +130,12 @@ export const printJobList = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+
+//打印箱号
+export const printBoxNumber = (params?: any) =>
+	request({
+		url: Api.PrintBoxNumber,
+		method: 'post',
+		data: params,
+	});
+

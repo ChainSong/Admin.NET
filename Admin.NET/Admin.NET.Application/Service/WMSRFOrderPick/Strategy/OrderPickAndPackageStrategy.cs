@@ -1,4 +1,4 @@
-﻿// 麻省理工学院许可证
+// 麻省理工学院许可证
 //
 // 版权所有 (c) 2021-2023 zuohuaijun，大名科技（天津）有限公司  联系电话/微信：18020030720  QQ：515096995
 //
@@ -25,7 +25,7 @@ using Admin.NET.Application.Service;
 using System.Web;
 
 namespace Admin.NET.Application;
-public class OrderPickRFStrategy : IOrderPickRFInterface
+public class OrderPickAndPackageStrategy : IOrderPickRFInterface
 {
     public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
     public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
@@ -33,7 +33,7 @@ public class OrderPickRFStrategy : IOrderPickRFInterface
     public SqlSugarRepository<CustomerUserMapping> _repCustomerUser { get; set; }
     public UserManager _userManager { get; set; }
     public SysCacheService _sysCacheService { get; set; }
-    public SqlSugarRepository<Admin.NET.Core.Entity.WMSOrder> _repOrder { get; set; }
+    public SqlSugarRepository<WMSOrder> _repOrder { get; set; }
     public SqlSugarRepository<WMSProduct> _repProduct { get; set; }
 
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }

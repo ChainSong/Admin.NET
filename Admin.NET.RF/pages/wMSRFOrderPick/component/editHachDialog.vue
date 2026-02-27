@@ -12,64 +12,14 @@
 						<view class="text-cut">任务信息</view>
 					</view>
 					<view class="content">
+						<!-- <view class="desc">
+							<text class="text-grey">订单号: {{form.orderNumber}}</text>
+						</view> -->
 						<view class="desc">
 							<text class="text-grey">拣货任务号: {{form.pickTaskNumber}}</text>
 						</view>
-						<!-- 拣货结果 -->
-						<view v-if="this.list.length>0">
-							<view class="cu-bar bg-white solid-bottom">
-								<view class="action">
-									<text class="cuIcon-title text-blue"></text>拣货明细
-								</view>
-							</view>
-							<view class="cu-list menu-avatar">
-								<view v-for="(item, index)  in this.list" :key="index"
-									class="cu-item"
-									:class="{'completed-item': item.order === 99}">
-									<view class="cu-avatar round lg" :class="getPickStatusClass(item)">
-										{{item.pickQty}}/{{item.qty}}
-									</view>
-									<view class="content">
-										<view class="text-grey">
-											<text class="text-bold">SKU:</text>{{item.sku}}
-											<text class="text-sm text-grey" v-if="item.goodsName">({{item.goodsName}})</text>
-										</view>
-										<view class="text-grey">
-											<text class="text-orange">库位:</text>{{item.location}}
-											<text v-if="item.area"> | 区域:{{item.area}}</text>
-										</view>
-										<view class="text-grey" v-if="item.batchCode">
-											<text>批次:</text>{{item.batchCode}}
-										</view>
-										<view class="text-gray text-sm flex">
-											<view class="text-cut">
-												<text class="text-blue">应拣:</text> {{item.qty}}
-											</view>
-											<view class="text-cut">
-												<text class="text-green">已拣:</text> {{item.pickQty}}
-											</view>
-											<view class="text-cut" v-if="item.order === 99">
-												<text class="text-cyan">待拣:</text> 0
-											</view>
-											<view class="text-cut" v-else>
-												<text class="text-red">待拣:</text> {{item.qty - item.pickQty}}
-											</view>
-										</view>
-										<view class="text-sm text-center mt-5" v-if="item.order === 99">
-											<text class="cuIcon-roundcheck text-green"></text>
-											<text class="text-green text-bold">已完成</text>
-										</view>
-									</view>
-								</view>
-							</view>
-						</view>
-						<!-- <view class="desc" >
-							<text class="text-orange">推荐库位: </text>
-							<text class="text-blue text-bold">{{form.location}}</text>
-						</view>
-						<view class="desc">
-							<text class="text-orange">推荐SKU: </text>
-							<text class="text-blue text-bold">{{form.sku}}</text>
+					<!-- 	<view class="desc">
+							<text class="text-grey">拣货状态: {{getStatusText(form.pickStatus)}}</text>
 						</view> -->
 					</view>
 				</view>
@@ -88,7 +38,37 @@
 					:selection-end="selectendlength"></input>
 			</view>
 
-			
+			<!-- 拣货结果 -->
+			<view v-if="this.list.length>0">
+				<view class="cu-bar bg-white solid-bottom">
+					<view class="action">
+						<text class="cuIcon-title text-blue"></text>拣货明细
+					</view>
+				</view>
+				<view class="cu-list menu-avatar">
+					<view v-for="(item, index)  in this.list" :key="index" class="cu-item">
+						<view class="cu-avatar round lg bg-blue">{{item.pickQty}}
+						</view>
+						<view class="content">
+							<view class="text-grey">
+								<text class="text-bold">SKU:</text>{{item.sku}}
+							</view>
+							<view class="text-grey">
+								<text>库位:{{item.location}}</text>
+								<text v-if="item.batchCode"> | 批次:{{item.batchCode}}</text>
+							</view>
+							<view class="text-gray text-sm flex">
+								<view class="text-cut">
+									<text class="text-blue">订单数量:</text> {{item.qty}}
+								</view>
+								<view class="text-cut">
+									<text class="text-blue">已拣数量:</text> {{item.pickQty}}
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
 
 			<!-- 包装按钮区域 -->
 			<view class="padding" v-if="showPackageBtn">
@@ -115,8 +95,7 @@
 		pageWMSRFOrderPickApi,
 		scanOrderPickTaskApi,
 		scanPickApi,
-		scanBoxNumberCompletePackageApi,
-		getPickTaskDetailsByLocationApi
+		scanBoxNumberCompletePackageApi
 	} from "@/services/wMSRFOrderPick/wMSRFOrderPick";
 	import youScroll from '@/components/you-scroll';
 	import {
@@ -165,8 +144,7 @@
 			};
 		},
 		created() {
-			// 进入页面时直接获取按库位排序的拣货明细
-			this.getPickDetailsByLocation();
+			this.getOrderList();
 		},
 		filters: {
 			// carNumber(val) {
@@ -187,66 +165,6 @@
 					this.focusflag = true;
 				})
 				this.selectendlength = this.form.scanInput.length;
-			},
-			// 获取拣货状态对应的样式类
-			getPickStatusClass(item) {
-				if (item.order === 99) {
-					return 'bg-green'; // 已完成
-				} else if (item.pickQty > 0) {
-					return 'bg-orange'; // 部分拣货
-				} else {
-					return 'bg-blue'; // 未拣货
-				}
-			},
-			// 获取按库位排序的拣货明细（进入拣货页面时自动调用）
-			async getPickDetailsByLocation() {
-				this.lpnSearchSet();
-				let that = this;
-				uni.showLoading({
-					title: '加载中...'
-				});
-
-				try {
-					let res = await getPickTaskDetailsByLocationApi({
-						pickTaskNumber: this.form.pickTaskNumber
-					});
-					console.log('按库位排序的拣货明细:', res.data.result);
-
-					if (res.data && res.data.result && res.data.result.code == "1") {
-						that.list = res.data.result.data || [];
-						console.log('拣货明细列表:', that.list);
-						console.log('拣货明细数量:', that.list.length);
-						that.list.forEach((item, index) => {
-							console.log(`第${index}项: SKU=${item.sku}, 库位=${item.location}, 应拣=${item.qty}, 已拣=${item.pickQty}`);
-						});
-
-						// 获取第一个未完成商品的库位作为推荐库位
-						const firstPendingItem = that.list.find(item => item.order !== 99);
-						if (firstPendingItem) {
-							that.form.location = firstPendingItem.location;
-							console.log('推荐库位:', that.form.location);
-						} else if (that.list.length > 0) {
-							// 如果都已拣完，显示第一个的库位
-							that.form.location = that.list[0].location;
-							console.log('所有商品已完成，显示第一个库位:', that.form.location);
-						}
-						// 检查是否显示包装按钮
-						that.checkPackageButton();
-					} else {
-						uni.showToast({
-							title: res.data?.result?.msg || "获取拣货明细失败",
-							icon: 'none'
-						});
-					}
-				} catch (error) {
-					console.error('获取拣货明细失败:', error);
-					uni.showToast({
-						title: "获取拣货明细失败",
-						icon: 'none'
-					});
-				} finally {
-					uni.hideLoading();
-				}
 			},
 			// 获取状态文本
 			getStatusText(status) {
@@ -295,24 +213,21 @@
 				this.lpnSearchSet();
 				let that = this;
 				let res = await scanOrderPickTaskApi(this.form);
-				console.log('扫描拣货结果:', res.data.result);
+				console.log(res.data.result.data)
 
 				if (res.data.result.code == "1") {
 
 					if (res.data.result.msg == "Location") {
 						that.form.location = that.form.scanInput;
 						that.form.pickTaskNumber = res.data.result.data[0].pickTaskNumber;
-						that.form.location = res.data.result.data[0].location;
-						// that.form.sku = res.data.result.data[0].sku;
-						console.log('扫描库位:', that.form)
+						// that.form.orderNumber = res.data.result.data[0].orderNumber;
+							console.log(that.form)
 					} else if (res.data.result.msg == "SKU") {
-							that.form.location = res.data.result.data[0].location;
-						console.log('扫描SKU成功，更新列表');
+
 					}
-
-					// 扫描成功后，重新获取按库位排序的拣货明细（保证合并展示）
-					await that.getPickDetailsByLocation();
-
+					that.list = res.data.result.data || [];
+					// 检查是否显示包装按钮
+					that.checkPackageButton();
 					uni.showToast({
 						title: "操作成功",
 						icon: 'success'
@@ -396,9 +311,7 @@
 </script>
 <style scoped>
 	.cu-item {
-		height: auto !important;
-		min-height: 100px;
-		padding: 20upx 0 !important;
+		height: 72px !important;
 	}
 
 	.my>.cu-item {
@@ -440,40 +353,5 @@
 	.bg-blue {
 		background-color: #007AFF;
 		color: white;
-	}
-
-	.bg-orange {
-		background-color: #ff9800;
-		color: white;
-	}
-
-	.bg-green {
-		background-color: #4cd964;
-		color: white;
-	}
-
-	.text-red {
-		color: #dd524d;
-	}
-
-	.text-green {
-		color: #4cd964;
-	}
-
-	.text-cyan {
-		color: #0dc9d8;
-	}
-
-	.mt-5 {
-		margin-top: 10upx;
-	}
-
-	.text-center {
-		text-align: center;
-	}
-
-	.completed-item {
-		opacity: 0.6;
-		background-color: #f5f5f5;
 	}
 </style>

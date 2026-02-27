@@ -769,6 +769,112 @@ public class WMSOrderService : IDynamicApiController, ITransient
         return data;
     }
 
+    /// <summary>
+    /// 打印箱号
+    /// </summary>
+    /// <param name="input">订单ID列表</param>
+    /// <returns></returns>
+    public async Task<Response<PrintBase<List<WMSOrderPrintDto>>>> PrintBoxNumber(List<long> input)
+    {
+        Response<PrintBase<List<WMSOrderPrintDto>>> data = new Response<PrintBase<List<WMSOrderPrintDto>>>();
+
+        // 根据订单ID获取订单信息
+        var orders = await _rep.AsQueryable()
+                 .Includes(a => a.Details)
+                 .Includes(a => a.OrderAddress)
+                 .Where(u => input.Contains(u.Id)).ToListAsync();
+
+        if (orders == null || orders.Count == 0)
+        {
+            data.Code = StatusCode.Error;
+            data.Msg = "订单不存在";
+            return data;
+        }
+
+        if (orders.Select(a => a.CustomerId).Distinct().Count() > 1)
+        {
+            data.Code = StatusCode.Error;
+            data.Msg = "请选择同一个客户的订单进行打印！";
+            return data;
+        }
+
+        // 获取仓库信息
+        WMSWarehouse warehouse = await _repWarehouse.AsQueryable().Where(o => o.Id == orders.First().WarehouseId).FirstAsync();
+
+        // 获取客户信息
+        WMSCustomer customer = await _repCustomer.AsQueryable()
+                 .Includes(a => a.Details)
+                 .Includes(a => a.CustomerConfig)
+                 .Where(o => o.Id == orders.First().CustomerId).FirstAsync();
+
+        // 获取订单对应的包装信息
+        var packageList = await _repPackage.AsQueryable()
+                 .Includes(a => a.Details)
+                 .Where(p => input.Contains(p.OrderId))
+                 .OrderBy(p => p.OrderId)
+                 .ToListAsync();
+
+        try
+        {
+            List<WMSOrderPrintDto> orderPrintDtos = new List<WMSOrderPrintDto>();
+            orderPrintDtos = orders.Adapt<List<WMSOrderPrintDto>>();
+
+            // 为每个订单生成箱号
+            foreach (var order in orderPrintDtos)
+            {
+                order.Customer = customer;
+                order.Warehouse = warehouse;
+                order.CustomerConfig = customer.CustomerConfig;
+                order.CustomerDetail = customer.Details.FirstOrDefault();
+                if (order.OrderAddress != null)
+                {
+                    order.OrderAddress.Address = order.OrderAddress.Province + order.OrderAddress.City + order.OrderAddress.County + order.OrderAddress.Address;
+                }
+
+                // 为每个明细生成箱号
+                int boxSequence = 1;
+                foreach (var detail in order.Details)
+                {
+                    // 箱号规则：订单号-序列号
+                    detail.BoxNumber = string.IsNullOrEmpty(order.OrderNumber) 
+                        ? $"ORDER-{order.Id}-{boxSequence}" 
+                        : $"{order.OrderNumber}-{boxSequence}";
+                    
+                    boxSequence++;
+                }
+
+                // 如果订单没有明细，生成一个箱号
+                if (order.Details == null || order.Details.Count == 0)
+                {
+                    var defaultDetail = new WMSOrderDetailDto
+                    {
+                        BoxNumber = string.IsNullOrEmpty(order.OrderNumber) 
+                            ? $"ORDER-{order.Id}-1" 
+                            : $"{order.OrderNumber}-1"
+                    };
+                    order.Details = new List<WMSOrderDetailDto> { defaultDetail };
+                }
+            }
+
+            // 获取打印模板
+            var workflow = await _repWorkFlowService.GetSystemWorkFlow(orders.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, orders.First().OrderType);
+
+            data.Data = new PrintBase<List<WMSOrderPrintDto>>()
+            {
+                PrintTemplate = string.IsNullOrEmpty(workflow) ? "PrintBoxNumber" : workflow,
+                Data = orderPrintDtos
+            };
+            data.Code = StatusCode.Success;
+            data.Msg = "获取成功";
+        }
+        catch (Exception ex)
+        {
+            data.Code = StatusCode.Error;
+            data.Msg = ex.Message;
+        }
+        return data;
+    }
+
 
 
     /// <summary>

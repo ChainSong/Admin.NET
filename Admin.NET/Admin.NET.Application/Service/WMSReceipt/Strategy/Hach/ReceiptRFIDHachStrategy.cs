@@ -71,7 +71,7 @@ namespace Admin.NET.Application.Strategy
             ).OrderBy(a=>a.LineNumber).ToList();
 
             //获取product
-            var products = _repProduct.AsQueryable().Where(a => a.IsRFID == 1 && rfidReceiptDetails.Select(b => b.SKU).Contains(a.SKU)).ToList();
+            var products =await _repProduct.AsQueryable().Where(a => a.IsRFID == 1 && rfidReceiptDetails.Select(b => b.SKU).Contains(a.SKU)).ToListAsync();
             if (rfidReceiptDetails == null || rfidReceiptDetails.Count == 0)
             {
                 response.Code = StatusCode.Error;

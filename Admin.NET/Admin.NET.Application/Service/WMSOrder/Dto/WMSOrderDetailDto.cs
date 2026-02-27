@@ -340,6 +340,12 @@ public class WMSOrderDetailDto
     public int? Int4 { get; set; }
     public int? Int5 { get; set; }
     public int Sequence { get; set; }
+
+    /// <summary>
+    /// 箱号
+    /// </summary>
+    public string? BoxNumber { get; set; }
+
     /// <summary>
     /// 完成时间
     /// </summary>

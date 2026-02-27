@@ -220,7 +220,7 @@ public class PrintJobOrderHachDGStrategy : IPrintJobOrderStrategy
 SUM(pd.Qty) AS PackQty,o.Dn,p.SerialNumber FROM wms_package p
 INNER JOIN wms_packagedetail pd ON p.Id = pd.PackageId
 INNER JOIN wms_order o ON p.OrderId = o.Id
-WHERE o.DN IN  ({item.DeliveryNumber})
+WHERE o.DN IN  ('{item.DeliveryNumber}')
 GROUP BY p.PackageNumber, p.CustomerId, p.OrderId, pd.SKU, o.Dn, p.SerialNumber),
 OD_PO AS ( SELECT od.OrderId,od.SKU,od.PoCode,SUM(ISNULL(od.OrderQty, 0)) AS PoOrderQty
 FROM wms_orderdetail od WHERE ISNULL(od.PoCode, '') <> '' GROUP BY od.OrderId, od.SKU, od.PoCode),
