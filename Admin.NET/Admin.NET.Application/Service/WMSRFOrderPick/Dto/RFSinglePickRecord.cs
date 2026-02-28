@@ -21,6 +21,7 @@ public class RFSinglePickRecord
     /// 记录ID（GUID）
     /// </summary>
     public string RecordId { get; set; } = Guid.NewGuid().ToString();
+    public long Id { get; set; }
 
     /// <summary>
     /// 拣货任务ID
@@ -41,7 +42,8 @@ public class RFSinglePickRecord
     /// 订单号
     /// </summary>
     public string OrderNumber { get; set; }
-
+    public string PreOrderNumber { get; set; }
+    
     /// <summary>
     /// 外部订单号
     /// </summary>

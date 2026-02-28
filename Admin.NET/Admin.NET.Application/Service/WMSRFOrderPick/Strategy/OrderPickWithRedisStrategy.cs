@@ -213,10 +213,12 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
         var pickRecord = new RFSinglePickRecord
         {
             RecordId = Guid.NewGuid().ToString(),
+            Id = pickTaskDetail.Id,
             PickTaskId = pickTaskDetail.PickTaskId,
             PickTaskNumber = request.PickTaskNumber,
             OrderId = pickTaskDetail.OrderId,
             OrderNumber = pickTaskDetail.OrderNumber,
+            PreOrderNumber = pickTaskDetail.PreOrderNumber,
             ExternOrderNumber = pickTaskDetail.ExternOrderNumber,
             SKU = pickTaskDetail.SKU,
             UPC = pickTaskDetail.UPC,

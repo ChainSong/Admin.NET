@@ -10,6 +10,7 @@ using Admin.NET.Common;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
+using AngleSharp.Dom;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
@@ -337,8 +338,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }
 
         // 从缓存获取拣货任务明细数据（包含用户扫描的内容）
-        string cacheKey = "RFPickTask:" + pickTask.CustomerId + ":" + pickTask.WarehouseId + ":" + input.PickTaskNumber;
-        var cachedPickTaskDetails = _sysCacheService.Get<List<WMSRFPickTaskDetailOutput>>(cacheKey);
+        string cacheKey = "RFSinglePick:" + pickTask.CustomerId + ":" + pickTask.WarehouseId + ":" + input.PickTaskNumber;
+        var cachedPickTaskDetails = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey);
 
         if (cachedPickTaskDetails == null || cachedPickTaskDetails.Count == 0)
         {
@@ -346,7 +347,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             cachedPickTaskDetails = await _repPickTaskDetail.AsQueryable()
                 .Where(a => a.PickTaskNumber == input.PickTaskNumber)
                 .ToListAsync()
-                .ContinueWith(t => t.Result.Adapt<List<WMSRFPickTaskDetailOutput>>());
+                .ContinueWith(t => t.Result.Adapt<List<RFSinglePickRecord>>());
         }
 
         // 过滤出已拣货完成的明细（PickQty > 0 表示已扫描拣货）
@@ -377,6 +378,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 PickTaskNumber = pickTask.PickTaskNumber,
                 OrderId = firstOrderId,
                 OrderNumber = firstOrderNumber,
+                PreOrderNumber = cachedPickTaskDetails.First().PreOrderNumber,
                 ExternOrderNumber = firstExternOrderNumber,
                 PackageNumber = input.BoxNumber, // 使用扫描的箱号
                 CustomerId = pickTask.CustomerId,
@@ -405,6 +407,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     OrderId = detail.OrderId,
                     OrderNumber = detail.OrderNumber,
                     ExternOrderNumber = detail.ExternOrderNumber,
+                    PreOrderNumber = detail.PreOrderNumber,
                     PickTaskNumber = detail.PickTaskNumber,
                     PackageNumber = input.BoxNumber,
                     CustomerId = detail.CustomerId,
@@ -432,11 +435,41 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
 
             // 批量插入包装明细
             await _repPackageDetail.InsertRangeAsync(packageDetails);
+            var entity = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == pickTask.PickTaskNumber).ToListAsync();
+            //修改拣货数量，以及判断拣货状态
+            foreach (var detail in cachedPickTaskDetails)
+            {
 
+                var data = entity.Where(a => a.Id == detail.Id).First();
+                data.PickQty += detail.PickQty;
+                if (data.PickQty == data.Qty)
+                {
+                    data.PickStatus = (int)PickTaskStatusEnum.拣货完成;
+                }
+                //await _repPickTaskDetail.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+            }
+            await _repPickTaskDetail.UpdateRangeAsync(entity);
             // 更新拣货任务状态为包装完成
-            pickTask.PickStatus = (int)PickTaskStatusEnum.包装完成;
-            pickTask.EndTime = DateTime.Now;
-            await _rep.UpdateAsync(pickTask);
+            //判断是不是都包装完成了
+            if (entity.Where(a => a.PickStatus == (int)PickTaskStatusEnum.新增).Count() == 0)
+            {
+                //判断包装信息是不是等于拣货信息
+                //查询包装数量
+                var packageCount = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == pickTask.PickTaskNumber).SumAsync(a => a.Qty);
+                //获取拣货数量
+                var pickCount = entity.Sum(b => b.Qty);
+                if (packageCount == pickCount)
+                {
+                    pickTask.PickStatus = (int)PickTaskStatusEnum.包装完成;
+                    pickTask.EndTime = DateTime.Now;
+                    await _rep.UpdateAsync(pickTask);
+                    //await _repPickTaskDetail.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
+                    await _repPickTaskDetail.Context.Updateable<WMSPickTaskDetail>()
+                   .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.包装完成)
+                   .Where(p => p.PickTaskNumber == pickTask.PickTaskNumber)
+                   .ExecuteCommandAsync();
+                }
+            }
 
             // 清除缓存
             _sysCacheService.Remove(cacheKey);
@@ -755,6 +788,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 a.Key.Location,
                 a.Key.Area,
                 TotalQty = a.Sum(x => x.Qty),
+                PickQty = a.Sum(x => x.PickQty),  
                 FirstDetail = a.First()
             })
             .ToList();
@@ -783,7 +817,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 BatchCode = g.BatchCode,
                 LotCode = g.FirstDetail.LotCode,
                 Qty = g.TotalQty,
-                PickQty = pickQty,
+                PickQty = g.PickQty + pickQty,
                 Location = g.Location,
                 Area = g.Area,
                 Order = isCompleted ? 99 : 1, // 99表示已完成，1表示待拣货
@@ -794,13 +828,13 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 WarehouseName = pickTask.WarehouseName,
                 PickTaskNumber = input.PickTaskNumber
             };
-        }).ToList();
+        }).Where(g => g.PickStatus == (int)PickTaskStatusEnum.新增).ToList();
 
         // 按库位排序（先按区域，再按库位）
         response.Data = outputList
             .OrderBy(a => a.Area)
             .ThenBy(a => a.Location)
-            .ThenBy(a => a.Order)
+            .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)
             .ToList();
 
         response.Code = StatusCode.Success;
