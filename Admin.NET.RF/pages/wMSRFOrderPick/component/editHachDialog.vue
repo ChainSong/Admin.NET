@@ -71,7 +71,7 @@
 			</view>
 
 			<!-- 包装按钮区域 -->
-			<view class="padding" v-if="showPackageBtn">
+			<!-- <view class="padding" v-if="showPackageBtn">
 				<view class="cu-bar bg-white solid-bottom">
 					<view class="action">
 						<text class="cuIcon-title text-orange"></text>包装操作
@@ -84,7 +84,7 @@
 				<view class="padding flex flex-direction">
 					<button class="cu-btn bg-blue lg round" @tap="handleScanBoxNumber">完成包装</button>
 				</view>
-			</view>
+			</view> -->
 		</you-scroll>
 	</view>
 
@@ -198,17 +198,8 @@
 					playErrorSound();
 				}
 
-			},
-			// 检查是否显示包装按钮
-			checkPackageButton() {
-				// 如果所有商品都已拣完，显示包装按钮
-				if (this.list.length > 0) {
-					this.showPackageBtn = true;
-					// 更新表单状态
-					this.form.pickStatus = 3;
-					this.form.orderNumber = this.list[0].orderNumber || '';
-				}
-			},
+			}, 
+			 
 			async scanAcquisition() {
 				this.lpnSearchSet();
 				let that = this;

@@ -50,6 +50,7 @@ public class WMSRFPickTaskDetailInput
     public string Lot { get; set; }
     public string ExpirationDate { get; set; }
     public string SKU { get; set; }
+    public string SN { get; set; }
     public string ScanType { get; set; }
 
 

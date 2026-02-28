@@ -34,6 +34,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSPackage> _repPackage;
     private readonly SqlSugarRepository<WMSPackageDetail> _repPackageDetail;
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
+    private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
+    private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -47,7 +49,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysWorkFlowService _repWorkFlowService;
 
-    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService)
+    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition)
     {
         _rep = rep;
         _userManager = userManager;
@@ -62,6 +64,9 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         _repLocation = repLocation;
         _repProduct = repProduct;
         _repWorkFlowService = repWorkFlowService;
+        _repProductBom = repProductBom;
+        _repRFPackageAcquisition = repRFPackageAcquisition;
+
     }
 
     /// <summary>
@@ -286,6 +291,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         strategy._repPackageDetail = _repPackageDetail;
         strategy._repLocation = _repLocation;
         strategy._repProduct = _repProduct;
+        strategy._repProductBom = _repProductBom;
 
         // 执行策略
         return await strategy.ScanOrderPickTask(input);
@@ -316,7 +322,14 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             response.Msg = "箱号不能为空";
             return response;
         }
-
+        //判断箱号是不是已经使用过
+        var isExist = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        if (isExist)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "箱号已使用";
+            return response;
+        }
         // 获取拣货任务
         var pickTask = await _rep.AsQueryable()
             .Where(a => a.PickTaskNumber == input.PickTaskNumber)
@@ -394,16 +407,18 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             };
 
             // 插入包装记录
-            var packageId = await _repPackage.InsertReturnIdentityAsync(package);
+            //var packageId = await _repPackage.InsertReturnIdentityAsync(package);
 
             // 创建包装明细记录 - 使用缓存中的扫描数据
             List<WMSPackageDetail> packageDetails = new List<WMSPackageDetail>();
+            List<WMSRFPackageAcquisition> packageAcquisitions = new List<WMSRFPackageAcquisition>();
+
             foreach (var detail in pickTaskDetails)
             {
                 packageDetails.Add(new WMSPackageDetail
                 {
                     PickTaskId = detail.PickTaskId,
-                    PackageId = packageId,
+                    //PackageId = packageId,
                     OrderId = detail.OrderId,
                     OrderNumber = detail.OrderNumber,
                     ExternOrderNumber = detail.ExternOrderNumber,
@@ -432,9 +447,80 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     CreationTime = DateTime.Now
                 });
             }
-
+            packageAcquisitions = packageDetails.Adapt<List<WMSRFPackageAcquisition>>();
+            foreach (var item in packageAcquisitions)
+            {
+                if (!string.IsNullOrEmpty(item.SN))
+                {
+                    item.Type = "AFC";
+                }
+                if (!string.IsNullOrEmpty(item.Lot))
+                {
+                    item.Type = "SN";
+                }
+            }
+            package.Details = packageDetails.GroupBy(a => new
+            {
+                a.PickTaskId,
+                a.SKU,
+                a.OrderId,
+                a.OrderNumber,
+                a.ExternOrderNumber,
+                a.PreOrderNumber,
+                a.PickTaskNumber,
+                a.PackageNumber,
+                a.CustomerId,
+                a.CustomerName,
+                a.WarehouseId,
+                a.WarehouseName,
+                a.UPC,
+                a.GoodsName,
+                a.GoodsType,
+                a.UnitCode,
+                a.Onwer,
+                a.BoxCode,
+                a.TrayCode,
+                a.BatchCode,
+                a.LotCode,
+                a.PoCode,
+                a.ProductionDate,
+                a.ExpirationDate,
+            }).Select(a => new WMSPackageDetail()
+            {
+                PickTaskId = a.Key.PickTaskId,
+                //PackageId = packageId,
+                OrderId = a.Key.OrderId,
+                OrderNumber = a.Key.OrderNumber,
+                ExternOrderNumber = a.Key.ExternOrderNumber,
+                PreOrderNumber = a.Key.PreOrderNumber,
+                PickTaskNumber = a.Key.PickTaskNumber,
+                PackageNumber = a.Key.PackageNumber,
+                CustomerId = a.Key.CustomerId,
+                CustomerName = a.Key.CustomerName,
+                WarehouseId = a.Key.WarehouseId,
+                WarehouseName = a.Key.WarehouseName,
+                SKU = a.Key.SKU,
+                UPC = a.Key.UPC,
+                GoodsName = a.Key.GoodsName,
+                GoodsType = a.Key.GoodsType,
+                UnitCode = a.Key.UnitCode,
+                Onwer = a.Key.Onwer,
+                BoxCode = a.Key.BoxCode,
+                TrayCode = a.Key.TrayCode,
+                BatchCode = a.Key.BatchCode,
+                LotCode = a.Key.LotCode,
+                PoCode = a.Key.PoCode,
+                Qty = a.Sum(b => b.Qty), // 使用Redis中的拣货数量 
+                ProductionDate = a.Key.ProductionDate,
+                ExpirationDate = a.Key.ExpirationDate,
+                Creator = _userManager.Account,
+                CreationTime = DateTime.Now
+            }).ToList();
+            //使用导航属性插入package
+            //await _repPackage.InsertAsync(package);
+            await _repPackage.Context.InsertNav(package).Include(a => a.Details).ExecuteCommandAsync();
             // 批量插入包装明细
-            await _repPackageDetail.InsertRangeAsync(packageDetails);
+            //await _repPackageDetail.InsertRangeAsync(packageDetails);
             var entity = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == pickTask.PickTaskNumber).ToListAsync();
             //修改拣货数量，以及判断拣货状态
             foreach (var detail in cachedPickTaskDetails)
@@ -449,6 +535,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 //await _repPickTaskDetail.AsUpdateable(entity).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommandAsync();
             }
             await _repPickTaskDetail.UpdateRangeAsync(entity);
+            await _repRFPackageAcquisition.InsertRangeAsync(packageAcquisitions.Where(a => !string.IsNullOrEmpty(a.Type)).ToList());
             // 更新拣货任务状态为包装完成
             //判断是不是都包装完成了
             if (entity.Where(a => a.PickStatus == (int)PickTaskStatusEnum.新增).Count() == 0)
@@ -476,7 +563,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
 
             response.Code = StatusCode.Success;
             response.Msg = $"箱号 {input.BoxNumber} 包装完成，共包装 {pickTaskDetails.Count} 条明细";
-            response.Data = packageId.ToString();
+            response.Data = pickTask.PickTaskNumber;
         }
         catch (Exception ex)
         {
@@ -513,6 +600,14 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             return response;
         }
 
+        //判断箱号是不是已经使用过
+        var isExist = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        if (isExist)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "箱号已使用";
+            return response;
+        }
         // 获取拣货任务
         var pickTask = await _rep.AsQueryable()
             .Where(a => a.PickTaskNumber == input.PickTaskNumber)
@@ -581,16 +676,17 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     DetailCount = orderRecords.Count
                 };
 
-                var packageId = await _repPackage.InsertReturnIdentityAsync(package);
+                //var packageId = await _repPackage.InsertReturnIdentityAsync(package);
 
                 // 创建包装明细记录
                 List<WMSPackageDetail> packageDetails = new List<WMSPackageDetail>();
+                List<WMSRFPackageAcquisition> packageAcquisitions = new List<WMSRFPackageAcquisition>();
                 foreach (var record in orderRecords)
                 {
                     packageDetails.Add(new WMSPackageDetail
                     {
                         PickTaskId = record.PickTaskId,
-                        PackageId = packageId,
+                        //PackageId = packageId,
                         OrderId = record.OrderId,
                         OrderNumber = record.OrderNumber,
                         ExternOrderNumber = record.ExternOrderNumber,
@@ -621,13 +717,71 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     // 标记为已包装
                     record.IsPackaged = true;
                 }
+                //将packageDetails 汇总起来赋值给Details
 
-                await _repPackageDetail.InsertRangeAsync(packageDetails);
+                package.Details = packageDetails.GroupBy(a => new
+                {
+                    a.PickTaskId,
+                    a.SKU,
+                    a.OrderId,
+                    a.OrderNumber,
+                    a.ExternOrderNumber,
+                    a.PickTaskNumber,
+                    a.PackageNumber,
+                    a.CustomerId,
+                    a.CustomerName,
+                    a.WarehouseId,
+                    a.WarehouseName,
+                    a.UPC,
+                    a.GoodsName,
+                    a.GoodsType,
+                    a.UnitCode,
+                    a.Onwer,
+                    a.BoxCode,
+                    a.TrayCode,
+                    a.BatchCode,
+                    a.LotCode,
+                    a.PoCode,
+                    a.ProductionDate,
+                    a.ExpirationDate,
+                }).Select(a => new WMSPackageDetail()
+                {
+                    PickTaskId = a.Key.PickTaskId,
+                    //PackageId = packageId,
+                    OrderId = a.Key.OrderId,
+                    OrderNumber = a.Key.OrderNumber,
+                    ExternOrderNumber = a.Key.ExternOrderNumber,
+                    PickTaskNumber = a.Key.PickTaskNumber,
+                    PackageNumber = a.Key.PackageNumber,
+                    CustomerId = a.Key.CustomerId,
+                    CustomerName = a.Key.CustomerName,
+                    WarehouseId = a.Key.WarehouseId,
+                    WarehouseName = a.Key.WarehouseName,
+                    SKU = a.Key.SKU,
+                    UPC = a.Key.UPC,
+                    GoodsName = a.Key.GoodsName,
+                    GoodsType = a.Key.GoodsType,
+                    UnitCode = a.Key.UnitCode,
+                    Onwer = a.Key.Onwer,
+                    BoxCode = a.Key.BoxCode,
+                    TrayCode = a.Key.TrayCode,
+                    BatchCode = a.Key.BatchCode,
+                    LotCode = a.Key.LotCode,
+                    PoCode = a.Key.PoCode,
+                    Qty = a.Sum(b => b.Qty), // 使用Redis中的拣货数量
+                    //Qty = record.PickQty, // 使用Redis中的拣货数量
+                    ProductionDate = a.Key.ProductionDate,
+                    ExpirationDate = a.Key.ExpirationDate,
+                    Creator = _userManager.Account,
+                    CreationTime = DateTime.Now
+                }).ToList();
+                //使用导航属性插入package
+                //await _repPackage.InsertAsync(package);
+                await _repPackage.Context.InsertNav(package).Include(a => a.Details).ExecuteCommandAsync();
+                //await _repPackageDetail.InsertRangeAsync(packageDetails);
             }
-
             // 更新缓存
             _sysCacheService.Set(cacheKey, pickedRecords);
-
             // 检查是否所有商品都已包装
             var allPackaged = pickedRecords.All(a => a.IsPackaged);
             if (allPackaged)
@@ -788,7 +942,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 a.Key.Location,
                 a.Key.Area,
                 TotalQty = a.Sum(x => x.Qty),
-                PickQty = a.Sum(x => x.PickQty),  
+                PickQty = a.Sum(x => x.PickQty),
                 FirstDetail = a.First()
             })
             .ToList();
@@ -831,7 +985,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }).Where(g => g.PickStatus == (int)PickTaskStatusEnum.新增).ToList();
 
         // 按库位排序（先按区域，再按库位）
-        response.Data = outputList
+        response.Data = outputList.Where(a => a.Qty != a.PickQty)
             .OrderBy(a => a.Area)
             .ThenBy(a => a.Location)
             .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)

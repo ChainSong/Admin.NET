@@ -31,6 +31,9 @@ public interface IOrderPickRFInterface
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
+
+    
     Task<Response<List<WMSRFPickTaskDetailOutput>>> OrderPickTask(WMSRFPickTaskInput request);
 
     Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanOrderPickTask(WMSRFPickTaskDetailInput request);

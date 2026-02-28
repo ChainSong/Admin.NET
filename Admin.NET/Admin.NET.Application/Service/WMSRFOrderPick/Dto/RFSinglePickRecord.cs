@@ -173,4 +173,6 @@ public class RFSinglePickRecord
     /// 仓库名称
     /// </summary>
     public string WarehouseName { get; set; }
+    public string SN { get; set; }
+    public string Lot { get; set; }
 }

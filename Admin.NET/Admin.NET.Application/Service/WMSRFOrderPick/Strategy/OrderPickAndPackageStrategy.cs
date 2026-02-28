@@ -39,6 +39,7 @@ public class OrderPickAndPackageStrategy : IOrderPickRFInterface
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
     public SqlSugarRepository<WMSLocation> _repLocation { get; set; }
+    public SqlSugarRepository<WMSProductBom> _repProductBom { get; set; }
     public async Task<Response<List<WMSRFPickTaskDetailOutput>>> OrderPickTask(WMSRFPickTaskInput request)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
