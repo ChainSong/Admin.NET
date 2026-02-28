@@ -116,6 +116,10 @@
             导出RFID
           </el-button>
         </el-form-item>
+         <el-form-item>
+          <el-button type="primary" icon="ele-Help" @click="complete0GIOrderFun" v-auth="'wMSOrder:completeOrder'" :loading="opLoading.completeOrder" :disabled="opLoading.completeOrder"> 0GI完成
+          </el-button>
+        </el-form-item>
       </el-form>
     </el-card>
     <el-card class="full-table" shadow="hover" style="margin-top: 8px">
@@ -202,7 +206,7 @@ import { auth } from '/@/utils/authFunction';
 import queryDialog from '/@/views/main/wMSOrder/component/queryDialog.vue'
 import {
   pageWMSOrder, deleteWMSOrder, automatedAllocation, printShippingList,
-  createPickTask, completeOrder, exportOrder, exportPackage, exportWMSOrderByRFID
+  createPickTask, completeOrder, complete0GIOrder,exportOrder, exportPackage, exportWMSOrderByRFID
   , printJobList
 } from '/@/api/main/wMSOrder';
 import { getByTableNameList } from "/@/api/main/tableColumns";
@@ -526,6 +530,44 @@ const createPickTaskFun = () => {
 };
 
 
+
+//完成订单
+const complete0GIOrderFun = () => {
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    if (a.orderStatus <=20) {
+      ids.push(a.id);
+    }
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选未生成拣货任务的订单");
+    return;
+  }
+  ElMessageBox.confirm(`确定要完成订单?`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      opLoading.value.completeOrder = true;
+      try {
+        let result = await complete0GIOrder(ids);
+        if (result.data.result.data.length > 0) {
+          state.value.orderStatus = result.data.result.data;
+          //导入弹框提醒
+          resultPopupShow.value = true;
+          handleQuery();
+        } else {
+          ElMessage.info(result.data.result.msg);
+        }
+      } catch (e) {
+        ElMessage.error(e?.message ?? "完成订单失败");
+      } finally {
+        opLoading.value.completeOrder = false;
+      }
+    })
+    .catch(() => { });
+};
 
 //完成订单
 const completeOrderFun = () => {
