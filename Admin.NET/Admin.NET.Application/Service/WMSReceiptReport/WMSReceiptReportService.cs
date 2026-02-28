@@ -63,10 +63,10 @@ public class WMSReceiptReportService : IDynamicApiController, ITransient
     [UnitOfWork]
     [DisplayName("增加GetReceiptReport")]
     [ApiDescriptionSettings(Name = "GetReceiptReport")]
-    public ActionResult GetReceiptReport([FromBody]List<long> ids)
+    public ActionResult GetReceiptReport([FromBody] List<long> ids)
     {
-        string strSql = @"select WMS_Receipt.ReceiptTime '入库日期',
-        WMS_Receipt.ExternReceiptNumber '运单号',  
+        string strSql = @"select WMS_Receipt.CompleteTime '入库完成时间',
+        isnull((select top 1 ShipmentNum from hach_wms_receiving  where OrderNo=WMS_Receipt.ExternReceiptNumber),WMS_Receipt.ExternReceiptNumber) '运单号',  
         WMS_ReceiptDetail.PoCode '合同号',
         WMS_ReceiptDetail.SKU '货号',
         WMS_ReceiptDetail.ReceivedQty '入库数量',
