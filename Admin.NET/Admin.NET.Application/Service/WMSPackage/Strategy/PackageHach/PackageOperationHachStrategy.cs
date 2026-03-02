@@ -746,6 +746,48 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                     wMSInstruction.InstructionPriority = 63;
                     wMSInstruction.Remark = "";
                     wMSInstructions.Add(wMSInstruction);
+
+
+
+                    WMSInstruction wMSInstructionGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.CustomerId = item.Key.CustomerId;
+                    wMSInstructionGRHach.CustomerName = item.Key.CustomerName;
+                    wMSInstructionGRHach.WarehouseId = item.Key.WarehouseId;
+                    wMSInstructionGRHach.WarehouseName = item.Key.WarehouseName;
+                    wMSInstructionGRHach.OperationId = item.Key.OrderId;
+                    wMSInstructionGRHach.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstructionGRHach.Creator = _userManager.Account;
+                    wMSInstructionGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstructionGRHach.TableName = "WMS_Order";
+                    wMSInstructionGRHach.InstructionPriority = 1;
+                    wMSInstructionGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionGRHach);
+
+
+
+                    WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.CustomerId = item.Key.CustomerId;
+                    wMSInstructionAFCGRHach.CustomerName = item.Key.CustomerName;
+                    wMSInstructionAFCGRHach.WarehouseId = item.Key.WarehouseId;
+                    wMSInstructionAFCGRHach.WarehouseName = item.Key.WarehouseName;
+                    wMSInstructionAFCGRHach.OperationId = item.Key.OrderId;
+                    wMSInstructionAFCGRHach.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
+                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionAFCGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.TableName = "WMS_Order";
+                    wMSInstructionAFCGRHach.InstructionPriority = 1;
+                    wMSInstructionAFCGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionAFCGRHach);
                 }
                 //wMSInstructions.Add(wMSInstruction);
                 //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
