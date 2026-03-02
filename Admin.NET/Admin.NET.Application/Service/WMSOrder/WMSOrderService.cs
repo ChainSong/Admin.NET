@@ -61,6 +61,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSHandover> _repHandover;
     private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SqlSugarRepository<FGFHOrder> _repFGFHOrder;
+    private readonly SqlSugarRepository<WMSPackageLable> _repPackageLable;
     public WMSOrderService(SqlSugarRepository<WMSOrder> rep,
         SqlSugarRepository<WMSOrderDetail> repOrderDetail,
         SqlSugarRepository<WMSCustomer> repCustomer,
@@ -82,9 +83,9 @@ public class WMSOrderService : IDynamicApiController, ITransient
         SqlSugarRepository<WMSPackageDetail> repPackageDetail,
         SysWorkFlowService repWorkFlowService,
         SqlSugarRepository<HachWmsOutBound> repOb,
-        SqlSugarRepository<WMSProductBom> repProductBom, 
+        SqlSugarRepository<WMSProductBom> repProductBom,
         SqlSugarRepository<WMSHandover> repHandover,
-        SqlSugarRepository<FGFHOrder> repFGFHOrder)
+        SqlSugarRepository<FGFHOrder> repFGFHOrder, SqlSugarRepository<WMSPackageLable> repPackageLable)
     {
         _rep = rep;
         _repOrderDetail = repOrderDetail;
@@ -114,6 +115,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
         _repProductBom = repProductBom;
         _repHandover = repHandover;
         _repFGFHOrder = repFGFHOrder;
+        _repPackageLable = repPackageLable;
     }
 
     /// <summary>
@@ -836,10 +838,10 @@ public class WMSOrderService : IDynamicApiController, ITransient
                 foreach (var detail in order.Details)
                 {
                     // 箱号规则：订单号-序列号
-                    detail.BoxNumber = string.IsNullOrEmpty(order.OrderNumber) 
-                        ? $"ORDER-{order.Id}-{boxSequence}" 
+                    detail.BoxNumber = string.IsNullOrEmpty(order.OrderNumber)
+                        ? $"ORDER-{order.Id}-{boxSequence}"
                         : $"{order.OrderNumber}-{boxSequence}";
-                    
+
                     boxSequence++;
                 }
 
@@ -848,8 +850,8 @@ public class WMSOrderService : IDynamicApiController, ITransient
                 {
                     var defaultDetail = new WMSOrderDetailDto
                     {
-                        BoxNumber = string.IsNullOrEmpty(order.OrderNumber) 
-                            ? $"ORDER-{order.Id}-1" 
+                        BoxNumber = string.IsNullOrEmpty(order.OrderNumber)
+                            ? $"ORDER-{order.Id}-1"
                             : $"{order.OrderNumber}-1"
                     };
                     order.Details = new List<WMSOrderDetailDto> { defaultDetail };

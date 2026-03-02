@@ -36,6 +36,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProduct> _repProduct;
     private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
+    private readonly SqlSugarRepository<WMSPackageLable> _repPackageLable;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -49,7 +50,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysWorkFlowService _repWorkFlowService;
 
-    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition)
+    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSPackageLable> repPackageLable)
     {
         _rep = rep;
         _userManager = userManager;
@@ -66,6 +67,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         _repWorkFlowService = repWorkFlowService;
         _repProductBom = repProductBom;
         _repRFPackageAcquisition = repRFPackageAcquisition;
+        _repPackageLable = repPackageLable;
 
     }
 
@@ -323,11 +325,18 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             return response;
         }
         //判断箱号是不是已经使用过
-        var isExist = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
-        if (isExist)
+        var isExistInPackage = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        var isExistInLable = await _repPackageLable.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        if (isExistInPackage)
         {
             response.Code = StatusCode.Error;
             response.Msg = "箱号已使用";
+            return response;
+        }
+        if (!isExistInLable)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "箱号不存在";
             return response;
         }
         // 获取拣货任务
@@ -601,8 +610,9 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }
 
         //判断箱号是不是已经使用过
-        var isExist = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
-        if (isExist)
+        var isExistInPackage = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        var isExistInLable = await _repPackageLable.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        if (isExistInPackage || isExistInLable)
         {
             response.Code = StatusCode.Error;
             response.Msg = "箱号已使用";
