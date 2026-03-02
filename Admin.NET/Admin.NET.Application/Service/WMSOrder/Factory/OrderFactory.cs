@@ -25,6 +25,8 @@ namespace Admin.NET.Application.Factory
             {
                 case "HachDG":
                     return new OrderHachDGStrategy();
+                case "Hach0GI":
+                    return new OrderHachDG0GIStrategy();
                 case "Hach":
                     return new OrderHachStrategy();
                 default:

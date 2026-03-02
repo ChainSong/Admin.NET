@@ -96,11 +96,11 @@ public class WMSAdjustmentExportOutput
     [ExporterHeader(displayName: "目标库位")]
     public string? ToLocation { get; set; }
     [ExporterHeader(displayName: "原数量")]
-    public decimal? FromQty { get; set; }
+    public float? FromQty { get; set; }
     [ExporterHeader(displayName: "目标调整数量")]
-    public decimal? ToQty { get; set; }
+    public float? ToQty { get; set; }
     [ExporterHeader(displayName: "调整数量")]
-    public decimal? Qty { get; set; }
+    public float? Qty { get; set; }
     [ExporterHeader(displayName: "原所属")]
     public string? FromOnwer { get; set; }
     [ExporterHeader(displayName: "目标所属")]

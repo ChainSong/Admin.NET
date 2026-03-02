@@ -8,6 +8,7 @@ enum Api {
 	AutomatedAllocation = '/api/wMSOrder/AutomatedAllocation',
 	CreatePickTask = '/api/wMSOrder/CreatePickTask',
 	CompleteOrder = '/api/wMSOrder/CompleteOrder',
+	Complete0GIOrder = '/api/wMSOrder/Complete0GIOrder',
 	ExportOrder = '/api/wMSOrder/ExportOrder',
 	PrintShippingList = '/api/wMSOrder/PrintShippingList',
 	ExportPackage = '/api/wMSOrder/ExportPackage',
@@ -88,6 +89,12 @@ export const completeOrder = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+export const complete0GIOrder = (params?: any) =>
+	request({
+		url: Api.Complete0GIOrder,
+		method: 'post',
+		data: params,
+	});	
 
 
 //打印拣货任务

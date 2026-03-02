@@ -19,7 +19,7 @@ using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetRespon
 
 namespace Admin.NET.Application.Strategy
 {
-    public class OrderHachDGStrategy : IOrderInterface
+    public class OrderHachDG0GIStrategy : IOrderInterface
     {
 
         public SqlSugarRepository<WMSPreOrder> _repPreOrder { get; set; }
@@ -44,7 +44,7 @@ namespace Admin.NET.Application.Strategy
         public SqlSugarRepository<WMSPickTask> _repPickTask { get; set; }
         public SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail { get; set; }
 
-        public OrderHachDGStrategy()
+        public OrderHachDG0GIStrategy()
         {
 
         }
@@ -56,58 +56,58 @@ namespace Admin.NET.Application.Strategy
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
             var orderData = await _repOrder.AsQueryable().Includes(a => a.Allocation).Includes(a => a.OrderAddress).Where(a => request.Contains(a.Id)).ToListAsync();
-            if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
-            {
-                orderData.ToList().ForEach(b =>
-                {
-                    if (b.OrderStatus < (int)OrderStatusEnum.已分配 || b.OrderStatus == (int)OrderStatusEnum.完成)
-                        response.Data.Add(new OrderStatusDto()
-                        {
-                            Id = b.Id,
-                            ExternOrder = b.ExternOrderNumber,
-                            SystemOrder = b.PreOrderNumber,
-                            Type = b.OrderType,
-                            StatusCode = StatusCode.Warning,
-                            //StatusMsg = (string)StatusCode.warning,
-                            Msg = "订单状态异常"
-                        });
-                });
-                if (response.Data.Count > 0)
-                {
-                    response.Code = StatusCode.Error;
-                    response.Msg = "订单异常";
-                    return response;
-                }
-            }
+            //if (orderData != null && orderData.Where(a => a.OrderStatus < (int)OrderStatusEnum.已分配 || a.OrderStatus == (int)OrderStatusEnum.完成).ToList().Count > 0)
+            //{
+            //    orderData.ToList().ForEach(b =>
+            //    {
+            //        if (b.OrderStatus < (int)OrderStatusEnum.已分配 || b.OrderStatus == (int)OrderStatusEnum.完成)
+            //            response.Data.Add(new OrderStatusDto()
+            //            {
+            //                Id = b.Id,
+            //                ExternOrder = b.ExternOrderNumber,
+            //                SystemOrder = b.PreOrderNumber,
+            //                Type = b.OrderType,
+            //                StatusCode = StatusCode.Warning,
+            //                //StatusMsg = (string)StatusCode.warning,
+            //                Msg = "订单状态异常"
+            //            });
+            //    });
+            //    if (response.Data.Count > 0)
+            //    {
+            //        response.Code = StatusCode.Error;
+            //        response.Msg = "订单异常";
+            //        return response;
+            //    }
+            //}
             //判断有没有包装信息
             var package = await _repPickTaskDetail.AsQueryable().Where(a => request.Contains(a.OrderId)).ToListAsync();
-            if (package.Count() == 0)
+            if (package.Count() > 0)
             {
                 response.Code = StatusCode.Error;
-                response.Msg = "订单异常:没有拣货信息";
+                response.Msg = "订单异常:有拣货信息，不能0GI";
                 return response;
             }
-            foreach (var item in request)
-            {
-                if (package.Where(a => a.PickStatus != (int)PickTaskStatusEnum.包装完成).Count() > 0)
-                {
-                    response.Code = StatusCode.Error;
-                    response.Msg = "订单异常:没有完成包装信息";
-                    return response;
-                }
-            }
+            //foreach (var item in request)
+            //{
+            //    if (package.Where(a => a.PickStatus != (int)PickTaskStatusEnum.包装完成).Count() > 0)
+            //    {
+            //        response.Code = StatusCode.Error;
+            //        response.Msg = "订单异常:没有完成包装信息";
+            //        return response;
+            //    }
+            //}
 
-            foreach (var item in orderData)
-            {
-                //判断是不是都已经交接
-                var handover = await _repHandover.AsQueryable().Where(a => a.OrderId == (item.Id)).ToListAsync();
-                if (handover == null || handover.Count == 0)
-                {
-                    response.Code = StatusCode.Error;
-                    response.Msg = "订单异常:+" + item.ExternOrderNumber + "没有完成交接信息";
-                    return response;
-                }
-            }
+            //foreach (var item in orderData)
+            //{
+            //    //判断是不是都已经交接
+            //    var handover = await _repHandover.AsQueryable().Where(a => a.OrderId == (item.Id)).ToListAsync();
+            //    if (handover == null || handover.Count == 0)
+            //    {
+            //        response.Code = StatusCode.Error;
+            //        response.Msg = "订单异常:+" + item.ExternOrderNumber + "没有完成交接信息";
+            //        return response;
+            //    }
+            //}
 
 
             await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.完成, CompleteTime = DateTime.Now }, a => orderData.Select(c => c.Id).Contains(a.Id));

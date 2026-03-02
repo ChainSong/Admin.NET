@@ -1220,7 +1220,6 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
 
             string SKURegex = @"(?<=\|ITM)[^|]+|^[^\s:]+=[0-9]{3,4}[CN]{0,2}(?=[0-9]{5}\b)|^[^|][^\s:]+(?=\s|$)"; // 正则表达式匹配英文字符或数字
-                                                                                                                  //string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d({4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
             string LOTRegex = @"(?<=\|LOT)[^\|]+|(?<==\d{3}|=\d{4}|=\d{4}CN)[0-9]{5}\b|(?<=\s)[A-Z0-9]{1,5}\b";
             string ExpirationDateRegex = @"(?<=\|EXP)[^\|]+|(?<=\s)\d{6}\b";
             MatchCollection matchesSKU = Regex.Matches(request.Input, SKURegex);
@@ -1293,6 +1292,10 @@ public class WMSPackageService : IDynamicApiController, ITransient
             }
         }
 
+
+
+
+
         WMSRFPackageAcquisition packageAcquisition = new WMSRFPackageAcquisition();
         packageAcquisition = packahe.Adapt<WMSRFPackageAcquisition>();
         packageAcquisition.SKU = request.SKU;
@@ -1302,6 +1305,35 @@ public class WMSPackageService : IDynamicApiController, ITransient
         packageAcquisition.Creator = _userManager.Account;
         packageAcquisition.CreationTime = DateTime.Now;
         await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
+
+     
+        if (packahe.CustomerId == 22)
+        {
+            var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == packahe.PickTaskNumber).ToListAsync();
+            //获取
+            var getSN = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == packahe.PickTaskNumber).ToListAsync();
+            //将福光的包装数据处理一下
+            foreach (var item in CheckPickData)
+            {
+                //声明一个变量
+                double NumberRemaining = item.PickQty;
+                var itemdata = getSN.Where(a => a.CustomerId == item.CustomerId && a.Type == "SN" && a.SKU == item.SKU && (a.ReceiptAcquisitionStatus ?? 0) != 1);
+                foreach (var itemSN in itemdata)
+                {
+                    if (NumberRemaining <= 0)
+                    {
+                        break;
+                    }
+                    itemSN.ReceiptAcquisitionStatus = 1;
+                    itemSN.OrderId = item.OrderId;
+                    itemSN.PreOrderNumber = item.PreOrderNumber;
+                    itemSN.OrderNumber = item.OrderNumber;
+                    itemSN.ExternOrderNumber = item.ExternOrderNumber;
+                    NumberRemaining--;
+                }
+            }
+            await _repRFPackageAcquisition.UpdateRangeAsync(getSN);
+        }
         _sysCacheService.Set(_userManager.Account + "_PackageSNCode_" + request.PickTaskNumber + request.SN, request.SN);
         return new Response() { Code = StatusCode.Success, Msg = "操作成功" };
 

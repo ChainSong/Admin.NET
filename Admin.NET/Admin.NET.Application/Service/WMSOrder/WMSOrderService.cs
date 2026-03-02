@@ -558,6 +558,52 @@ public class WMSOrderService : IDynamicApiController, ITransient
     }
 
 
+    [HttpPost]
+    [UnitOfWork]
+    [ApiDescriptionSettings(Name = "Complete0GIOrder")]
+    public async Task<Response<List<OrderStatusDto>>> Complete0GIOrder(List<long> input)
+    {
+        //1根据id 获取订单信息
+        var order = await _rep.AsQueryable().Where(a => input.Contains(a.Id)).ToListAsync();
+        //只允许同客户，同仓库同订单类型的订单进行拣货任务创建
+        if (order.GroupBy(a => new { a.CustomerId, a.WarehouseId, a.OrderType }).Count() > 1)
+        {
+            //return new Response<List<OrderStatusDto>>()
+            //{
+            //    Code = StatusCode.Error,
+            //    Msg = "只能选择同客户，同仓库，同订单类型的订单进行拣货任务创建！"
+            //};
+        }
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == order.First().CustomerName + OutboundWorkFlowConst.Workflow_Outbound).FirstAsync();
+
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(order.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Complete, order.First().OrderType);
+
+        //使用简单工厂定制化  / 
+        IOrderInterface factory = OrderFactory.CompleteOrder("Hach0GI");
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repTableColumns = _repTableColumns;
+        factory._repTableColumnsDetail = _repTableColumnsDetail;
+        factory._repOrder = _rep;
+        factory._repPreOrder = _repPreOrder;
+        factory._repOrderDetail = _repOrderDetail;
+        factory._repInstruction = _repInstruction;
+        factory._repOrderAllocation = _repOrderAllocation;
+        factory._repPackage = _repPackage;
+        factory._repPickTaskDetail = _repPickTaskDetail;
+        factory._repHandover = _repHandover;
+        //factory._reprf = _reprf;
+        factory._repInventoryUsable = _repInventoryUsable;
+
+        var response = await factory.CompleteOrder(input);
+        return response;
+
+    }
+
 
     /// <summary>
     /// 导出预出库单

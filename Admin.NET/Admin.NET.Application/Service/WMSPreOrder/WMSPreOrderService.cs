@@ -287,6 +287,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [DisplayName("增加WMS_PreOrder")]
+    [Idempotent("s", 2)]
     [ApiDescriptionSettings(Name = "Add")]
     public async Task<Response<List<OrderStatusDto>>> Add(AddOrUpdateWMSPreOrderInput input)
     {
@@ -388,6 +389,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [DisplayName("更新WMS_PreOrder")]
+    [Idempotent("s", 2)]
     [ApiDescriptionSettings(Name = "Update")]
     public async Task<Response<List<OrderStatusDto>>> Update(AddOrUpdateWMSPreOrderInput input)
     {
@@ -619,6 +621,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <returns></returns>
     [ApiDescriptionSettings(Name = "PreOrderForOrder")]
     [DisplayName("预出库单转出库单")]
+    [Idempotent("s", 3)]
     [UnitOfWork]
     public async Task<Response<List<OrderStatusDto>>> PreOrderForOrder(List<long> input)
     {
@@ -667,6 +670,7 @@ public class WMSPreOrderService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [Idempotent("s", 3)]
     [ApiDescriptionSettings(Name = "UpdateOrderAddress")]
     public async Task<Response> UpdateOrderAddress(WMSOrderAddressIntput input)
     {
