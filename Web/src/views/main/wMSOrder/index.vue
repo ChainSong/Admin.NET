@@ -110,8 +110,6 @@
           <el-button type="primary" icon="ele-Help" @click="openPrintJob" v-auth="'wMSOrder:page'" :loading="opLoading.printJob" :disabled="opLoading.printJob"> 打印JOB汇总清单
           </el-button>
         </el-form-item>
-       
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="ele-Help" @click="exportWMSOrderByRFIDFun"
             v-auth="'wMSOrder:page'" :loading="opLoading.exportRFID" :disabled="opLoading.exportRFID">
@@ -275,8 +273,7 @@ const opLoading = ref({
   createPickTask: false,
   completeOrder: false,
   print: false,
-  printJob: false,
-  printBoxNumber: false
+  printJob: false
 });
 // const tableData = ref<any>
 // ([]);
@@ -695,8 +692,6 @@ const openPrintJob = async () => {
     opLoading.value.printJob = false;
   }
 };
-
-
 
 
 // 改变页面容量
