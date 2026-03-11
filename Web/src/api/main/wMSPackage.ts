@@ -23,6 +23,9 @@ enum Api {
 	PrintDGPackageList = '/api/wMSPackage/PrintDGPackageList',
 	PrintPackageNumber = '/api/wMSPackage/PrintPackageNumber',
 	AddPackageHachDGSuit = '/api/wMSPackage/AddPackageHachDGSuit',
+	PrintPackageListByPackageMunber = '/api/wMSPackage/PrintPackageListByPackageMunber',
+	PrintPackageNumberByPackageNumber = '/api/wMSPackage/PrintPackageNumberByPackageNumber',
+	
 }
 
 // 增加WMSPackage
@@ -221,3 +224,20 @@ export const printDGPackageList = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
+//打印危险仓装箱清单
+export const printPackageListByPackageMunber = (params?: any) =>
+	request({
+		url: Api.PrintPackageListByPackageMunber,
+		method: 'post',
+		data: params,
+	});	
+//打印危险仓装箱清单
+export const printPackageNumberByPackageNumber = (params?: any) =>
+	request({
+		url: Api.PrintPackageNumberByPackageNumber,
+		method: 'post',
+		data: params,
+	});	
+
+
+	

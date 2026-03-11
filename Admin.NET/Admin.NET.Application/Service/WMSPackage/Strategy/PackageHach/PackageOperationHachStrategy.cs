@@ -219,8 +219,8 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             pickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
                   .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
                   .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-              .GroupBy(a => new { a.SKU, a.PickTaskNumber,a.CustomerId })
-              .Select(a => new PackageData { SKU = a.SKU, CustomerId=a.CustomerId, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
+              .GroupBy(a => new { a.SKU, a.PickTaskNumber, a.CustomerId })
+              .Select(a => new PackageData { SKU = a.SKU, CustomerId = a.CustomerId, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
               .ToList();
 
             if (pickData.Count > 0)
@@ -302,7 +302,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                 //判断JNE 是不是可用
                 if (!string.IsNullOrEmpty(request.SN))
                 {
-                    var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId== pickData.First().CustomerId).FirstAsync();
+                    var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == pickData.First().CustomerId).FirstAsync();
                     if (checkJNE != null && string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                     {
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -412,6 +412,8 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                             response.Code = result.Code;
                             response.Msg = result.Msg;
+                            response.Data.PackageNumber = result.Data;
+
                             return response;
                         }
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -469,6 +471,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 return response;
             }
             else
@@ -476,6 +479,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -515,6 +519,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 return response;
             }
             else
@@ -522,6 +527,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -532,9 +538,9 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
         response.Msg = "系统错误";
         return response;
     }
-    private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
+    private async Task<Response<string>> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
-        Response response = new Response();
+        Response<string> response = new Response<string>();
         if (request.Weight < 0.3)
         {
             request.Weight = 1;
@@ -713,7 +719,7 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
             }
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
-                
+
                 //wMSInstructions.Add(wMSInstruction);
                 await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
                 await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, (a => a.PickTaskNumber == request.PickTaskNumber));
@@ -849,10 +855,13 @@ internal class PackageOperationHachStrategy : IPackageOperationInterface
                 //}
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
                 response.Code = StatusCode.Finish;
+                response.Data = packageNumber;
                 response.Msg = "订单完成";
                 return response;
             }
             response.Code = StatusCode.Success;
+            response.Data = packageNumber;
+
             response.Msg = "成功";
             return response;
             //return response;

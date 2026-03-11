@@ -99,7 +99,7 @@ public class HandoverDefaultStrategy : IHandoverInterface
             await _repHandover.InsertRangeAsync(handoverData);
         }
 
-        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.交接 }, a => packageData.Select(c => c.OrderId).Contains(a.Id) && a.OrderStatus > (int)OrderStatusEnum.已分配);
+        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.交接 }, a => packageData.Select(c => c.OrderId).Contains(a.Id) && a.OrderStatus > (int)OrderStatusEnum.已分配 && a.OrderStatus < (int)OrderStatusEnum.完成);
 
 
         response.Code = StatusCode.Success;

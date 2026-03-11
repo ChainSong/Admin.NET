@@ -26,8 +26,8 @@ export const clearAccessTokens = () => {
 	uni.removeStorageSync(refreshAccessTokenKey);
 	// 清除其他
 	uni.clearStorageSync();
-	
-	uni.navigateTo({
+
+	uni.reLaunch({
 		url: '/pages/login/index'
 	});
 };

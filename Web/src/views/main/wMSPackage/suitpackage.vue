@@ -30,11 +30,10 @@
                 </td>
 
               </tr>
-               <tr>
+              <tr>
                 <th style="padding-left:5px;font-size:20px" rowspan="1">包装箱型:</th>
                 <td>
-                    <el-input v-model="state.vm.form.boxType"   
-                   style="font-size:20px" placeholder="请输入内容"></el-input>
+                  <el-input v-model="state.vm.form.boxType" style="font-size:20px" placeholder="请输入内容"></el-input>
                 </td>
               </tr>
               <tr>
@@ -113,7 +112,7 @@
             批量快递打印
           </el-button>
         </el-button-group>
-         <!-- <el-button-group>
+        <!-- <el-button-group>
           <el-button type="primary" icon="ele-Printer" @click="printExpressBatchFun('')">
             批量快递箱号
           </el-button>
@@ -130,7 +129,7 @@
         </el-table-column>
         <el-table-column prop="packageNumber" label="箱号">
         </el-table-column>
-          <el-table-column prop="serialNumber" label="序号">
+        <el-table-column prop="serialNumber" label="序号">
         </el-table-column>
         <el-table-column prop="detailCount" label="包装数量">
         </el-table-column>
@@ -144,14 +143,14 @@
           <template #default="scope">
             <el-button icon="ele-Printer" type="primary" @click="printExpress(scope.row)">打印快递单
             </el-button>
-              <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
+            <el-button type="primary" icon="ele-Printer" @click="printPackageListFun(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱清单
             </el-button>
-             <el-button type="primary" icon="ele-Printer" @click="printPackageNumberFun(scope.row)"
+            <el-button type="primary" icon="ele-Printer" @click="printPackageNumberFun(scope.row)"
               v-auth="'wMSPackage:printPackage'">
               打印箱号
-            </el-button> 
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -197,7 +196,7 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { auth } from '/@/utils/authFunction';
 // import printDialog from '/@/views/main/wMSPackage/component/printDialog.vue'
 import printDialog from '/@/views/tools/printDialog.vue';
-import { pageWMSPackage, deleteWMSPackage, scanPackageData,scanPackagSuiteData,addPackageHachDGSuit, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage, printPackageList ,printPackageNumber} from '/@/api/main/wMSPackage';
+import { pageWMSPackage, deleteWMSPackage, scanPackageData, scanPackagSuiteData, addPackageHachDGSuit, printExpressData, allWMSPackage, addPackageData, shortagePackageData, resetPackageData, printBatchExpress, scanSNPackage, printPackageList, printPackageNumber, printPackageListByPackageMunber, printPackageNumberByPackageNumber } from '/@/api/main/wMSPackage';
 import { getExpressConfig, allExpress } from '/@/api/main/wMSExpressConfig';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import selectRemote from '/@/views/tools/select-remote.vue';
@@ -390,6 +389,9 @@ const addPackage = async (data: any) => {
     input.value.select();
   });
   allPackage(state.value.vm.form);
+  if (res.data.result.data.packageNumber != null) {
+    printPackageNumberByPackageNumberFun([res.data.result.data.packageNumber]);
+  }
 };
 
 
@@ -441,6 +443,9 @@ const scanPackage = async () => {
       state.value.vm.tableData = res.data.result.data.packageDatas;
 
     ElMessage.success(res.data.result.msg);
+    if (res.data.result.data.packageNumber != null) {
+      printPackageNumberByPackageNumberFun([res.data.result.data.packageNumber]);
+    }
   } else {
     audio_error.play(); // 播放音频
     state.value.vm.form = res.data.result.data;
@@ -570,6 +575,21 @@ const printPackageListFun = async (row: any) => {
 // };
 
 
+const printPackageNumberByPackageNumberFun = async (data: any) => {
+  let result = await printPackageNumberByPackageNumber(data);
+  let printData = new Array<Header>();
+  console.log("printData");
+  printData.printTemplate = "";
+  // console.log("ids", packageNumbers);
+  console.log("result", result);
+  if (result.data.result != null) {
+    printData = result.data.result.data;
+  }
+  printData.printTemplate = "打印出库箱号";
+  // console.log("packageNumbers", packageNumbers);
+  printDialogRef.value.openDialog({ "printData": printData.data, "templateName": printData.printTemplate });
+
+};
 
 //打印箱唛
 const printPackageNumberFun = async (row: any) => {

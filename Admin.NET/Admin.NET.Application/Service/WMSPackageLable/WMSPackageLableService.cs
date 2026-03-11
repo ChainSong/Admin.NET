@@ -124,7 +124,8 @@ public class WMSPackageLableService : IDynamicApiController, ITransient
         {
             throw Oops.Oh($"未找到订单号为 {input.PreOrderNumber} 的订单");
         }
-
+        //查看已经生成了多少箱号了；
+         var getBoxNum = await _rep.AsQueryable().Where(o => o.PreOrderNumber == input.PreOrderNumber.Trim()).CountAsync();
         // 根据打印数量生成多个打印信息
         var packageLables = new List<WMSPackageLable>();
         for (int i = 1; i <= input.PrintNum.Value; i++)
@@ -133,7 +134,7 @@ public class WMSPackageLableService : IDynamicApiController, ITransient
             {
                 OrderId = order.Id,
                 PreOrderNumber = order.PreOrderNumber,
-                PackageNumber = $"{order.Dn ?? order.ExternOrderNumber}-{i.ToString().PadLeft(3, '0')}", // 包装单号加上序号
+                PackageNumber = $"{order.Dn ?? order.ExternOrderNumber}-{(getBoxNum+i).ToString().PadLeft(3, '0')}", // 包装单号加上序号
                 OrderNumber = order.OrderNumber,
                 ExternOrderNumber = order.ExternOrderNumber,
                 CustomerId = order.CustomerId,
@@ -148,7 +149,7 @@ public class WMSPackageLableService : IDynamicApiController, ITransient
                 GrossWeight = input.GrossWeight,
                 ExpressCompany = input.ExpressCompany,
                 ExpressNumber = input.ExpressNumber,
-                SerialNumber = i.ToString(), // 序号加上序号
+                SerialNumber = (getBoxNum + i).ToString(), // 序号加上序号
                 PrintNum = 0,
                 PrintPersonnel = input.PrintPersonnel,
                 PrintTime = null,

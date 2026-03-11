@@ -5,8 +5,10 @@ using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
 using Admin.NET.Application.Service;
+using Admin.NET.Application.Service.Enumerate;
 using Admin.NET.Application.Strategy;
 using Admin.NET.Common;
+using Admin.NET.Common.SnowflakeCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
 using Admin.NET.Core.Service;
@@ -37,6 +39,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSProductBom> _repProductBom;
     private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
     private readonly SqlSugarRepository<WMSPackageLable> _repPackageLable;
+    private readonly SqlSugarRepository<WMSInstruction> _repInstruction;
 
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
     //private readonly SqlSugarRepository<CustomerUserMapping> _repCustomerUser;
@@ -50,7 +53,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
     private readonly SysWorkFlowService _repWorkFlowService;
 
-    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSPackageLable> repPackageLable)
+    public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSPackageLable> repPackageLable, SqlSugarRepository<WMSInstruction> repInstruction)
     {
         _rep = rep;
         _userManager = userManager;
@@ -68,6 +71,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         _repProductBom = repProductBom;
         _repRFPackageAcquisition = repRFPackageAcquisition;
         _repPackageLable = repPackageLable;
+        _repInstruction = repInstruction;
 
     }
 
@@ -317,28 +321,29 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             response.Msg = "拣货任务号不能为空";
             return response;
         }
-
-        if (string.IsNullOrEmpty(input.BoxNumber))
-        {
-            response.Code = StatusCode.Error;
-            response.Msg = "箱号不能为空";
-            return response;
-        }
+        //使用雪花算法生成一个箱号
+        input.BoxNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+        //if (string.IsNullOrEmpty(input.BoxNumber))
+        //{
+        //    response.Code = StatusCode.Error;
+        //    response.Msg = "箱号不能为空";
+        //    return response;
+        //}
         //判断箱号是不是已经使用过
         var isExistInPackage = await _repPackage.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
-        var isExistInLable = await _repPackageLable.AsQueryable().AnyAsync(a => a.PackageNumber == input.BoxNumber);
+        //var isExistInLable = await _repPackageLable.AsQueryable().Where(a => a.PackageNumber == input.BoxNumber).FirstAsync();
         if (isExistInPackage)
         {
             response.Code = StatusCode.Error;
             response.Msg = "箱号已使用";
             return response;
         }
-        if (!isExistInLable)
-        {
-            response.Code = StatusCode.Error;
-            response.Msg = "箱号不存在";
-            return response;
-        }
+        //if (isExistInLable == null)
+        //{
+        //    response.Code = StatusCode.Error;
+        //    response.Msg = "箱号不存在";
+        //    return response;
+        //}
         // 获取拣货任务
         var pickTask = await _rep.AsQueryable()
             .Where(a => a.PickTaskNumber == input.PickTaskNumber)
@@ -390,8 +395,25 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             var orderIds = pickTaskDetails.Select(a => a.OrderId).Distinct().ToList();
 
             // 创建包装记录（一个拣货任务可能对应多个订单，每个订单创建一个包装记录）
-            var firstOrderNumber = pickTask.OrderNumber?.Split(',')[0] ?? "";
-            var firstExternOrderNumber = pickTask.ExternOrderNumber?.Split(',')[0] ?? "";
+            //var firstOrderNumber = pickTask.OrderNumber?.Split(',')[0] ?? "";
+            //var firstExternOrderNumber = pickTask.ExternOrderNumber?.Split(',')[0] ?? "";
+
+            //通过order id  查找 dn
+            //再根据dn 查找所有的 so 信息， 再来计算箱号序列
+            var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == orderIds.First()).FirstAsync();
+            List<WMSOrder> orderSo = new List<WMSOrder>();
+            if (orderDn != null && !string.IsNullOrEmpty(orderDn.Dn))
+            {
+                orderSo = await _repOrder.AsQueryable().Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId).ToListAsync();
+            }
+            else
+            {
+                orderSo = await _repOrder.AsQueryable().Where(a => a.Id == orderIds.First() && orderDn.CustomerId == a.CustomerId).ToListAsync();
+            }
+            var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
+
+
+
             var firstOrderId = orderIds.FirstOrDefault();
 
             var package = new WMSPackage
@@ -399,15 +421,16 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 PickTaskId = pickTask.Id,
                 PickTaskNumber = pickTask.PickTaskNumber,
                 OrderId = firstOrderId,
-                OrderNumber = firstOrderNumber,
+                OrderNumber = pickTask.OrderNumber,
                 PreOrderNumber = cachedPickTaskDetails.First().PreOrderNumber,
-                ExternOrderNumber = firstExternOrderNumber,
+                ExternOrderNumber = pickTask.ExternOrderNumber,
                 PackageNumber = input.BoxNumber, // 使用扫描的箱号
                 CustomerId = pickTask.CustomerId,
                 CustomerName = pickTask.CustomerName,
                 WarehouseId = pickTask.WarehouseId,
                 WarehouseName = pickTask.WarehouseName,
                 PackageType = "标准箱",
+                SerialNumber = (packagenumberData.Count + 1).ToString(),
                 PackageStatus = 1, // 待交接
                 PackageTime = DateTime.Now,
                 Creator = _userManager.Account,
@@ -564,6 +587,77 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                    .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.包装完成)
                    .Where(p => p.PickTaskNumber == pickTask.PickTaskNumber)
                    .ExecuteCommandAsync();
+                    await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => a.ExternOrderNumber == pickTask.ExternOrderNumber);
+
+
+
+
+
+                    //包装完成，插入
+                    List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+
+                    //插入反馈指令
+                    WMSInstruction wMSInstruction = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstruction.InstructionType = "出库单回传HachDG";
+                    wMSInstruction.BusinessType = "出库单回传HachDG";
+                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                    wMSInstruction.CustomerId = pickTask.CustomerId;
+                    wMSInstruction.CustomerName = pickTask.CustomerName;
+                    wMSInstruction.WarehouseId = pickTask.WarehouseId;
+                    wMSInstruction.WarehouseName = pickTask.WarehouseName;
+                    wMSInstruction.OperationId = entity.First().OrderId;
+                    wMSInstruction.OrderNumber = pickTask.ExternOrderNumber;
+                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.InstructionTaskNo = pickTask.ExternOrderNumber;
+                    wMSInstruction.TableName = "WMS_Order";
+                    wMSInstruction.InstructionPriority = 63;
+                    wMSInstruction.Remark = "";
+                    wMSInstructions.Add(wMSInstruction);
+
+                    WMSInstruction wMSInstructionGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
+                    wMSInstructionGRHach.CustomerId = pickTask.CustomerId;
+                    wMSInstructionGRHach.CustomerName = pickTask.CustomerName;
+                    wMSInstructionGRHach.WarehouseId = pickTask.WarehouseId;
+                    wMSInstructionGRHach.WarehouseName = pickTask.WarehouseName;
+                    wMSInstructionGRHach.OperationId = entity.First().OrderId;
+                    wMSInstructionGRHach.OrderNumber = pickTask.ExternOrderNumber;
+                    wMSInstructionGRHach.Creator = _userManager.Account;
+                    wMSInstructionGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
+                    wMSInstructionGRHach.TableName = "WMS_Order";
+                    wMSInstructionGRHach.InstructionPriority = 1;
+                    wMSInstructionGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionGRHach);
+
+
+
+                    WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
+                    //wMSInstruction.OrderId = orderData[0].Id;
+                    wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                    wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
+                    wMSInstructionAFCGRHach.CustomerId = pickTask.CustomerId;
+                    wMSInstructionAFCGRHach.CustomerName = pickTask.CustomerName;
+                    wMSInstructionAFCGRHach.WarehouseId = pickTask.WarehouseId;
+                    wMSInstructionAFCGRHach.WarehouseName = pickTask.WarehouseName;
+                    wMSInstructionAFCGRHach.OperationId = entity.First().OrderId;
+                    wMSInstructionAFCGRHach.OrderNumber = pickTask.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
+                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionAFCGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.TableName = "WMS_Order";
+                    wMSInstructionAFCGRHach.InstructionPriority = 1;
+                    wMSInstructionAFCGRHach.Remark = "";
+                    wMSInstructions.Add(wMSInstructionAFCGRHach);
+
+                    await _repInstruction.InsertRangeAsync(wMSInstructions);
                 }
             }
 

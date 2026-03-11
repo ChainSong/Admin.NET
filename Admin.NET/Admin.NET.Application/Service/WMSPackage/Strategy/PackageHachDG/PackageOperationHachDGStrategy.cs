@@ -324,6 +324,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                             response.Code = result.Code;
                             response.Msg = result.Msg;
+                            response.Data.PackageNumber = result.Data;
                             return response;
                         }
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -444,7 +445,9 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             if (PackingCompleteCheck.Code == StatusCode.Finish)
             {
                 response.Code = PackingCompleteCheck.Code;
+
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 return response;
             }
             else
@@ -452,6 +455,7 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -491,6 +495,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 return response;
             }
             else
@@ -498,6 +504,8 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -508,9 +516,9 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
         response.Msg = "系统错误";
         return response;
     }
-    private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
+    private async Task<Response<string>> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
-        Response response = new Response();
+        Response<string> response = new Response<string>();
         if (request.Weight < 0.3)
         {
             request.Weight = 1;
@@ -803,10 +811,13 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";
+                response.Data = packageNumber;
                 return response;
             }
             response.Code = StatusCode.Success;
             response.Msg = "成功";
+            response.Data = packageNumber;
+
             return response;
             //return response;
         }

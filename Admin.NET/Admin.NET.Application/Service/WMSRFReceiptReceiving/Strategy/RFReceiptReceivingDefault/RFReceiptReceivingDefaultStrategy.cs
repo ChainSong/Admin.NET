@@ -246,7 +246,10 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             var packageData = mapper.Map<WMSReceiptReceiving>(receiptReceiving);
             packageData.ReceivedQty = 1;
             packageData.BatchCode = !string.IsNullOrEmpty(request.Lot) ? request.Lot : receiptReceiving.BatchCode;
-
+            if (IsValidDate(request.ExpirationDate))
+            {
+                packageData.ExpirationDate = Convert.ToDateTime(request.ExpirationDate);
+            }
             if (!string.IsNullOrEmpty(request.ExpirationDate))
             {
                 //CultureInfo culture = new CultureInfo("en-US");
@@ -301,7 +304,7 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
                         DateTime.TryParseExact(request.ExpirationDate, "MMyyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
                         packageData.ExpirationDate = dateTime;
                     }
-             
+
                     if (packageData.ExpirationDate != null && packageData.ExpirationDate.Value.Year < 1900)
                     {
 
@@ -316,7 +319,13 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
             {
                 packageData.ExpirationDate = receiptReceiving.ExpirationDate;
             }
-
+            if (packageData.ExpirationDate != null)
+            {
+                if (packageData.ExpirationDate.Value.Year < 2000)
+                {
+                    packageData.ExpirationDate.Value.AddYears(100);
+                }
+            }
             orderCheckData.Add(packageData);
             _sysCacheService.Set("RFReceiptReceivingScan:" + request.CustomerId + ":" + request.ReceiptNumber, orderCheckData, timeSpan);
             _sysCacheService.Set("RFReceiptReceivingOrder:" + request.CustomerId + ":" + request.ReceiptNumber, orderData, timeSpan);
@@ -332,7 +341,24 @@ public class RFReceiptReceivingDefaultStrategy : IRFReceiptReceivingInterface
         response.Msg = "成功";
         return response;
     }
+    public static bool IsValidDate(string dateString)
+    {
+        if (string.IsNullOrWhiteSpace(dateString))
+            return false;
 
+        // 期望的格式：yyyy-MM-dd
+        string format = "yyyy-MM-dd";
+
+        // 使用 InvariantCulture 避免本地化差异，并严格匹配格式
+        bool isValid = DateTime.TryParseExact(
+            dateString,
+            format,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out _);
+
+        return isValid;
+    }
 
     //扫描SKU 注意区分有唯一编码和没有唯一编码
     private async Task<Response> ScanLocation(RFReceiptReceivingInput request, List<WMSReceiptDetail> orderData)

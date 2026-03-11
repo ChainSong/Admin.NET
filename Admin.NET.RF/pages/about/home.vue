@@ -112,7 +112,7 @@
 
 					this.$mStore.commit('logout');
 
-					uni.navigateTo({
+					uni.reLaunch({
 						url: `/pages/login/index`
 					});
 					uni.showToast({

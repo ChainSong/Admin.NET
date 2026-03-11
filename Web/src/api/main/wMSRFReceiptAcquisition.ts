@@ -5,12 +5,10 @@ enum Api {
   UpdateWMSRFReceiptAcquisition = '/api/wMSRFReceiptAcquisition/update',
   PageWMSRFReceiptAcquisition = '/api/wMSRFReceiptAcquisition/page',
   GetWMSRFReceiptAcquisition = '/api/wMSRFReceiptAcquisition/Query',
-  AllWMSRFReceiptAcquisition = '/api/wMSRFReceiptAcquisition/All',
-  SaveAcquisitionData = '/api/wMSRFReceiptAcquisition/SaveAcquisitionData',
-  
+  ExportWMSRFReceiptAcquisition = '/api/wMSRFReceiptAcquisition/Export',
 }
 
-// 增加WMSRFReceiptAcquisition
+// 增加WMS_RFReceiptAcquisition
 export const addWMSRFReceiptAcquisition = (params?: any) =>
 	request({
 		url: Api.AddWMSRFReceiptAcquisition,
@@ -18,7 +16,7 @@ export const addWMSRFReceiptAcquisition = (params?: any) =>
 		data: params,
 	});
 
-// 删除WMSRFReceiptAcquisition
+// 删除WMS_RFReceiptAcquisition
 export const deleteWMSRFReceiptAcquisition = (params?: any) => 
 	request({
 			url: Api.DeleteWMSRFReceiptAcquisition,
@@ -26,7 +24,7 @@ export const deleteWMSRFReceiptAcquisition = (params?: any) =>
 			data: params,
 		});
 
-// 编辑WMSRFReceiptAcquisition
+// 编辑WMS_RFReceiptAcquisition
 export const updateWMSRFReceiptAcquisition = (params?: any) => 
 	request({
 			url: Api.UpdateWMSRFReceiptAcquisition,
@@ -34,33 +32,29 @@ export const updateWMSRFReceiptAcquisition = (params?: any) =>
 			data: params,
 		});
 
-// 分页查询WMSRFReceiptAcquisition
+// 分页查询WMS_RFReceiptAcquisition
 export const pageWMSRFReceiptAcquisition = (params?: any) => 
 	request({
 			url: Api.PageWMSRFReceiptAcquisition,
 			method: 'post',
 			data: params,
 		});
-// 单条查询WMSRFReceiptAcquisition
-export const getWMSRFReceiptAcquisition = (params?: any) => 
+// 单条查询WMS_RFReceiptAcquisition
+export const getWMSRFReceiptAcquisition = (params?: any) =>
 request({
 	url: `${Api.GetWMSRFReceiptAcquisition}/${params}`,
 	method: 'get'
 });
 
-
-// 编辑WMSRFReceiptAcquisition
-export const allWMSRFReceiptAcquisition = (params?: any) => 
+// 导出WMS_RFReceiptAcquisition
+export const exportWMSRFReceiptAcquisition = (params?: any) =>
 	request({
-			url: Api.AllWMSRFReceiptAcquisition,
-			method: 'post',
-			data: params,
-		});
-
-		// 编辑WMSRFReceiptAcquisition
-export const saveAcquisition = (params?: any) => 
-request({
-		url: Api.SaveAcquisitionData,
+		url: Api.ExportWMSRFReceiptAcquisition,
 		method: 'post',
 		data: params,
+		responseType: 'blob',
 	});
+
+
+
+

@@ -33,6 +33,12 @@ public class WMSPackageDetail : ITenantIdFilter
     [SugarColumn(ColumnDescription = "")]
     public long PackageId { get; set; }
     
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [SugarColumn(ColumnDescription = "")]
+    public long PickTaskDetailId { get; set; }
     /// <summary>
     /// 
     /// </summary>

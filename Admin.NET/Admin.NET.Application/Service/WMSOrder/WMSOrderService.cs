@@ -355,6 +355,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [ApiDescriptionSettings(Name = "Delete")]
     [UnitOfWork]
+    [Idempotent("s", 2)]
     public async Task<Response<List<OrderStatusDto>>> Delete(DeleteWMSOrderInput input)
     {
         //var entity = await _rep.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
@@ -471,6 +472,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "CreatePickTask")]
+    [Idempotent("s", 2)]
     public async Task<Response<List<OrderStatusDto>>> CreatePickTask(List<long> input)
     {
 
@@ -514,6 +516,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "CompleteOrder")]
+    [Idempotent("s", 2)]
     public async Task<Response<List<OrderStatusDto>>> CompleteOrder(List<long> input)
     {
         //1根据id 获取订单信息
@@ -561,6 +564,7 @@ public class WMSOrderService : IDynamicApiController, ITransient
     [HttpPost]
     [UnitOfWork]
     [ApiDescriptionSettings(Name = "Complete0GIOrder")]
+    [Idempotent("s", 2)]
     public async Task<Response<List<OrderStatusDto>>> Complete0GIOrder(List<long> input)
     {
         //1根据id 获取订单信息

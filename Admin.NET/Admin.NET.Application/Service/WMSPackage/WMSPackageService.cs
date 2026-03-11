@@ -806,6 +806,9 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             return new Response() { Code = StatusCode.Error, Msg = "任务号不能为空" };
         }
+        //删除扫描的序列号信息
+        await _repRFPackageAcquisition.DeleteAsync(a => a.PickTaskNumber == input.PickTaskNumber);
+
         //获取任务号明细信息
         var pickTaskList = await _repPickTask.AsQueryable().Includes(a => a.Details).Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
         if (pickTaskList.Count > 1)
@@ -829,8 +832,6 @@ public class WMSPackageService : IDynamicApiController, ITransient
             await _rep.DeleteAsync(packageList);
             //return new Response() { Code = StatusCode.Error, Msg = "找到多条包裹信息" };
         }
-        //删除扫描的序列号信息
-        await _repRFPackageAcquisition.DeleteAsync(a => a.PickTaskNumber == input.PickTaskNumber);
 
         //修改任务号明细信息
         //var pickTaskDetailList = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == input.PickTaskNumber).ToListAsync();
@@ -1077,6 +1078,90 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
 
+
+    /// <summary>
+    /// 打印包装清单
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "PrintPackageListByPackageMunber")]
+    public async Task<Response<PrintBase<dynamic>>> PrintPackageListByPackageMunber(List<string> input)
+    {
+        Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
+
+        var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.PackageNumber)).ToListAsync();
+        //获取订单状态
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber) && getPackageList.First().CustomerId == a.CustomerId).ToListAsync();
+
+
+        //foreach (var item in getOrder)
+        //{
+        //    if (item.OrderStatus == (int)OrderStatusEnum.已包装)
+        //    {
+        //        data.Code = StatusCode.Error;
+        //        data.Msg = "请完成所有包装再打印快递面单";
+        //        return data;
+        //    }
+        //}
+
+        var workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List_Data, getOrder.First().OrderType);
+
+
+        //使用简单工厂定制化修改和新增的方法
+        IPackagePrintInterface factory = PackagePrintFactory.PackagePrint(workflow);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repOrder = _repOrder;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repCustomerConfig = _repCustomerConfig;
+        //factory._repASNDetail = _repASNDetail;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repProduct = _repProduct;
+        //factory._userManager = _userManager;
+        //return await factory.AddStrategy(entityListDtos);
+        //string asdasd = response.Result.Msg;
+        //response.Data.PrintTemplate = workflow;
+        var response = await factory.Strategy(getPackageList.Select(a => a.Id).ToList());
+        //response.Data.PrintTemplate = workflow;
+        if (response.Code == StatusCode.Success)
+        {
+            var printTemplate = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Print_Package_List, getOrder.First().OrderType);
+            if (!string.IsNullOrEmpty(printTemplate))
+            {
+                response.Data.PrintTemplate = printTemplate;
+            }
+            else
+            {
+                response.Data.PrintTemplate = "装箱清单";
+            }
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
+        }
+        return data;
+        //response.Data = new List<PackageData>();
+        //response.Data.aaa= "aaa";
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
+
+
+
+        //return response;
+
+    }
+
+
+
+
     /// <summary>
     /// 打印包装箱号
     /// </summary>
@@ -1142,6 +1227,74 @@ public class WMSPackageService : IDynamicApiController, ITransient
         //return response;
 
     }
+
+
+    /// <summary>
+    /// 打印包装箱号
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "PrintPackageNumberByPackageNumber")]
+    public async Task<Response<PrintBase<dynamic>>> PrintPackageNumberByPackageNumber(List<string> input)
+    {
+        Response<PrintBase<dynamic>> data = new Response<PrintBase<dynamic>>() { Data = new PrintBase<dynamic>() };
+
+        var getPackageList = await _rep.AsQueryable().Where(a => input.Contains(a.PackageNumber)).ToListAsync();
+        //获取订单状态
+        var getOrder = await _repOrder.AsQueryable().Where(a => getPackageList.Select(b => b.ExternOrderNumber).Contains(a.ExternOrderNumber)).ToListAsync();
+
+        string workflow = "";
+        if (getOrder != null && getOrder.Count > 0)
+        {
+
+            workflow = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number_Data, getOrder.First().OrderType);
+        }
+
+        //使用简单工厂定制化修改和新增的方法
+        IPackagePrintInterface factory = PackagePrintFactory.PackageNumberPrint(workflow);
+        //factory._db = _db;
+        factory._userManager = _userManager;
+        factory._repOrder = _repOrder;
+        factory._repCustomerUser = _repCustomerUser;
+        factory._repCustomerConfig = _repCustomerConfig;
+        factory._repPackage = _rep;
+        //factory._repCustomerUser = _repCustomerUser;
+        //factory._repWarehouseUser = _repWarehouseUser;
+        //factory._repProduct = _repProduct;
+        //factory._userManager = _userManager;
+        //return await factory.AddStrategy(entityListDtos);
+        //string asdasd = response.Result.Msg;
+        //response.Data.PrintTemplate = workflow;
+        var response = await factory.Strategy(getPackageList.Select(a => a.Id).ToList());
+        //response.Data.PrintTemplate = workflow;
+        if (response.Code == StatusCode.Success)
+        {
+            var PrintTemplate = await _repWorkFlowService.GetSystemWorkFlow(getOrder.First().CustomerName, OutboundWorkFlowConst.Workflow_Outbound, OutboundWorkFlowConst.Workflow_Package_Number, getOrder.First().OrderType);
+            response.Data.PrintTemplate = PrintTemplate;
+            //data.Data = response.Data.Data;
+            //data.Code = StatusCode.Success;
+            //data.Msg = "打印成功";
+            //return data;
+            return response;
+        }
+        return data;
+        //response.Data = new List<PackageData>();
+        //response.Data.aaa= "aaa";
+        //使用简单工厂定制化修改和新增的方法
+        //根据订单类型判断是否存在该流程
+        //var workflow = await _repWorkFlow.AsQueryable()
+        //   .Includes(a => a.SysWorkFlowSteps)
+        //   .Where(a => a.WorkName == input.CustomerName + InboundWorkFlowConst.Workflow_Inbound).FirstAsync();
+        //var workflow = await _repWorkFlowService.GetSystemWorkFlow(input.CustomerName, InboundWorkFlowConst.Workflow_Inbound, InboundWorkFlowConst.Workflow_ASN, input.ReceiptType);
+
+
+
+        //return response;
+
+    }
+
 
 
 
@@ -1306,7 +1459,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
         packageAcquisition.CreationTime = DateTime.Now;
         await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
 
-     
+
         if (packahe.CustomerId == 22)
         {
             var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == packahe.PickTaskNumber).ToListAsync();

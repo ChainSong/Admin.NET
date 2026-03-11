@@ -339,7 +339,7 @@ public class WMSRFASNCountQuantity : IDynamicApiController, ITransient
         scanType.Code = StatusCode.Success;
 
         if (!string.IsNullOrEmpty(input.ScanInput) && string.IsNullOrEmpty(input.SKU))
-        { 
+        {
             if (input.ScanInput.Split(' ').Length > 1 || input.ScanInput.Split('|').Length > 1)
             {
 

@@ -135,6 +135,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     response.Code = result.Code;
                     response.Msg = result.Msg;
                     response.Data.BoxType = request.BoxType;
+                    response.Data.PackageNumber = result.Data;
 
                     return response;
                 }
@@ -304,7 +305,7 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                     }
                 }
 
-              
+
 
                 var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
                 if (PickSKUData.Count() > 0)
@@ -339,11 +340,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             response.Data.BoxType = request.BoxType;
                             response.Code = result.Code;
                             response.Msg = result.Msg;
+                            response.Data.PackageNumber = result.Data;
+
                             return response;
                         }
                         response.Data.BoxType = request.BoxType;
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                         response.Code = StatusCode.Success;
+
                         return response;
                     }
                     else
@@ -406,6 +410,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                             response.Code = result.Code;
                             response.Msg = result.Msg;
+                            response.Data.PackageNumber = result.Data;
+
                             return response;
                         }
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -463,7 +469,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
-           
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 return response;
             }
             else
@@ -471,6 +478,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -510,6 +519,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
             {
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 return response;
             }
             else
@@ -517,6 +528,8 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
 
                 response.Code = PackingCompleteCheck.Code;
                 response.Msg = PackingCompleteCheck.Msg;
+                response.Data.PackageNumber = PackingCompleteCheck.Data;
+
                 //response.Msg = PackingCompleteCheck.Msg;
                 return response;
             }
@@ -527,9 +540,9 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
         response.Msg = "系统错误";
         return response;
     }
-    private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
+    private async Task<Response<string>> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
-        Response response = new Response();
+        Response<string> response = new Response<string>();
 
         //判断是不是输入了重量
         if (request.Weight > 0.2)
@@ -844,10 +857,14 @@ internal class PackageOperationDefaultStrategy : IPackageOperationInterface
                 //wMSInstructions.Add(wMSInstruction);
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";
+                response.Data = packageNumber;
+
                 return response;
             }
             response.Code = StatusCode.Success;
             response.Msg = "成功";
+            response.Data = packageNumber;
+
             return response;
             //return response;
         }

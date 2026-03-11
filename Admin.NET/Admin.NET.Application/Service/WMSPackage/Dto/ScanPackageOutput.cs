@@ -20,6 +20,7 @@ public class ScanPackageOutput
     public string Input { get; set; }
     public string SKU { get; set; }
     public string PickTaskNumber { get; set; }
+    public string PackageNumber { get; set; }
     public double Weight { get; set; }
     public double Qty { get; set; }
     public string BoxType { get; set; }
@@ -40,6 +41,7 @@ public class PackageData
 {
 
     public long CustomerId { get; set; }
+    public long PickTaskDetailId { get; set; }
     public string OrderNumber { get; set; }
     public string SKU { get; set; }
     public string PickTaskNumber { get; set; }
