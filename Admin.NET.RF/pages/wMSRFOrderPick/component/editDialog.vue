@@ -32,8 +32,7 @@
 								</view>
 							</view>
 							<view class="cu-list menu-avatar">
-								<view v-for="(item, index)  in this.list" :key="index"
-									class="cu-item"
+								<view v-for="(item, index)  in this.list" :key="index" class="cu-item"
 									:class="{'completed-item': item.order === 99}">
 									<view class="cu-avatar round lg" :class="getPickStatusClass(item)">
 										{{item.pickQty}}/{{item.qty}}
@@ -41,7 +40,8 @@
 									<view class="content">
 										<view class="text-grey">
 											<text class="text-bold">SKU:</text>{{item.sku}}
-											<text class="text-sm text-grey" v-if="item.goodsName">({{item.goodsName}})</text>
+											<text class="text-sm text-grey"
+												v-if="item.goodsName">({{item.goodsName}})</text>
 										</view>
 										<view class="text-grey">
 											<text class="text-orange">库位:</text>{{item.location}}
@@ -87,17 +87,17 @@
 			<!-- 扫描区域 -->
 			<view class="cu-form-group ">
 				<view class="title">库位</view>
-				<input disabled v-model="form.location" placeholder="库位" />
+				<input disabled v-model="form.location" placeholder="库位"></input>
 			</view>
 			<view class="cu-form-group ">
 				<view class="title">扫描</view>
 				<input :adjust-position="false" confirm-type="search" id="scanInput" :focus="focusflag"
 					v-model="form.scanInput" v-focus="input" v-select="input" ref="input" name="input"
 					@confirm="scanAcquisition()" clearable="" placeholder="请扫描条码/SKU" selection-start="0"
-					:selection-end="selectendlength" />
+					:selection-end="selectendlength"></input>
 			</view>
 
-			
+
 
 			<!-- 包装按钮区域 -->
 			<view class="padding" v-if="showPackageBtn">
@@ -113,10 +113,13 @@
 				<view class="padding flex flex-direction">
 					<button class="cu-btn bg-blue lg round" @tap="handleScanBoxNumber">完成包装</button>
 					<button class="cu-btn bg-green lg round" @tap="connectPrinter">连接打印机</button>
+					<button class="search-ble" @click="searchBluetooth">搜索蓝牙</button>
+					<!-- <button class="print"  @click="print">打印base64的图片</button> -->
+					<button class="createLabel" @click="printLabel">打印测试标签</button>
 				</view>
 			</view>
 		</you-scroll>
-		
+
 		<!-- 打印机设备选择弹窗 -->
 		<view v-if="printerModalVisible" class="bluetooth-modal">
 			<view class="bluetooth-modal-content">
@@ -142,6 +145,7 @@
 
 <script>
 	import {
+		pageWMSRFOrderPickApi,
 		scanOrderPickTaskApi,
 		scanPickApi,
 		scanBoxNumberCompletePackageApi,
@@ -153,6 +157,7 @@
 		playSuccessSound
 	} from "@/services/common/playaudio.js";
 	import esc from '@/components/gprint/esc.js';
+	import esc from '@/components/gprint/uni.webview.1.5.8.js';
 	export default {
 		name: "wMSShelveDetail",
 		components: {
@@ -199,7 +204,15 @@
 				printerDevices: [],
 				printerDeviceId: null,
 				printerServiceId: null,
-				printerCharacteristicId: null
+				printerCharacteristicId: null,
+				// 标记 UniApp 桥接是否已准备就绪
+				bridgeReady: false,
+
+				// 标签打印参数（可根据实际需求修改或通过 props 传入）
+				labelWidth: 50, // 标签宽度（mm）
+				labelHeight: 30, // 标签高度（mm）
+				gap: 12// 标签纸间距
+				// text 参数暂未使用，保留注释说明
 			};
 		},
 		created() {
@@ -261,7 +274,9 @@
 						console.log('拣货明细列表:', that.list);
 						console.log('拣货明细数量:', that.list.length);
 						that.list.forEach((item, index) => {
-							console.log(`第${index}项: SKU=${item.sku}, 库位=${item.location}, 应拣=${item.qty}, 已拣=${item.pickQty}`);
+							console.log(
+								`第${index}项: SKU=${item.sku}, 库位=${item.location}, 应拣=${item.qty}, 已拣=${item.pickQty}`
+								);
 						});
 
 						// 获取第一个未完成商品的库位作为推荐库位
@@ -350,7 +365,7 @@
 						// that.form.sku = res.data.result.data[0].sku;
 						console.log('扫描库位:', that.form)
 					} else if (res.data.result.msg == "SKU") {
-							that.form.location = res.data.result.data[0].location;
+						that.form.location = res.data.result.data[0].location;
 						console.log('扫描SKU成功，更新列表');
 					}
 
@@ -424,7 +439,7 @@
 							icon: 'success'
 						});
 						playSuccessSound();
-						
+
 						// 如果包装成功，获取箱号并打印
 						if (res.data.result.data && res.data.result.data.boxNumber) {
 							const boxNumber = res.data.result.data.boxNumber;
@@ -432,7 +447,7 @@
 							// 调用打印方法
 							await this.printBoxLabel(boxNumber);
 						}
-						
+
 						// 清空箱号输入
 						this.packageForm.boxNumber = "";
 						// 更新状态
@@ -460,14 +475,14 @@
 					uni.hideLoading();
 				}
 			},
-			
+
 			/**
 			 * 初始化蓝牙 - 参考文档流程：开启定位 → 打开蓝牙 → 获取蓝牙状态
 			 */
 			async initBluetooth() {
 				try {
 					// 1. 开启定位
-					// await this.openLocation();
+					await this.openLocation();
 
 					// 2. 打开蓝牙适配器
 					await uni.openBluetoothAdapter();
@@ -531,10 +546,12 @@
 						console.log('发现设备', res.devices);
 						res.devices.forEach(device => {
 							// 避免重复添加
-							const exists = this.printerDevices.some(d => d.deviceId === device.deviceId);
+							const exists = this.printerDevices.some(d => d.deviceId === device
+								.deviceId);
 							// 过滤打印机设备（通常名称包含print或PRINTER）
 							const name = (device.name || device.localName || '').toLowerCase();
-							if (!exists && (name.includes('print') || name.includes('printer') || name.includes('gp') || name.includes('gprinter'))) {
+							if (!exists && (name.includes('print') || name.includes('printer') || name
+									.includes('gp') || name.includes('gprinter'))) {
 								this.printerDevices.push(device);
 							}
 						});
@@ -657,33 +674,33 @@
 					// 创建ESC打印指令
 					const command = esc.createNew();
 					command.init();
-					
+
 					// 设置标题
 					command.setAlign(1); // 居中
 					command.setSize(2, 2); // 放大字体
 					command.setBold(true);
 					command.setText("包装标签\n");
 					command.setPrint();
-					
+
 					// 设置箱号
 					command.setAlign(1);
 					command.setSize(3, 3); // 更大字体
 					command.setBold(true);
 					command.setText(`${boxNumber}\n`);
 					command.setPrint();
-					
+
 					// 设置拣货任务号
 					command.setAlign(0); // 左对齐
 					command.setSize(1, 1);
 					command.setBold(false);
 					command.setText(`任务号: ${this.form.pickTaskNumber}\n`);
 					command.setPrint();
-					
+
 					// 设置打印时间
 					command.setAlign(1);
 					command.setText(`时间: ${new Date().toLocaleString()}\n`);
 					command.setPrint();
-					
+
 					command.setPrintAndFeedLine(3); // 走纸3行
 
 					// 获取打印数据
@@ -766,6 +783,31 @@
 				}
 				this.printerConnected = false;
 			}
+			/**
+			 * 
+			 */
+			async searchBluetooth() {
+				uni.postMessage({
+					data: {
+						action: 'search_ble',
+						// data: "图片的base64"  // if needed
+					}
+				});
+			}
+			async printLabel() {
+				uni.postMessage({
+					data: {
+						action: 'createLabel',
+						data: {
+							size: [this.labelWidth, this.labelHeight], // 标签尺寸 [宽, 高] (mm)
+							gap: this.gap, // 标签纸间距
+							// 如需添加文字或二维码参数，可在此扩展，例如：
+							// text: [50, 10, 'Arial', 1, 1, '示例文字'],
+							// QR: [100, 100, 'M', 4, 'M', '二维码内容']
+						},
+					},
+				});
+			}
 		}
 	}
 </script>
@@ -779,7 +821,7 @@
 	.my>.cu-item {
 		height: calc(100vh) !important;
 		align-items: center;
-	justify-content: center;
+		justify-content: center;
 	}
 
 	.cu-list.grid>.cu-item [class*=cuIcon],
