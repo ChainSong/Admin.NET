@@ -79,6 +79,8 @@
           </el-button>
 
           <el-button type="primary" icon="ele-Fold" @click="asnCountQuantity" v-auth="'wMSASN:add'"> 点数</el-button>
+
+          <el-button type="primary" icon="ele-Printer" @click="openPrintASN" v-auth="'wMSASN:page'"> 打印ASN</el-button>
         </el-form-item>
 
       </el-form>
@@ -149,6 +151,7 @@
       <addDialog ref="addDialogRef" :title="addTitle" @reloadTable="handleQuery" />
       <queryDialog ref="queryDialogRef" :title="queryTitle" @reloadTable="handleQuery" />
       <asnforReceiptDialog ref="openAsnforReceiptRef" :title="asnforReceiptTitle" @reloadTable="handleQuery" />
+      <printDialog ref="printDialogRef" :title="printTitle" @reloadTable="handleQuery" />
     </el-card>
     <el-dialog v-model="resultPopupShow" title="转入库单结果" :append-to-body="true">
       <el-alert v-for="i in state.orderStatus" v-bind="i" :key="i" :title="i.externOrder + i.msg" :type="i.statusMsg">
@@ -174,7 +177,8 @@ import editDialog from '/@/views/main/wMSASN/component/editDialog.vue'
 import addDialog from '/@/views/main/wMSASN/component/addDialog.vue'
 import queryDialog from '/@/views/main/wMSASN/component/queryDialog.vue'
 import asnforReceiptDialog from '/@/views/main/wMSASN/component/asnforReceiptDialog.vue'
-import { pageWMSASN, deleteWMSASN, asnForReceipt, exportASN, cancelWMSASN } from '/@/api/main/wMSASN';
+import printDialog from '/@/views/tools/printDialog.vue'
+import { pageWMSASN, deleteWMSASN, asnForReceipt, exportASN, cancelWMSASN,printASN } from '/@/api/main/wMSASN';
 import { addWMSASNCountQuantity } from '/@/api/main/wMSASNCountQuantity';
 import { getByTableNameList } from "/@/api/main/tableColumns";
 import { addSysPresetQuery, queryByUser } from "/@/api/main/sysPresetQuery";
@@ -221,6 +225,7 @@ const editDialogRef = ref();
 const openAsnforReceiptRef = ref();
 const addDialogRef = ref();
 const queryDialogRef = ref();
+const printDialogRef = ref();
 const loading = ref(false);
 const multipleTableRef = ref();
 //自定义提示
@@ -238,6 +243,10 @@ const editTitle = ref("");
 const addTitle = ref("");
 const queryTitle = ref("");
 const asnforReceiptTitle = ref("");
+const printTitle = ref("");
+
+// 主体路径
+let baseURL = import.meta.env.VITE_API_URL;
 
 // 页面加载时
 onMounted(async () => {
@@ -464,6 +473,46 @@ const handleCurrentChange = (val: number) => {
   tableParams.value.page = val;
   handleQuery();
   queryPresetQuery();
+};
+
+// 打印ASN
+const openPrintASN = async () => {
+  printTitle.value = 'ASN打印';
+  let ids = new Array<Number>();
+  multipleTableRef.value.getSelectionRows().forEach(a => {
+    ids.push(a.id);
+  });
+  if (ids.length == 0) {
+    ElMessage.error("请勾选需要打印的ASN");
+    return;
+  }
+  loading.value = true;
+  try {
+    let result = await printASN(ids);
+    if (result.data.result != null) {
+      let printData = result.data.result.data;
+      // 处理客户配置的Logo路径
+      // if (Array.isArray(printData)) {
+      //   printData.forEach(a => {
+      //     if (a.customerConfig != null && a.customerConfig.customerLogo) {
+      //       // a.customerConfig.customerLogo = baseURL + a.customerConfig.customerLogo;
+      //     }
+      //   });
+      // }
+console.log(printData);
+      // 判断使用哪个打印模板
+      let templateName = "ASN打印模板";
+      if (result.data.result.printTemplate && result.data.result.printTemplate !== "") {
+        templateName = result.data.result.printTemplate;
+      }
+
+      printDialogRef.value.openDialog({ "printData": printData.data, "templateName": templateName });
+    }
+  } catch (e) {
+    ElMessage.error(e?.message ?? "打印失败");
+  } finally {
+    loading.value = false;
+  }
 };
 
 

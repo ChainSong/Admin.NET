@@ -18,6 +18,8 @@ namespace Admin.NET.Application.Service;
 public class ScanPackageInput
 {
     public string Input { get; set; }
+    public string InputType { get; set; }
+    public string OriginalInput { get; set; }
     public string SKU { get; set; }
     public string RFID { get; set; }
     public string SN { get; set; }

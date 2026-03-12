@@ -10,7 +10,7 @@ enum Api {
   ExportASN = '/api/wMSASN/ExportASN',
   CancelASN = '/api/wMSASN/Cancel',
   AddASNCountQuantity = '/api/WMSASNCountQuantity/AddASNCountQuantity',
-  
+  PrintASN='/api/wMSASN/PrintASN'
 }
 
 // 增加WMSASN
@@ -90,4 +90,13 @@ export const addASNCountQuantity = (params?: any) =>
 		method: 'post',
 		data: params,
 	});
-			
+
+
+	// 打印asn
+export const printASN = (params?: any) =>
+	request({
+		url: Api.PrintASN,
+		method: 'post',
+		data: params,
+	});
+		 

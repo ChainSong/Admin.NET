@@ -15,6 +15,7 @@ enum Api {
 	GetOrderLocation = '/api/wMSOrder/GetOrderLocation',
 	ExportWMSOrderByRFID = '/api/WMSOrderReport/ExportWMSOrderByRFID',
 	PrintJobList='/api/wMSOrder/PrintJobList'
+	
 }
 
 // 增加WMSOrder

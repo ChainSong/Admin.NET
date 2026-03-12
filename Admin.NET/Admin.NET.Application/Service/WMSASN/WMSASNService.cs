@@ -1,36 +1,38 @@
-﻿using Admin.NET.Common.ExcelCommon;
-using Admin.NET.Application.Const;
+﻿using Admin.NET.Application.Const;
 using Admin.NET.Application.Dtos;
+using Admin.NET.Application.Dtos.Enum;
+using Admin.NET.Application.Enumerate;
 using Admin.NET.Application.Factory;
 using Admin.NET.Application.Interface;
+using Admin.NET.Application.Service;
+using Admin.NET.Common;
+using Admin.NET.Common.ExcelCommon;
 using Admin.NET.Core;
 using Admin.NET.Core.Entity;
+using Admin.NET.Express;
 using AngleSharp.Dom;
 using Elasticsearch.Net;
 using Furion.DatabaseAccessor;
 using Furion.DependencyInjection;
 using Furion.FriendlyException;
+using Magicodes.ExporterAndImporter.Core;
+using Magicodes.ExporterAndImporter.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Nest;
 using NewLife.Net;
+using NewLife.Security;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using RulesEngine.Models;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
-using Admin.NET.Express;
+using static SKIT.FlurlHttpClient.Wechat.Api.Models.CgibinTagsMembersGetBlackListResponse.Types;
 using static SKIT.FlurlHttpClient.Wechat.Api.Models.ChannelsECWarehouseGetResponse.Types;
-using Magicodes.ExporterAndImporter.Core;
-using Magicodes.ExporterAndImporter.Excel;
-using System.IO;
-using Admin.NET.Application.Dtos.Enum;
-using Admin.NET.Application.Service;
-using Admin.NET.Application.Enumerate;
-using Admin.NET.Common;
-using NewLife.Security;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Admin.NET.Application;
 /// <summary>
@@ -354,7 +356,7 @@ public class WMSASNService : IDynamicApiController, ITransient
                 //data.Data = response.Data.Data;
                 data.Code = StatusCode.Error;
                 data.Msg = "客户不存在";
-                return data; 
+                return data;
             }
             //根据发货地址获取仓库信息
             var warehouse = await _repWarehouse.AsQueryable().Where(a => a.Address == input.WarehouseName).FirstAsync();
@@ -372,8 +374,8 @@ public class WMSASNService : IDynamicApiController, ITransient
             input.CustomerName = customer.CustomerName;
             foreach (var item in input.Details)
             {
-                item.WarehouseId= warehouse.Id;
-                item.WarehouseName= warehouse.WarehouseName;
+                item.WarehouseId = warehouse.Id;
+                item.WarehouseName = warehouse.WarehouseName;
                 item.CustomerId = customer.Id;
                 item.CustomerName = customer.CustomerName;
             }
@@ -419,7 +421,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         catch (Exception ex)
         {
             throw Oops.Oh(ex.Message);
-         
+
         }
     }
 
@@ -597,7 +599,7 @@ public class WMSASNService : IDynamicApiController, ITransient
         {
             return new Response<List<OrderStatusDto>> { Code = StatusCode.Error, Msg = ex.Message };
             //throw Oops.Oh(ErrorCodeEnum.D1001, ex.Message);
-            throw Oops.Oh( ex.Message);
+            throw Oops.Oh(ex.Message);
         }
     }
     [DisplayName("ASN 转入库单")]
@@ -710,7 +712,7 @@ public class WMSASNService : IDynamicApiController, ITransient
     [HttpPost]
     [DisplayName("导出预出库单")]
     [UnitOfWork]
-    public ActionResult ExportASN(WMSASNExcelInput input)
+    public Microsoft.AspNetCore.Mvc.ActionResult ExportASN(WMSASNExcelInput input)
     {
         //使用简单工厂定制化  /
         //不同的仓库存在不同的上架推荐库位的逻辑，这个地方按照实际的情况实现自己的业务逻辑，
@@ -733,6 +735,41 @@ public class WMSASNService : IDynamicApiController, ITransient
         };
     }
 
+
+
+
+
+
+
+    /// <summary>
+    /// 分页查询WMSASN
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [DisplayName("打印ASN")]
+    [ApiDescriptionSettings(Name = "PrintASN")]
+    public async Task<Response<PrintBase<List<WMSASNPrintDto>>>> PrintASN(List<long> input)
+    {
+        Response<PrintBase<List<WMSASNPrintDto>>> response = new Response<PrintBase<List<WMSASNPrintDto>>>() { Data = new PrintBase<List<WMSASNPrintDto>>() };
+
+        var asnData = await _rep.AsQueryable().Includes(a => a.Details).Where(a => input.Contains(a.Id)).ToListAsync();
+        response.Data.Data = asnData.Adapt<List<WMSASNPrintDto>>();
+       //response.Data.Data = await query.Includes(a => a.Details).ToListAsync();
+       //query = query.OrderBuilder(input);
+       //return await query.ToPagedListAsync(input.Page, input.PageSize);
+       //if (response.Code == StatusCode.Success)
+       //{
+       response.Code = StatusCode.Success;
+        response.Data.PrintTemplate = "ASN打印模板";
+        //data.Data = response.Data.Data;
+        //data.Code = StatusCode.Success;
+        //data.Msg = "打印成功";
+        //return data;s
+        return response;
+        //}
+        //return response;
+    }
 
 }
 
