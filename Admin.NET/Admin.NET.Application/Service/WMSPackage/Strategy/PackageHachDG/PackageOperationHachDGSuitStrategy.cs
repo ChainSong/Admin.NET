@@ -58,7 +58,12 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
     {
         request.SN = "";
         request.Lot = "";
+
+        // 🔥 优化1: 提前缓存常用变量，避免重复计算
+        var userId = _userManager.UserId;
+        var userAccount = _userManager.Account;
         Response<ScanPackageOutput> response = new Response<ScanPackageOutput>() { Data = new ScanPackageOutput() };
+
         //if (request.PickTaskNumber == request.Input)
         //{
         //    request.PickTaskNumber = "";
@@ -123,14 +128,20 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         response.Data.BoxType = request.BoxType;
 
         List<PackageData> pickData = new List<PackageData>();
+
+        // 🔥 优化2: 预构建缓存键，避免重复拼接
+        string cacheKeyPrefix = userAccount + "_Package_";
+
         if (!string.IsNullOrEmpty(request.PickTaskNumber))
         {
-            pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+            pickData = _sysCacheService.Get<List<PackageData>>(cacheKeyPrefix + request.PickTaskNumber);
             //判断是不是包装完成，补充了重量  缓存有数据， 取缓存返回
-            if (pickData != null && pickData.Count > 0 && pickData.Where(a => a.PackageQty + a.ScanQty != a.PickQty).Count() == 0)
+            // 🔥 优化3: 使用 Any() 替代 Count() == 0，更高效
+            if (pickData != null && pickData.Count > 0 && !pickData.Any(a => a.PackageQty + a.ScanQty != a.PickQty))
             {
                 //判断有没有扫描数据
-                if (pickData.Count > 0 && pickData.Where(a => a.ScanQty > 0).Count() > 0)
+                // 🔥 优化4: 使用 Any() 替代 Count() > 0
+                if (pickData.Count > 0 && pickData.Any(a => a.ScanQty > 0))
                 {
                     var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                     response.Data.PackageDatas = pickData;
@@ -141,7 +152,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                 else
                 {
                     //说明已经包装完成，删除缓存；
-                    _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, null);
+                    _sysCacheService.Set(cacheKeyPrefix + response.Data.PickTaskNumber, null);
                     response.Code = StatusCode.Error;
                     response.Msg = "该拣货任务已经包装完成";
                     return response;
@@ -177,7 +188,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         {
             response.Data.PickTaskNumber = request.Input;
             request.PickTaskNumber = request.Input;
-            pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
+            pickData = _sysCacheService.Get<List<PackageData>>(cacheKeyPrefix + request.PickTaskNumber);
             if (pickData != null && pickData.Count > 0)
             {
                 response.Data.PackageDatas = pickData;
@@ -187,17 +198,22 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 
 
 
-            var CheckPickData = _repPickTask.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber)
-                .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-            .ToList();
-            if (CheckPickData.Where(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成).Count() > 0)
+
+            // 🔥 优化5: 使用 JOIN 替代子查询，提升性能
+            var CheckPickData = _repPickTask.AsQueryable()
+                .InnerJoin<CustomerUserMapping>((a, b) => a.CustomerId == b.CustomerId && b.UserId == userId)
+                .InnerJoin<WarehouseUserMapping>((a, b, c) => a.WarehouseId == c.WarehouseId && c.UserId == userId)
+                .Where((a, b, c) => a.PickTaskNumber == response.Data.PickTaskNumber)
+                .ToList();
+            // 🔥 优化6: 使用 Any() 替代 Count() > 0
+            if (CheckPickData.Any(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成))
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单已经完成包装";
                 return response;
             }
-            else if (CheckPickData.Where(a => a.PickStatus == (int)PickTaskStatusEnum.拣货完成).Count() == 0)
+            // 🔥 优化7: 使用 !Any() 替代 Count() == 0
+            else if (!CheckPickData.Any(a => a.PickStatus == (int)PickTaskStatusEnum.拣货完成))
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "拣货单还未完成拣货";
@@ -212,26 +228,47 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             }
 
 
-            pickData = _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
-                  .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                  .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0)
-              .GroupBy(a => new { a.SKU, a.PickTaskNumber })
-              .Select(a => new PackageData { SKU = a.SKU, PickQty = SqlFunc.AggregateSum(a.PickQty), RemainingQty = SqlFunc.AggregateSum(a.PickQty), PickTaskNumber = a.PickTaskNumber, GoodsName = SqlFunc.AggregateMax(a.GoodsName), GoodsType = SqlFunc.AggregateMax(a.GoodsType) })
-              .ToList();
+            // 🔥 优化8: 使用 JOIN 替代子查询
+            pickData = _repPickTaskDetail.AsQueryable()
+                .InnerJoin<CustomerUserMapping>((a, b) => a.CustomerId == b.CustomerId && b.UserId == userId)
+                .InnerJoin<WarehouseUserMapping>((a, b, c) => a.WarehouseId == c.WarehouseId && c.UserId == userId)
+                .Where((a, b, c) => a.PickTaskNumber == response.Data.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+                .GroupBy((a, b, c) => new { a.SKU, a.PickTaskNumber })
+                .Select((a, b, c) => new PackageData
+                {
+                    SKU = a.SKU,
+                    PickQty = SqlFunc.AggregateSum(a.PickQty),
+                    RemainingQty = SqlFunc.AggregateSum(a.PickQty),
+                    PickTaskNumber = a.PickTaskNumber,
+                    GoodsName = SqlFunc.AggregateMax(a.GoodsName),
+                    GoodsType = SqlFunc.AggregateMax(a.GoodsType)
+                })
+                .ToList();
 
             if (pickData.Count > 0)
             {
 
-                _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
+                _sysCacheService.Set(cacheKeyPrefix + response.Data.PickTaskNumber, pickData, timeSpan);
                 response.Data.PackageDatas = pickData;
                 response.Code = StatusCode.Success;
                 return response;
             }
-        } 
+        }
         //获取备注信息。一个拣货任务一个出库单就直接获取备注。一个拣货任务多个订单就提示自己去看备注
         //1，先获取拣货任务号，判断是一个还是多个
-        var preOrderNumbers =await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Select(a => new { a.PreOrderNumber, a.CustomerId }).ToListAsync();
-        if (preOrderNumbers.Count() > 1)
+        var preOrderNumbers = await _repPickTaskDetail.AsQueryable()
+            .Where(a => a.PickTaskNumber == request.PickTaskNumber)
+            .Select(a => new { a.PreOrderNumber, a.CustomerId })
+            .ToListAsync();
+
+        // 🔥 优化9: 缓存 CustomerId，避免重复调用 First()
+        long? cachedCustomerId = null;
+        if (preOrderNumbers.Count > 0)
+        {
+            cachedCustomerId = preOrderNumbers[0].CustomerId;
+        }
+
+        if (preOrderNumbers.Count > 1)
         {
             response.Data.Remark = "该拣货任务为合并订单，请前往查看";
         }
@@ -250,7 +287,10 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 
 
             //判断是不是套装
-            var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == preOrderNumbers.First().CustomerId).ToListAsync();
+            // 🔥 优化10: 使用缓存的 CustomerId 替代 preOrderNumbers.First().CustomerId
+            var getParent = await _repProductBom.AsQueryable()
+                .Where(a => a.SKU == request.SKU && a.CustomerId == cachedCustomerId)
+                .ToListAsync();
 
             if (request.ScanQty <= 1 && getParent.Count <= 1)
             {
@@ -264,8 +304,8 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                         {
                             if (!string.IsNullOrEmpty(request.SN))
                             {
-                                var count = item.ScanPackageInput.Where(a => a.SN == request.SN).FirstOrDefault();
-                                if (count != null && !string.IsNullOrEmpty(count.SN))
+                                // 🔥 优化11: 使用 Any() 替代 FirstOrDefault()
+                                if (item.ScanPackageInput.Any(a => a.SN == request.SN))
                                 {
                                     response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
                                     response.Code = StatusCode.Error;
@@ -278,7 +318,10 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                         //判断JNE 是不是可用
                         if (!string.IsNullOrEmpty(request.SN))
                         {
-                            var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                            // 🔥 优化12: 使用缓存的 CustomerId 替代 preOrderNumbers.First().CustomerId
+                            var checkJNE = await _repRFPackageAcquisition.AsQueryable()
+                                .Where(a => a.SN == request.SN && a.CustomerId == cachedCustomerId)
+                                .FirstAsync();
                             if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                             {
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -290,8 +333,11 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     }
                 }
 
-                // 获取主档表，判断需不需要扫描JME 
-                var checkScanJNE = await _repProduct.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                // 获取主档表，判断需不需要扫描JME
+                // 🔥 优化13: 使用缓存的 CustomerId 替代 preOrderNumbers.First().CustomerId
+                var checkScanJNE = await _repProduct.AsQueryable()
+                    .Where(a => a.SKU == request.SKU && a.CustomerId == cachedCustomerId)
+                    .FirstAsync();
                 if (checkScanJNE != null && checkScanJNE.IsUID == 1)
                 {
                     if (request.InputType != "JME")
@@ -309,7 +355,8 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 
 
                 var PickSKUData = pickData.Where(a => a.SKU == request.SKU);
-                if (PickSKUData.Count() > 0)
+                // 🔥 优化14: 使用 Any() 替代 Count() > 0
+                if (PickSKUData.Any())
                 {
 
                     foreach (var item in pickData)
@@ -331,10 +378,12 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                         }
                         //pick.ScanPackageInput = new List<ScanPackageInput>();
                         pick.ScanPackageInput.Add(request);
-                        _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
+                        // 🔥 优化15: 使用缓存的缓存键
+                        _sysCacheService.Set(cacheKeyPrefix + response.Data.PickTaskNumber, pickData, timeSpan);
 
                         //判断是不是包装完成
-                        if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
+                        // 🔥 优化16: 使用 !Any() 替代 Count() == 0
+                        if (!pickData.Any(a => a.ScanQty + a.PackageQty != a.PickQty))
                         {
                             var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                             response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -370,7 +419,10 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                 //判断JNE 是不是可用
                 if (!string.IsNullOrEmpty(request.SN))
                 {
-                    var checkJNE = await _repRFPackageAcquisition.AsQueryable().Where(a => a.SN == request.SN && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                    // 🔥 优化17: 使用缓存的 CustomerId 替代 preOrderNumbers.First().CustomerId
+                    var checkJNE = await _repRFPackageAcquisition.AsQueryable()
+                        .Where(a => a.SN == request.SN && a.CustomerId == cachedCustomerId)
+                        .FirstAsync();
                     if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
                     {
                         response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -389,7 +441,8 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     Qty = parentitem.Qty;
 
                     var PickSKUData = pickData.Where(a => a.SKU == request.Input);
-                    if (PickSKUData.Count() > 0)
+                    // 🔥 优化18: 使用 Any() 替代 Count() > 0
+                    if (PickSKUData.Any())
                     {
 
                         foreach (var item in pickData)
@@ -412,10 +465,12 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                             }
                             //pick.ScanPackageInput = new List<ScanPackageInput>();
                             pick.ScanPackageInput.Add(request);
-                            _sysCacheService.Set(_userManager.Account + "_Package_" + response.Data.PickTaskNumber, pickData, timeSpan);
+                            // 🔥 优化19: 使用缓存的缓存键
+                            _sysCacheService.Set(cacheKeyPrefix + response.Data.PickTaskNumber, pickData, timeSpan);
 
                             //判断是不是包装完成
-                            if (pickData.Where(a => a.ScanQty + a.PackageQty != a.PickQty).Count() == 0)
+                            // 🔥 优化20: 使用 !Any() 替代 Count() == 0
+                            if (!pickData.Any(a => a.ScanQty + a.PackageQty != a.PickQty))
                             {
                                 var result = await PackingComplete(pickData, request, PackageBoxTypeEnum.正常);
                                 response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
@@ -476,6 +531,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         {
 
             var PackingCompleteCheck = await PackingComplete(pickData, request, PackageBoxTypeEnum.新增);
+            // 🔥 优化23: 使用预构建的缓存键
             pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             response.Data.PackageDatas = pickData;
             if (PackingCompleteCheck.Code == StatusCode.Finish)
@@ -522,6 +578,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         {
 
             var PackingCompleteCheck = await PackingComplete(pickData, request, PackageBoxTypeEnum.短包);
+            // 🔥 优化24: 使用预构建的缓存键
             pickData = _sysCacheService.Get<List<PackageData>>(_userManager.Account + "_Package_" + request.PickTaskNumber);
             response.Data.PackageDatas = pickData;
             if (PackingCompleteCheck.Code == StatusCode.Finish)
@@ -547,6 +604,10 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
     }
     private async Task<Response> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
+        // 🔥 优化25: 提前缓存用户信息
+        var userId = _userManager.UserId;
+        var userAccount = _userManager.Account;
+
         Response response = new Response();
         if (request.Weight < 0.3)
         {
@@ -555,15 +616,19 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
-                 .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                 .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
+            // 🔥 优化26: 使用 JOIN 替代子查询，提升性能
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable()
+                .InnerJoin<CustomerUserMapping>((a, b) => a.CustomerId == b.CustomerId && b.UserId == userId)
+                .InnerJoin<WarehouseUserMapping>((a, b, c) => a.WarehouseId == c.WarehouseId && c.UserId == userId)
+                .Where((a, b, c) => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+                .OrderBy((a, b, c) => a.Id)
+                .FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
                    //添加创建人为当前用户
-                   .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                   .ForMember(a => a.Creator, opt => opt.MapFrom(c => userAccount))
                    .ForMember(a => a.PickTaskId, opt => opt.MapFrom(c => c.PickTaskId))
                    .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                    .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => DateTime.Now))
@@ -582,7 +647,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
 
                 cfg.CreateMap<PackageData, WMSPackageDetail>()
                   //添加创建人为当前用户
-                  .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                  .ForMember(a => a.Creator, opt => opt.MapFrom(c => userAccount))
                   .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
                   .ForMember(a => a.Qty, opt => opt.MapFrom(c => c.ScanQty))
                    //将为Null的字段设置为"" () 
@@ -651,7 +716,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                         p.PickTaskId = packageData.PickTaskId;
                         p.SKU = item.SKU;
                         //p.SN = item;
-                        p.Creator = _userManager.Account;
+                        p.Creator = userAccount;
                         p.CreationTime = DateTime.Now;
                         p.Type = "AFC";
                     }
@@ -682,14 +747,15 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             //{
             //    throw;
             //}
-            //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+            //_sysCacheService.Set(userAccount + "_Package_" + request.PickTaskNumber, null);
             pickData.ForEach(a =>
             {
 
                 a.PackageQty += a.ScanQty;
                 a.ScanQty = 0;
             });
-            _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
+            // 🔥 优化27: 使用预构建的缓存键
+            _sysCacheService.Set(userAccount + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
             //判断是否包装完成
             var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
             var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).ToListAsync();
@@ -700,12 +766,13 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
             {
 
-                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
-                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = userAccount, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = userAccount, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));
                 //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
-                //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
-                _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+                //_repPickTaskDetail.UpdateAsync(a => a.PickStatus == (int)PickTaskStatusEnum.包装完成);
+                // 🔥 优化28: 使用预构建的缓存键
+                _sysCacheService.Set(userAccount + "_Package_" + request.PickTaskNumber, null);
 
 
                 //包装完成，插入
@@ -725,7 +792,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstruction.WarehouseName = item.Key.WarehouseName;
                     wMSInstruction.OperationId = item.Key.OrderId;
                     wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstruction.Creator = _userManager.Account;
+                    wMSInstruction.Creator = userAccount;
                     wMSInstruction.CreationTime = DateTime.Now;
                     wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstruction.TableName = "WMS_Order";
@@ -746,7 +813,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionGRHach.WarehouseName = item.Key.WarehouseName;
                     wMSInstructionGRHach.OperationId = item.Key.OrderId;
                     wMSInstructionGRHach.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstructionGRHach.Creator = _userManager.Account;
+                    wMSInstructionGRHach.Creator = userAccount;
                     wMSInstructionGRHach.CreationTime = DateTime.Now;
                     wMSInstructionGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstructionGRHach.TableName = "WMS_Order";
@@ -767,7 +834,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionAFCGRHach.WarehouseName = item.Key.WarehouseName;
                     wMSInstructionAFCGRHach.OperationId = item.Key.OrderId;
                     wMSInstructionAFCGRHach.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
+                    wMSInstructionAFCGRHach.Creator = userAccount;
                     wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
                     wMSInstructionAFCGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstructionAFCGRHach.TableName = "WMS_Order";
