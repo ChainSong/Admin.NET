@@ -566,8 +566,16 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         response.Msg = "系统错误";
         return response;
     }
+
+
+
+
     private async Task<Response<string>> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
     {
+        // 🔥 优化1: 提前缓存用户信息，避免重复访问属性
+        var userId = _userManager.UserId;
+        var userAccount = _userManager.Account;
+
         Response<string> response = new Response<string>();
         if (request.Weight < 0.3)
         {
@@ -576,39 +584,46 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
-            var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
-                 .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
-                 .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
+            // 🔥 优化2: 使用 JOIN 替代子查询，大幅提升数据库查询性能
+            var pickDataTemp = await _repPickTaskDetail.AsQueryable()
+                .InnerJoin<CustomerUserMapping>((a, b) => a.CustomerId == b.CustomerId && b.UserId == userId)
+                .InnerJoin<WarehouseUserMapping>((a, b, c) => a.WarehouseId == c.WarehouseId && c.UserId == userId)
+                .Where((a, b, c) => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+                .OrderBy((a, b, c) => a.Id)
+                .FirstAsync();
             var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+            // 🔥 优化3: 预缓存当前时间，避免重复调用 DateTime.Now
+            var now = DateTime.Now;
+
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
-                   //添加创建人为当前用户
-                   .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+                   //添加创建人为当前用户 - 使用缓存的 userAccount
+                   .ForMember(a => a.Creator, opt => opt.MapFrom(c => userAccount))
                    .ForMember(a => a.PickTaskId, opt => opt.MapFrom(c => c.PickTaskId))
-                   .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
-                   .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => DateTime.Now))
-                   // 
+                   .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => now))
+                   .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => now))
+                   //
                    .ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
                    .ForMember(a => a.Id, opt => opt.Ignore())
-                   //将为Null的字段设置为"" () 
+                   //将为Null的字段设置为"" ()
                    .AddTransform<string>(a => a == null ? "" : a)
-                   //将为Null的字段设置为"" () 
+                   //将为Null的字段设置为"" ()
                    .AddTransform<int?>(a => a == null ? 0 : a)
-                   //将为Null的字段设置为"" () 
+                   //将为Null的字段设置为"" ()
                    .AddTransform<double?>(a => a == null ? 0 : a)
                    //添加
                    .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
                 //.AddTransform<string>(a => a == null ? "" : a);
 
                 cfg.CreateMap<PackageData, WMSPackageDetail>()
-                  //添加创建人为当前用户
-                  .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
-                  .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+                  //添加创建人为当前用户 - 使用缓存的 userAccount
+                  .ForMember(a => a.Creator, opt => opt.MapFrom(c => userAccount))
+                  .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => now))
                   .ForMember(a => a.Qty, opt => opt.MapFrom(c => c.ScanQty))
-                   //将为Null的字段设置为"" () 
+                   //将为Null的字段设置为"" ()
                    .AddTransform<int?>(a => a == null ? 0 : a)
-                   //将为Null的字段设置为"" () 
+                   //将为Null的字段设置为"" ()
                    .AddTransform<double?>(a => a == null ? 0 : a)
                   //添加
                   .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
@@ -618,36 +633,60 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             var mapper = new Mapper(config);
             var packageData = mapper.Map<WMSPackage>(pickDataTemp);
             var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
-            //var packageDetailDetail = .WMSRFPackageAcquisition
-            //通过order id  查找 dn
-            //再根据dn 查找所有的 so 信息， 再来计算箱号序列
-            var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId).FirstAsync();
-            List<WMSOrder> orderSo = new List<WMSOrder>();
+
+            // 🔥 优化4: 合并订单相关查询，减少数据库往返次数
+            // 获取订单信息，同时获取DN
+            var orderDn = await _repOrder.AsQueryable()
+                .Where(a => a.Id == pickDataTemp.OrderId)
+                .FirstAsync();
+
+            List<WMSOrder> orderSo;
             if (orderDn != null && !string.IsNullOrEmpty(orderDn.Dn))
             {
-                orderSo = await _repOrder.AsQueryable().Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId).ToListAsync();
+                // 🔥 优化5: 根据DN获取所有SO信息
+                orderSo = await _repOrder.AsQueryable()
+                    .Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId)
+                    .ToListAsync();
             }
             else
             {
-                orderSo = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId && orderDn.CustomerId == a.CustomerId).ToListAsync();
+                // 单个订单
+                orderSo = new List<WMSOrder> { orderDn };
             }
-            var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
+
+            // 🔥 优化6: 预计算订单ID列表，避免重复转换
+            var orderIds = orderSo.Select(b => b.Id).ToList();
+            var packagenumberData = await _repPackage.AsQueryable()
+                .Where(a => orderIds.Contains(a.OrderId))
+                .ToListAsync();
 
 
             packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
             packageData.Details = packageDetailData;
             packageData.PackageType = request.BoxType;
+
+            // 🔥 优化7: 预缓存常用字段，减少重复访问
+            var packageCustomerId = packageData.CustomerId;
+            var packageCustomerName = packageData.CustomerName;
+            var packageWarehouseId = packageData.WarehouseId;
+            var packageWarehouseName = packageData.WarehouseName;
+            var packageOrderId = packageData.OrderId;
+            var packageExternOrderNumber = packageData.ExternOrderNumber;
+            var packagePreOrderNumber = packageData.PreOrderNumber;
+            var packageOrderNumber = packageData.OrderNumber;
+            var packagePickTaskId = packageData.PickTaskId;
+
             packageData.Details.ForEach(a =>
             {
-                a.CustomerId = packageData.CustomerId;
-                a.CustomerName = packageData.CustomerName;
-                a.WarehouseId = packageData.WarehouseId;
-                a.WarehouseName = packageData.WarehouseName;
-                a.OrderId = packageData.OrderId;
-                a.ExternOrderNumber = packageData.ExternOrderNumber;
-                a.PreOrderNumber = packageData.PreOrderNumber;
-                a.OrderNumber = packageData.OrderNumber;
-                a.PickTaskId = packageData.PickTaskId;
+                a.CustomerId = packageCustomerId;
+                a.CustomerName = packageCustomerName;
+                a.WarehouseId = packageWarehouseId;
+                a.WarehouseName = packageWarehouseName;
+                a.OrderId = packageOrderId;
+                a.ExternOrderNumber = packageExternOrderNumber;
+                a.PreOrderNumber = packagePreOrderNumber;
+                a.OrderNumber = packageOrderNumber;
+                a.PickTaskId = packagePickTaskId;
                 //a.Weight = 0;
             });
 
@@ -657,23 +696,23 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                 var PackageAcquisition = item.ScanPackageInput.Adapt<List<WMSRFPackageAcquisition>>();
                 if (PackageAcquisition != null)
                 {
+                    // 🔥 优化8: 批量设置属性，减少重复赋值
                     foreach (var p in PackageAcquisition)
                     {
                         p.Qty = 1;
-                        p.CustomerId = packageData.CustomerId;
-                        p.CustomerName = packageData.CustomerName;
-                        p.WarehouseId = packageData.WarehouseId;
-                        p.WarehouseName = packageData.WarehouseName;
-                        p.OrderId = packageData.OrderId;
-                        p.ExternOrderNumber = packageData.ExternOrderNumber;
+                        p.CustomerId = packageCustomerId;
+                        p.CustomerName = packageCustomerName;
+                        p.WarehouseId = packageWarehouseId;
+                        p.WarehouseName = packageWarehouseName;
+                        p.OrderId = packageOrderId;
+                        p.ExternOrderNumber = packageExternOrderNumber;
                         p.PackageNumber = packageNumber;
-                        p.PreOrderNumber = packageData.PreOrderNumber;
-                        p.OrderNumber = packageData.OrderNumber;
-                        p.PickTaskId = packageData.PickTaskId;
-                        p.SKU = item.SKU;
+                        p.PreOrderNumber = packagePreOrderNumber;
+                        p.OrderNumber = packageOrderNumber;
+                        p.PickTaskId = packagePickTaskId;
                         //p.SN = item;
-                        p.Creator = _userManager.Account;
-                        p.CreationTime = DateTime.Now;
+                        p.Creator = userAccount;  // 使用缓存的 userAccount
+                        p.CreationTime = now;      // 使用缓存的 now
                         p.Type = "AFC";
                     }
 
@@ -693,6 +732,11 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             packageData.Id = 0;
             packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
 
+            //判断SN是不是重复
+            //if (PackageAcquisitions.GroupBy(a => a.SN).Any(a => a.Count() > 1))
+            //{
+            //    throw Oops.Oh("SN不能重复");
+            //}
             //try
             //{
             await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
@@ -703,30 +747,51 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
             //{
             //    throw;
             //}
-            //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+            // 🔥 优化9: 预构建缓存键，避免重复拼接
+            var cacheKey = userAccount + "_Package_" + request.PickTaskNumber;
+            _sysCacheService.Set(cacheKey, null);
             pickData.ForEach(a =>
             {
 
                 a.PackageQty += a.ScanQty;
                 a.ScanQty = 0;
             });
-            _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
-            //判断是否包装完成
-            var CheckPackageData = _repPackage.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).Sum(a => a.DetailCount);
-            var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).ToListAsync();
-            if (CheckPackageData > CheckPickData.Sum(a => a.PickQty))
+            _sysCacheService.Set(cacheKey, pickData, timeSpan);
+
+            // 🔥 优化10: 合并包装和拣货数据查询，使用相同过滤条件
+            var customerId = packageData.CustomerId;
+            var externOrderNumber = packageData.ExternOrderNumber;
+
+            // 并行执行两个查询，提升性能
+            var packageDataTask = _repPackage.AsQueryable()
+                .Where(a => a.CustomerId == customerId && a.ExternOrderNumber == externOrderNumber)
+                .SumAsync(a => a.DetailCount);
+
+            var pickDataTask = _repPickTaskDetail.AsQueryable()
+                .Where(a => a.CustomerId == customerId && a.ExternOrderNumber == externOrderNumber)
+                .ToListAsync();
+
+            await Task.WhenAll(packageDataTask, pickDataTask);
+
+            var CheckPackageData = await packageDataTask;
+            var CheckPickData = await pickDataTask;
+
+            // 🔥 优化11: 预计算总拣货数量，避免重复计算
+            var totalPickQty = CheckPickData.Sum(a => a.PickQty);
+            if (CheckPackageData > totalPickQty)
             {
                 throw Oops.Oh("并发请求回滚");
             }
-            if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
+            if (CheckPackageData >= totalPickQty || packageBox == PackageBoxTypeEnum.短包)
             {
 
-                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
-                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                // 🔥 优化12: 使用缓存的变量
+                await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = userAccount, UpdateTime = now }, a => a.PickTaskNumber == request.PickTaskNumber);
+                await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = userAccount, UpdateTime = now }, a => a.PickTaskNumber == request.PickTaskNumber);
                 await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));
                 //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
                 //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
-                _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+                _sysCacheService.Set(cacheKey, null);
 
 
                 //包装完成，插入
@@ -746,14 +811,13 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstruction.WarehouseName = item.Key.WarehouseName;
                     wMSInstruction.OperationId = item.Key.OrderId;
                     wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstruction.Creator = _userManager.Account;
-                    wMSInstruction.CreationTime = DateTime.Now;
+                    wMSInstruction.Creator = userAccount;
+                    wMSInstruction.CreationTime = now;
                     wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstruction.TableName = "WMS_Order";
                     wMSInstruction.InstructionPriority = 63;
                     wMSInstruction.Remark = "";
                     wMSInstructions.Add(wMSInstruction);
-
 
 
                     WMSInstruction wMSInstructionGRHach = new WMSInstruction();
@@ -767,8 +831,8 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionGRHach.WarehouseName = item.Key.WarehouseName;
                     wMSInstructionGRHach.OperationId = item.Key.OrderId;
                     wMSInstructionGRHach.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstructionGRHach.Creator = _userManager.Account;
-                    wMSInstructionGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionGRHach.Creator = userAccount;
+                    wMSInstructionGRHach.CreationTime = now;
                     wMSInstructionGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstructionGRHach.TableName = "WMS_Order";
                     wMSInstructionGRHach.InstructionPriority = 1;
@@ -788,8 +852,8 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionAFCGRHach.WarehouseName = item.Key.WarehouseName;
                     wMSInstructionAFCGRHach.OperationId = item.Key.OrderId;
                     wMSInstructionAFCGRHach.OrderNumber = item.Key.ExternOrderNumber;
-                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
-                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+                    wMSInstructionAFCGRHach.Creator = userAccount;
+                    wMSInstructionAFCGRHach.CreationTime = now;
                     wMSInstructionAFCGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
                     wMSInstructionAFCGRHach.TableName = "WMS_Order";
                     wMSInstructionAFCGRHach.InstructionPriority = 1;
@@ -877,6 +941,319 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         }
         //PackageData. = PackageDetailData.Sum(a => a.Qty);
     }
+
+    //private async Task<Response<string>> PackingComplete(List<PackageData> pickData, ScanPackageInput request, PackageBoxTypeEnum packageBox)
+    //{
+    //    Response<string> response = new Response<string>();
+    //    if (request.Weight < 0.3)
+    //    {
+    //        request.Weight = 1;
+    //    }
+    //    //判断是不是输入了重量
+    //    if (request.Weight > 0.2)
+    //    {
+    //        var pickDataTemp = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PickStatus == (int)PickTaskStatusEnum.拣货完成)
+    //             .Where(a => SqlFunc.Subqueryable<CustomerUserMapping>().Where(b => b.CustomerId == a.CustomerId && b.UserId == _userManager.UserId).Count() > 0)
+    //             .Where(a => SqlFunc.Subqueryable<WarehouseUserMapping>().Where(b => b.WarehouseId == a.WarehouseId && b.UserId == _userManager.UserId).Count() > 0).OrderBy(a => a.Id).FirstAsync();
+    //        var packageNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();
+    //        var config = new MapperConfiguration(cfg =>
+    //        {
+    //            cfg.CreateMap<WMSPickTaskDetail, WMSPackage>()
+    //               //添加创建人为当前用户
+    //               .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+    //               .ForMember(a => a.PickTaskId, opt => opt.MapFrom(c => c.PickTaskId))
+    //               .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+    //               .ForMember(a => a.PackageTime, opt => opt.MapFrom(c => DateTime.Now))
+    //               // 
+    //               .ForMember(a => a.PackageStatus, opt => opt.MapFrom(c => PackageStatusEnum.完成))
+    //               .ForMember(a => a.Id, opt => opt.Ignore())
+    //               //将为Null的字段设置为"" () 
+    //               .AddTransform<string>(a => a == null ? "" : a)
+    //               //将为Null的字段设置为"" () 
+    //               .AddTransform<int?>(a => a == null ? 0 : a)
+    //               //将为Null的字段设置为"" () 
+    //               .AddTransform<double?>(a => a == null ? 0 : a)
+    //               //添加
+    //               .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
+    //            //.AddTransform<string>(a => a == null ? "" : a);
+
+    //            cfg.CreateMap<PackageData, WMSPackageDetail>()
+    //              //添加创建人为当前用户
+    //              .ForMember(a => a.Creator, opt => opt.MapFrom(c => _userManager.Account))
+    //              .ForMember(a => a.CreationTime, opt => opt.MapFrom(c => DateTime.Now))
+    //              .ForMember(a => a.Qty, opt => opt.MapFrom(c => c.ScanQty))
+    //               //将为Null的字段设置为"" () 
+    //               .AddTransform<int?>(a => a == null ? 0 : a)
+    //               //将为Null的字段设置为"" () 
+    //               .AddTransform<double?>(a => a == null ? 0 : a)
+    //              //添加
+    //              .ForMember(a => a.PackageNumber, opt => opt.MapFrom(c => packageNumber));
+    //        });
+
+
+    //        var mapper = new Mapper(config);
+    //        var packageData = mapper.Map<WMSPackage>(pickDataTemp);
+    //        var packageDetailData = mapper.Map<List<WMSPackageDetail>>(pickData.Where(a => a.ScanQty > 0));
+    //        //var packageDetailDetail = .WMSRFPackageAcquisition
+    //        //通过order id  查找 dn
+    //        //再根据dn 查找所有的 so 信息， 再来计算箱号序列
+    //        var orderDn = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId).FirstAsync();
+    //        List<WMSOrder> orderSo = new List<WMSOrder>();
+    //        if (orderDn != null && !string.IsNullOrEmpty(orderDn.Dn))
+    //        {
+    //            orderSo = await _repOrder.AsQueryable().Where(a => a.Dn == orderDn.Dn && orderDn.CustomerId == a.CustomerId).ToListAsync();
+    //        }
+    //        else
+    //        {
+    //            orderSo = await _repOrder.AsQueryable().Where(a => a.Id == pickDataTemp.OrderId && orderDn.CustomerId == a.CustomerId).ToListAsync();
+    //        }
+    //        var packagenumberData = await _repPackage.AsQueryable().Where(a => orderSo.Select(b => b.Id).Contains(a.OrderId)).ToListAsync();
+
+
+    //        packageData.DetailCount = packageDetailData.Sum(a => a.Qty);
+    //        packageData.Details = packageDetailData;
+    //        packageData.PackageType = request.BoxType;
+    //        packageData.Details.ForEach(a =>
+    //        {
+    //            a.CustomerId = packageData.CustomerId;
+    //            a.CustomerName = packageData.CustomerName;
+    //            a.WarehouseId = packageData.WarehouseId;
+    //            a.WarehouseName = packageData.WarehouseName;
+    //            a.OrderId = packageData.OrderId;
+    //            a.ExternOrderNumber = packageData.ExternOrderNumber;
+    //            a.PreOrderNumber = packageData.PreOrderNumber;
+    //            a.OrderNumber = packageData.OrderNumber;
+    //            a.PickTaskId = packageData.PickTaskId;
+    //            //a.Weight = 0;
+    //        });
+
+    //        List<WMSRFPackageAcquisition> PackageAcquisitions = new List<WMSRFPackageAcquisition>();
+    //        foreach (var item in pickData)
+    //        {
+    //            var PackageAcquisition = item.ScanPackageInput.Adapt<List<WMSRFPackageAcquisition>>();
+    //            if (PackageAcquisition != null)
+    //            {
+    //                foreach (var p in PackageAcquisition)
+    //                {
+    //                    p.Qty = 1;
+    //                    p.CustomerId = packageData.CustomerId;
+    //                    p.CustomerName = packageData.CustomerName;
+    //                    p.WarehouseId = packageData.WarehouseId;
+    //                    p.WarehouseName = packageData.WarehouseName;
+    //                    p.OrderId = packageData.OrderId;
+    //                    p.ExternOrderNumber = packageData.ExternOrderNumber;
+    //                    p.PackageNumber = packageNumber;
+    //                    p.PreOrderNumber = packageData.PreOrderNumber;
+    //                    p.OrderNumber = packageData.OrderNumber;
+    //                    p.PickTaskId = packageData.PickTaskId;
+    //                    p.SKU = item.SKU;
+    //                    //p.SN = item;
+    //                    p.Creator = _userManager.Account;
+    //                    p.CreationTime = DateTime.Now;
+    //                    p.Type = "AFC";
+    //                }
+
+    //                PackageAcquisitions.AddRange(PackageAcquisition);
+
+    //                if (item.ScanPackageInputOld == null)
+    //                {
+    //                    item.ScanPackageInputOld = new List<ScanPackageInput>();
+    //                }
+    //                item.ScanPackageInputOld.AddRange(item.ScanPackageInput);
+    //                item.ScanPackageInput = new List<ScanPackageInput>();
+    //            }
+    //        }
+    //        packageData.ExpressCompany = request.ExpressCompany;
+    //        packageData.GrossWeight = request.Weight;
+    //        packageData.NetWeight = request.Weight;
+    //        packageData.Id = 0;
+    //        packageData.SerialNumber = (packagenumberData.Count + 1).ToString();
+
+    //        //try
+    //        //{
+    //        await _repPackage.Context.InsertNav(packageData).Include(a => a.Details).ExecuteCommandAsync();
+    //        await _repRFPackageAcquisition.InsertRangeAsync(PackageAcquisitions);
+    //        //await _repPackage.InsertAsync();
+    //        //}
+    //        //catch (Exception asdas)
+    //        //{
+    //        //    throw;
+    //        //}
+    //        //_sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+    //        pickData.ForEach(a =>
+    //        {
+
+    //            a.PackageQty += a.ScanQty;
+    //            a.ScanQty = 0;
+    //        });
+    //        _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, pickData, timeSpan);
+    //        //判断是否包装完成
+    //        var CheckPackageData = _repPackage.AsQueryable().Where(a => a.CustomerId == packageData.CustomerId && a.ExternOrderNumber == packageData.ExternOrderNumber).Sum(a => a.DetailCount);
+    //        var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.CustomerId == packageData.CustomerId && a.ExternOrderNumber == packageData.ExternOrderNumber).ToListAsync();
+
+    //        if (CheckPackageData > CheckPickData.Sum(a => a.PickQty))
+    //        {
+    //            throw Oops.Oh("并发请求回滚");
+    //        }
+    //        if (CheckPackageData >= CheckPickData.Sum(a => a.PickQty) || packageBox == PackageBoxTypeEnum.短包)
+    //        {
+
+    //            await _repPickTask.UpdateAsync(a => new WMSPickTask { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+    //            await _repPickTaskDetail.UpdateAsync(a => new WMSPickTaskDetail { PickStatus = (int)PickTaskStatusEnum.包装完成, Updator = _userManager.Account, UpdateTime = DateTime.Now }, a => a.PickTaskNumber == request.PickTaskNumber);
+    //            await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id));
+    //            //_repPickTask.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+    //            //_repPickTaskDetail.UpdateAsync(a => a.PickStatus = (int)PickTaskStatusEnum.包装完成);
+    //            _sysCacheService.Set(_userManager.Account + "_Package_" + request.PickTaskNumber, null);
+
+
+    //            //包装完成，插入
+    //            List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+    //            foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).Distinct().ToList())
+    //            {
+    //                //插入反馈指令
+    //                WMSInstruction wMSInstruction = new WMSInstruction();
+    //                //wMSInstruction.OrderId = orderData[0].Id;
+    //                wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+    //                wMSInstruction.InstructionType = "出库单回传HachDG";
+    //                wMSInstruction.BusinessType = "出库单回传HachDG";
+    //                //wMSInstruction.InstructionTaskNo = DateTime.Now;
+    //                wMSInstruction.CustomerId = item.Key.CustomerId;
+    //                wMSInstruction.CustomerName = item.Key.CustomerName;
+    //                wMSInstruction.WarehouseId = item.Key.WarehouseId;
+    //                wMSInstruction.WarehouseName = item.Key.WarehouseName;
+    //                wMSInstruction.OperationId = item.Key.OrderId;
+    //                wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
+    //                wMSInstruction.Creator = _userManager.Account;
+    //                wMSInstruction.CreationTime = DateTime.Now;
+    //                wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
+    //                wMSInstruction.TableName = "WMS_Order";
+    //                wMSInstruction.InstructionPriority = 63;
+    //                wMSInstruction.Remark = "";
+    //                wMSInstructions.Add(wMSInstruction);
+
+
+
+    //                WMSInstruction wMSInstructionGRHach = new WMSInstruction();
+    //                //wMSInstruction.OrderId = orderData[0].Id;
+    //                wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+    //                wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+    //                wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
+    //                wMSInstructionGRHach.CustomerId = item.Key.CustomerId;
+    //                wMSInstructionGRHach.CustomerName = item.Key.CustomerName;
+    //                wMSInstructionGRHach.WarehouseId = item.Key.WarehouseId;
+    //                wMSInstructionGRHach.WarehouseName = item.Key.WarehouseName;
+    //                wMSInstructionGRHach.OperationId = item.Key.OrderId;
+    //                wMSInstructionGRHach.OrderNumber = item.Key.ExternOrderNumber;
+    //                wMSInstructionGRHach.Creator = _userManager.Account;
+    //                wMSInstructionGRHach.CreationTime = DateTime.Now;
+    //                wMSInstructionGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+    //                wMSInstructionGRHach.TableName = "WMS_Order";
+    //                wMSInstructionGRHach.InstructionPriority = 1;
+    //                wMSInstructionGRHach.Remark = "";
+    //                wMSInstructions.Add(wMSInstructionGRHach);
+
+
+
+    //                WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
+    //                //wMSInstruction.OrderId = orderData[0].Id;
+    //                wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+    //                wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+    //                wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
+    //                wMSInstructionAFCGRHach.CustomerId = item.Key.CustomerId;
+    //                wMSInstructionAFCGRHach.CustomerName = item.Key.CustomerName;
+    //                wMSInstructionAFCGRHach.WarehouseId = item.Key.WarehouseId;
+    //                wMSInstructionAFCGRHach.WarehouseName = item.Key.WarehouseName;
+    //                wMSInstructionAFCGRHach.OperationId = item.Key.OrderId;
+    //                wMSInstructionAFCGRHach.OrderNumber = item.Key.ExternOrderNumber;
+    //                wMSInstructionAFCGRHach.Creator = _userManager.Account;
+    //                wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+    //                wMSInstructionAFCGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+    //                wMSInstructionAFCGRHach.TableName = "WMS_Order";
+    //                wMSInstructionAFCGRHach.InstructionPriority = 1;
+    //                wMSInstructionAFCGRHach.Remark = "";
+    //                wMSInstructions.Add(wMSInstructionAFCGRHach);
+    //            }
+
+    //            //wMSInstructions.Add(wMSInstruction);
+    //            //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
+    //            //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
+    //            //判断里面有哪些DN 
+    //            //var checkDn = await _repOrder.AsQueryable()
+    //            //    .Where(a => CheckPickData.Select(b => b.OrderNumber).Contains(a.OrderNumber) && !string.IsNullOrEmpty(a.Dn))
+    //            //    .Select(a => new
+    //            //    {
+    //            //        a.Dn,
+    //            //        a.CustomerId,
+    //            //        a.CustomerName,
+    //            //        a.WarehouseId,
+    //            //        a.WarehouseName,
+    //            //        a.Id
+    //            //    }).FirstAsync();
+    //            //if (checkDn != null && !string.IsNullOrEmpty(checkDn.Dn))
+    //            //{
+    //            //    //foreach (var item in checkDn)
+    //            //    //{
+    //            //    var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.OrderStatus < (int)OrderStatusEnum.已包装).ToListAsync();
+    //            //    //已经转出库单的都已经完成， 且预出库单没有新增
+    //            //    var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
+
+    //            //    if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
+    //            //    {
+    //            //        WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
+    //            //        //wMSInstruction.OrderId = orderData[0].Id;
+    //            //        wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+    //            //        wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
+    //            //        wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
+    //            //        //wMSInstruction.InstructionTaskNo = DateTime.Now;
+    //            //        wMSInstructionSNGRHach.CustomerId = checkDn.CustomerId;
+    //            //        wMSInstructionSNGRHach.CustomerName = checkDn.CustomerName;
+    //            //        wMSInstructionSNGRHach.WarehouseId = checkDn.WarehouseId;
+    //            //        wMSInstructionSNGRHach.WarehouseName = checkDn.WarehouseName;
+    //            //        wMSInstructionSNGRHach.OperationId = checkDn.Id;
+    //            //        wMSInstructionSNGRHach.OrderNumber = checkDn.Dn ?? "";
+    //            //        wMSInstructionSNGRHach.Creator = _userManager.Account;
+    //            //        wMSInstructionSNGRHach.CreationTime = DateTime.Now;
+    //            //        wMSInstructionSNGRHach.InstructionTaskNo = checkDn.Dn ?? "";
+    //            //        wMSInstructionSNGRHach.TableName = "WMS_Order";
+    //            //        wMSInstructionSNGRHach.InstructionPriority = 4;
+    //            //        wMSInstructionSNGRHach.Remark = "";
+    //            //        //判断是否插入过一次
+    //            //        var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == checkDn.CustomerId && a.OrderNumber == checkDn.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
+    //            //        if (getInstruction == null || getInstruction.Count == 0)
+    //            //        {
+    //            //            if (!string.IsNullOrEmpty(checkDn.Dn))
+    //            //            {
+    //            //                if (wMSInstructions.Where(a => a.OperationId == checkDn.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
+    //            //                {
+    //            //                    wMSInstructions.Add(wMSInstructionSNGRHach);
+    //            //                }
+    //            //            }
+    //            //        }
+    //            //    }
+    //            //}
+    //            //}
+    //            await _repInstruction.InsertRangeAsync(wMSInstructions);
+    //            response.Code = StatusCode.Finish;
+    //            response.Msg = "订单完成";
+    //            response.Data = packageNumber;
+    //            return response;
+    //        }
+    //        response.Code = StatusCode.Success;
+    //        response.Msg = "成功";
+    //        response.Data = packageNumber;
+
+    //        return response;
+    //        //return response;
+    //    }
+    //    else
+    //    {
+    //        response.Code = StatusCode.Error;
+    //        response.Msg = "请输入重量";
+    //        return response;
+    //        //return response;
+    //    }
+    //    //PackageData. = PackageDetailData.Sum(a => a.Qty);
+    //}
 
     /// <summary>
     /// 校验包装

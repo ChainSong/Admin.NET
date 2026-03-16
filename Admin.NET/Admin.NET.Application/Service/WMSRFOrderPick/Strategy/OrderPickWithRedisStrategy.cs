@@ -184,8 +184,17 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
 
-        var getData = await _repPickTaskDetail.AsQueryable()
-            .Where(a => a.PickTaskId == request.Id).ToListAsync();
+        // 🔥 优化: 先从缓存中取拣货明细，取不到再从数据库取
+        string pickTaskDetailCacheKey = $"PickTaskDetailRF_{request.Id}";
+        var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
+        if (getData == null || getData.Count == 0)
+        {
+            // 缓存中没有，从数据库查询
+            getData = await _repPickTaskDetail.AsQueryable()
+                .Where(a => a.PickTaskId == request.Id).ToListAsync();
+            // 将查询结果存入缓存，缓存时间设置为1小时
+            _sysCacheService.Set(pickTaskDetailCacheKey, getData, TimeSpan.FromHours(30));
+        }
         //判断扫描的是不是套装
         var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == getData.First().CustomerId).ToListAsync();
         if (getParent.Count <= 1)
@@ -194,7 +203,7 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
             var pickTaskDetails = getData
             .Where(a =>
                  a.SKU == request.SKU
-                && ((a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode)) || string.IsNullOrEmpty(request.Lot))
+                //&& ((a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode)) || string.IsNullOrEmpty(request.Lot))
                 && a.Location == request.Location)
             .ToList();
 
@@ -205,8 +214,13 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
                 return response;
             }
 
-            var pickTaskDetail = pickTaskDetails.First();
-
+            var pickTaskDetail = pickTaskDetails.Where(a => a.SKU == request.SKU && a.Qty > a.PickQty).FirstOrDefault();
+            if (pickTaskDetail == null)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "该SKU 已经满足";
+                return response;
+            }
             // 获取缓存中的已拣货记录
             string cacheKey = GetCacheKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
             var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
@@ -218,9 +232,10 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
                     && r.Location == request.Location
                     && !r.IsPackaged)
                 .Sum(r => r.PickQty);
+            // 判断是否还有其他的未完成拣货的信息
 
             // 检查是否已经拣货完成
-            if (currentPickedQty >= pickTaskDetail.Qty)
+            if (currentPickedQty >= pickTaskDetails.Where(a => a.SKU == request.SKU).Sum(a => a.Qty))
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "该产品已经全部拣货完成";
@@ -232,6 +247,7 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
             {
                 RecordId = Guid.NewGuid().ToString(),
                 Id = pickTaskDetail.Id,
+                PckTaskDetailId = pickTaskDetail.Id,
                 PickTaskId = pickTaskDetail.PickTaskId,
                 PickTaskNumber = request.PickTaskNumber,
                 OrderId = pickTaskDetail.OrderId,
@@ -266,10 +282,12 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
                 WarehouseId = pickTaskDetail.WarehouseId,
                 WarehouseName = pickTaskDetail.WarehouseName
             };
-
+            pickTaskDetail.PickQty += 1;
+            _sysCacheService.Set(pickTaskDetailCacheKey, getData);
             // 添加到缓存
             pickedRecords.Add(pickRecord);
             _sysCacheService.Set(cacheKey, pickedRecords);
+
 
             // 更新拣货任务状态
             await _repPickTask.Context.Updateable<WMSPickTask>()

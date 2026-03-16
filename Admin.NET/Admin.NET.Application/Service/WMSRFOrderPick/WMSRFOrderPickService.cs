@@ -451,6 +451,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 {
                     PickTaskId = detail.PickTaskId,
                     //PackageId = packageId,
+                    PickTaskDetailId = detail.PckTaskDetailId,
                     OrderId = detail.OrderId,
                     OrderNumber = detail.OrderNumber,
                     ExternOrderNumber = detail.ExternOrderNumber,
@@ -493,6 +494,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             }
             package.Details = packageDetails.GroupBy(a => new
             {
+                a.PickTaskDetailId,
                 a.PickTaskId,
                 a.SKU,
                 a.OrderId,
@@ -520,6 +522,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             }).Select(a => new WMSPackageDetail()
             {
                 PickTaskId = a.Key.PickTaskId,
+                PickTaskDetailId = a.Key.PickTaskDetailId,
                 //PackageId = packageId,
                 OrderId = a.Key.OrderId,
                 OrderNumber = a.Key.OrderNumber,
@@ -587,77 +590,84 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                    .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.包装完成)
                    .Where(p => p.PickTaskNumber == pickTask.PickTaskNumber)
                    .ExecuteCommandAsync();
-                    await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => a.ExternOrderNumber == pickTask.ExternOrderNumber);
+
+                    //判断是不是订单都已经完成包装
+                    //获取当前订单需要拣货的总数量
+                    //获取当前订单已经包装的总数量
+                    //比较两个数据，如果相等，则修改订单状态为包装完成，并且插入指令信息
+                    var getPickNumber = _repPickTaskDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
+                    var getPackage = _repPackageDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
+                    if (getPickNumber.Result.Sum(a => a.PickQty) == getPackage.Result.Sum(a => a.Qty))
+                    {
+                        await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => a.ExternOrderNumber == pickTask.ExternOrderNumber);
+
+
+                        //包装完成，插入
+                        List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
+
+                        //插入反馈指令
+                        WMSInstruction wMSInstruction = new WMSInstruction();
+                        //wMSInstruction.OrderId = orderData[0].Id;
+                        wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
+                        wMSInstruction.InstructionType = "出库单回传HachDG";
+                        wMSInstruction.BusinessType = "出库单回传HachDG";
+                        //wMSInstruction.InstructionTaskNo = DateTime.Now;
+                        wMSInstruction.CustomerId = pickTask.CustomerId;
+                        wMSInstruction.CustomerName = pickTask.CustomerName;
+                        wMSInstruction.WarehouseId = pickTask.WarehouseId;
+                        wMSInstruction.WarehouseName = pickTask.WarehouseName;
+                        wMSInstruction.OperationId = entity.First().OrderId;
+                        wMSInstruction.OrderNumber = pickTask.ExternOrderNumber;
+                        wMSInstruction.Creator = _userManager.Account;
+                        wMSInstruction.CreationTime = DateTime.Now;
+                        wMSInstruction.InstructionTaskNo = pickTask.ExternOrderNumber;
+                        wMSInstruction.TableName = "WMS_Order";
+                        wMSInstruction.InstructionPriority = 63;
+                        wMSInstruction.Remark = "";
+                        wMSInstructions.Add(wMSInstruction);
+
+                        WMSInstruction wMSInstructionGRHach = new WMSInstruction();
+                        //wMSInstruction.OrderId = orderData[0].Id;
+                        wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                        wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
+                        wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
+                        wMSInstructionGRHach.CustomerId = pickTask.CustomerId;
+                        wMSInstructionGRHach.CustomerName = pickTask.CustomerName;
+                        wMSInstructionGRHach.WarehouseId = pickTask.WarehouseId;
+                        wMSInstructionGRHach.WarehouseName = pickTask.WarehouseName;
+                        wMSInstructionGRHach.OperationId = entity.First().OrderId;
+                        wMSInstructionGRHach.OrderNumber = pickTask.ExternOrderNumber;
+                        wMSInstructionGRHach.Creator = _userManager.Account;
+                        wMSInstructionGRHach.CreationTime = DateTime.Now;
+                        wMSInstructionGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
+                        wMSInstructionGRHach.TableName = "WMS_Order";
+                        wMSInstructionGRHach.InstructionPriority = 1;
+                        wMSInstructionGRHach.Remark = "";
+                        wMSInstructions.Add(wMSInstructionGRHach);
 
 
 
+                        WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
+                        //wMSInstruction.OrderId = orderData[0].Id;
+                        wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
+                        wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
+                        wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
+                        wMSInstructionAFCGRHach.CustomerId = pickTask.CustomerId;
+                        wMSInstructionAFCGRHach.CustomerName = pickTask.CustomerName;
+                        wMSInstructionAFCGRHach.WarehouseId = pickTask.WarehouseId;
+                        wMSInstructionAFCGRHach.WarehouseName = pickTask.WarehouseName;
+                        wMSInstructionAFCGRHach.OperationId = entity.First().OrderId;
+                        wMSInstructionAFCGRHach.OrderNumber = pickTask.ExternOrderNumber;
+                        wMSInstructionAFCGRHach.Creator = _userManager.Account;
+                        wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
+                        wMSInstructionAFCGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
+                        wMSInstructionAFCGRHach.TableName = "WMS_Order";
+                        wMSInstructionAFCGRHach.InstructionPriority = 1;
+                        wMSInstructionAFCGRHach.Remark = "";
+                        wMSInstructions.Add(wMSInstructionAFCGRHach);
 
-
-                    //包装完成，插入
-                    List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
-
-                    //插入反馈指令
-                    WMSInstruction wMSInstruction = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstruction.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstruction.InstructionType = "出库单回传HachDG";
-                    wMSInstruction.BusinessType = "出库单回传HachDG";
-                    //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstruction.CustomerId = pickTask.CustomerId;
-                    wMSInstruction.CustomerName = pickTask.CustomerName;
-                    wMSInstruction.WarehouseId = pickTask.WarehouseId;
-                    wMSInstruction.WarehouseName = pickTask.WarehouseName;
-                    wMSInstruction.OperationId = entity.First().OrderId;
-                    wMSInstruction.OrderNumber = pickTask.ExternOrderNumber;
-                    wMSInstruction.Creator = _userManager.Account;
-                    wMSInstruction.CreationTime = DateTime.Now;
-                    wMSInstruction.InstructionTaskNo = pickTask.ExternOrderNumber;
-                    wMSInstruction.TableName = "WMS_Order";
-                    wMSInstruction.InstructionPriority = 63;
-                    wMSInstruction.Remark = "";
-                    wMSInstructions.Add(wMSInstruction);
-
-                    WMSInstruction wMSInstructionGRHach = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
-                    wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
-                    wMSInstructionGRHach.CustomerId = pickTask.CustomerId;
-                    wMSInstructionGRHach.CustomerName = pickTask.CustomerName;
-                    wMSInstructionGRHach.WarehouseId = pickTask.WarehouseId;
-                    wMSInstructionGRHach.WarehouseName = pickTask.WarehouseName;
-                    wMSInstructionGRHach.OperationId = entity.First().OrderId;
-                    wMSInstructionGRHach.OrderNumber = pickTask.ExternOrderNumber;
-                    wMSInstructionGRHach.Creator = _userManager.Account;
-                    wMSInstructionGRHach.CreationTime = DateTime.Now;
-                    wMSInstructionGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
-                    wMSInstructionGRHach.TableName = "WMS_Order";
-                    wMSInstructionGRHach.InstructionPriority = 1;
-                    wMSInstructionGRHach.Remark = "";
-                    wMSInstructions.Add(wMSInstructionGRHach);
-
-
-
-                    WMSInstruction wMSInstructionAFCGRHach = new WMSInstruction();
-                    //wMSInstruction.OrderId = orderData[0].Id;
-                    wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                    wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
-                    wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
-                    wMSInstructionAFCGRHach.CustomerId = pickTask.CustomerId;
-                    wMSInstructionAFCGRHach.CustomerName = pickTask.CustomerName;
-                    wMSInstructionAFCGRHach.WarehouseId = pickTask.WarehouseId;
-                    wMSInstructionAFCGRHach.WarehouseName = pickTask.WarehouseName;
-                    wMSInstructionAFCGRHach.OperationId = entity.First().OrderId;
-                    wMSInstructionAFCGRHach.OrderNumber = pickTask.ExternOrderNumber;
-                    wMSInstructionAFCGRHach.Creator = _userManager.Account;
-                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
-                    wMSInstructionAFCGRHach.InstructionTaskNo = pickTask.ExternOrderNumber;
-                    wMSInstructionAFCGRHach.TableName = "WMS_Order";
-                    wMSInstructionAFCGRHach.InstructionPriority = 1;
-                    wMSInstructionAFCGRHach.Remark = "";
-                    wMSInstructions.Add(wMSInstructionAFCGRHach);
-
-                    await _repInstruction.InsertRangeAsync(wMSInstructions);
+                        await _repInstruction.InsertRangeAsync(wMSInstructions);
+                    }
                 }
             }
 
@@ -998,6 +1008,64 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     }
 
     /// <summary>
+    /// 清理当前拣货任务的Redis缓存（当前箱重新拣货）
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ApiDescriptionSettings(Name = "ClearPickCache")]
+    public async Task<Response<string>> ClearPickCache(GetPickTaskDetailsByLocationInput input)
+    {
+        Response<string> response = new Response<string>();
+
+        if (string.IsNullOrEmpty(input.PickTaskNumber))
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "拣货任务号不能为空";
+            return response;
+        }
+
+        // 获取拣货任务
+        var pickTask = await _rep.AsQueryable()
+            .Where(a => a.PickTaskNumber == input.PickTaskNumber)
+            .FirstAsync();
+
+        if (pickTask == null)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "拣货任务不存在";
+            return response;
+        }
+        string pickTaskDetailCacheKey = $"PickTaskDetailRF_{pickTask.Id}";
+        var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
+
+        // 构建缓存key
+        string cacheKey = $"RFSinglePick:{pickTask.CustomerId}:{pickTask.WarehouseId}:{input.PickTaskNumber}";
+
+        if (getData != null && getData.Count > 0)
+        {
+            var getRFSinglePickRecord = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey);
+            if (getRFSinglePickRecord != null && getRFSinglePickRecord.Count > 0)
+            {
+                foreach (var item in getData)
+                {
+                    item.PickQty -= getRFSinglePickRecord.Where(a => a.PckTaskDetailId == item.Id).Sum(b => b.PickQty);
+                }
+            }
+
+        }
+        _sysCacheService.Set(pickTaskDetailCacheKey, getData);
+        // 清除缓存
+        _sysCacheService.Remove(cacheKey);
+
+        response.Code = StatusCode.Success;
+        response.Msg = "当前箱拣货缓存已清除，可以重新拣货";
+        response.Data = input.PickTaskNumber;
+
+        return response;
+    }
+
+    /// <summary>
     /// 获取按库位排序的拣货明细（推荐拣货顺序）
     /// </summary>
     /// <param name="input"></param>
@@ -1071,9 +1139,9 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 UPC = g.FirstDetail.UPC,
                 GoodsName = g.FirstDetail.GoodsName,
                 GoodsType = g.FirstDetail.GoodsType,
-                UnitCode = g.FirstDetail.UnitCode,
-                BatchCode = g.BatchCode,
-                LotCode = g.FirstDetail.LotCode,
+                //UnitCode = g.FirstDetail.UnitCode,
+                //BatchCode = g.BatchCode,
+                //LotCode = g.FirstDetail.LotCode,
                 Qty = g.TotalQty,
                 PickQty = g.PickQty + pickQty,
                 Location = g.Location,
@@ -1094,7 +1162,14 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             .ThenBy(a => a.Location)
             .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)
             .ToList();
-
+        if (response.Data.Count == 0)
+        {
+            response.Data = outputList
+                .OrderBy(a => a.Area)
+                .ThenBy(a => a.Location)
+                .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)
+                .ToList();
+        }
         response.Code = StatusCode.Success;
         response.Msg = $"获取拣货明细成功，共 {outputList.Count} 个SKU";
 

@@ -22,7 +22,8 @@ public class RFSinglePickRecord
     /// </summary>
     public string RecordId { get; set; } = Guid.NewGuid().ToString();
     public long Id { get; set; }
-
+    public long PckTaskDetailId{ get; set; }
+    
     /// <summary>
     /// 拣货任务ID
     /// </summary>

@@ -8,6 +8,7 @@ let GetPickTaskDetailsByLocation = '/api/WMSRFOrderPick/GetPickTaskDetailsByLoca
 let GetCurrentPickTask = '/api/WMSRFOrderPick/GetCurrentPickTask';
 let ApplyPickTask = '/api/WMSRFOrderPick/ApplyPickTask';
 let CompletePackage = '/api/WMSRFOrderPick/CompletePackage';
+let ClearPickCache = '/api/WMSRFOrderPick/ClearPickCache';
 
 
 // 分页查询WMSRFReceiptAcquisition
@@ -75,6 +76,14 @@ export const applyPickTaskApi = (params) =>
 export const completePackageApi = (params) =>
 		request({
 			url: CompletePackage,
+			method: 'post',
+			data: params,
+		});
+
+// 清理当前箱拣货缓存（当前箱重新拣货）
+export const clearPickCacheApi = (params) =>
+		request({
+			url: ClearPickCache,
 			method: 'post',
 			data: params,
 		});

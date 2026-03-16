@@ -18,7 +18,7 @@
 						<view class="desc">
 							<text class="text-grey">拣货任务号: {{form.pickTaskNumber}}</text>
 						</view>
-					<!-- 	<view class="desc">
+						<!-- 	<view class="desc">
 							<text class="text-grey">拣货状态: {{getStatusText(form.pickStatus)}}</text>
 						</view> -->
 					</view>
@@ -198,8 +198,8 @@
 					playErrorSound();
 				}
 
-			}, 
-			 
+			},
+
 			async scanAcquisition() {
 				this.lpnSearchSet();
 				let that = this;
@@ -212,7 +212,7 @@
 						that.form.location = that.form.scanInput;
 						that.form.pickTaskNumber = res.data.result.data[0].pickTaskNumber;
 						// that.form.orderNumber = res.data.result.data[0].orderNumber;
-							console.log(that.form)
+						console.log(that.form)
 					} else if (res.data.result.msg == "SKU") {
 
 					}
@@ -308,7 +308,7 @@
 	.my>.cu-item {
 		height: calc(100vh) !important;
 		align-items: center;
-	justify-content: center;
+		justify-content: center;
 	}
 
 	.cu-list.grid>.cu-item [class*=cuIcon],
