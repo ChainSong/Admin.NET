@@ -4,22 +4,15 @@
 			<block slot="backText">返回</block>
 			<block slot="content">拣货:{{form.pickTaskNumber}}</block>
 		</cu-custom>
-		<!-- <view class="bluetooth-bar" v-if="printerConnected">
-			<view class="bluetooth-info">
-				<text class="cuIcon-bluetooth text-blue"></text>
-				<text class="text-sm">{{printerDeviceName || '已连接'}}</text>
-			</view>
-			<view class="bluetooth-actions">
-				<button class="cu-btn round bg-red sm" @tap="disconnectPrinter">断开</button>
-			</view>
-		</view> -->
+
 		<you-scroll ref="scroll" :style="[{height:'calc(100vh)'}]" @onPullDown="onPullDown">
 			<!-- 拣货信息 -->
 			<view class="cu-card case">
 				<view class="cu-item shadow">
 					<view class="title">
-						<view class="text-cut">任务信息<button class="cu-btn bg-red lg " @tap="handleClearPickCache">重新拣货</button></view>
-						
+						<view class="text-cut">任务信息<button class="cu-btn bg-red lg "
+								@tap="handleClearPickCache">重新拣货</button></view>
+
 					</view>
 					<view class="content">
 						<view class="desc">
@@ -89,9 +82,7 @@
 
 			<!-- 扫描区域 -->
 			<view class="cu-form-group ">
-				<button class="search-ble" @click="searchBluetooth">搜索蓝牙</button>
-				<!-- <button class="print"  @click="print">打印base64的图片</button> -->
-				<button class="createLabel" @click="printLabel">打印测试标签</button>
+
 				<view class="title">库位</view>
 				<input disabled v-model="form.location" placeholder="库位"></input>
 			</view>
@@ -124,25 +115,7 @@
 			</view>
 		</you-scroll>
 
-		<!-- 打印机设备选择弹窗 -->
-		<view v-if="printerModalVisible" class="bluetooth-modal">
-			<view class="bluetooth-modal-content">
-				<view class="bluetooth-modal-header">
-					<text>选择打印机</text>
-					<text class="cuIcon-close text-grey" @tap="hidePrinterModal"></text>
-				</view>
-				<scroll-view scroll-y class="bluetooth-device-list">
-					<view v-for="(device, index) in printerDevices" :key="index" class="bluetooth-device-item"
-						@tap="selectPrinterDevice(device)">
-						<text class="device-name">{{device.name || device.localName || '未知设备'}}</text>
-						<text class="device-id">{{device.deviceId}}</text>
-					</view>
-					<view v-if="printerDevices.length === 0" class="no-device">
-						<text>未发现打印机设备</text>
-					</view>
-				</scroll-view>
-			</view>
-		</view>
+
 	</view>
 
 </template>
@@ -161,8 +134,6 @@
 		playErrorSound,
 		playSuccessSound
 	} from "@/services/common/playaudio.js";
-	// import esc from '@/components/gprint/esc.js';
-	import escgprint from '@/components/gprint/uni.webview.1.5.8.js';
 	export default {
 		name: "wMSShelveDetail",
 		components: {
@@ -228,7 +199,13 @@
 		},
 		onUnload() {
 			// 页面卸载时关闭打印机连接
-			this.closePrinter();
+			// this.closePrinter();
+			this.loadScript({
+				src: '/static/js/uni.webview.1.5.2.js',
+				fun: window.h5uni,
+				eventListener: 'UniAppJSBridgeReady'
+			}, () => {});
+
 		},
 		filters: {
 			// carNumber(val) {
@@ -243,6 +220,24 @@
 			this.packageForm.pickTaskNumber = options.pickTaskNumber;
 		},
 		methods: {
+			loadScript(options, callback) {
+				if (!options.src) {
+					return;
+				}
+				// 判断引入的js对象是否存在  
+				if (typeof options.fun == 'undefined') {
+					console.log('自动引入');
+					var node = document.createElement('script');
+					node.src = options.src;
+					node.addEventListener('load', callback, false);
+					document.head.appendChild(node);
+				} else {
+					console.log('直接渲染');
+					console.log(options.eventListener || 'load');
+					document.addEventListener(options.eventListener || 'load', callback, false);
+				}
+			},
+
 			lpnSearchSet() {
 				this.focusflag = false;
 				this.$nextTick(() => {
@@ -535,328 +530,8 @@
 					uni.hideLoading();
 				}
 			},
-
-			/**
-			 * 初始化蓝牙 - 参考文档流程：开启定位 → 打开蓝牙 → 获取蓝牙状态
-			 */
-			// async initBluetooth() {
-			// 	try {
-			// 		// 1. 开启定位
-			// 		await this.openLocation();
-
-			// 		// 2. 打开蓝牙适配器
-			// 		await uni.openBluetoothAdapter();
-			// 		console.log('蓝牙适配器初始化成功');
-
-			// 		// 3. 获取蓝牙状态
-			// 		const state = await uni.getBluetoothAdapterState();
-			// 		console.log('蓝牙状态:', state);
-
-			// 	} catch (error) {
-			// 		console.error('蓝牙初始化失败', error);
-			// 	}
-			// },
-
-			// /**
-			//  * 开启定位（蓝牙搜索需要）
-			//  */
-			// openLocation() {
-			// 	return new Promise((resolve) => {
-			// 		uni.getLocation({
-			// 			type: 'wgs84',
-			// 			success: (res) => {
-			// 				console.log('定位成功', res);
-			// 				resolve(res);
-			// 			},
-			// 			fail: (error) => {
-			// 				console.error('定位失败', error);
-			// 				// 定位失败不影响后续操作
-			// 				resolve(null);
-			// 			}
-			// 		});
-			// 	});
-			// },
-
-			// /**
-			//  * 连接打印机
-			//  */
-			// async connectPrinter() {
-			// 	// 显示打印机设备选择弹窗
-			// 	this.printerModalVisible = true;
-			// 	this.printerDevices = [];
-
-			// 	try {
-			// 		// 搜索可用蓝牙列表
-			// 		await uni.startBluetoothDevicesDiscovery({
-			// 			allowDuplicatesKey: true,
-			// 			success: () => {
-			// 				console.log('开始搜索打印机');
-			// 			},
-			// 			fail: (error) => {
-			// 				console.error('开始搜索失败', error);
-			// 				uni.showToast({
-			// 					title: '搜索失败',
-			// 					icon: 'none'
-			// 				});
-			// 			}
-			// 		});
-
-			// 		// 监听设备发现事件
-			// 		uni.onBluetoothDeviceFound((res) => {
-			// 			console.log('发现设备', res.devices);
-			// 			res.devices.forEach(device => {
-			// 				// 避免重复添加
-			// 				const exists = this.printerDevices.some(d => d.deviceId === device
-			// 					.deviceId);
-			// 				// 过滤打印机设备（通常名称包含print或PRINTER）
-			// 				const name = (device.name || device.localName || '').toLowerCase();
-			// 				if (!exists && (name.includes('print') || name.includes('printer') || name
-			// 						.includes('gp') || name.includes('gprinter'))) {
-			// 					this.printerDevices.push(device);
-			// 				}
-			// 			});
-			// 		});
-
-			// 		// 30秒后自动停止搜索
-			// 		setTimeout(() => {
-			// 			if (this.printerModalVisible) {
-			// 				uni.stopBluetoothDevicesDiscovery();
-			// 			}
-			// 		}, 30000);
-
-			// 	} catch (error) {
-			// 		console.error('开始搜索异常', error);
-			// 		uni.showToast({
-			// 			title: '请开启蓝牙',
-			// 			icon: 'none'
-			// 		});
-			// 	}
-			// },
-
-			// /**
-			//  * 隐藏打印机设备选择弹窗
-			//  */
-			// async hidePrinterModal() {
-			// 	this.printerModalVisible = false;
-			// 	try {
-			// 		await uni.stopBluetoothDevicesDiscovery();
-			// 	} catch (error) {
-			// 		console.error('停止搜索失败', error);
-			// 	}
-			// },
-
-			// /**
-			//  * 选择打印机设备并连接
-			//  */
-			// async selectPrinterDevice(device) {
-			// 	uni.showLoading({
-			// 		title: '连接中...'
-			// 	});
-
-			// 	try {
-			// 		// 连接打印机设备
-			// 		await uni.createBLEConnection({
-			// 			deviceId: device.deviceId
-			// 		});
-			// 		this.printerDeviceId = device.deviceId;
-			// 		this.printerDeviceName = device.name || device.localName || '打印机';
-			// 		console.log('打印机连接成功', device.deviceId);
-
-			// 		// 停止搜索
-			// 		await uni.stopBluetoothDevicesDiscovery();
-
-			// 		// 获取打印机服务
-			// 		const servicesRes = await uni.getBLEDeviceServices({
-			// 			deviceId: device.deviceId
-			// 		});
-			// 		const services = servicesRes.services;
-			// 		console.log('打印机服务列表', services);
-
-			// 		if (services && services.length > 0) {
-			// 			// 遍历所有服务找到支持write的特征值
-			// 			for (const service of services) {
-			// 				const charRes = await uni.getBLEDeviceCharacteristics({
-			// 					deviceId: device.deviceId,
-			// 					serviceId: service.uuid
-			// 				});
-			// 				const characteristics = charRes.characteristics;
-			// 				console.log('特征值列表', characteristics);
-
-			// 				// 找到支持write的特征值用于发送打印指令
-			// 				const writeCharacteristic = characteristics.find(c => c.properties.write);
-			// 				if (writeCharacteristic) {
-			// 					this.printerServiceId = service.uuid;
-			// 					this.printerCharacteristicId = writeCharacteristic.uuid;
-			// 					console.log('找到写特征值', writeCharacteristic.uuid);
-
-			// 					this.printerConnected = true;
-			// 					this.printerModalVisible = false;
-
-			// 					uni.hideLoading();
-			// 					uni.showToast({
-			// 						title: '打印机连接成功',
-			// 						icon: 'success'
-			// 					});
-			// 					return;
-			// 				}
-			// 			}
-			// 		}
-
-			// 		throw new Error('未找到可用的服务');
-
-			// 	} catch (error) {
-			// 		uni.hideLoading();
-			// 		uni.showToast({
-			// 			title: '连接失败',
-			// 			icon: 'none'
-			// 		});
-			// 		console.error('打印机连接错误', error);
-			// 	}
-			// },
-
-			// /**
-			//  * 打印箱号标签
-			//  */
-			// async printBoxLabel(boxNumber) {
-			// 	if (!this.printerConnected) {
-			// 		console.log('打印机未连接，跳过打印');
-			// 		return;
-			// 	}
-
-			// 	if (!boxNumber) {
-			// 		console.log('箱号为空，跳过打印');
-			// 		return;
-			// 	}
-
-			// 	console.log('开始打印箱号:', boxNumber);
-
-			// 	try {
-			// 		// 创建ESC打印指令
-			// 		const command = esc.createNew();
-			// 		command.init();
-
-			// 		// 设置标题
-			// 		command.setAlign(1); // 居中
-			// 		command.setSize(2, 2); // 放大字体
-			// 		command.setBold(true);
-			// 		command.setText("包装标签\n");
-			// 		command.setPrint();
-
-			// 		// 设置箱号
-			// 		command.setAlign(1);
-			// 		command.setSize(3, 3); // 更大字体
-			// 		command.setBold(true);
-			// 		command.setText(`${boxNumber}\n`);
-			// 		command.setPrint();
-
-			// 		// 设置拣货任务号
-			// 		command.setAlign(0); // 左对齐
-			// 		command.setSize(1, 1);
-			// 		command.setBold(false);
-			// 		command.setText(`任务号: ${this.form.pickTaskNumber}\n`);
-			// 		command.setPrint();
-
-			// 		// 设置打印时间
-			// 		command.setAlign(1);
-			// 		command.setText(`时间: ${new Date().toLocaleString()}\n`);
-			// 		command.setPrint();
-
-			// 		command.setPrintAndFeedLine(3); // 走纸3行
-
-			// 		// 获取打印数据
-			// 		const printData = command.getData();
-
-			// 		// 发送十进制数据到打印机 - 参考文档：uni.writeBLECharacteristicValue
-			// 		// 安卓底层限制每次只能发送20字节，需要分包发送
-			// 		const maxPacketSize = 20;
-			// 		for (let i = 0; i < printData.length; i += maxPacketSize) {
-			// 			const chunk = printData.slice(i, i + maxPacketSize);
-			// 			await uni.writeBLECharacteristicValue({
-			// 				deviceId: this.printerDeviceId,
-			// 				serviceId: this.printerServiceId,
-			// 				characteristicId: this.printerCharacteristicId,
-			// 				value: chunk,
-			// 				success: () => {
-			// 					console.log('发送成功', i, 'to', i + maxPacketSize);
-			// 				},
-			// 				fail: (error) => {
-			// 					console.error('发送失败', error);
-			// 				}
-			// 			});
-
-			// 			// 延迟避免发送过快
-			// 			await new Promise(resolve => setTimeout(resolve, 20));
-			// 		}
-
-			// 		console.log('打印成功');
-			// 		uni.showToast({
-			// 			title: '打印成功',
-			// 			icon: 'success'
-			// 		});
-
-			// 	} catch (error) {
-			// 		console.error('打印错误', error);
-			// 		uni.showToast({
-			// 			title: '打印失败',
-			// 			icon: 'none'
-			// 		});
-			// 	}
-			// },
-
-			// /**
-			//  * 断开打印机连接
-			//  */
-			// async disconnectPrinter() {
-			// 	if (this.printerDeviceId) {
-			// 		try {
-			// 			await uni.closeBLEConnection({
-			// 				deviceId: this.printerDeviceId
-			// 			});
-			// 		} catch (error) {
-			// 			console.error('断开连接失败', error);
-			// 		}
-			// 	}
-			// 	this.printerConnected = false;
-			// 	this.printerDeviceName = '';
-			// 	this.printerDeviceId = null;
-			// 	this.printerServiceId = null;
-			// 	this.printerCharacteristicId = null;
-
-			// 	uni.showToast({
-			// 		title: '已断开连接',
-			// 		icon: 'none'
-			// 	});
-			// },
-
-			// /**
-			//  * 关闭打印机
-			//  */
-			// async closePrinter() {
-			// 	try {
-			// 		if (this.printerDeviceId) {
-			// 			await uni.closeBLEConnection({
-			// 				deviceId: this.printerDeviceId
-			// 			});
-			// 		}
-			// 	} catch (error) {
-			// 		console.error('关闭打印机失败', error);
-			// 	}
-			// 	this.printerConnected = false;
-			// },
-			/**
-			 * 
-			 */
-			searchBluetooth() {
-				this.$uni.postMessage({
-					data: {
-						action: 'search_ble',
-						// data: "图片的base64"  // if needed
-					}
-				});
-			},
-			printLabel() {
-				// escgprint.postMessage({
-				this.$uni.postMessage({
+			createL() {
+				h5uni.postMessage({
 					data: {
 						action: 'createLabel',
 						data: {
@@ -866,50 +541,39 @@
 								g: 2
 							},
 							content: [{
-								"t": "text",
-								"x": 50,
-								"y": 10,
-								"x_m": 1,
-								"y_m": 1,
-								"c": "打印测试打印测试打印测试"
-							}, {
-								"t": "text",
-								"x": 50,
-								"y": 50,
-								"x_m": 1,
-								"y_m": 1,
-								"c": "打印测试打印测试ssss22ww"
-							}, {
-								"t": "qr",
-								"x": 150,
-								"y": 180,
-								"l": "L",
-								"w": 5,
-								"m": "A",
-								"c": "www.poscom.cn"
-							}, {
-								"t": "qr",
-								"x": 150,
-								"y": 360,
-								"l": "L",
-								"w": 5,
-								"m": "A",
-								"c": "www.poscom.cn"
-							}, {
-								"t": "bar",
-								"x": 150,
-								"y": 540,
-								"ct": "128",
-								"h": 64,
-								"r": 1,
-								"n": 2,
-								"w": 4,
-								"c": "200902125410"
-							}]
+									"t": "qr",
+									"x": 150,
+									"y": 180,
+									"l": "L",
+									"w": 10,
+									"m": "A",
+									"c": "20090212-5410"
+								},
+								{
+									"t": "text",
+									"x": 75,
+									"y": 280,
+									"x_m": 1,
+									"y_m": 1,
+									"c": "20090212-5410"
+								},
+								{
+									"t": "bar",
+									"x": 75,
+									"y": 540,
+									"ct": "128",
+									"h": 64,
+									"r": 1,
+									"n": 2,
+									"w": 4,
+									"c": "200902125410"
+								}
+							]
 						}
-					},
+					}
 				});
 			}
+
 		}
 	}
 </script>

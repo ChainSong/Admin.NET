@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App'
 // 引入全局存储
 import store from '@/store';
-import * as uni from '@/components/gprint/uni.webview.1.5.8.js'; // 路径根据实际调整
+
 import basics from './pages/basics/home.vue'
 Vue.component('basics',basics)
 
@@ -32,11 +32,6 @@ uni.onNetworkStatusChange(function (res) {
 	store.dispatch('networkStateChange', res.networkType);
 });
 
-document.addEventListener('UniAppJSBridgeReady', function() {
-  Vue.prototype.$uni = uni; // Vue2
-  // 或在 Vue3 中挂载到 app.config.globalProperties.$uni
-  console.log('uni.webview.js 初始化成功');
-});
 App.mpType = 'app'
 
 const app = new Vue({

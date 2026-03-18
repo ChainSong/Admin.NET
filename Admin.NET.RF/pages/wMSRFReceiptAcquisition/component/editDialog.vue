@@ -86,6 +86,12 @@
 			console.log("options");
 			console.log(options);
 			this.form.receiptNumber = options.receiptNumber;
+			this.loadScript({
+				src: '/static/js/uni.webview.1.5.2.js',
+				fun: window.h5uni,
+				eventListener: 'UniAppJSBridgeReady'
+			}, () => {});
+
 		},
 		methods: {
 			async scanAcquisition() {

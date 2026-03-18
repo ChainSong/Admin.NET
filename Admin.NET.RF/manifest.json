@@ -83,7 +83,11 @@
     },
     "h5" : {
         "title" : "RF for UniApp",
-        "domain" : "demo.color-ui.com"
+        "domain" : "demo.color-ui.com",
+        "template" : "",
+        "router" : {
+            "base" : ""
+        }
     },
     "vueVersion" : "2",
     "fallbackLocale" : "zh-Hans"
