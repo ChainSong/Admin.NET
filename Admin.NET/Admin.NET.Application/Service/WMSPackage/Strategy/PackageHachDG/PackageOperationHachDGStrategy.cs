@@ -94,9 +94,12 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                 var p = collection["p"];
                 if (p.Count() > 0)
                 {
+                    request.OriginalInput = request.Input;
+                    request.InputType = "JME";//AFC
                     request.SKU = collection["p"].Split(':')[1];
                     request.SN = collection["p"].Split(':')[0];
                     request.Input = request.SKU;
+
                 }
             }
         }
@@ -288,6 +291,18 @@ internal class PackageOperationHachDGStrategy : IPackageOperationInterface
                     }
                 }
 
+                // 获取主档表，判断需不需要扫描JME 
+                var checkScanJNE = await _repProduct.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == preOrderNumbers.First().CustomerId).FirstAsync();
+                if (checkScanJNE != null && checkScanJNE.IsUID == 1)
+                {
+                    if (request.InputType != "JME")
+                    {
+                        response.Data.PackageDatas = pickData.OrderBy(a => a.Order).ToList();
+                        response.Code = StatusCode.Error;
+                        response.Msg = "请扫描JME";
+                        return response;
+                    }
+                }
                 //判断有没有SN,有SN 就记录出库SN
                 //WMSRFPackageAcquisition wMSRF=new WMSRFPackageAcquisition();
                 //wMSRF.

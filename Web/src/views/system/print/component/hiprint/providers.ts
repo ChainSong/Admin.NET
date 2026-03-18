@@ -191,6 +191,46 @@ export const aProvider = function () {
 							{ title: '备注', align: 'center', field: 'remark', width: 150 },
 						],
 					],
+				}, {
+					tid: 'HachASNPrintModule.table',
+					title: 'Hach ASN表格',
+					type: 'table',
+					options: {
+						field: 'table',
+						tableHeaderRepeat: 'first',
+						tableFooterRepeat: 'last',
+						fields: [
+							{ text: '序号', field: 'sequence' },
+							{ text: '产品代码', field: 'sku' },
+							{ text: '入库数量', field: 'expectedQty' },
+							{ text: '批次号/SN码', field: 'batchCode' },
+							{ text: '失效日期', field: 'expirationDate' },
+							{ text: '备注', field: 'remark' },
+						],
+					},
+					editable: true,
+					columnDisplayEditable: true, //列显示是否能编辑
+					columnDisplayIndexEditable: true, //列顺序显示是否能编辑
+					columnTitleEditable: true, //列标题是否能编辑
+					columnResizable: true, //列宽是否能调整
+					columnAlignEditable: true, //列对齐是否调整
+					isEnableEditField: true, //编辑字段
+					isEnableContextMenu: true, //开启右键菜单 默认true
+					isEnableInsertRow: true, //插入行
+					isEnableDeleteRow: true, //删除行
+					isEnableInsertColumn: true, //插入列
+					isEnableDeleteColumn: true, //删除列
+					isEnableMergeCell: true, //合并单元格
+					columns: [
+						[
+							{ title: '序号', align: 'center', field: 'sequence', width: 150 },
+							{ title: '产品代码', align: 'center', field: 'sku', width: 150 },
+							{ title: '入库数量', align: 'center', field: 'expectedQty', width: 150 },
+							{ title: '批次号/SN码', align: 'center', field: 'batchCode', width: 150 },
+							{ title: '失效日期', align: 'center', field: 'expirationDate', width: 150 },
+							{ title: '备注', align: 'center', field: 'remark', width: 150 },
+						],
+					],
 				},
 				{
 					tid: 'aProviderModule.customText',
