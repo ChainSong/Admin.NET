@@ -15,7 +15,7 @@ namespace TaskPlaApplication.Application.Services.Handlers
         private readonly ISqlSugarClient _db;
         ExternalFeedbackClient _external = new ExternalFeedbackClient();
         private readonly IThirdPartyConfigProvider _provider;
-        
+
         Logger _log = new Logger();
 
         public OutboundPickingInstructionHandler(ISqlSugarClient db, IThirdPartyConfigProvider provider)
@@ -81,10 +81,10 @@ namespace TaskPlaApplication.Application.Services.Handlers
             }
 
             //获取对接信息
-             var HachWmsOutBoundList = await _db.Queryable<HachWmsOutBound>()
-            .Where(p => p.DeliveryNumber == ins.InstructionTaskNo)
-             .Includes(p => p.items).
-             ToListAsync();
+            var HachWmsOutBoundList = await _db.Queryable<HachWmsOutBound>()
+           .Where(p => p.DeliveryNumber == ins.InstructionTaskNo)
+            .Includes(p => p.items).
+            ToListAsync();
             if (HachWmsOutBoundList == null || !HachWmsOutBoundList.Any())
             {
                 _log.Log("获取对接订单信息失败");
@@ -98,25 +98,47 @@ namespace TaskPlaApplication.Application.Services.Handlers
 
             foreach (var item in HachWmsOutBoundList)
             {
-                var PalletList =await _db.Queryable<WMSHandover>()
-                    .Where(p=>p.ExternOrderNumber==item.OrderNumber)
+                var PalletList = await _db.Queryable<WMSHandover>()
+                    .Where(p => p.ExternOrderNumber == item.OrderNumber)
                     .ToListAsync();
 
-                if (PalletList == null || PalletList.Count==0)
+                if (PalletList == null || PalletList.Count == 0)
                 {
-                    _log.Log($"{item.OrderNumber}获取托信息信息失败");
-                    return new HandlerResult(false, $"{item.OrderNumber}获取托信息信息失败");
+                    //判断是不是有订单0GI 出库
+                    var checkOrder = await _db.Queryable<WMSOrder>()
+                   .Where(p => p.ExternOrderNumber == item.OrderNumber)
+                   .FirstAsync();
+                    if (checkOrder.OrderStatus == 99)
+                    {
+                        //不做任何处理
+                    }
+                    else
+                    {
+                        _log.Log($"{item.OrderNumber}获取托信息信息失败");
+                        return new HandlerResult(false, $"{item.OrderNumber}获取托信息信息失败");
+                    }
                 }
 
                 var PackageList = await _db.Queryable<WMSPackage>()
                    .Where(p => p.ExternOrderNumber == item.OrderNumber)
-                   .Includes(a=>a.Details)
+                   .Includes(a => a.Details)
                    .ToListAsync();
 
-                if (PackageList == null || PackageList.Count==0)
+                if (PackageList == null || PackageList.Count == 0)
                 {
-                    _log.Log($"{item.OrderNumber}获取包装信息信息失败");
-                    return new HandlerResult(false, $"{item.OrderNumber}获取托信息信息失败");
+                    //判断是不是有订单0GI 出库
+                    var checkOrder = await _db.Queryable<WMSOrder>()
+                   .Where(p => p.ExternOrderNumber == item.OrderNumber)
+                   .FirstAsync();
+                    if (checkOrder.OrderStatus == 99)
+                    {
+                        //不做任何处理
+                    }
+                    else
+                    {
+                        _log.Log($"{item.OrderNumber}获取包装信息信息失败");
+                        return new HandlerResult(false, $"{item.OrderNumber}获取托信息信息失败");
+                    }
                 }
 
                 wMSHandoverList.AddRange(PalletList);
@@ -157,7 +179,7 @@ namespace TaskPlaApplication.Application.Services.Handlers
                 var palletInfo = new cartonPallet
                 {
                     //cartonNum = ins.InstructionTaskNo+item.SerialNumber,
-                    cartonNum = (ins.InstructionTaskNo ?? "").Trim()+"_"+ (item.SerialNumber ?? "").Trim(),
+                    cartonNum = (ins.InstructionTaskNo ?? "").Trim() + "_" + (item.SerialNumber ?? "").Trim(),
                     cartonNumQuantity = PackageInfo.SerialNumber,
                     palletNum = item.PalletNumber,
                     items = new List<items>()
@@ -165,7 +187,7 @@ namespace TaskPlaApplication.Application.Services.Handlers
 
                 foreach (var detail in PackageInfo.Details)
                 {
-                    var obd = HachWmsOutBoundList.Where(a=>a.OrderNumber==PackageInfo.ExternOrderNumber).FirstOrDefault()
+                    var obd = HachWmsOutBoundList.Where(a => a.OrderNumber == PackageInfo.ExternOrderNumber).FirstOrDefault()
                         .items.Where(a => a.ItemNumber == detail.SKU).FirstOrDefault();
 
                     var details = new items()

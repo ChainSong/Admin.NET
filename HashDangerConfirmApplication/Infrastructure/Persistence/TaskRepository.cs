@@ -40,7 +40,7 @@ public sealed class TaskRepository : ITaskRepository
                               FROM [WMS_Instruction]
                               WHERE (( [InstructionStatus] = @Pending ) )
                               AND ([InstructionType] IN ('入库单回传HachDG','入库单序列号回传HachDG'))
-                              AND InstructionTaskNo IN (select OrderNo from hach_wms_receiving)
+                              AND InstructionTaskNo IN (select OrderNo from hach_wms_receiving where CreateTime>DATEADD(day, -15, getdate()))
                               UNION ALL
                               SELECT distinct TOP 100 
                               [TenantId],[Id],[CustomerId],[CustomerName],[WarehouseId],
@@ -51,7 +51,7 @@ public sealed class TaskRepository : ITaskRepository
                               FROM [WMS_Instruction]
                               WHERE (( [InstructionStatus] =  @Pending)) 
                               AND ([InstructionType] IN ('出库装箱回传HachDG'))
-                              AND InstructionTaskNo IN (select DeliveryNumber from hach_wms_outBound)
+                              AND InstructionTaskNo IN (select DeliveryNumber from hach_wms_outBound where CreateTime>DATEADD(day, -15, getdate()))
                               UNION ALL
                               SELECT distinct TOP 100 
                               [TenantId],[Id],[CustomerId],[CustomerName],[WarehouseId],
@@ -62,7 +62,7 @@ public sealed class TaskRepository : ITaskRepository
                               FROM [WMS_Instruction]
                               WHERE (( [InstructionStatus] =  @Pending or InstructionStatus=63)) 
                               AND ([InstructionType] IN ('出库单回传HachDG','出库单序列号回传HachDG','出库单防伪码回传HachDG'))
-                              AND InstructionTaskNo IN (select OrderNumber from hach_wms_outBound)
+                              AND InstructionTaskNo IN (select OrderNumber from hach_wms_outBound where CreateTime>DATEADD(day, -15, getdate()))
                               order by InstructionPriority";
 
         ////测试某一单

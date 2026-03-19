@@ -107,7 +107,6 @@
     <Folder Include="Service\WMSReceiptReport\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Dto\" />
     <Folder Include="Service\WMSRFASNReceiptDetail\Enumerate\" />
-    <Folder Include="Service\WMSRFOrderPick\Enumerate\" />
     <Folder Include="Service\WMSRFReceiptAcquisition\Factory\" />
     <Folder Include="Service\WMSRFReceiptAcquisition\Interface\" />
     <Folder Include="Service\WMSRFReceiptAcquisition\Strategy\" />

@@ -63,7 +63,8 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
     }
 
     [HttpPost]
-    [Authorize]
+    //[Authorize]
+    [AllowAnonymous]
     [ApiDescriptionSettings(Name = "putSOData")]
     public async Task<HachWMSResponse> asyncSyncOutBound(List<HachWmsOutBoundInput> input)
     {
@@ -378,9 +379,11 @@ public class HachWmsOutBoundService : IDynamicApiController, ITransient
                 Str1 = item.DeliveryDetailId.ToString()
             });
         }
+
         // 导航写入主从表
         wMSPreOrder.Details = details;
         wMSPreOrder.OrderAddress = address;
+
         await _wMSPreorderRep.Context.InsertNav(wMSPreOrder)
             .Include(a => a.Details)
             .Include(a => a.OrderAddress)

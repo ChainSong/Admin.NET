@@ -23,6 +23,7 @@ using Admin.NET.Application.Enumerate;
 namespace Admin.NET.Application;
 /// <summary>
 /// RF拣货策略（每次扫描即拣货一次，存入Redis）
+/// 性能优化版本：减少数据库查询、统一缓存管理、批量操作
 /// </summary>
 public class OrderPickWithRedisStrategy : IOrderPickRFInterface
 {
@@ -40,6 +41,13 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
     public SqlSugarRepository<WMSPackage> _repPackage { get; set; }
     public SqlSugarRepository<WMSPackageDetail> _repPackageDetail { get; set; }
 
+    public SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition { get; set; }
+
+    // 产品信息本地缓存（请求级别）
+    private Dictionary<string, WMSProduct> _productCache;
+    // 产品BOM本地缓存（请求级别）
+    private Dictionary<string, List<WMSProductBom>> _productBomCache;
+
     /// <summary>
     /// 获取拣货任务明细（初始化拣货任务时调用）
     /// </summary>
@@ -47,27 +55,38 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
 
-        // 从数据库获取拣货明细
-        var orderPickTask = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskId == request.Id)
+        // ✅ 优化: 使用缓存键常量
+        string pickTaskDetailCacheKey = WMSRFOrderPickCacheKeys.GetPickTaskDetailKey(request.Id);
+        var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
+
+        if (getData == null || getData.Count == 0)
+        {
+            getData = await _repPickTaskDetail.AsQueryable()
+                .Where(a => a.PickTaskId == request.Id).ToListAsync();
+            _sysCacheService.Set(pickTaskDetailCacheKey, getData, TimeSpan.FromHours(WMSRFOrderPickCacheKeys.DefaultCacheHours));
+        }
+
+        // 从数据库获取拣货明细（分组统计）
+        var orderPickTask = getData
             .GroupBy(a => new { a.SKU, a.BatchCode, a.CustomerId, a.WarehouseId, a.PickTaskNumber, a.Location })
             .Select(a => new WMSRFPickTaskDetailOutput()
             {
-                SKU = a.SKU,
-                Qty = SqlFunc.AggregateSum(a.Qty),
-                PickQty = SqlFunc.AggregateSum(a.PickQty),
-                BatchCode = a.BatchCode,
-                CustomerId = a.CustomerId,
-                WarehouseId = a.WarehouseId,
-                PickTaskNumber = a.PickTaskNumber,
-                Location = a.Location,
-                Order = (SqlFunc.AggregateSum(a.Qty) == SqlFunc.AggregateSum(a.PickQty) ? 99 : 1)
-            }).ToListAsync();
+                SKU = a.Key.SKU,
+                Qty = a.Sum(x => x.Qty),
+                PickQty = a.Sum(x => x.PickQty),
+                BatchCode = a.Key.BatchCode,
+                CustomerId = a.Key.CustomerId,
+                WarehouseId = a.Key.WarehouseId,
+                PickTaskNumber = a.Key.PickTaskNumber,
+                Location = a.Key.Location,
+                Order = (a.Sum(x => x.Qty) == a.Sum(x => x.PickQty) ? 99 : 1)
+            }).ToList();
 
         // 从缓存获取已拣货记录
-        string cacheKey = GetCacheKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
         var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
 
-        // 计算实际拣货数量（从Redis统计）
+        // 计算实际拣货数量（从缓存统计）
         var pickQtyDict = pickedRecords
             .Where(r => !r.IsPackaged)
             .GroupBy(r => new { r.SKU, r.BatchCode, r.Location })
@@ -77,9 +96,9 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
         foreach (var item in orderPickTask)
         {
             var key = new { item.SKU, item.BatchCode, item.Location };
-            if (pickQtyDict.ContainsKey(key))
+            if (pickQtyDict.TryGetValue(key, out var pickQty))
             {
-                item.PickQty = pickQtyDict[key];
+                item.PickQty += pickQty;
                 item.Order = (item.Qty == item.PickQty) ? 99 : 1;
             }
         }
@@ -155,6 +174,7 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
             {
                 request.SKU = collection["p"].Split(':')[1];
                 request.SN = collection["p"].Split(':')[0];
+                request.InputType = "JME";
             }
         }
         // 直接扫描产品条码
@@ -173,7 +193,6 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
                     request.SKU = checkProductBm.SKU;
                 }
             }
-
         }
     }
 
@@ -184,131 +203,131 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>() { Data = new List<WMSRFPickTaskDetailOutput>() };
 
-        // 🔥 优化: 先从缓存中取拣货明细，取不到再从数据库取
-        string pickTaskDetailCacheKey = $"PickTaskDetailRF_{request.Id}";
+        // ✅ 优化: 先从缓存中取拣货明细
+        string pickTaskDetailCacheKey = WMSRFOrderPickCacheKeys.GetPickTaskDetailKey(request.Id);
         var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
         if (getData == null || getData.Count == 0)
         {
-            // 缓存中没有，从数据库查询
             getData = await _repPickTaskDetail.AsQueryable()
                 .Where(a => a.PickTaskId == request.Id).ToListAsync();
-            // 将查询结果存入缓存，缓存时间设置为1小时
-            _sysCacheService.Set(pickTaskDetailCacheKey, getData, TimeSpan.FromHours(30));
+            _sysCacheService.Set(pickTaskDetailCacheKey, getData, TimeSpan.FromHours(WMSRFOrderPickCacheKeys.DefaultCacheHours));
         }
-        //判断扫描的是不是套装
-        var getParent = await _repProductBom.AsQueryable().Where(a => a.SKU == request.SKU && a.CustomerId == getData.First().CustomerId).ToListAsync();
+
+        // ✅ 安全检查: 使用FirstOrDefault避免空引用
+        var firstDetail = getData.FirstOrDefault();
+        if (firstDetail == null)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = "拣货任务明细不存在";
+            return response;
+        }
+
+        // ✅ 优化: 使用本地缓存获取产品BOM信息
+        var getParent = await GetProductBomListAsync(firstDetail.CustomerId, request.SKU);
+
         if (getParent.Count <= 1)
         {
-            // 从数据库查询拣货明细
+            // 从缓存数据中筛选
             var pickTaskDetails = getData
-            .Where(a =>
-                 a.SKU == request.SKU
-                //&& ((a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode)) || string.IsNullOrEmpty(request.Lot))
-                && a.Location == request.Location)
-            .ToList();
+                .Where(a => a.SKU == request.SKU && a.Location == request.Location)
+                .ToList();
 
-            if (pickTaskDetails == null || pickTaskDetails.Count == 0)
+            if (pickTaskDetails.Count == 0)
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "该产品不存在于拣货任务中";
                 return response;
             }
 
-            var pickTaskDetail = pickTaskDetails.Where(a => a.SKU == request.SKU && a.Qty > a.PickQty).FirstOrDefault();
+            var pickTaskDetail = pickTaskDetails.FirstOrDefault(a => a.Qty > a.PickQty);
             if (pickTaskDetail == null)
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "该SKU 已经满足";
                 return response;
             }
+
             // 获取缓存中的已拣货记录
-            string cacheKey = GetCacheKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
+            string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
             var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
 
-            // 计算该SKU+批次+库位的已拣货数量（未包装的）
+            // 计算该SKU+批次+库位的已拣货数量
             var currentPickedQty = pickedRecords
                 .Where(r => r.SKU == request.SKU
                     && r.BatchCode == pickTaskDetail.BatchCode
                     && r.Location == request.Location
                     && !r.IsPackaged)
                 .Sum(r => r.PickQty);
-            // 判断是否还有其他的未完成拣货的信息
 
             // 检查是否已经拣货完成
-            if (currentPickedQty >= pickTaskDetails.Where(a => a.SKU == request.SKU).Sum(a => a.Qty))
+            var totalQty = pickTaskDetails.Where(a => a.SKU == request.SKU).Sum(a => a.Qty);
+            if (currentPickedQty >= totalQty)
             {
                 response.Code = StatusCode.Error;
                 response.Msg = "该产品已经全部拣货完成";
                 return response;
             }
 
-            // 创建拣货记录（每次扫描=拣货1次）
-            var pickRecord = new RFSinglePickRecord
+            // 判断唯一码是不是重复扫描
+            if (!string.IsNullOrEmpty(request.SN))
             {
-                RecordId = Guid.NewGuid().ToString(),
-                Id = pickTaskDetail.Id,
-                PckTaskDetailId = pickTaskDetail.Id,
-                PickTaskId = pickTaskDetail.PickTaskId,
-                PickTaskNumber = request.PickTaskNumber,
-                OrderId = pickTaskDetail.OrderId,
-                OrderNumber = pickTaskDetail.OrderNumber,
-                PreOrderNumber = pickTaskDetail.PreOrderNumber,
-                ExternOrderNumber = pickTaskDetail.ExternOrderNumber,
-                SKU = pickTaskDetail.SKU,
-                UPC = pickTaskDetail.UPC,
-                GoodsName = pickTaskDetail.GoodsName,
-                GoodsType = pickTaskDetail.GoodsType,
-                UnitCode = pickTaskDetail.UnitCode,
-                Onwer = pickTaskDetail.Onwer,
-                BoxCode = pickTaskDetail.BoxCode,
-                TrayCode = pickTaskDetail.TrayCode,
-                BatchCode = pickTaskDetail.BatchCode,
-                LotCode = pickTaskDetail.LotCode,
-                PoCode = pickTaskDetail.PoCode,
-                Qty = pickTaskDetail.Qty,
-                PickQty = 1, // 每次扫描只拣货1个
-                Location = pickTaskDetail.Location,
-                Area = pickTaskDetail.Area,
-                ProductionDate = pickTaskDetail.ProductionDate,
-                ExpirationDate = pickTaskDetail.ExpirationDate,
-                PickTime = DateTime.Now,
-                PickPersonnel = _userManager.Account,
-                PickBoxNumber = "",
-                SN = request.SN,
-                Lot = request.Lot,
-                IsPackaged = false,
-                CustomerId = pickTaskDetail.CustomerId,
-                CustomerName = pickTaskDetail.CustomerName,
-                WarehouseId = pickTaskDetail.WarehouseId,
-                WarehouseName = pickTaskDetail.WarehouseName
-            };
+                var checkSN = pickedRecords.FirstOrDefault(a => a.SKU == request.SKU && a.SN == request.SN);
+                if (checkSN != null && !string.IsNullOrEmpty(checkSN.SN))
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "不能重复扫描同一个条码";
+                    return response;
+                }
+
+                // 判断JME 是否已使用
+                var checkJNE = await _repRFPackageAcquisition.AsQueryable()
+                    .Where(a => a.SN == request.SN && a.CustomerId == firstDetail.CustomerId)
+                    .FirstAsync();
+                if (checkJNE != null && !string.IsNullOrEmpty(checkJNE.PreOrderNumber))
+                {
+                    response.Code = StatusCode.Error;
+                    response.Msg = "不能重复扫描同一个条码";
+                    return response;
+                }
+            }
+
+            // ✅ 优化: 使用产品信息缓存
+            var productInfo = await GetProductInfoAsync(firstDetail.CustomerId, request.SKU);
+            if (productInfo != null && productInfo.IsUID == 1 && request.InputType != "JME")
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = "请扫描JME";
+                return response;
+            }
+
+            // 创建拣货记录
+            var pickRecord = CreatePickRecord(pickTaskDetail, request);
             pickTaskDetail.PickQty += 1;
             _sysCacheService.Set(pickTaskDetailCacheKey, getData);
+
             // 添加到缓存
             pickedRecords.Add(pickRecord);
             _sysCacheService.Set(cacheKey, pickedRecords);
 
-
             // 更新拣货任务状态
-            await _repPickTask.Context.Updateable<WMSPickTask>()
-                .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.拣货中)
-                .Where(p => p.Id == request.Id)
-                .ExecuteCommandAsync();
+            await UpdatePickTaskStatusAsync(request.Id);
         }
         else
         {
+            // 套装处理
+            string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
+            var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
+
             foreach (var item in getParent)
             {
                 request.SKU = item.ChildSKU;
-                // 从数据库查询拣货明细
                 var pickTaskDetails = getData
-                 .Where(a =>
-                      a.SKU == request.SKU
-                     && ((a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode)) || string.IsNullOrEmpty(request.Lot))
-                     && a.Location == request.Location)
-                 .ToList();
+                    .Where(a => a.SKU == request.SKU
+                        && (string.IsNullOrEmpty(request.Lot) || a.BatchCode == request.Lot || string.IsNullOrEmpty(a.BatchCode))
+                        && a.Location == request.Location)
+                    .ToList();
 
-                if (pickTaskDetails == null || pickTaskDetails.Count == 0)
+                if (pickTaskDetails.Count == 0)
                 {
                     response.Code = StatusCode.Error;
                     response.Msg = "该产品不存在于拣货任务中";
@@ -317,19 +336,13 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
 
                 var pickTaskDetail = pickTaskDetails.First();
 
-                // 获取缓存中的已拣货记录
-                string cacheKey = GetCacheKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
-                var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
-
-                // 计算该SKU+批次+库位的已拣货数量（未包装的）
                 var currentPickedQty = pickedRecords
                     .Where(r => r.SKU == request.SKU
                         && r.BatchCode == pickTaskDetail.BatchCode
-                        && r.Location == request.Location
+                        && r.Location == pickTaskDetail.Location
                         && !r.IsPackaged)
                     .Sum(r => r.PickQty);
 
-                // 检查是否已经拣货完成
                 if (currentPickedQty >= pickTaskDetail.Qty)
                 {
                     response.Code = StatusCode.Error;
@@ -337,60 +350,16 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
                     return response;
                 }
 
-                // 创建拣货记录（每次扫描=拣货1次）
-                var pickRecord = new RFSinglePickRecord
-                {
-                    RecordId = Guid.NewGuid().ToString(),
-                    Id = pickTaskDetail.Id,
-                    PickTaskId = pickTaskDetail.PickTaskId,
-                    PickTaskNumber = request.PickTaskNumber,
-                    OrderId = pickTaskDetail.OrderId,
-                    OrderNumber = pickTaskDetail.OrderNumber,
-                    PreOrderNumber = pickTaskDetail.PreOrderNumber,
-                    ExternOrderNumber = pickTaskDetail.ExternOrderNumber,
-                    SKU = pickTaskDetail.SKU,
-                    UPC = pickTaskDetail.UPC,
-                    GoodsName = pickTaskDetail.GoodsName,
-                    GoodsType = pickTaskDetail.GoodsType,
-                    UnitCode = pickTaskDetail.UnitCode,
-                    Onwer = pickTaskDetail.Onwer,
-                    BoxCode = pickTaskDetail.BoxCode,
-                    TrayCode = pickTaskDetail.TrayCode,
-                    BatchCode = pickTaskDetail.BatchCode,
-                    LotCode = pickTaskDetail.LotCode,
-                    PoCode = pickTaskDetail.PoCode,
-                    Qty = pickTaskDetail.Qty,
-                    PickQty = 1, // 每次扫描只拣货1个
-                    Location = pickTaskDetail.Location,
-                    Area = pickTaskDetail.Area,
-                    ProductionDate = pickTaskDetail.ProductionDate,
-                    ExpirationDate = pickTaskDetail.ExpirationDate,
-                    PickTime = DateTime.Now,
-                    PickPersonnel = _userManager.Account,
-                    PickBoxNumber = "",
-                    SN = request.SN,
-                    Lot = request.Lot,
-                    IsPackaged = false,
-                    CustomerId = pickTaskDetail.CustomerId,
-                    CustomerName = pickTaskDetail.CustomerName,
-                    WarehouseId = pickTaskDetail.WarehouseId,
-                    WarehouseName = pickTaskDetail.WarehouseName
-                };
-
-                // 添加到缓存
+                var pickRecord = CreatePickRecord(pickTaskDetail, request);
                 pickedRecords.Add(pickRecord);
-                _sysCacheService.Set(cacheKey, pickedRecords);
-
-
             }
-            // 更新拣货任务状态
-            await _repPickTask.Context.Updateable<WMSPickTask>()
-                .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.拣货中)
-                .Where(p => p.Id == request.Id)
-                .ExecuteCommandAsync();
+
+            _sysCacheService.Set(cacheKey, pickedRecords);
+            await UpdatePickTaskStatusAsync(request.Id);
         }
+
         // 返回拣货明细列表
-        return await GetPickDetailListAsync(request);
+        return await GetPickDetailListAsync(request, getData);
     }
 
     /// <summary>
@@ -409,27 +378,36 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
             return response;
         }
 
-        // 返回该库位的拣货明细
-        return await GetPickDetailListAsync(request);
+        // ✅ 优化: 使用缓存数据
+        string pickTaskDetailCacheKey = WMSRFOrderPickCacheKeys.GetPickTaskDetailKey(request.Id);
+        var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
+        if (getData == null || getData.Count == 0)
+        {
+            getData = await _repPickTaskDetail.AsQueryable()
+                .Where(a => a.PickTaskId == request.Id).ToListAsync();
+            _sysCacheService.Set(pickTaskDetailCacheKey, getData, TimeSpan.FromHours(WMSRFOrderPickCacheKeys.DefaultCacheHours));
+        }
+
+        return await GetPickDetailListAsync(request, getData);
     }
 
     /// <summary>
     /// 获取拣货明细列表
     /// </summary>
-    private async Task<Response<List<WMSRFPickTaskDetailOutput>>> GetPickDetailListAsync(WMSRFPickTaskDetailInput request)
+    private async Task<Response<List<WMSRFPickTaskDetailOutput>>> GetPickDetailListAsync(WMSRFPickTaskDetailInput request, List<WMSPickTaskDetail> cachedData = null)
     {
         Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>> { Data = new List<WMSRFPickTaskDetailOutput>() };
 
-        // 从数据库获取拣货明细
-        var pickTaskDetails = await _repPickTaskDetail.AsQueryable()
+        // ✅ 优化: 使用传入的缓存数据，避免重复查询
+        var pickTaskDetails = cachedData ?? await _repPickTaskDetail.AsQueryable()
             .Where(a => a.PickTaskId == request.Id)
             .ToListAsync();
 
         // 从缓存获取已拣货记录
-        string cacheKey = GetCacheKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
         var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
 
-        // 计算实际拣货数量（从Redis统计）
+        // 计算实际拣货数量
         var pickQtyDict = pickedRecords
             .Where(r => !r.IsPackaged)
             .GroupBy(r => new { r.SKU, r.BatchCode, r.Location })
@@ -456,9 +434,9 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
         foreach (var item in outputList)
         {
             var key = new { item.SKU, item.BatchCode, item.Location };
-            if (pickQtyDict.ContainsKey(key))
+            if (pickQtyDict.TryGetValue(key, out var pickQty))
             {
-                item.PickQty = pickQtyDict[key];
+                item.PickQty = pickQty;
                 item.Order = (item.Qty == item.PickQty) ? 99 : 1;
             }
         }
@@ -479,11 +457,96 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
         return response;
     }
 
+    #region 辅助方法
+
     /// <summary>
-    /// 获取缓存Key
+    /// 创建拣货记录
     /// </summary>
-    private string GetCacheKey(long customerId, long warehouseId, string pickTaskNumber)
+    private RFSinglePickRecord CreatePickRecord(WMSPickTaskDetail pickTaskDetail, WMSRFPickTaskDetailInput request)
     {
-        return $"RFSinglePick:{customerId}:{warehouseId}:{pickTaskNumber}";
+        return new RFSinglePickRecord
+        {
+            RecordId = Guid.NewGuid().ToString(),
+            Id = pickTaskDetail.Id,
+            PckTaskDetailId = pickTaskDetail.Id,
+            PickTaskId = pickTaskDetail.PickTaskId,
+            PickTaskNumber = request.PickTaskNumber,
+            OrderId = pickTaskDetail.OrderId,
+            OrderNumber = pickTaskDetail.OrderNumber,
+            PreOrderNumber = pickTaskDetail.PreOrderNumber,
+            ExternOrderNumber = pickTaskDetail.ExternOrderNumber,
+            SKU = pickTaskDetail.SKU,
+            UPC = pickTaskDetail.UPC,
+            GoodsName = pickTaskDetail.GoodsName,
+            GoodsType = pickTaskDetail.GoodsType,
+            UnitCode = pickTaskDetail.UnitCode,
+            Onwer = pickTaskDetail.Onwer,
+            BoxCode = pickTaskDetail.BoxCode,
+            TrayCode = pickTaskDetail.TrayCode,
+            BatchCode = pickTaskDetail.BatchCode,
+            LotCode = pickTaskDetail.LotCode,
+            PoCode = pickTaskDetail.PoCode,
+            Qty = pickTaskDetail.Qty,
+            PickQty = 1,
+            Location = pickTaskDetail.Location,
+            Area = pickTaskDetail.Area,
+            ProductionDate = pickTaskDetail.ProductionDate,
+            ExpirationDate = pickTaskDetail.ExpirationDate,
+            PickTime = DateTime.Now,
+            PickPersonnel = _userManager.Account,
+            PickBoxNumber = "",
+            SN = request.SN,
+            Lot = request.Lot,
+            IsPackaged = false,
+            CustomerId = pickTaskDetail.CustomerId,
+            CustomerName = pickTaskDetail.CustomerName,
+            WarehouseId = pickTaskDetail.WarehouseId,
+            WarehouseName = pickTaskDetail.WarehouseName
+        };
     }
+
+    /// <summary>
+    /// 更新拣货任务状态
+    /// </summary>
+    private async Task UpdatePickTaskStatusAsync(long pickTaskId)
+    {
+        await _repPickTask.Context.Updateable<WMSPickTask>()
+            .SetColumns(p => p.PickStatus == (int)PickTaskStatusEnum.拣货中)
+            .Where(p => p.Id == pickTaskId)
+            .ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 获取产品信息（带缓存）
+    /// </summary>
+    private async Task<WMSProduct> GetProductInfoAsync(long customerId, string sku)
+    {
+        if (_productCache == null)
+        {
+            var products = await _repProduct.AsQueryable()
+                .Where(a => a.CustomerId == customerId)
+                .ToListAsync();
+            _productCache = products.ToDictionary(p => p.SKU, p => p);
+        }
+
+        return _productCache.TryGetValue(sku, out var product) ? product : null;
+    }
+
+    /// <summary>
+    /// 获取产品BOM列表（带缓存）
+    /// </summary>
+    private async Task<List<WMSProductBom>> GetProductBomListAsync(long customerId, string sku)
+    {
+        if (_productBomCache == null)
+        {
+            var bomList = await _repProductBom.AsQueryable()
+                .Where(a => a.CustomerId == customerId)
+                .ToListAsync();
+            _productBomCache = bomList.GroupBy(b => b.SKU).ToDictionary(g => g.Key, g => g.ToList());
+        }
+
+        return _productBomCache.TryGetValue(sku, out var list) ? list : new List<WMSProductBom>();
+    }
+
+    #endregion
 }

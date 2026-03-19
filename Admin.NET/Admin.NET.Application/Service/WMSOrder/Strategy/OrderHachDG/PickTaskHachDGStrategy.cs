@@ -91,9 +91,12 @@ namespace Admin.NET.Application.Strategy
             {
                 int pickTaskSerialNumber = 0;
                 //得到出库单，开始根据明细拆单子
-                //1，根据是否RFID拆单
-                //2，根据POCode拆单
-                foreach (var allocation in data.Allocation.GroupBy(a => new { a.OrderId }))
+                //1，根据是否是组合件拆
+                foreach (var item in data.Allocation)
+                {
+                    item.Str2 = data.Details.Where(a => a.Id == item.OrderDetailId).FirstOrDefault().Str2;
+                }
+                foreach (var allocation in data.Allocation.GroupBy(a => new { a.OrderId, a.Str2 }))
                 {
                     pickTaskSerialNumber++;
                     var pickTaskNumber = SnowFlakeHelper.GetSnowInstance().NextId().ToString();

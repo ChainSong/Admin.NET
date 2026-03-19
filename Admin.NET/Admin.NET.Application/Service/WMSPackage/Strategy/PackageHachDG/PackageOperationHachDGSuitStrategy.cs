@@ -607,7 +607,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         // 🔥 优化25: 提前缓存用户信息
         var userId = _userManager.UserId;
         var userAccount = _userManager.Account;
-
+        var now = DateTime.Now;
         Response response = new Response();
         if (request.Weight < 0.3)
         {
@@ -616,6 +616,7 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
         //判断是不是输入了重量
         if (request.Weight > 0.2)
         {
+         
             // 🔥 优化26: 使用 JOIN 替代子查询，提升性能
             var pickDataTemp = await _repPickTaskDetail.AsQueryable()
                 .InnerJoin<CustomerUserMapping>((a, b) => a.CustomerId == b.CustomerId && b.UserId == userId)
@@ -775,9 +776,13 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                 _sysCacheService.Set(userAccount + "_Package_" + request.PickTaskNumber, null);
 
 
-                //包装完成，插入
+                //修改逻辑，后期需要拆单。现在判断是否整个订单都已经拣货并且包装完成
+                var getPickTaskDetail = await _repPickTaskDetail.AsQueryable().Where(a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)).SumAsync(a => a.Qty);
+                var getPackageDetail = await _repPackageDetail.AsQueryable().Where(a => CheckPickData.Select(b => b.OrderId).ToList().Contains(a.Id)).SumAsync(a => a.Qty);
+                var getPackageDetailSingle = CheckPickData.First();
                 List<WMSInstruction> wMSInstructions = new List<WMSInstruction>();
-                foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).Distinct().ToList())
+                //foreach (var item in CheckPickData.GroupBy(a => new { a.CustomerId, a.CustomerName, a.WarehouseId, a.WarehouseName, a.OrderId, a.ExternOrderNumber }).Distinct().ToList())
+                if (getPickTaskDetail == getPackageDetail)
                 {
                     //插入反馈指令
                     WMSInstruction wMSInstruction = new WMSInstruction();
@@ -786,20 +791,19 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstruction.InstructionType = "出库单回传HachDG";
                     wMSInstruction.BusinessType = "出库单回传HachDG";
                     //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                    wMSInstruction.CustomerId = item.Key.CustomerId;
-                    wMSInstruction.CustomerName = item.Key.CustomerName;
-                    wMSInstruction.WarehouseId = item.Key.WarehouseId;
-                    wMSInstruction.WarehouseName = item.Key.WarehouseName;
-                    wMSInstruction.OperationId = item.Key.OrderId;
-                    wMSInstruction.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstruction.CustomerId = getPackageDetailSingle.CustomerId;
+                    wMSInstruction.CustomerName = getPackageDetailSingle.CustomerName;
+                    wMSInstruction.WarehouseId = getPackageDetailSingle.WarehouseId;
+                    wMSInstruction.WarehouseName = getPackageDetailSingle.WarehouseName;
+                    wMSInstruction.OperationId = getPackageDetailSingle.OrderId;
+                    wMSInstruction.OrderNumber = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstruction.Creator = userAccount;
-                    wMSInstruction.CreationTime = DateTime.Now;
-                    wMSInstruction.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstruction.CreationTime = now;
+                    wMSInstruction.InstructionTaskNo = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstruction.TableName = "WMS_Order";
                     wMSInstruction.InstructionPriority = 63;
                     wMSInstruction.Remark = "";
                     wMSInstructions.Add(wMSInstruction);
-
 
 
                     WMSInstruction wMSInstructionGRHach = new WMSInstruction();
@@ -807,15 +811,15 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
                     wMSInstructionGRHach.InstructionType = "出库单防伪码回传HachDG";
                     wMSInstructionGRHach.BusinessType = "出库单防伪码回传HachDG";
-                    wMSInstructionGRHach.CustomerId = item.Key.CustomerId;
-                    wMSInstructionGRHach.CustomerName = item.Key.CustomerName;
-                    wMSInstructionGRHach.WarehouseId = item.Key.WarehouseId;
-                    wMSInstructionGRHach.WarehouseName = item.Key.WarehouseName;
-                    wMSInstructionGRHach.OperationId = item.Key.OrderId;
-                    wMSInstructionGRHach.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstructionGRHach.CustomerId = getPackageDetailSingle.CustomerId;
+                    wMSInstructionGRHach.CustomerName = getPackageDetailSingle.CustomerName;
+                    wMSInstructionGRHach.WarehouseId = getPackageDetailSingle.WarehouseId;
+                    wMSInstructionGRHach.WarehouseName = getPackageDetailSingle.WarehouseName;
+                    wMSInstructionGRHach.OperationId = getPackageDetailSingle.OrderId;
+                    wMSInstructionGRHach.OrderNumber = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstructionGRHach.Creator = userAccount;
-                    wMSInstructionGRHach.CreationTime = DateTime.Now;
-                    wMSInstructionGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstructionGRHach.CreationTime = now;
+                    wMSInstructionGRHach.InstructionTaskNo = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstructionGRHach.TableName = "WMS_Order";
                     wMSInstructionGRHach.InstructionPriority = 1;
                     wMSInstructionGRHach.Remark = "";
@@ -828,79 +832,20 @@ internal class PackageOperationHachDGSuitStrategy : IPackageOperationInterface
                     wMSInstructionAFCGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
                     wMSInstructionAFCGRHach.InstructionType = "出库单序列号回传HachDG";
                     wMSInstructionAFCGRHach.BusinessType = "出库单序列号回传HachDG";
-                    wMSInstructionAFCGRHach.CustomerId = item.Key.CustomerId;
-                    wMSInstructionAFCGRHach.CustomerName = item.Key.CustomerName;
-                    wMSInstructionAFCGRHach.WarehouseId = item.Key.WarehouseId;
-                    wMSInstructionAFCGRHach.WarehouseName = item.Key.WarehouseName;
-                    wMSInstructionAFCGRHach.OperationId = item.Key.OrderId;
-                    wMSInstructionAFCGRHach.OrderNumber = item.Key.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.CustomerId = getPackageDetailSingle.CustomerId;
+                    wMSInstructionAFCGRHach.CustomerName = getPackageDetailSingle.CustomerName;
+                    wMSInstructionAFCGRHach.WarehouseId = getPackageDetailSingle.WarehouseId;
+                    wMSInstructionAFCGRHach.WarehouseName = getPackageDetailSingle.WarehouseName;
+                    wMSInstructionAFCGRHach.OperationId = getPackageDetailSingle.OrderId;
+                    wMSInstructionAFCGRHach.OrderNumber = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstructionAFCGRHach.Creator = userAccount;
-                    wMSInstructionAFCGRHach.CreationTime = DateTime.Now;
-                    wMSInstructionAFCGRHach.InstructionTaskNo = item.Key.ExternOrderNumber;
+                    wMSInstructionAFCGRHach.CreationTime = now;
+                    wMSInstructionAFCGRHach.InstructionTaskNo = getPackageDetailSingle.ExternOrderNumber;
                     wMSInstructionAFCGRHach.TableName = "WMS_Order";
                     wMSInstructionAFCGRHach.InstructionPriority = 1;
                     wMSInstructionAFCGRHach.Remark = "";
                     wMSInstructions.Add(wMSInstructionAFCGRHach);
                 }
-
-                //wMSInstructions.Add(wMSInstruction);
-                //出库装箱回传判断DN 是不是都完成了。ND下的所有的so 都完成才可以插入出库装箱回传 (客户系统需要对接WMS)
-                //让安琪将DN 字段对接到业务表中 STR1 可以通过dn 字段来判断是不是所有的dn 都已经完成，那么可以插入装箱信息
-                //判断里面有哪些DN 
-                //var checkDn = await _repOrder.AsQueryable()
-                //    .Where(a => CheckPickData.Select(b => b.OrderNumber).Contains(a.OrderNumber) && !string.IsNullOrEmpty(a.Dn))
-                //    .Select(a => new
-                //    {
-                //        a.Dn,
-                //        a.CustomerId,
-                //        a.CustomerName,
-                //        a.WarehouseId,
-                //        a.WarehouseName,
-                //        a.Id
-                //    }).FirstAsync();
-                //if (checkDn != null && !string.IsNullOrEmpty(checkDn.Dn))
-                //{
-                //    //foreach (var item in checkDn)
-                //    //{
-                //    var checkOrderDN = await _repOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.OrderStatus < (int)OrderStatusEnum.已包装).ToListAsync();
-                //    //已经转出库单的都已经完成， 且预出库单没有新增
-                //    var checkPreOrderDN = await _repPreOrder.AsQueryable().Where(a => a.Dn == checkDn.Dn && a.PreOrderStatus == (int)PreOrderStatusEnum.新增).ToListAsync();
-
-                //    if ((checkOrderDN == null || checkOrderDN.Count == 0) && checkPreOrderDN.Count == 0)
-                //    {
-                //        WMSInstruction wMSInstructionSNGRHach = new WMSInstruction();
-                //        //wMSInstruction.OrderId = orderData[0].Id;
-                //        wMSInstructionSNGRHach.InstructionStatus = (int)InstructionStatusEnum.新增;
-                //        wMSInstructionSNGRHach.InstructionType = "出库装箱回传HachDG";
-                //        wMSInstructionSNGRHach.BusinessType = "出库装箱回传HachDG";
-                //        //wMSInstruction.InstructionTaskNo = DateTime.Now;
-                //        wMSInstructionSNGRHach.CustomerId = checkDn.CustomerId;
-                //        wMSInstructionSNGRHach.CustomerName = checkDn.CustomerName;
-                //        wMSInstructionSNGRHach.WarehouseId = checkDn.WarehouseId;
-                //        wMSInstructionSNGRHach.WarehouseName = checkDn.WarehouseName;
-                //        wMSInstructionSNGRHach.OperationId = checkDn.Id;
-                //        wMSInstructionSNGRHach.OrderNumber = checkDn.Dn ?? "";
-                //        wMSInstructionSNGRHach.Creator = _userManager.Account;
-                //        wMSInstructionSNGRHach.CreationTime = DateTime.Now;
-                //        wMSInstructionSNGRHach.InstructionTaskNo = checkDn.Dn ?? "";
-                //        wMSInstructionSNGRHach.TableName = "WMS_Order";
-                //        wMSInstructionSNGRHach.InstructionPriority = 4;
-                //        wMSInstructionSNGRHach.Remark = "";
-                //        //判断是否插入过一次
-                //        var getInstruction = await _repInstruction.AsQueryable().Where(a => a.CustomerId == checkDn.CustomerId && a.OrderNumber == checkDn.Dn && a.BusinessType == "出库装箱回传HachDG").ToListAsync();
-                //        if (getInstruction == null || getInstruction.Count == 0)
-                //        {
-                //            if (!string.IsNullOrEmpty(checkDn.Dn))
-                //            {
-                //                if (wMSInstructions.Where(a => a.OperationId == checkDn.Id && a.InstructionType == "出库装箱回传HachDG").Count() == 0)
-                //                {
-                //                    wMSInstructions.Add(wMSInstructionSNGRHach);
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-                //}
                 await _repInstruction.InsertRangeAsync(wMSInstructions);
                 response.Code = StatusCode.Finish;
                 response.Msg = "订单完成";

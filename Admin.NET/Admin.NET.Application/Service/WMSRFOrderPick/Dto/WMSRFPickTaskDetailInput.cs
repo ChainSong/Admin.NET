@@ -52,8 +52,9 @@ public class WMSRFPickTaskDetailInput
     public string SKU { get; set; }
     public string SN { get; set; }
     public string ScanType { get; set; }
+    public string InputType { get; set; }
 
-
+    
 
     /// <summary>
     /// PickStatus

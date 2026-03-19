@@ -57,7 +57,7 @@
 		onShow() {
 			if (this.$mStore.getters.hasLogin) {
 				uni.navigateTo({
-					url: '/pages/login/index'
+					url: '/pages/menu/index'
 				});
 			}
 		},

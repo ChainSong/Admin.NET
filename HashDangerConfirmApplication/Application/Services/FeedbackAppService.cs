@@ -28,24 +28,24 @@ public sealed class FeedbackAppService(
         var cfg = opt.Value;
         var batch = await repo.GetPendingAsync(cfg.BatchSize, ct);
         if (batch.Count == 0)
-        { 
+        {
             _log.Log("队列中没有待回传的订单");
             return;
         }
-        foreach ( var ins in batch)
-         {
+        foreach (var ins in batch)
+        {
             InstructionStatus statucCode = InstructionStatus.Pending;
             try
-             {
+            {
                 // 从枚举属性取类型
-                  var typeEnum = ins.InstructionTypeEnum;
+                var typeEnum = ins.InstructionTypeEnum;
 
                 if (!_handlerMap.TryGetValue(typeEnum, out var handler))
                 {
-                     statucCode = InstructionStatus.Failed;
+                    statucCode = InstructionStatus.Failed;
                     ins.Message = $"未找到当前类型: {typeEnum}";
                     ins.UpdationTime = DateTime.Now;
-                    await repo.UpdateAsync(ins, statucCode,ct);
+                    await repo.UpdateAsync(ins, statucCode, ct);
                     continue;
                 }
                 HachConfirmWmsAuthorizationConfig input = new HachConfirmWmsAuthorizationConfig
@@ -61,11 +61,11 @@ public sealed class FeedbackAppService(
                     _log.Log($"身份验证失败: {typeEnum}，目标单号：{ins.OrderNumber}");
                     ins.Message = $"身份验证失败: {typeEnum}，目标单号：{ins.OrderNumber}";
                     ins.UpdationTime = DateTime.Now;
-                    statucCode= InstructionStatus.Failed;
-                    await repo.UpdateAsync(ins, statucCode,ct);
+                    statucCode = InstructionStatus.Failed;
+                    await repo.UpdateAsync(ins, statucCode, ct);
                     continue;
                 }
-                
+
                 Token = Authentication.Token;
 
                 if (string.IsNullOrEmpty(Token))
@@ -79,7 +79,12 @@ public sealed class FeedbackAppService(
                     var authInfo = await _external.PostFormUrlEncodedAsync<GetTokenResponse>(requestUrl);
                     Token = authInfo.data.token;
                 }
-                var result = await handler.HandleAsync(ins,Token ,ct);
+                var result = await handler.HandleAsync(ins, Token, ct);
+                //重大事故， 先提交上线
+                if (result.Result.Contains("Timeout"))
+                {
+                    result = await handler.HandleAsync(ins, Token, ct);
+                }
                 if (result.Success)
                 {
                     statucCode = InstructionStatus.Succeeded;
@@ -88,7 +93,7 @@ public sealed class FeedbackAppService(
                 {
                     statucCode = InstructionStatus.Failed;
                 }
-                
+
                 ins.Message = result.Result;
 
                 // 先落本地成功状态，再回传第三方（若担心幂等可用Outbox）
@@ -98,8 +103,8 @@ public sealed class FeedbackAppService(
             }
             catch (Exception ex)
             {
-                statucCode= InstructionStatus.Failed;
-                await repo.UpdateAsync(ins, statucCode,ct);
+                statucCode = InstructionStatus.Failed;
+                await repo.UpdateAsync(ins, statucCode, ct);
 
                 _log.Log($"指令 {ins.Id}处理异常");
             }

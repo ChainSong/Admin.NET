@@ -51,6 +51,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<WMSOrder> _repOrder;
     private readonly SqlSugarRepository<WMSPickTaskDetail> _repPickTaskDetail;
     private readonly SqlSugarRepository<WMSLocation> _repLocation;
+    //private readonly SqlSugarRepository<WMSRFPackageAcquisition> _repRFPackageAcquisition;
     private readonly SysWorkFlowService _repWorkFlowService;
 
     public WMSRFOrderPickService(SqlSugarRepository<WMSPickTask> rep, UserManager userManager, ISqlSugarClient db, SqlSugarRepository<WarehouseUserMapping> repWarehouseUser, SqlSugarRepository<CustomerUserMapping> repCustomerUser, SqlSugarRepository<WMSOrder> repOrder, SqlSugarRepository<WMSPickTaskDetail> repPickTaskDetail, SqlSugarRepository<WMSPackage> repPackage, SqlSugarRepository<WMSPackageDetail> repPackageDetail, SysCacheService sysCacheService, SqlSugarRepository<WMSLocation> repLocation, SqlSugarRepository<WMSProduct> repProduct, SysWorkFlowService repWorkFlowService, SqlSugarRepository<WMSProductBom> repProductBom, SqlSugarRepository<WMSRFPackageAcquisition> repRFPackageAcquisition, SqlSugarRepository<WMSPackageLable> repPackageLable, SqlSugarRepository<WMSInstruction> repInstruction)
@@ -223,6 +224,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "ScanRFOrderPick")]
     public async Task<Response<List<WMSRFPickTaskDetailOutput>>> ScanRFOrderPick(WMSRFPickTaskDetailInput input)
     {
@@ -298,6 +300,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         strategy._repLocation = _repLocation;
         strategy._repProduct = _repProduct;
         strategy._repProductBom = _repProductBom;
+        strategy._repRFPackageAcquisition = _repRFPackageAcquisition;
+
 
         // 执行策略
         return await strategy.ScanOrderPickTask(input);
@@ -309,10 +313,11 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "ScanBoxNumberCompletePackage")]
-    public async Task<Response<string>> ScanBoxNumberCompletePackage(RFBoxNumberPackageInput input)
+    public async Task<Response<WMSPackage>> ScanBoxNumberCompletePackage(RFBoxNumberPackageInput input)
     {
-        Response<string> response = new Response<string>();
+        Response<WMSPackage> response = new Response<WMSPackage>() { Data = new WMSPackage() };
 
         // 验证输入
         if (string.IsNullOrEmpty(input.PickTaskNumber))
@@ -365,7 +370,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }
 
         // 从缓存获取拣货任务明细数据（包含用户扫描的内容）
-        string cacheKey = "RFSinglePick:" + pickTask.CustomerId + ":" + pickTask.WarehouseId + ":" + input.PickTaskNumber;
+        // ✅ 优化: 使用缓存键常量
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(pickTask.CustomerId, pickTask.WarehouseId, input.PickTaskNumber);
         var cachedPickTaskDetails = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey);
 
         if (cachedPickTaskDetails == null || cachedPickTaskDetails.Count == 0)
@@ -435,7 +441,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                 PackageTime = DateTime.Now,
                 Creator = _userManager.Account,
                 CreationTime = DateTime.Now,
-                DetailCount = pickTaskDetails.Count
+                DetailCount = pickTaskDetails.Count,
+                Str4 = !string.IsNullOrEmpty(orderDn.Dn) ? orderDn.Dn : orderDn.ExternOrderNumber
             };
 
             // 插入包装记录
@@ -447,7 +454,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
 
             foreach (var detail in pickTaskDetails)
             {
-                packageDetails.Add(new WMSPackageDetail
+                var packageDetail = new WMSPackageDetail
                 {
                     PickTaskId = detail.PickTaskId,
                     //PackageId = packageId,
@@ -478,20 +485,25 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     ExpirationDate = detail.ExpirationDate,
                     Creator = _userManager.Account,
                     CreationTime = DateTime.Now
-                });
-            }
-            packageAcquisitions = packageDetails.Adapt<List<WMSRFPackageAcquisition>>();
-            foreach (var item in packageAcquisitions)
-            {
-                if (!string.IsNullOrEmpty(item.SN))
+                };
+
+                packageDetails.Add(packageDetail);
+
+                var packageAcquisition = packageDetail.Adapt<WMSRFPackageAcquisition>();
+                packageAcquisition.SN = detail.SN;
+                packageAcquisition.Lot = detail.LotCode;
+                if (!string.IsNullOrEmpty(packageAcquisition.SN))
                 {
-                    item.Type = "AFC";
+                    packageAcquisition.Type = "AFC";
                 }
-                if (!string.IsNullOrEmpty(item.Lot))
+                if (!string.IsNullOrEmpty(packageAcquisition.Lot))
                 {
-                    item.Type = "SN";
+                    packageAcquisition.Type = "SN";
                 }
+                packageAcquisitions.Add(packageAcquisition);
+
             }
+
             package.Details = packageDetails.GroupBy(a => new
             {
                 a.PickTaskDetailId,
@@ -595,9 +607,9 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
                     //获取当前订单需要拣货的总数量
                     //获取当前订单已经包装的总数量
                     //比较两个数据，如果相等，则修改订单状态为包装完成，并且插入指令信息
-                    var getPickNumber = _repPickTaskDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
-                    var getPackage = _repPackageDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
-                    if (getPickNumber.Result.Sum(a => a.PickQty) == getPackage.Result.Sum(a => a.Qty))
+                    var getPickNumber = await _repPickTaskDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
+                    var getPackage = await _repPackageDetail.AsQueryable().Where(a => a.ExternOrderNumber == pickTask.ExternOrderNumber && a.CustomerId == pickTask.CustomerId).ToListAsync();
+                    if (getPickNumber.Sum(a => a.PickQty) == getPackage.Sum(a => a.Qty))
                     {
                         await _repOrder.UpdateAsync(a => new WMSOrder { OrderStatus = (int)OrderStatusEnum.已包装 }, a => a.ExternOrderNumber == pickTask.ExternOrderNumber);
 
@@ -676,7 +688,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
 
             response.Code = StatusCode.Success;
             response.Msg = $"箱号 {input.BoxNumber} 包装完成，共包装 {pickTaskDetails.Count} 条明细";
-            response.Data = pickTask.PickTaskNumber;
+            response.Data = package;
         }
         catch (Exception ex)
         {
@@ -693,6 +705,7 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
+    [UnitOfWork]
     [ApiDescriptionSettings(Name = "CompletePackage")]
     public async Task<Response<string>> CompletePackage(RFPackageCompleteInput input)
     {
@@ -735,7 +748,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }
 
         // 从Redis获取拣货记录
-        string cacheKey = $"RFSinglePick:{pickTask.CustomerId}:{pickTask.WarehouseId}:{input.PickTaskNumber}";
+        // ✅ 优化: 使用缓存键常量
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(pickTask.CustomerId, pickTask.WarehouseId, input.PickTaskNumber);
         var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey);
 
         if (pickedRecords == null || pickedRecords.Count == 0)
@@ -1036,11 +1050,12 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             response.Msg = "拣货任务不存在";
             return response;
         }
-        string pickTaskDetailCacheKey = $"PickTaskDetailRF_{pickTask.Id}";
+        // ✅ 优化: 使用缓存键常量
+        string pickTaskDetailCacheKey = WMSRFOrderPickCacheKeys.GetPickTaskDetailKey(pickTask.Id);
         var getData = _sysCacheService.Get<List<WMSPickTaskDetail>>(pickTaskDetailCacheKey);
 
         // 构建缓存key
-        string cacheKey = $"RFSinglePick:{pickTask.CustomerId}:{pickTask.WarehouseId}:{input.PickTaskNumber}";
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(pickTask.CustomerId, pickTask.WarehouseId, input.PickTaskNumber);
 
         if (getData != null && getData.Count > 0)
         {
@@ -1072,9 +1087,14 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpPost]
     [ApiDescriptionSettings(Name = "GetPickTaskDetailsByLocation")]
-    public async Task<Response<List<WMSRFPickTaskDetailOutput>>> GetPickTaskDetailsByLocation(GetPickTaskDetailsByLocationInput input)
+    public async Task<Response<WMSRFPickTaskDetailDataOutput>> GetPickTaskDetailsByLocation(GetPickTaskDetailsByLocationInput input)
     {
-        Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>();
+
+        Response<WMSRFPickTaskDetailDataOutput> response = new Response<WMSRFPickTaskDetailDataOutput>();
+        response.Data = new WMSRFPickTaskDetailDataOutput();
+        response.Data.WMSRFPickTaskDetailOutputs = new List<WMSRFPickTaskDetailOutput>();
+
+        //Response<List<WMSRFPickTaskDetailOutput>> response = new Response<List<WMSRFPickTaskDetailOutput>>();
 
         if (string.IsNullOrEmpty(input.PickTaskNumber))
         {
@@ -1096,7 +1116,8 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }
 
         // 从Redis获取已拣货记录
-        string cacheKey = $"RFSinglePick:{pickTask.CustomerId}:{pickTask.WarehouseId}:{input.PickTaskNumber}";
+        // ✅ 优化: 使用缓存键常量
+        string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(pickTask.CustomerId, pickTask.WarehouseId, input.PickTaskNumber);
         var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
 
         // 从数据库获取拣货明细
@@ -1157,19 +1178,57 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
         }).Where(g => g.PickStatus == (int)PickTaskStatusEnum.新增).ToList();
 
         // 按库位排序（先按区域，再按库位）
-        response.Data = outputList.Where(a => a.Qty != a.PickQty)
+        response.Data.WMSRFPickTaskDetailOutputs = outputList.Where(a => a.Qty != a.PickQty)
             .OrderBy(a => a.Area)
             .ThenBy(a => a.Location)
             .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)
             .ToList();
-        if (response.Data.Count == 0)
+        if (response.Data.WMSRFPickTaskDetailOutputs.Count == 0)
         {
-            response.Data = outputList
-                .OrderBy(a => a.Area)
-                .ThenBy(a => a.Location)
-                .ThenBy(a => a.Order).ThenBy(a => a.Id).Take(1)
+            // 转换为输出格式
+            outputList = groupedDetails.Select(g =>
+          {
+              var key = new { g.SKU, g.BatchCode, g.Location };
+              var pickQty = pickQtyDict.ContainsKey(key) ? pickQtyDict[key] : 0;
+              var isCompleted = pickQty >= g.TotalQty;
+
+              return new WMSRFPickTaskDetailOutput
+              {
+                  PickTaskId = pickTask.Id,
+                  SKU = g.SKU,
+                  UPC = g.FirstDetail.UPC,
+                  GoodsName = g.FirstDetail.GoodsName,
+                  GoodsType = g.FirstDetail.GoodsType,
+                  //UnitCode = g.FirstDetail.UnitCode,
+                  //BatchCode = g.BatchCode,
+                  //LotCode = g.FirstDetail.LotCode,
+                  Qty = g.TotalQty,
+                  PickQty = g.PickQty + pickQty,
+                  Location = g.Location,
+                  Area = g.Area,
+                  Order = isCompleted ? 99 : 1, // 99表示已完成，1表示待拣货
+                  PickStatus = isCompleted ? (int)PickTaskStatusEnum.拣货完成 : (int)PickTaskStatusEnum.新增,
+                  CustomerId = pickTask.CustomerId,
+                  CustomerName = pickTask.CustomerName,
+                  WarehouseId = pickTask.WarehouseId,
+                  WarehouseName = pickTask.WarehouseName,
+                  PickTaskNumber = input.PickTaskNumber
+              };
+          }).ToList();
+
+            // 按库位排序（先按区域，再按库位）
+            response.Data.WMSRFPickTaskDetailOutputs = outputList
+                .OrderByDescending(a => a.Area)
+                .ThenByDescending(a => a.Location)
+                .ThenByDescending(a => a.Order).ThenByDescending(a => a.Id).Take(1)
                 .ToList();
         }
+        //获取任务的总数
+        response.Data.PickedTotal = pickTaskDetails.Sum(a => a.Qty);
+        //获取任务已经拣货的总数
+        response.Data.PickQty = pickTaskDetails.Sum(a => a.PickQty) + pickedRecords.Sum(a => a.PickQty);
+        //获取任务已经拣货但是没有提交的总数
+        response.Data.UnSubmitTotal = pickedRecords.Sum(a => a.PickQty);
         response.Code = StatusCode.Success;
         response.Msg = $"获取拣货明细成功，共 {outputList.Count} 个SKU";
 

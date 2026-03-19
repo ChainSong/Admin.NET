@@ -10,13 +10,25 @@
 			<view class="cu-card case">
 				<view class="cu-item shadow">
 					<view class="title">
-						<view class="text-cut">任务信息<button class="cu-btn bg-red lg "
-								@tap="handleClearPickCache">重新拣货</button></view>
+						<view class="text-cut">任务信息
+							<button class="cu-btn line-red sm" @tap="handleClearPickCache">重新拣货</button>
+						</view>
 
 					</view>
 					<view class="content">
 						<view class="desc">
 							<text class="text-grey">拣货任务号: {{form.pickTaskNumber}}</text>
+						</view>
+						<view class="text-gray text-sm flex">
+							<view class="text-cut">
+								<text class="text-blue">总数:</text> {{pickedTotal}}
+							</view>
+							<view class="text-cut">
+								<text class="text-green">已拣:</text> {{pickQty}}
+							</view>
+							<view class="text-cut" >
+								<text class="text-red">待包装:</text> {{unSubmitTotal}}
+							</view>
 						</view>
 						<!-- 拣货结果 -->
 						<view v-if="this.list.length>0">
@@ -110,7 +122,6 @@
 				<view class="padding flex flex-direction">
 					<button class="cu-btn bg-blue lg round" @tap="handleScanBoxNumber">完成包装</button>
 					<!-- <button class="cu-btn bg-green lg round" @tap="connectPrinter">连接打印机</button> -->
-					<!-- <button class="cu-btn bg-red lg round" @tap="handleClearPickCache">当前箱重新拣货</button> -->
 				</view>
 			</view>
 		</you-scroll>
@@ -173,6 +184,11 @@
 				visible: false,
 				loading: false,
 				showPackageBtn: false,
+				printPackageNumber: "",
+				printSerialNumber: "",
+				pickQty: 0,
+				unSubmitTotal:0,
+				pickedTotal: 0,
 				// 蓝牙打印机相关
 				printerConnected: false,
 				printerDeviceName: '',
@@ -180,6 +196,7 @@
 				printerDevices: [],
 				printerDeviceId: null,
 				printerServiceId: null,
+				input:0,
 				printerCharacteristicId: null,
 				// 标记 UniApp 桥接是否已准备就绪
 				bridgeReady: false,
@@ -270,7 +287,10 @@
 					console.log('按库位排序的拣货明细:', res.data.result);
 
 					if (res.data && res.data.result && res.data.result.code == "1") {
-						that.list = res.data.result.data || [];
+						that.pickQty= res.data.result.data.pickQty;
+						that.unSubmitTotal= res.data.result.data.unSubmitTotal;
+						that.pickedTotal= res.data.result.data.pickedTotal;
+						that.list = res.data.result.data.wmsrfPickTaskDetailOutputs || [];
 						console.log('拣货明细列表:', that.list);
 						console.log('拣货明细数量:', that.list.length);
 						that.list.forEach((item, index) => {
@@ -481,6 +501,8 @@
 				});
 
 				try {
+					this.printPackageNumber = "";
+					this.printSerialNumber = "";
 					let res = await scanBoxNumberCompletePackageApi({
 						pickTaskNumber: this.packageForm.pickTaskNumber,
 						boxNumber: this.packageForm.boxNumber
@@ -488,26 +510,32 @@
 
 					console.log('包装结果:', res);
 
-					if (res.data && res.data.result) {
+					if (res.data && res.data.result.code == 1) {
 						uni.showToast({
 							title: res.data.result.msg || "包装完成",
 							icon: 'success'
 						});
 						playSuccessSound();
-
-						// 如果包装成功，获取箱号并打印
-						if (res.data.result.data && res.data.result.data.boxNumber) {
-							const boxNumber = res.data.result.data.boxNumber;
-							console.log('箱号:', boxNumber);
-							// 调用打印方法
-							// await this.printBoxLabel(boxNumber);
-						}
-
+						// 清空扫描框
+						this.form.scanInput = "";
+						this.lpnSearchSet();
 						// 清空箱号输入
-						this.packageForm.boxNumber = "";
+						// this.packageForm.boxNumber = "";
 						// 更新状态
 						this.form.pickStatus = 4;
 						this.showPackageBtn = false;
+						// 如果包装成功，获取箱号并打印
+						if (res.data.result.data && res.data.result.code == 1) {
+							const boxNumber = res.data.result.data.packageNumber;
+							const serialNumber =res.data.result.data.str4+"_"+res.data.result.data.serialNumber;
+							console.log('箱号:', boxNumber);
+							// 调用打印方法
+							this.printPackageNumber = boxNumber;
+							this.printSerialNumber = serialNumber;
+							this.createL();
+							// await this.printBoxLabel(boxNumber);
+						}
+
 						// 延迟返回
 						// setTimeout(() => {
 						// 	uni.navigateBack();
@@ -517,6 +545,7 @@
 							title: res.data?.result?.msg || "包装失败",
 							icon: 'none'
 						});
+						this.lpnSearchSet();
 						playErrorSound();
 					}
 				} catch (error) {
@@ -531,6 +560,8 @@
 				}
 			},
 			createL() {
+				console.log(this.printSerialNumber);
+				console.log(this.printPackageNumber);
 				h5uni.postMessage({
 					data: {
 						action: 'createLabel',
@@ -547,7 +578,7 @@
 									"l": "L",
 									"w": 10,
 									"m": "A",
-									"c": "20090212-5410"
+									"c": this.printSerialNumber
 								},
 								{
 									"t": "text",
@@ -555,18 +586,18 @@
 									"y": 280,
 									"x_m": 1,
 									"y_m": 1,
-									"c": "20090212-5410"
+									"c": this.printSerialNumber
 								},
 								{
 									"t": "bar",
-									"x": 75,
-									"y": 540,
+									"x": 130,
+									"y": 480,
 									"ct": "128",
 									"h": 64,
 									"r": 1,
 									"n": 2,
 									"w": 4,
-									"c": "200902125410"
+									"c": this.printPackageNumber
 								}
 							]
 						}
