@@ -58,17 +58,17 @@
         </el-row>
         <el-form-item>
           <el-button-group>
-            <el-button type="primary"  icon="ele-Download"  @click="handleQuery" v-auth="'wMSHandover:page'"> 查询
+            <el-button type="primary"  icon="ele-Download"  @click="handleQuery" > 查询
             </el-button>
             <!-- <el-button icon="ele-Refresh" @click="() => queryParams = {}"> 重置 </el-button> -->
           </el-button-group>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="ele-Plus" @click="openAdd" v-auth="'wMSHandover:add'">导入
+          <el-button type="primary" icon="ele-Plus" @click="openAdd" >导入
           </el-button>
         </el-form-item>
           <el-form-item>
-          <el-button type="primary" icon="ele-Delete" @click="del" v-auth="'wMSHandover:add'">批量删除
+          <el-button type="primary" icon="ele-Delete" @click="del" >批量删除
           </el-button>
         </el-form-item>
         
