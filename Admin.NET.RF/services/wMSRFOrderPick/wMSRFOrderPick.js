@@ -9,6 +9,7 @@ let GetCurrentPickTask = '/api/WMSRFOrderPick/GetCurrentPickTask';
 let ApplyPickTask = '/api/WMSRFOrderPick/ApplyPickTask';
 let CompletePackage = '/api/WMSRFOrderPick/CompletePackage';
 let ClearPickCache = '/api/WMSRFOrderPick/ClearPickCache';
+let ScanSNPackage = '/api/WMSPackage/ScanSNPackage';
 
 
 // 分页查询WMSRFReceiptAcquisition
@@ -84,6 +85,14 @@ export const completePackageApi = (params) =>
 export const clearPickCacheApi = (params) =>
 		request({
 			url: ClearPickCache,
+			method: 'post',
+			data: params,
+		});
+
+// 扫描SN包装
+export const scanSNPackageApi = (params) =>
+		request({
+			url: ScanSNPackage,
 			method: 'post',
 			data: params,
 		});

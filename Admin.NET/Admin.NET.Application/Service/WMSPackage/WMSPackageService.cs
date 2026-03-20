@@ -1437,6 +1437,16 @@ public class WMSPackageService : IDynamicApiController, ITransient
         {
             return new Response() { Code = StatusCode.Error, Msg = "已扫描" };
         }
+        //判断当前任务是不是已经扫描过改SN
+        if (!string.IsNullOrEmpty(request.SN))
+        {
+            var getSNAcquisition = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.SN == request.SN).ToListAsync();
+            if (getSNAcquisition != null && getSNAcquisition.Count > 0)
+            {
+                return new Response() { Code = StatusCode.Error, Msg = "SN已扫描" };
+            }
+
+        }
 
         var packahe = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
         if (packahe == null || string.IsNullOrEmpty(packahe.PackageNumber))

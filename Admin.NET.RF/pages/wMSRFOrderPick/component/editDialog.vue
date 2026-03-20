@@ -96,14 +96,14 @@
 			<view class="cu-form-group ">
 
 				<view class="title">库位</view>
-				<input disabled v-model="form.location" placeholder="库位"></input>
+				<input disabled v-model="form.location" placeholder="库位" />
 			</view>
 			<view class="cu-form-group ">
 				<view class="title">扫描</view>
 				<input :adjust-position="false" confirm-type="search" id="scanInput" :focus="focusflag"
 					v-model="form.scanInput" v-focus="input" v-select="input" ref="input" name="input"
 					@confirm="scanAcquisition()" clearable="" placeholder="请扫描条码/SKU" selection-start="0"
-					:selection-end="selectendlength"></input>
+					:selection-end="selectendlength" />
 			</view>
 
 
@@ -121,11 +121,45 @@
 				</view> -->
 				<view class="padding flex flex-direction">
 					<button class="cu-btn bg-blue lg round" @tap="handleScanBoxNumber">完成包装</button>
+					<button class="cu-btn bg-green lg round" @tap="openSNDialog">扫描SN</button>
 					<!-- <button class="cu-btn bg-green lg round" @tap="connectPrinter">连接打印机</button> -->
 				</view>
 			</view>
 		</you-scroll>
 
+		<!-- 扫描SN弹窗 -->
+		<view class="cu-modal" :class="snModalVisible ? 'show' : ''" @tap="closeSNDialog">
+			<view class="cu-dialog" @tap.stop>
+				<view class="cu-bar bg-white justify-end">
+					<view class="content">扫描SN</view>
+					<view class="action" @tap="closeSNDialog">
+						<text class="cuIcon-close text-red"></text>
+					</view>
+				</view>
+				<view class="padding-xl">
+					<view class="cu-form-group">
+						<view class="title">拣货单号</view>
+						<input disabled v-model="snForm.pickTaskNumber" placeholder="拣货单号" />
+					</view>
+					<view class="cu-form-group">
+						<view class="title">SKU</view>
+						<input v-model="snForm.sku" placeholder="请扫描SKU" @confirm="focusSNInput" />
+					</view>
+					<view class="cu-form-group">
+						<view class="title">条码</view>
+						<input :focus="snInputFocus" v-model="snForm.snCode" placeholder="请扫描条码" @confirm="handleScanSN" />
+					</view>
+				</view>
+				<view class="cu-bar bg-white">
+					<view class="action margin-0 flex-sub text-center" @tap="closeSNDialog">
+						取消
+					</view>
+					<view class="action margin-0 flex-sub text-green text-center" @tap="handleScanSN">
+						确定
+					</view>
+				</view>
+			</view>
+		</view>
 
 	</view>
 
@@ -138,7 +172,8 @@
 		scanPickApi,
 		scanBoxNumberCompletePackageApi,
 		getPickTaskDetailsByLocationApi,
-		clearPickCacheApi
+		clearPickCacheApi,
+		scanSNPackageApi
 	} from "@/services/wMSRFOrderPick/wMSRFOrderPick";
 	import youScroll from '@/components/you-scroll';
 	import {
@@ -204,8 +239,16 @@
 				// 标签打印参数（可根据实际需求修改或通过 props 传入）
 				labelWidth: 50, // 标签宽度（mm）
 				labelHeight: 30, // 标签高度（mm）
-				gap: 12 // 标签纸间距
+				gap: 12, // 标签纸间距
 				// text 参数暂未使用，保留注释说明
+				// 扫描SN弹窗相关
+				snModalVisible: false,
+				snInputFocus: false,
+				snForm: {
+					pickTaskNumber: '',
+					sku: '',
+					snCode: ''
+				}
 			};
 		},
 		created() {
@@ -603,10 +646,91 @@
 						}
 					}
 				});
+			},
+			// 打开扫描SN弹窗
+			openSNDialog() {
+				this.snForm.pickTaskNumber = this.form.pickTaskNumber;
+				this.snForm.sku = '';
+				this.snForm.snCode = '';
+				this.snModalVisible = true;
+				this.$nextTick(() => {
+					this.snInputFocus = false;
+				});
+			},
+			// 关闭扫描SN弹窗
+			closeSNDialog() {
+				this.snModalVisible = false;
+				this.snInputFocus = false;
+			},
+			// 焦点移到SN输入框
+			focusSNInput() {
+				this.snInputFocus = true;
+			},
+			// 扫描SN
+			async handleScanSN() {
+				if (!this.snForm.sku) {
+					uni.showToast({
+						title: "请输入或扫描SKU",
+						icon: 'none'
+					});
+					playErrorSound();
+					return;
+				}
+				if (!this.snForm.snCode) {
+					uni.showToast({
+						title: "请输入或扫描条码",
+						icon: 'none'
+					});
+					playErrorSound();
+					return;
+				}
+
+				uni.showLoading({
+					title: '处理中...'
+				});
+
+				try {
+					let res = await scanSNPackageApi({
+						pickTaskNumber: this.snForm.pickTaskNumber,
+						sku: this.snForm.sku,
+						snCode: this.snForm.snCode
+					});
+
+					console.log('扫描SN结果:', res);
+
+					if (res.data && res.data.result && res.data.result.code == 1) {
+						uni.showToast({
+							title: res.data.result.msg || "扫描成功",
+							icon: 'success'
+						});
+						playSuccessSound();
+						// 清空条码输入，保留SKU方便连续扫描
+						this.snForm.snCode = '';
+						this.$nextTick(() => {
+							this.snInputFocus = true;
+						});
+					} else {
+						uni.showToast({
+							title: res.data?.result?.msg || "扫描失败",
+							icon: 'none'
+						});
+						playErrorSound();
+					}
+				} catch (error) {
+					console.error('扫描SN失败:', error);
+					uni.showToast({
+						title: "扫描失败，请重试",
+						icon: 'none'
+					});
+					playErrorSound();
+				} finally {
+					uni.hideLoading();
+				}
 			}
 
 		}
 	}
+
 </script>
 <style scoped>
 	.cu-item {
