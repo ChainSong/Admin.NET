@@ -54,7 +54,7 @@ namespace Admin.NET.Application.Strategy
 
             Response<List<OrderStatusDto>> response = new Response<List<OrderStatusDto>>() { Data = new List<OrderStatusDto>() };
 
-            var orderData = _repOrder.AsQueryable().Includes(a => a.Allocation).Where(a => request.Contains(a.Id)).ToList();
+            var orderData = _repOrder.AsQueryable().Includes(a => a.Details).Includes(a => a.Allocation).Where(a => request.Contains(a.Id)).ToList();
             if (orderData != null && orderData.Where(a => a.OrderStatus != (int)OrderStatusEnum.已分配).ToList().Count > 0)
             {
                 orderData.ToList().ForEach(b =>

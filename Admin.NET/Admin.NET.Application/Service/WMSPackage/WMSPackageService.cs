@@ -1447,11 +1447,36 @@ public class WMSPackageService : IDynamicApiController, ITransient
             }
 
         }
+        WMSPackageDetail package = new WMSPackageDetail();
+        if (!string.IsNullOrEmpty(request.PickTaskNumber))
+        {
+            package = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PackageNumber == request.PackageNumber).FirstAsync();
 
-        var packahe = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
-        if (packahe == null || string.IsNullOrEmpty(packahe.PackageNumber))
+        }
+        else
+        {
+            package = await _repPackageDetail.AsQueryable().Where(a => a.PickTaskNumber == request.PickTaskNumber).FirstAsync();
+        }
+        if (package == null || string.IsNullOrEmpty(package.PackageNumber))
         {
             return new Response() { Code = StatusCode.Error, Msg = "请先完成包装" };
+        }
+        if (!string.IsNullOrEmpty(request.PackageNumber))
+        {
+            // 验证：该SKU已扫描的SN数量不能超过包装数量
+            var packageDetailList = await _repPackageDetail.AsQueryable()
+                .Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PackageNumber == request.PackageNumber && a.SKU == request.SKU)
+                .ToListAsync();
+            var packageQty = packageDetailList.Sum(a => a.Qty);
+
+            var scannedSNCount = await _repRFPackageAcquisition.AsQueryable()
+                .Where(a => a.PickTaskNumber == request.PickTaskNumber && a.PackageNumber == request.PackageNumber && a.SKU == request.SKU && a.Type == "SN")
+                .CountAsync();
+
+            if (scannedSNCount >= packageQty)
+            {
+                return new Response() { Code = StatusCode.Error, Msg = $"该SKU扫描数量已达上限，包装数量：{packageQty}，已扫描：{scannedSNCount}" };
+            }
         }
         if (string.IsNullOrEmpty(request.SN))
         {
@@ -1466,7 +1491,7 @@ public class WMSPackageService : IDynamicApiController, ITransient
 
 
         WMSRFPackageAcquisition packageAcquisition = new WMSRFPackageAcquisition();
-        packageAcquisition = packahe.Adapt<WMSRFPackageAcquisition>();
+        packageAcquisition = package.Adapt<WMSRFPackageAcquisition>();
         packageAcquisition.SKU = request.SKU;
         packageAcquisition.SN = request.SN;
         packageAcquisition.Type = "SN";
@@ -1476,11 +1501,11 @@ public class WMSPackageService : IDynamicApiController, ITransient
         await _repRFPackageAcquisition.InsertAsync(packageAcquisition);
 
 
-        if (packahe.CustomerId == 22)
+        if (package.CustomerId == 22)
         {
-            var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == packahe.PickTaskNumber).ToListAsync();
+            var CheckPickData = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == package.PickTaskNumber).ToListAsync();
             //获取
-            var getSN = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == packahe.PickTaskNumber).ToListAsync();
+            var getSN = await _repRFPackageAcquisition.AsQueryable().Where(a => a.PickTaskNumber == package.PickTaskNumber).ToListAsync();
             //将福光的包装数据处理一下
             foreach (var item in CheckPickData)
             {

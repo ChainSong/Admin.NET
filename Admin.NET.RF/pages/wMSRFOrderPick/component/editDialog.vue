@@ -11,7 +11,9 @@
 				<view class="cu-item shadow">
 					<view class="title">
 						<view class="text-cut">任务信息
-							<button class="cu-btn line-red sm" @tap="handleClearPickCache">重新拣货</button>
+							<button class="cu-btn line-red sm margin-left-sm" @tap="handleClearPickCache">重新拣货</button>
+							<button class="cu-btn line-grey sm margin-left-sm" @tap="createL">重新打印</button>
+							<button class="cu-btn line-grey sm margin-left-sm" @tap="createLTest">打印测试页面</button>
 						</view>
 
 					</view>
@@ -26,7 +28,7 @@
 							<view class="text-cut">
 								<text class="text-green">已拣:</text> {{pickQty}}
 							</view>
-							<view class="text-cut" >
+							<view class="text-cut">
 								<text class="text-red">待包装:</text> {{unSubmitTotal}}
 							</view>
 						</view>
@@ -121,7 +123,7 @@
 				</view> -->
 				<view class="padding flex flex-direction">
 					<button class="cu-btn bg-blue lg round" @tap="handleScanBoxNumber">完成包装</button>
-					<button class="cu-btn bg-green lg round" @tap="openSNDialog">扫描SN</button>
+					<button class="cu-btn bg-green lg round margin-top-sm" @tap="openSNDialog">扫描SN</button>
 					<!-- <button class="cu-btn bg-green lg round" @tap="connectPrinter">连接打印机</button> -->
 				</view>
 			</view>
@@ -142,20 +144,27 @@
 						<input disabled v-model="snForm.pickTaskNumber" placeholder="拣货单号" />
 					</view>
 					<view class="cu-form-group">
+						<view class="title">箱号</view>
+						<input :focus="snBoxInputFocus" v-model="snForm.boxNumber" placeholder="请扫描箱号"
+							@confirm="focusSKUInput" />
+					</view>
+					<view class="cu-form-group">
 						<view class="title">SKU</view>
-						<input v-model="snForm.sku" placeholder="请扫描SKU" @confirm="focusSNInput" />
+						<input :focus="snSkuInputFocus" v-model="snForm.sku" placeholder="请扫描SKU"
+							@confirm="focusSNInput" />
 					</view>
 					<view class="cu-form-group">
 						<view class="title">条码</view>
-						<input :focus="snInputFocus" v-model="snForm.snCode" placeholder="请扫描条码" @confirm="handleScanSN" />
+						<input :focus="snInputFocus" v-model="snForm.snCode" placeholder="请扫描条码"
+							@confirm="handleScanSN" />
 					</view>
 				</view>
 				<view class="cu-bar bg-white">
 					<view class="action margin-0 flex-sub text-center" @tap="closeSNDialog">
 						取消
 					</view>
-					<view class="action margin-0 flex-sub text-green text-center" @tap="handleScanSN">
-						确定
+					<view class="action margin-0 flex-sub text-blue text-center" @tap="clearSNForm">
+						清空
 					</view>
 				</view>
 			</view>
@@ -222,7 +231,7 @@
 				printPackageNumber: "",
 				printSerialNumber: "",
 				pickQty: 0,
-				unSubmitTotal:0,
+				unSubmitTotal: 0,
 				pickedTotal: 0,
 				// 蓝牙打印机相关
 				printerConnected: false,
@@ -231,7 +240,7 @@
 				printerDevices: [],
 				printerDeviceId: null,
 				printerServiceId: null,
-				input:0,
+				input: 0,
 				printerCharacteristicId: null,
 				// 标记 UniApp 桥接是否已准备就绪
 				bridgeReady: false,
@@ -244,10 +253,13 @@
 				// 扫描SN弹窗相关
 				snModalVisible: false,
 				snInputFocus: false,
+				snSkuInputFocus: false,
+				snBoxInputFocus: false,
 				snForm: {
 					pickTaskNumber: '',
 					sku: '',
-					snCode: ''
+					snCode: '',
+					boxNumber: ''
 				}
 			};
 		},
@@ -330,9 +342,9 @@
 					console.log('按库位排序的拣货明细:', res.data.result);
 
 					if (res.data && res.data.result && res.data.result.code == "1") {
-						that.pickQty= res.data.result.data.pickQty;
-						that.unSubmitTotal= res.data.result.data.unSubmitTotal;
-						that.pickedTotal= res.data.result.data.pickedTotal;
+						that.pickQty = res.data.result.data.pickQty;
+						that.unSubmitTotal = res.data.result.data.unSubmitTotal;
+						that.pickedTotal = res.data.result.data.pickedTotal;
 						that.list = res.data.result.data.wmsrfPickTaskDetailOutputs || [];
 						console.log('拣货明细列表:', that.list);
 						console.log('拣货明细数量:', that.list.length);
@@ -539,6 +551,16 @@
 			},
 			// 执行包装操作
 			async executePackage() {
+
+				// 调用打印方法
+				// this.printPackageNumber = "200848677507392";
+				// this.printSerialNumber = "232322_01";
+				// uni.showToast({
+				// 	title: "开始打印",
+				// 	icon: 'none'
+				// });
+				// this.createL();
+				// return;
 				uni.showLoading({
 					title: '处理中...'
 				});
@@ -570,11 +592,15 @@
 						// 如果包装成功，获取箱号并打印
 						if (res.data.result.data && res.data.result.code == 1) {
 							const boxNumber = res.data.result.data.packageNumber;
-							const serialNumber =res.data.result.data.str4+"_"+res.data.result.data.serialNumber;
+							const serialNumber = res.data.result.data.str4 + "_" + res.data.result.data.serialNumber;
 							console.log('箱号:', boxNumber);
 							// 调用打印方法
 							this.printPackageNumber = boxNumber;
 							this.printSerialNumber = serialNumber;
+							uni.showToast({
+								title: "开始打印",
+								icon: 'none'
+							});
 							this.createL();
 							// await this.printBoxLabel(boxNumber);
 						}
@@ -602,6 +628,52 @@
 					uni.hideLoading();
 				}
 			},
+			createLTest() {
+
+				console.log(this.printSerialNumber);
+				console.log(this.printPackageNumber);
+				h5uni.postMessage({
+					data: {
+						action: 'createLabel',
+						data: {
+							lable: {
+								w: 60,
+								h: 80,
+								g: 2
+							},
+							content: [{
+									"t": "qr",
+									"x": 120,
+									"y": 80,
+									"l": "L",
+									"w": 10,
+									"m": "A",
+									"c": "123456789"
+								},
+								{
+									"t": "text",
+									"x": 110,
+									"y": 340,
+									"x_m": 2,
+									"y_m": 2,
+									"c": "123456789"
+								},
+								{
+									"t": "bar",
+									"x": 90,
+									"y": 430,
+									"ct": "128",
+									"h": 64,
+									"r": 1,
+									"n": 2,
+									"w": 4,
+									"c": "123456789"
+								}
+							]
+						}
+					}
+				});
+			},
 			createL() {
 				console.log(this.printSerialNumber);
 				console.log(this.printPackageNumber);
@@ -616,8 +688,8 @@
 							},
 							content: [{
 									"t": "qr",
-									"x": 150,
-									"y": 180,
+									"x": 120,
+									"y": 80,
 									"l": "L",
 									"w": 10,
 									"m": "A",
@@ -625,16 +697,16 @@
 								},
 								{
 									"t": "text",
-									"x": 75,
-									"y": 280,
-									"x_m": 1,
-									"y_m": 1,
+									"x": 110,
+									"y": 340,
+									"x_m": 2,
+									"y_m": 2,
 									"c": this.printSerialNumber
 								},
 								{
 									"t": "bar",
-									"x": 130,
-									"y": 480,
+									"x": 90,
+									"y": 430,
 									"ct": "128",
 									"h": 64,
 									"r": 1,
@@ -662,9 +734,29 @@
 				this.snModalVisible = false;
 				this.snInputFocus = false;
 			},
+
+			// 焦点移到SKU输入框
+			focusSKUInput() {
+				this.snSkuInputFocus = true;
+			},
 			// 焦点移到SN输入框
 			focusSNInput() {
+				this.snSkuInputFocus = false;
 				this.snInputFocus = true;
+			},
+			// 清空SN表单
+			clearSNForm() {
+				this.snForm.boxNumber = '';
+				this.snForm.sku = '';
+				this.snForm.snCode = '';
+				// 先重置所有焦点
+				this.snBoxInputFocus = false;
+				this.snSkuInputFocus = false;
+				this.snInputFocus = false;
+				// 再设置箱号焦点
+				this.$nextTick(() => {
+					this.snBoxInputFocus = true;
+				});
 			},
 			// 扫描SN
 			async handleScanSN() {
@@ -730,7 +822,6 @@
 
 		}
 	}
-
 </script>
 <style scoped>
 	.cu-item {

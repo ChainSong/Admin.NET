@@ -251,10 +251,9 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
             string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(request.CustomerId, request.WarehouseId, request.PickTaskNumber);
             var pickedRecords = _sysCacheService.Get<List<RFSinglePickRecord>>(cacheKey) ?? new List<RFSinglePickRecord>();
 
-            // 计算该SKU+批次+库位的已拣货数量
+            // 计算该SKU+库位的已拣货数量（不校验批次）
             var currentPickedQty = pickedRecords
                 .Where(r => r.SKU == request.SKU
-                    && r.BatchCode == pickTaskDetail.BatchCode
                     && r.Location == request.Location
                     && !r.IsPackaged)
                 .Sum(r => r.PickQty);
@@ -338,7 +337,6 @@ public class OrderPickWithRedisStrategy : IOrderPickRFInterface
 
                 var currentPickedQty = pickedRecords
                     .Where(r => r.SKU == request.SKU
-                        && r.BatchCode == pickTaskDetail.BatchCode
                         && r.Location == pickTaskDetail.Location
                         && !r.IsPackaged)
                     .Sum(r => r.PickQty);
