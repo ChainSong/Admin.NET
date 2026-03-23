@@ -369,6 +369,18 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             return response;
         }
 
+        // ✅ 防重复包装检查：检查该拣货任务是否已有包装记录
+        var existingPackage = await _repPackage.AsQueryable()
+            .Where(a => a.PickTaskNumber == input.PickTaskNumber)
+            .FirstAsync();
+
+        if (existingPackage != null)
+        {
+            response.Code = StatusCode.Error;
+            response.Msg = $"该拣货任务已完成包装，箱号：{existingPackage.PackageNumber}，请勿重复操作";
+            return response;
+        }
+
         // 从缓存获取拣货任务明细数据（包含用户扫描的内容）
         // ✅ 优化: 使用缓存键常量
         string cacheKey = WMSRFOrderPickCacheKeys.GetRFSinglePickKey(pickTask.CustomerId, pickTask.WarehouseId, input.PickTaskNumber);
@@ -569,12 +581,38 @@ public class WMSRFOrderPickService : IDynamicApiController, ITransient
             // 批量插入包装明细
             //await _repPackageDetail.InsertRangeAsync(packageDetails);
             var entity = await _repPickTaskDetail.AsQueryable().Where(a => a.PickTaskNumber == pickTask.PickTaskNumber).ToListAsync();
+
+            // ✅ 防止数据翻倍：检查包装数量是否已经等于拣货数量
+            var totalPackageQty = packageDetails.Sum(a => a.Qty);
+            var currentTotalPickQty = entity.Sum(a => a.PickQty);
+
+            if (totalPackageQty <= currentTotalPickQty)
+            {
+                response.Code = StatusCode.Error;
+                response.Msg = $"包装数量({totalPackageQty})小于或等于已拣货数量({currentTotalPickQty})，可能是重复包装，操作已取消";
+                // 回滚：删除刚刚插入的包装记录
+                await _repPackage.DeleteAsync(package);
+                return response;
+            }
+
             //修改拣货数量，以及判断拣货状态
             foreach (var detail in cachedPickTaskDetails)
             {
 
                 var data = entity.Where(a => a.Id == detail.Id).First();
-                data.PickQty += detail.PickQty;
+
+                // ✅ 数据校验：防止 PickQty 翻倍
+                if (data.PickQty + detail.PickQty > data.Qty)
+                {
+                    Console.WriteLine($"[WARNING] 拣货明细ID {data.Id} 数量异常：当前PickQty={data.PickQty}，准备增加{detail.PickQty}，应拣Qty={data.Qty}");
+                    // 使用应拣数量作为上限
+                    data.PickQty = data.Qty;
+                }
+                else
+                {
+                    data.PickQty += detail.PickQty;
+                }
+
                 if (data.PickQty == data.Qty)
                 {
                     data.PickStatus = (int)PickTaskStatusEnum.拣货完成;

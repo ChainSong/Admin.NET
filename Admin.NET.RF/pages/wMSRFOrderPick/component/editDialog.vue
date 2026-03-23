@@ -233,6 +233,8 @@
 				pickQty: 0,
 				unSubmitTotal: 0,
 				pickedTotal: 0,
+				// ✅ 防重复包装标志
+				isPackaging: false,
 				// 蓝牙打印机相关
 				printerConnected: false,
 				printerDeviceName: '',
@@ -260,7 +262,9 @@
 					sku: '',
 					snCode: '',
 					boxNumber: ''
-				}
+				},
+				// 标记脚本是否已加载
+				scriptLoaded: false
 			};
 		},
 		created() {
@@ -272,12 +276,7 @@
 		onUnload() {
 			// 页面卸载时关闭打印机连接
 			// this.closePrinter();
-			this.loadScript({
-				src: '/static/js/uni.webview.1.5.2.js',
-				fun: window.h5uni,
-				eventListener: 'UniAppJSBridgeReady'
-			}, () => {});
-
+		
 		},
 		filters: {
 			// carNumber(val) {
@@ -285,29 +284,84 @@
 			// }
 		},
 		onLoad(options) {
-			console.log("options");
-			console.log(options);
+			console.log("options", options);
 			this.form.pickTaskNumber = options.pickTaskNumber;
 			this.form.id = options.id;
 			this.packageForm.pickTaskNumber = options.pickTaskNumber;
+
+			// 加载 uni.webview 桥接脚本
+			this.loadScript({
+				src: '/static/js/uni.webview.1.5.2.js',
+				fun: window.h5uni,
+				eventListener: 'UniAppJSBridgeReady'
+			}, () => {
+				console.log('打印机桥接模块加载完成');
+				this.scriptLoaded = true;
+			});
 		},
 		methods: {
 			loadScript(options, callback) {
 				if (!options.src) {
 					return;
 				}
-				// 判断引入的js对象是否存在  
-				if (typeof options.fun == 'undefined') {
-					console.log('自动引入');
-					var node = document.createElement('script');
-					node.src = options.src;
-					node.addEventListener('load', callback, false);
-					document.head.appendChild(node);
-				} else {
-					console.log('直接渲染');
-					console.log(options.eventListener || 'load');
-					document.addEventListener(options.eventListener || 'load', callback, false);
+
+				const scriptSrc = options.src;
+
+				// 检查脚本是否已在页面中
+				const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+
+				if (existingScript) {
+					// 脚本已存在，检查 h5uni 是否已加载
+					if (typeof window.h5uni !== 'undefined' && window.h5uni.postMessage) {
+						console.log('脚本已加载，h5uni 可用');
+						this.scriptLoaded = true;
+						this.bridgeReady = true;
+						callback && callback();
+					} else {
+						console.log('脚本标签存在但 h5uni 未就绪，等待 UniAppJSBridgeReady 事件');
+						document.addEventListener('UniAppJSBridgeReady', () => {
+							this.scriptLoaded = true;
+							this.bridgeReady = true;
+							console.log('UniAppJSBridgeReady 触发');
+							callback && callback();
+						}, { once: true });
+					}
+					return;
 				}
+
+				// 脚本不存在，动态加载
+				console.log('动态加载脚本:', scriptSrc);
+				const script = document.createElement('script');
+				script.src = scriptSrc;
+				script.async = true;
+
+				script.onload = () => {
+					console.log('脚本加载完成:', scriptSrc);
+					this.scriptLoaded = true;
+
+					// 检查 h5uni 是否可用
+					if (typeof window.h5uni !== 'undefined' && window.h5uni.postMessage) {
+						this.bridgeReady = true;
+						callback && callback();
+					} else {
+						// 等待 UniAppJSBridgeReady 事件
+						document.addEventListener('UniAppJSBridgeReady', () => {
+							this.bridgeReady = true;
+							console.log('UniAppJSBridgeReady 触发');
+							callback && callback();
+						}, { once: true });
+					}
+				};
+
+				script.onerror = () => {
+					console.error('脚本加载失败:', scriptSrc);
+					uni.showToast({
+						title: '打印机模块加载失败',
+						icon: 'none'
+					});
+				};
+
+				document.head.appendChild(script);
 			},
 
 			lpnSearchSet() {
@@ -380,6 +434,8 @@
 					});
 				} finally {
 					uni.hideLoading();
+					// ✅ 重置包装标志，允许再次操作
+					this.isPackaging = false;
 				}
 			},
 			// 获取状态文本
@@ -418,12 +474,12 @@
 			// 检查是否显示包装按钮
 			checkPackageButton() {
 				// 如果所有商品都已拣完，显示包装按钮
-				if (this.list.length > 0) {
+				// if (this.list.length > 0) {
 					this.showPackageBtn = true;
 					// 更新表单状态
 					this.form.pickStatus = 3;
 					this.form.orderNumber = this.list[0].orderNumber || '';
-				}
+				// }
 			},
 			async scanAcquisition() {
 				this.lpnSearchSet();
@@ -535,6 +591,16 @@
 					return;
 				}
 
+				// ✅ 防重复点击：检查是否正在包装中
+				if (this.isPackaging) {
+					uni.showToast({
+						title: "正在包装中，请勿重复操作",
+						icon: 'none'
+					});
+					playErrorSound();
+					return;
+				}
+
 				// 弹出确认对话框
 				uni.showModal({
 					title: '确认包装',
@@ -551,6 +617,8 @@
 			},
 			// 执行包装操作
 			async executePackage() {
+				// ✅ 设置包装标志，防止重复点击
+				this.isPackaging = true;
 
 				// 调用打印方法
 				// this.printPackageNumber = "200848677507392";
@@ -626,98 +694,167 @@
 					playErrorSound();
 				} finally {
 					uni.hideLoading();
+					// ✅ 重置包装标志，允许再次操作
+					this.isPackaging = false;
 				}
 			},
 			createLTest() {
+				// 检查 h5uni 是否可用
+				if (!this.checkH5UniReady()) {
+					return;
+				}
 
-				console.log(this.printSerialNumber);
-				console.log(this.printPackageNumber);
-				h5uni.postMessage({
-					data: {
-						action: 'createLabel',
+				console.log('打印测试页:', this.printSerialNumber, this.printPackageNumber);
+
+				try {
+					window.h5uni.postMessage({
 						data: {
-							lable: {
-								w: 60,
-								h: 80,
-								g: 2
-							},
-							content: [{
-									"t": "qr",
-									"x": 120,
-									"y": 80,
-									"l": "L",
-									"w": 10,
-									"m": "A",
-									"c": "123456789"
+							action: 'createLabel',
+							data: {
+								lable: {
+									w: 60,
+									h: 80,
+									g: 2
 								},
-								{
-									"t": "text",
-									"x": 110,
-									"y": 340,
-									"x_m": 2,
-									"y_m": 2,
-									"c": "123456789"
-								},
-								{
-									"t": "bar",
-									"x": 90,
-									"y": 430,
-									"ct": "128",
-									"h": 64,
-									"r": 1,
-									"n": 2,
-									"w": 4,
-									"c": "123456789"
-								}
-							]
+								content: [{
+										"t": "qr",
+										"x": 120,
+										"y": 80,
+										"l": "L",
+										"w": 10,
+										"m": "A",
+										"c": "123456789"
+									},
+									{
+										"t": "text",
+										"x": 110,
+										"y": 340,
+										"x_m": 2,
+										"y_m": 2,
+										"c": "123456789"
+									},
+									{
+										"t": "bar",
+										"x": 90,
+										"y": 430,
+										"ct": "128",
+										"h": 64,
+										"r": 1,
+										"n": 2,
+										"w": 4,
+										"c": "123456789"
+									}
+								]
+							}
 						}
-					}
-				});
+					});
+
+					uni.showToast({
+						title: '打印指令已发送',
+						icon: 'success'
+					});
+				} catch (error) {
+					console.error('打印测试页失败:', error);
+					uni.showToast({
+						title: '打印失败',
+						icon: 'none'
+					});
+				}
 			},
 			createL() {
-				console.log(this.printSerialNumber);
-				console.log(this.printPackageNumber);
-				h5uni.postMessage({
-					data: {
-						action: 'createLabel',
-						data: {
-							lable: {
-								w: 60,
-								h: 80,
-								g: 2
-							},
-							content: [{
-									"t": "qr",
-									"x": 120,
-									"y": 80,
-									"l": "L",
-									"w": 10,
-									"m": "A",
-									"c": this.printSerialNumber
-								},
-								{
-									"t": "text",
-									"x": 110,
-									"y": 340,
-									"x_m": 2,
-									"y_m": 2,
-									"c": this.printSerialNumber
-								},
-								{
-									"t": "bar",
-									"x": 90,
-									"y": 430,
-									"ct": "128",
-									"h": 64,
-									"r": 1,
-									"n": 2,
-									"w": 4,
-									"c": this.printPackageNumber
-								}
-							]
-						}
-					}
+				// 检查 h5uni 是否可用
+				if (!this.checkH5UniReady()) {
+					return;
+				}
+
+				if (!this.printSerialNumber || !this.printPackageNumber) {
+					console.warn('打印参数缺失:', {
+						serialNumber: this.printSerialNumber,
+						packageNumber: this.printPackageNumber
+					});
+				}
+
+				console.log('开始打印:', {
+					serialNumber: this.printSerialNumber,
+					packageNumber: this.printPackageNumber
 				});
+
+				try {
+					window.h5uni.postMessage({
+						data: {
+							action: 'createLabel',
+							data: {
+								lable: {
+									w: 60,
+									h: 80,
+									g: 2
+								},
+								content: [{
+										"t": "qr",
+										"x": 120,
+										"y": 80,
+										"l": "L",
+										"w": 10,
+										"m": "A",
+										"c": this.printSerialNumber
+									},
+									{
+										"t": "text",
+										"x": 110,
+										"y": 340,
+										"x_m": 2,
+										"y_m": 2,
+										"c": this.printSerialNumber
+									},
+									{
+										"t": "bar",
+										"x": 90,
+										"y": 430,
+										"ct": "128",
+										"h": 64,
+										"r": 1,
+										"n": 2,
+										"w": 4,
+										"c": this.printPackageNumber
+									}
+								]
+							}
+						}
+					});
+
+					uni.showToast({
+						title: '打印指令已发送',
+						icon: 'success'
+					});
+				} catch (error) {
+					console.error('打印失败:', error);
+					uni.showToast({
+						title: '打印失败',
+						icon: 'none'
+					});
+				}
+			},
+			// 检查 h5uni 是否准备就绪
+			checkH5UniReady() {
+				if (typeof window.h5uni === 'undefined' || !window.h5uni.postMessage) {
+					console.error('h5uni 未加载或不可用');
+					uni.showToast({
+						title: '打印机模块未加载',
+						icon: 'none'
+					});
+					return false;
+				}
+
+				if (!this.bridgeReady) {
+					console.warn('UniApp 桥接未就绪');
+					uni.showToast({
+						title: '打印机桥接未就绪，请稍后重试',
+						icon: 'none'
+					});
+					return false;
+				}
+
+				return true;
 			},
 			// 打开扫描SN弹窗
 			openSNDialog() {
